@@ -1,0 +1,123 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Russian resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+#ifdef _WIN32
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CONFIG_DIALOG DIALOG DISCARDABLE  0, 0, 234, 173
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Direct3D 8 Configuration2"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Device:",IDC_DEVICE_STATIC,15,7,47,8
+    COMBOBOX        IDC_DEVICE_COMBO,70,7,157,30,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Video mode",IDC_VIDMODE_STATIC,7,28,220,68
+    RTEXT           "Mode:",IDC_MODE_STATIC,15,40,47,8
+    COMBOBOX        IDC_VIDMODE_COMBO,70,40,103,109,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Color Depth:",IDC_COLOR_DEPTH_STATIC,15,56,47,8
+    COMBOBOX        IDC_VID_COLOR_COMBO,70,56,38,63,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Full Screen",IDC_FULLSCREEN_CHECK,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,70,72,148,8
+    CONTROL         "Vertical sync",IDC_VSYNC_CHECK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,70,84,148,8
+    GROUPBOX        "Textures Quality",IDC_TEXTURE_STATIC,7,100,220,45
+    RTEXT           "Color Depth:",IDC_TEX_DEPTH_STATIC,15,112,47,8
+    COMBOBOX        IDC_TEX_COLOR_COMBO,70,112,38,54,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Filter:",IDC_TEX_FILTER_STATIC,15,128,47,8
+    COMBOBOX        IDC_TEX_FILTER_COMBO,70,128,79,53,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,122,152,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,177,152,50,14
+    PUSHBUTTON      "Default",IDC_DEFAULT_BUTTON,7,152,63,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_CONFIG_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 227
+        VERTGUIDE, 15
+        VERTGUIDE, 62
+        VERTGUIDE, 70
+        VERTGUIDE, 218
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 166
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Russian resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
