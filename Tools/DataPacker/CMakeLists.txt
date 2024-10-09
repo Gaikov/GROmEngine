@@ -13,8 +13,8 @@ set(SOURCES
 )
 
 include_directories(
-        ../../..
-        ../..
+        ./
+        ../
 )
 
 add_executable(DataPacker ${SOURCES})
