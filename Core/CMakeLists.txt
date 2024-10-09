@@ -15,7 +15,6 @@ set(sources
         ParseFile.cpp
         Parser.cpp
         ParserUtils.cpp
-        RegCrypt.cpp
         ScriptSaver.cpp
         SmartPtr.cpp
         Var.cpp

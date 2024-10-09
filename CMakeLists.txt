@@ -27,7 +27,7 @@ endif ()
 
 set(SOUND_LIB SoundOAL)
 
-set(ENGINE_LIBS
+set(GROM_ENGINE_LIBS
         ${PLATFORM}
         Engine
         RasterGL
@@ -36,9 +36,9 @@ set(ENGINE_LIBS
         SoundBase
         Core
         nsLib
-
-        PARENT_SCOPE
 )
+
+set(ENGINE_LIBS ${GROM_ENGINE_LIBS} PARENT_SCOPE)
 
 add_subdirectory(ThirdParty/OggVorbis)
 
@@ -58,12 +58,15 @@ add_subdirectory(${SOUND_LIB})
 add_subdirectory(RasterGL)
 add_subdirectory(Engine)
 
-if (NOT ANDROID)
+if (NOT ANDROID) #TODO: not mobile
     add_subdirectory(nsLib_unit)
     add_dependencies(nsLib_unit nsLib)
     add_subdirectory(Core_unit)
     add_dependencies(Core_unit Core)
     add_subdirectory(Tools)
+    add_subdirectory(TestsApp)
+
+    add_dependencies(functional_tests Engine)
 endif()
 
 add_dependencies(Core nsLib)
