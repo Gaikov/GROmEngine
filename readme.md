@@ -3,6 +3,8 @@
 - Supported platforms: Windows, Linux, MacOS, Android
 
 ## How to start to make a game
+Use [Game Template](https://github.com/Gaikov/GROmGameTemplate)
+## Or
 Create folders structure like:
 ```text
 GameProject /
