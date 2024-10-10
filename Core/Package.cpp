@@ -7,7 +7,7 @@
 #include <string>
 #include <algorithm>
 #include "nsLib/FilePath.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 #include "Crypt.h"
 
 nsPackage g_pack;

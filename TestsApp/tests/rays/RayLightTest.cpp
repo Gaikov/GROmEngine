@@ -3,8 +3,8 @@
 //
 
 #include "RayLightTest.h"
-#include "engine/RenAux.h"
-#include "engine/RenManager.h"
+#include "Engine/RenAux.h"
+#include "Engine/RenManager.h"
 
 IVertexBuffer *nsRayLightTest::_vb = nullptr;
 IRenState *nsRayLightTest::_rs = nullptr;

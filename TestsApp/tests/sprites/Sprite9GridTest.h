@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/renderer/sprites/Sprite9Grid.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/renderer/sprites/Sprite9Grid.h"
 
 class nsSprite9GridTest : public BaseFunctionalTest {
 public:

@@ -7,9 +7,9 @@
 
 #include "nsLib/math/Rect.h"
 #include "nsLib/math/Transform2.h"
-#include "engine/RenDevice.h"
+#include "Engine/RenDevice.h"
 #include "VisualContext2d.h"
-#include "engine/display/anchors/LayoutAnchor.h"
+#include "Engine/display/anchors/LayoutAnchor.h"
 
 class nsVisualContainer2d;
 

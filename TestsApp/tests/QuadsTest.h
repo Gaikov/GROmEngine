@@ -5,9 +5,9 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/renderer/QuadsBuffer.h"
-#include "engine/RenDevice.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/renderer/QuadsBuffer.h"
+#include "Engine/RenDevice.h"
 
 class nsQuadsTest : public BaseFunctionalTest {
 public:

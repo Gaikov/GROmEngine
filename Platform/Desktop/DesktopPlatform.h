@@ -7,7 +7,7 @@
 
 #include <GLES/gl.h>
 #include <GLFW/glfw3.h>
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 #include "DesktopKeyNames.h"
 #include "Core/DataWriter.h"
 #include "nsLib/FilePath.h"

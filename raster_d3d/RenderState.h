@@ -5,7 +5,7 @@
 #include "D3d_enum.h"
 #include "TexManager.h"
 #include "RenStateMgr.h"
-#include "engine/RenDevice.h"
+#include "Engine/RenDevice.h"
 
 class CRenderState : public IRenDevice
 {

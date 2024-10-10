@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include "AppInfo.h"
 #include "nsLib/FilePath.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 
 //---------------------------------------------------------
 // Sys_FatalError: 

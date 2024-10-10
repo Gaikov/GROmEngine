@@ -4,10 +4,10 @@
 
 #include "RayMarchingTest.h"
 #include "RayBoxTest.h"
-#include "engine/display/VisualSceneRender2d.h"
-#include "engine/Platform.h"
-#include "engine/RenManager.h"
-#include "engine/renderer/sprites/SpriteDesc.h"
+#include "Engine/display/VisualSceneRender2d.h"
+#include "Engine/Platform.h"
+#include "Engine/RenManager.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
 
 
 bool nsRayMarchingTest::Init() {

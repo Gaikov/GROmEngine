@@ -3,11 +3,11 @@
 //
 
 #include "ScrollTest.h"
-#include "engine/Platform.h"
-#include "engine/display/VisualSceneRender2d.h"
-#include "engine/display/layouts/VGroupLayout.h"
-#include "engine/display/layouts/scroll/ScrollBar.h"
-#include "engine/display/Sprite.h"
+#include "Engine/Platform.h"
+#include "Engine/display/VisualSceneRender2d.h"
+#include "Engine/display/layouts/VGroupLayout.h"
+#include "Engine/display/layouts/scroll/ScrollBar.h"
+#include "Engine/display/Sprite.h"
 
 bool nsScrollTest::Init() {
 /*    auto content = new nsVGroupLayout();

@@ -4,7 +4,7 @@
 
 #include "VisualContainer2d.h"
 #include "VisualContext2d.h"
-#include "engine/display/context/VisualMaskManager.h"
+#include "Engine/display/context/VisualMaskManager.h"
 
 void nsVisualContainer2d::Destroy() {
     DestroyChildren();

@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/VisualObject2d.h"
-#include "engine/renderer/sprites/Sprite9SliceDesc.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/renderer/sprites/Sprite9SliceDesc.h"
 
 class nsSprite9Slice : public nsVisualObject2d {
 public:

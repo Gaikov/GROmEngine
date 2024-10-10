@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include "engine/display/button/IconButton.h"
-#include "engine/display/button/TextButton.h"
+#include "Engine/display/button/IconButton.h"
+#include "Engine/display/button/TextButton.h"
 
 class ISoftKeyHandler {
 public:

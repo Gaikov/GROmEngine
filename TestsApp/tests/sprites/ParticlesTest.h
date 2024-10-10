@@ -5,10 +5,10 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/renderer/particles/ParticleSystem.h"
-#include "engine/display/layouts/GroupLayout.h"
-#include "engine/display/text/TextLabel.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/renderer/particles/ParticleSystem.h"
+#include "Engine/display/layouts/GroupLayout.h"
+#include "Engine/display/text/TextLabel.h"
 
 class nsParticlesTest : public BaseFunctionalTest {
 public:

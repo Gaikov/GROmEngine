@@ -5,9 +5,9 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/renderer/particles/spawner/ParticlesSpawner.h"
-#include "engine/renderer/particles/renderer/ParticlesRenderer.h"
-#include "engine/renderer/particles/updater/ParticlesUpdater.h"
+#include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
+#include "Engine/renderer/particles/renderer/ParticlesRenderer.h"
+#include "Engine/renderer/particles/updater/ParticlesUpdater.h"
 
 class nsParticlesBehaviour {
 public:

@@ -11,7 +11,7 @@
 #include "nsLib/color.h"
 #include "nsLib/BBox2.h"
 #include "RenDevice.h"
-#include "engine/renderer/sprites/SpriteDesc.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
 #include "nsLib/math/Rect.h"
 
 bool RX_Init();

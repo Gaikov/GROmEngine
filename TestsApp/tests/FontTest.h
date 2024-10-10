@@ -4,7 +4,7 @@
 
 #pragma once
 #include "TestCommon.h"
-#include "engine/Font.h"
+#include "Engine/Font.h"
 
 class FontTest : public BaseFunctionalTest
 {

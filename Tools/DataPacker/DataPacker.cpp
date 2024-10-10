@@ -2,7 +2,7 @@
 #include "UnpackStrategy.h"
 #include "nsLib/log.h"
 #include "Core/debug/LogStdOut.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 #include "Core/AppInfo.h"
 #include "PackStrategy.h"
 #include "Options.h"

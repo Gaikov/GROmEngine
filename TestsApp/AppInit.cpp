@@ -3,9 +3,7 @@
 // file AppInit.cpp
 // author Roman Gaikov 
 //--------------------------------------------------------------------------------------------------
-#include "engine/engine.h"
 #include "Core/AppInfo.h"
-#include "nsLib/log.h"
 
 class nsTestApp : public IAppInfo
 {

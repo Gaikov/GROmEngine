@@ -3,7 +3,7 @@
 //
 
 #include "Core/AppInfo.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 #include "UnitCommon.h"
 
 int main(int argc, char **argv)

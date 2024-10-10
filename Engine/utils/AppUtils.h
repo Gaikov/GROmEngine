@@ -6,7 +6,7 @@
 #pragma once
 
 #include "nsLib/Vec2.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 
 struct nsAppUtils final {
     static inline nsVec2 GetClientSize() {

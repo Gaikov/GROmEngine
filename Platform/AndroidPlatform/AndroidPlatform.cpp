@@ -9,7 +9,7 @@
 #include "Core/Package.h"
 #include "Core/FileReader.h"
 #include "Core/FileWriter.h"
-#include "engine/input/SoftInputEmpty.h"
+#include "Engine/input/SoftInputEmpty.h"
 
 static nsArgs g_args;
 static AndroidPlatform *g_platform = nullptr;

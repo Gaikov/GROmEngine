@@ -4,7 +4,7 @@
 
 #include "BaseTestApp.h"
 #include "Core/Config.h"
-#include "engine/RenManager.h"
+#include "Engine/RenManager.h"
 #include "nsLib/log.h"
 #include "EngineInfo.h"
 #include "Input.h"

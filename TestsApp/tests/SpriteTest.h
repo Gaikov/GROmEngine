@@ -5,7 +5,7 @@
 #pragma once
 #include "TestCommon.h"
 #include "nsLib/math/Transform2.h"
-#include "engine/renderer/sprites/Sprite9SliceDesc.h"
+#include "Engine/renderer/sprites/Sprite9SliceDesc.h"
 
 class SpriteTest final : public BaseFunctionalTest
 {

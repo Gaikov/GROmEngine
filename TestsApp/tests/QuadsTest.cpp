@@ -3,8 +3,8 @@
 //
 
 #include "QuadsTest.h"
-#include "engine/RenManager.h"
-#include "engine/TimeFormat.h"
+#include "Engine/RenManager.h"
+#include "Engine/TimeFormat.h"
 
 bool nsQuadsTest::Init() {
     _quads = new nsQuadsBuffer(g_renDev, 4);

@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "engine/display/layouts/VGroupLayout.h"
+#include "Engine/display/layouts/VGroupLayout.h"
 #include "nsLib/SubSystem.h"
 #include "soft/SoftKeyButtons.h"
 

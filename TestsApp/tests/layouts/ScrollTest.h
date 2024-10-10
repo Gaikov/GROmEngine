@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/display/layouts/GroupLayout.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/display/layouts/GroupLayout.h"
 
 class nsScrollTest : public BaseFunctionalTest {
 public:

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/renderer/particles/spawner/ParticlesSpawner.h"
+#include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 
 class nsParticlesEdgesSpawner : public nsParticlesSpawner {
 public:

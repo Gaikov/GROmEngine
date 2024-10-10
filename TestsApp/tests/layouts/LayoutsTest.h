@@ -5,10 +5,10 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/display/text/TextLabel.h"
-#include "engine/display/layouts/BaseLayout.h"
-#include "engine/display/layouts/GroupLayout.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/display/text/TextLabel.h"
+#include "Engine/display/layouts/BaseLayout.h"
+#include "Engine/display/layouts/GroupLayout.h"
 
 class nsLayoutsTest final : public BaseFunctionalTest {
 public:

@@ -5,9 +5,9 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/layouts/GroupLayout.h"
-#include "engine/display/text/TextLabel.h"
-#include "engine/display/Sprite.h"
+#include "Engine/display/layouts/GroupLayout.h"
+#include "Engine/display/text/TextLabel.h"
+#include "Engine/display/Sprite.h"
 
 class nsBasePopup : public nsGroupLayout {
     friend class nsPopupManager;

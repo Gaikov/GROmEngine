@@ -4,7 +4,7 @@
 
 #pragma once
 #include "GroupLayout.h"
-#include "engine/display/align/Align.h"
+#include "Engine/display/align/Align.h"
 
 class nsHGroupLayout : public nsGroupLayout {
 public:

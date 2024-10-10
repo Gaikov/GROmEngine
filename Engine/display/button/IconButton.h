@@ -4,7 +4,7 @@
 
 #pragma once
 #include "BaseButton.h"
-#include "engine/renderer/sprites/SpriteDesc.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
 
 class nsIconButton : public nsBaseButton {
 public:

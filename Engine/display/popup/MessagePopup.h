@@ -4,8 +4,8 @@
 
 #pragma once
 #include "BasePopup.h"
-#include "engine/display/text/TextArea.h"
-#include "engine/display/button/TextButton.h"
+#include "Engine/display/text/TextArea.h"
+#include "Engine/display/button/TextButton.h"
 
 struct nsButtonInfo {
     nsString    label;

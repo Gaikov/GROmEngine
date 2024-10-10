@@ -9,7 +9,7 @@
 #include "nsLib/StrTools.h"
 #include "Core/sys.h"
 #include "nsLib/log.h"
-#include "engine/GameApp.h"
+#include "Engine/GameApp.h"
 #include "renderer/sprites/SpriteDesc.h"
 
 static IVertexBuffer	*g_sprBuff = nullptr;

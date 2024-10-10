@@ -5,11 +5,11 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/display/VisualContainer2d.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/display/VisualContainer2d.h"
 #include "RayBoxTest.h"
 #include "RayLightTest.h"
-#include "engine/display/Sprite.h"
+#include "Engine/display/Sprite.h"
 
 class nsRayMarchingTest : public BaseFunctionalTest {
 public:

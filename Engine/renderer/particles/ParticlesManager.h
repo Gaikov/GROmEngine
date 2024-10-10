@@ -8,9 +8,9 @@
 #include "nsLib/SubSystem.h"
 #include "nsLib/factory/ResourcesCache.h"
 #include "ParticlesBehaviour.h"
-#include "engine/renderer/particles/spawner/factory/ParticlesSpawnerFactory.h"
-#include "engine/renderer/particles/renderer/ParticlesRendererFactory.h"
-#include "engine/renderer/particles/updater/factory/ParticlesUpdaterFactory.h"
+#include "Engine/renderer/particles/spawner/factory/ParticlesSpawnerFactory.h"
+#include "Engine/renderer/particles/renderer/ParticlesRendererFactory.h"
+#include "Engine/renderer/particles/updater/factory/ParticlesUpdaterFactory.h"
 
 class nsParticlesManager : public nsSubSystem<nsParticlesManager>, public ResourcesCache<nsParticlesBehaviour, int> {
 public:

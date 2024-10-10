@@ -5,10 +5,10 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/test/BaseFunctionalTest.h"
-#include "engine/display/Sprite.h"
-#include "engine/display/VisualContainer2d.h"
-#include "engine/display/context/VisualMaskManager.h"
+#include "Engine/test/BaseFunctionalTest.h"
+#include "Engine/display/Sprite.h"
+#include "Engine/display/VisualContainer2d.h"
+#include "Engine/display/context/VisualMaskManager.h"
 
 class nsStencilMaskTest : public BaseFunctionalTest {
 public:

@@ -6,7 +6,7 @@
 #include "Core/headers.h"
 #include "Core/Var.h"
 #include "BaseFunctionalTest.h"
-#include "engine/GameApp.h"
+#include "Engine/GameApp.h"
 
 class BaseTestApp : public IGameApp
 {

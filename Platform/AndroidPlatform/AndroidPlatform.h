@@ -5,7 +5,7 @@
 #ifndef _GROM_ANDROIDPLATFORM_H
 #define _GROM_ANDROIDPLATFORM_H
 
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 #include "AndroidKeyboard.h"
 #include "ImageDecoder/ImagesDecoder.h"
 #include "GLNativeContext.h"

@@ -4,7 +4,7 @@
 #include "nsLib/log.h"
 #include "Args.h"
 #include "sys.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 
 nsConfig	*g_cfg = nullptr;
 

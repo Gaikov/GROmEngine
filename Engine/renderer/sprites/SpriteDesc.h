@@ -9,8 +9,8 @@
 #include "nsLib/Vec2.h"
 #include "nsLib/color.h"
 #include "nsLib/BBox2.h"
-#include "engine/RenDevice.h"
-#include "engine/renderer/QuadsBuffer.h"
+#include "Engine/RenDevice.h"
+#include "Engine/renderer/QuadsBuffer.h"
 
 struct nsSpriteDesc
 {

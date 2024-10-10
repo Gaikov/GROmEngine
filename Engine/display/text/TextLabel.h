@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/VisualObject2d.h"
-#include "engine/Font.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/Font.h"
 #include "nsLib/color.h"
 
 class nsTextLabel : public nsVisualObject2d {

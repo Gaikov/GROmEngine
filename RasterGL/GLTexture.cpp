@@ -5,7 +5,7 @@
 #include "GLTexture.h"
 #include "GLUtils.h"
 #include "GLCommon.h"
-#include "engine/Platform.h"
+#include "Engine/Platform.h"
 #include "ImageDecoder/BitmapLoader.h"
 #include "Core/Package.h"
 

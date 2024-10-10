@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/input/ISoftInput.h"
+#include "Engine/input/ISoftInput.h"
 
 class nsSoftInputKeyboard : public ISoftInput {
 public:

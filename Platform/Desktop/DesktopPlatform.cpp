@@ -8,8 +8,8 @@
 #include "Core/sys.h"
 #include "Core/FileReader.h"
 #include "Core/FileWriter.h"
-#include "engine/input/SoftInputEmpty.h"
-#include "engine/input/soft/SoftInputKeyboard.h"
+#include "Engine/input/SoftInputEmpty.h"
+#include "Engine/input/soft/SoftInputKeyboard.h"
 #include "Core/Config.h"
 
 bool DesktopPlatform::Init() {

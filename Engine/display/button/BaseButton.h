@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include "engine/display/VisualObject2d.h"
-#include "engine/input/InteractiveElement.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/input/InteractiveElement.h"
 #include "nsLib/color.h"
 
 class nsBaseButton : public nsVisualObject2d, public nsInteractiveElement {

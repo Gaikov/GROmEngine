@@ -3,9 +3,9 @@
 //
 
 #include "BaseButton.h"
-#include "engine/RenAux.h"
-#include "engine/renderer/sprites/SpriteDesc.h"
-#include "engine/RenManager.h"
+#include "Engine/RenAux.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
+#include "Engine/RenManager.h"
 #include "nsLib/log.h"
 
 void nsBaseButton::SetClickHandler(const handler_t &handler) {

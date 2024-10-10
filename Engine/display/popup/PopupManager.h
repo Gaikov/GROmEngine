@@ -6,7 +6,7 @@
 #pragma once
 
 #include "nsLib/SubSystem.h"
-#include "engine/display/layouts/GroupLayout.h"
+#include "Engine/display/layouts/GroupLayout.h"
 #include "nsLib/color.h"
 #include "BasePopup.h"
 

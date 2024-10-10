@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/RenDevice.h"
-#include "engine/Font.h"
+#include "Engine/RenDevice.h"
+#include "Engine/Font.h"
 
 class nsVisualMaskManager;
 

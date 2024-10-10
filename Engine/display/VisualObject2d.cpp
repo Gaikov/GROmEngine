@@ -4,7 +4,7 @@
 
 #include "VisualObject2d.h"
 #include "RenManager.h"
-#include "engine/display/context/VisualMaskManager.h"
+#include "Engine/display/context/VisualMaskManager.h"
 
 int nsVisualObject2d::_leakCounter = 0;
 

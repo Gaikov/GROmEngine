@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/VisualContainer2d.h"
+#include "Engine/display/VisualContainer2d.h"
 
 class nsBaseLayout : public nsVisualContainer2d {
 friend class nsLayoutUpdater;

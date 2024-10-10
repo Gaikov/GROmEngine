@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 #include "RayMarching.h"
 
 class nsRayBoxTest : public nsVisualObject2d {

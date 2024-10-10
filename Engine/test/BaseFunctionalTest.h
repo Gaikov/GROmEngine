@@ -3,9 +3,9 @@
 //
 
 #pragma once
-#include "engine/UserInput.h"
+#include "Engine/UserInput.h"
 #include "nsLib/Vec2.h"
-#include "engine/RenManager.h"
+#include "Engine/RenManager.h"
 
 class BaseFunctionalTest : public IUserInput
 {

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/renderer/particles/updater/factory/ParticlesUpdaterContext.h"
+#include "Engine/renderer/particles/updater/factory/ParticlesUpdaterContext.h"
 
 class nsParticlesVelToAngleUpdater : public nsParticlesUpdater {
 public:

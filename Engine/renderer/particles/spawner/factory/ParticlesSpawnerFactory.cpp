@@ -4,10 +4,10 @@
 
 #include "ParticlesSpawnerFactory.h"
 #include "renderer/particles/spawner/ParticlesAngleSpawner.h"
-#include "engine/renderer/particles/spawner/position/ParticlesCircleSpawner.h"
+#include "Engine/renderer/particles/spawner/position/ParticlesCircleSpawner.h"
 #include "renderer/particles/spawner/ParticlesLifeSpawner.h"
 #include "renderer/particles/spawner/ParticlesMultiSpawner.h"
-#include "engine/renderer/particles/spawner/position/ParticlesPolygonSpawner.h"
+#include "Engine/renderer/particles/spawner/position/ParticlesPolygonSpawner.h"
 #include "renderer/particles/spawner/velocity/ParticlesRadialVelocitySpawner.h"
 #include "renderer/particles/spawner/ParticlesSizeSpawner.h"
 #include "renderer/particles/spawner/velocity/ParticlesVectorVelSpawner.h"

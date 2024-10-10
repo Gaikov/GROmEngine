@@ -7,7 +7,7 @@
 
 #include "nsLib/factory/AbstractFactory.h"
 #include "Core/SmartPtr.h"
-#include "engine/renderer/particles/spawner/ParticlesSpawner.h"
+#include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 #include "ParticlesSpawnerContext.h"
 
 class nsParticlesSpawnerFactory : public nsAbstractFactory<nsParticlesSpawner>, nsParticlesSpawnerContext {

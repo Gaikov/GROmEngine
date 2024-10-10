@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/renderer/particles/updater/ParticlesUpdater.h"
+#include "Engine/renderer/particles/updater/ParticlesUpdater.h"
 #include "Core/Parser.h"
 
 class nsParticlesUpdaterContext {

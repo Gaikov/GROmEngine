@@ -3,16 +3,16 @@
 //
 
 #include "ParticlesTest.h"
-#include "engine/display/VisualSceneRender2d.h"
-#include "engine/Platform.h"
-#include "engine/display/layouts/HGroupLayout.h"
-#include "engine/display/layouts/VGroupLayout.h"
-#include "engine/display/text/TextLabel.h"
-#include "engine/renderer/particles/renderer/RoundParticlesRenderer.h"
-#include "engine/TimeFormat.h"
-#include "engine/utils/AppUtils.h"
-#include "engine/KeyCodes.h"
-#include "engine/renderer/particles/ParticlesManager.h"
+#include "Engine/display/VisualSceneRender2d.h"
+#include "Engine/Platform.h"
+#include "Engine/display/layouts/HGroupLayout.h"
+#include "Engine/display/layouts/VGroupLayout.h"
+#include "Engine/display/text/TextLabel.h"
+#include "Engine/renderer/particles/renderer/RoundParticlesRenderer.h"
+#include "Engine/TimeFormat.h"
+#include "Engine/utils/AppUtils.h"
+#include "Engine/KeyCodes.h"
+#include "Engine/renderer/particles/ParticlesManager.h"
 
 bool nsParticlesTest::Init() {
 

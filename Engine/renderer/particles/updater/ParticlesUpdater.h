@@ -7,7 +7,7 @@
 
 #include "Core/SmartPtr.h"
 #include "Core/Parser.h"
-#include "engine/renderer/particles/Particle.h"
+#include "Engine/renderer/particles/Particle.h"
 
 class nsParticlesUpdaterContext;
 

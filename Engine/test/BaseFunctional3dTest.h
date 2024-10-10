@@ -5,8 +5,8 @@
 #pragma once
 #include "BaseFunctionalTest.h"
 
-#include "engine/RenManager.h"
-#include "engine/RenAux.h"
+#include "Engine/RenManager.h"
+#include "Engine/RenAux.h"
 #include "nsLib/MathTools.h"
 
 class BaseFunctional3dTest : public BaseFunctionalTest

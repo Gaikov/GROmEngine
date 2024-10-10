@@ -3,8 +3,8 @@
 //
 
 #include "Sprite9GridTest.h"
-#include "engine/RenManager.h"
-#include "engine/RenAux.h"
+#include "Engine/RenManager.h"
+#include "Engine/RenAux.h"
 
 bool nsSprite9GridTest::Init() {
     _sprite.SetTexture(g_renDev->TextureLoad("tests/frame9grid.png", false));

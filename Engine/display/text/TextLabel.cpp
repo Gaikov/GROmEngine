@@ -3,7 +3,7 @@
 //
 
 #include "TextLabel.h"
-#include "engine/RenManager.h"
+#include "Engine/RenManager.h"
 #include "RenAux.h"
 
 nsTextLabel::nsTextLabel() {

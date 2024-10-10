@@ -11,8 +11,8 @@
 #include "nsLib/log.h"
 #include "Core/sys.h"
 #include "Core/Config.h"
-#include "engine/RenManager.h"
-#include "engine/ResourceMap.h"
+#include "Engine/RenManager.h"
+#include "Engine/ResourceMap.h"
 
 
 //#define SYNC_RENDER

@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/VisualObject2d.h"
-#include "engine/display/align/Align.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/display/align/Align.h"
 #include "nsLib/color.h"
 
 class nsTextArea : public nsVisualObject2d {

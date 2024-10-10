@@ -5,7 +5,7 @@
 #include "nsLib/color.h"
 #include "nsLib/StrTools.h"
 #include "nsLib/Vec2.h"
-#include "engine/display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 
 class nsTextButton : public nsBaseButton {
 public:

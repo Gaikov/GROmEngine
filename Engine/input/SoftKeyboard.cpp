@@ -3,7 +3,7 @@
 //
 
 #include "SoftKeyboard.h"
-#include "engine/KeyCodes.h"
+#include "Engine/KeyCodes.h"
 #include "nsLib/log.h"
 #include "display/layouts/HGroupLayout.h"
 #include "display/Sprite.h"

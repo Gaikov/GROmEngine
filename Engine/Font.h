@@ -7,7 +7,7 @@
 #define	_Font_H_
 
 #include "nsLib/StrTools.h"
-#include "engine/RenDevice.h"
+#include "Engine/RenDevice.h"
 #include "nsLib/math/Rect.h"
 
 #define		RES_FONT	0x5555

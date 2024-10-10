@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Core/headers.h"
-#include "engine/UserInput.h"
+#include "Engine/UserInput.h"
 
 class nsMultiUserInput : public IUserInput {
 public:

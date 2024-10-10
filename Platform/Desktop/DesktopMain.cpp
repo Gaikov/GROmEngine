@@ -3,11 +3,11 @@
 //
 #include "DesktopPlatform.h"
 #include "nsLib/log.h"
-#include "engine/engine.h"
+#include "Engine/engine.h"
 #include "Core/sys.h"
-#include "engine/RenDevice.h"
+#include "Engine/RenDevice.h"
 #include "Core/Var.h"
-#include "engine/display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 
 static DesktopPlatform g_desktop;
 static nsArgs g_args;

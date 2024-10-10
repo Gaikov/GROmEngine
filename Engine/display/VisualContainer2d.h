@@ -6,7 +6,7 @@
 #pragma once
 
 #include "VisualObject2d.h"
-#include "engine/input/InteractiveElement.h"
+#include "Engine/input/InteractiveElement.h"
 #include "VisualContext2d.h"
 
 class nsVisualContainer2d : public nsVisualObject2d, public IUserInput {

@@ -9,7 +9,7 @@
 
 #include "Core/Memory.h"
 #include "nsLib/StrTools.h"
-#include "engine/RenDevice.h"
+#include "Engine/RenDevice.h"
 
 class nsVar;
 

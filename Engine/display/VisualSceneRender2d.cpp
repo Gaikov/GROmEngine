@@ -6,7 +6,7 @@
 #include "display/layouts/BaseLayout.h"
 #include "display/layouts/LayoutUpdater.h"
 #include "EngineContext.h"
-#include "engine/display/context/VisualMaskManager.h"
+#include "Engine/display/context/VisualMaskManager.h"
 
 void nsVisualSceneRender2d::DrawScene(nsVisualObject2d *sceneRoot) {
     auto &context = nsEngineContext::Shared()->GetContext2D();

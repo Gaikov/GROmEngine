@@ -6,7 +6,7 @@
 #pragma once
 
 #include "nsLib/headers.h"
-#include "engine/display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 
 class nsVisualMaskManager {
 public:

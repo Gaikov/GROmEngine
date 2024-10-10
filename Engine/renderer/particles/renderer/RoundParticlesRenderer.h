@@ -6,8 +6,8 @@
 #pragma once
 
 #include "ParticlesRenderer.h"
-#include "engine/RenDevice.h"
-#include "engine/renderer/QuadsBuffer.h"
+#include "Engine/RenDevice.h"
+#include "Engine/renderer/QuadsBuffer.h"
 
 class nsParticlesRoundRenderer : public nsParticlesRenderer {
 public:

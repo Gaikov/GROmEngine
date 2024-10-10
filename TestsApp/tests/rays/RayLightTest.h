@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "engine/display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 #include "nsLib/color.h"
 #include "RayBoxTest.h"
 

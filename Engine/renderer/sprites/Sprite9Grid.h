@@ -7,7 +7,7 @@
 
 #include "nsLib/Vec2.h"
 #include "nsLib/color.h"
-#include "engine/renderer/TileDef.h"
+#include "Engine/renderer/TileDef.h"
 
 class nsQuadsBuffer;
 

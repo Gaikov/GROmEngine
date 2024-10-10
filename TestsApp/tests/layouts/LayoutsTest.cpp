@@ -3,18 +3,18 @@
 //
 
 #include "LayoutsTest.h"
-#include "engine/display/VisualSceneRender2d.h"
-#include "engine/Platform.h"
-#include "engine/display/layouts/HGroupLayout.h"
-#include "engine/display/layouts/VGroupLayout.h"
-#include "engine/display/text/TextArea.h"
-#include "engine/display/button/TextButton.h"
-#include "engine/display/popup/PopupManager.h"
-#include "engine/display/Sprite.h"
-#include "engine/display/button/IconButton.h"
-#include "engine/display/popup/MessagePopup.h"
+#include "Engine/display/VisualSceneRender2d.h"
+#include "Engine/Platform.h"
+#include "Engine/display/layouts/HGroupLayout.h"
+#include "Engine/display/layouts/VGroupLayout.h"
+#include "Engine/display/text/TextArea.h"
+#include "Engine/display/button/TextButton.h"
+#include "Engine/display/popup/PopupManager.h"
+#include "Engine/display/Sprite.h"
+#include "Engine/display/button/IconButton.h"
+#include "Engine/display/popup/MessagePopup.h"
 #include "nsLib/log.h"
-#include "engine/display/sprite/Sprite9Slice.h"
+#include "Engine/display/sprite/Sprite9Slice.h"
 
 nsTextLabel *nsLayoutsTest::CreateLabel(const char *text, nsVisualContainer2d *container) {
     auto label = new nsTextLabel();

@@ -10,8 +10,8 @@
 #include "nsLib/nsLib.h"
 #include "nsLib/log.h"
 #include "Core/sys.h"
-#include "engine/RenDevice.h"
-#include "engine/Platform.h"
+#include "Engine/RenDevice.h"
+#include "Engine/Platform.h"
 #include "Core/BitmapData.h"
 #include <iostream>
 #include <functional>

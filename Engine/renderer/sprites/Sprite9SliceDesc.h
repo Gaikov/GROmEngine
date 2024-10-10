@@ -6,7 +6,7 @@
 #pragma once
 
 #include "nsLib/color.h"
-#include "engine/RenDevice.h"
+#include "Engine/RenDevice.h"
 
 class nsQuadsBuffer;
 struct ITexture;

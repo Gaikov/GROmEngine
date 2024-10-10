@@ -3,8 +3,8 @@
 //
 
 #include "RayBoxTest.h"
-#include "engine/TimeFormat.h"
-#include "engine/RenAux.h"
+#include "Engine/TimeFormat.h"
+#include "Engine/RenAux.h"
 
 nsRayBoxTest::nsRayBoxTest(float width, float height) :
         _width(width),

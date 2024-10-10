@@ -3,10 +3,10 @@
 //
 
 #include "GlobalToLocalTest.h"
-#include "engine/RenAux.h"
-#include "engine/Platform.h"
-#include "engine/RenManager.h"
-#include "engine/display/VisualSceneRender2d.h"
+#include "Engine/RenAux.h"
+#include "Engine/Platform.h"
+#include "Engine/RenManager.h"
+#include "Engine/display/VisualSceneRender2d.h"
 
 bool nsGlobalToLocalTest::Init() {
     _container.AddChild(&_rect);

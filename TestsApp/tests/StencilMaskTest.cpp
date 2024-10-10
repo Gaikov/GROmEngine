@@ -3,11 +3,11 @@
 //
 
 #include "StencilMaskTest.h"
-#include "engine/Platform.h"
-#include "engine/display/VisualSceneRender2d.h"
-#include "engine/KeyCodes.h"
+#include "Engine/Platform.h"
+#include "Engine/display/VisualSceneRender2d.h"
+#include "Engine/KeyCodes.h"
 #include "nsLib/log.h"
-#include "engine/SndManager.h"
+#include "Engine/SndManager.h"
 
 #define WALL_ANGLE (M_PI / 2)
 

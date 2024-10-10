@@ -4,11 +4,11 @@
 
 #include "SpriteTest.h"
 
-#include "engine/KeyCodes.h"
-#include "engine/Platform.h"
+#include "Engine/KeyCodes.h"
+#include "Engine/Platform.h"
 
 #include "nsLib/math/Matrix2.h"
-#include "engine/renderer/sprites/SpriteDesc.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
 
 bool SpriteTest::Init()
 {
