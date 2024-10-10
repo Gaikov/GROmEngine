@@ -17,7 +17,7 @@ bool PlaneSprite3dTest::Init()
 		return false;
 	}
 
-	_tex = g_renDev->TextureLoad("textures/ctrls/flash01.jpg");
+	_tex = g_renDev->TextureLoad("tests/flash.jpg");
 	return _tex != nullptr;
 }
 

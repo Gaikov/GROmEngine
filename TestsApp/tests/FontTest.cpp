@@ -7,7 +7,7 @@
 
 bool FontTest::Init()
 {
-	return _font.Load("scripts/fnt_sys2.txt");
+	return _font.Load("default/sysfont.txt");
 }
 
 void FontTest::Loop(float deltaTime)

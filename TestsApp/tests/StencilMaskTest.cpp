@@ -21,7 +21,7 @@ bool nsStencilMaskTest::Init() {
     _root.AddChild(&_wall);
 
     _mask.desc.tex = _device->TextureLoad("tests/mask.png");
-    _mask.renState = _device->StateLoad("scripts/rs/gui_alpha_test.txt");
+    _mask.renState = _device->StateLoad("default/rs/gui_alpha_test.txt");
     _mask.desc.size = {600, 600};
     _mask.desc.ComputeCenter().color.FromBytes(0, 255, 0);
 
@@ -30,10 +30,10 @@ bool nsStencilMaskTest::Init() {
     _mask2.desc.color.FromBytes(255,0,100);
 
     _block.desc.tex = _device->TextureLoad("tests/mask2.png");
-    _block.renState = _device->StateLoad("scripts/rs/gui_alpha_test.txt");
+    _block.renState = _device->StateLoad("default/rs/gui_alpha_test.txt");
     _block.desc.ResetSize().ComputeCenter().color.FromBytes(200, 255, 0);
 
-    _states.emplace_back([this]() -> void {
+    _states.emplace_back([this] {
         _root.AddChild(&_mask);
     });
 

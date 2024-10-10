@@ -19,7 +19,7 @@ bool nsEngineContext::OnInit() {
     kb->SetHandler(this);
     _root->AddChild(kb->GetRoot());
 
-    _rsGUI = nsRenDevice::Shared()->Device()->StateLoad( "scripts/rs/gui.txt" );
+    _rsGUI = nsRenDevice::Shared()->Device()->StateLoad( "default/rs/gui.txt" );
     if ( !_rsGUI )
     {
         Sys_FatalError( "Can't load GUI render state!\n" );

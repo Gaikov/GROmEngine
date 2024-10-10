@@ -12,8 +12,8 @@
 
 bool SpriteTest::Init()
 {
-	_tex = _device->TextureLoad("textures/menu/big_font_en_3_2.PNG");
-	_tex1 = _device->TextureLoad("textures/sysfont.png");
+	_tex = _device->TextureLoad("default/console.jpg");
+	_tex1 = _device->TextureLoad("default/sysfont.png");
 
 
     _origin3.pos = { 200, 200};

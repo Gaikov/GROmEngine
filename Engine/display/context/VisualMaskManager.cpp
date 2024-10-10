@@ -9,8 +9,8 @@
 
 nsVisualMaskManager::nsVisualMaskManager() {
     _device = nsRenDevice::Shared()->Device();
-    _maskState = _device->StencilLoad("scripts/rs/mask.txt");
-    _maskedState = _device->StencilLoad("scripts/rs/masked.txt");
+    _maskState = _device->StencilLoad("default/rs/mask.txt");
+    _maskedState = _device->StencilLoad("default/rs/masked.txt");
     if (!_maskState || !_maskedState) {
         Sys_FatalError("Stencil state was not loaded!");
     }

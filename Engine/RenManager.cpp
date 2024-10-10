@@ -57,7 +57,7 @@ bool nsRenDevice::OnInit() {
     if (!_current->Init(App_GetPlatform()->GetWindowHandler())) return false;
 
     g_sysFont = _defaultFont = new nsFont();
-    _defaultFont->Load("scripts/fnt_sys2.txt");    //HACK: ��� ����� �������� � ����
+    _defaultFont->Load("default/sysfont.txt");
 
     return RX_Init();
 }

@@ -104,7 +104,7 @@ void nsLayoutsTest::CreateVGroupLayout() {
     });
 
     auto iconButton = new nsIconButton();
-    iconButton->SetTexture("textures/bonus/fomka_icon.png");
+    iconButton->SetTexture("tests/particle.jpg");
     iconButton->xCenter.SetNumber(0);
     group->AddChild(iconButton);
 }
@@ -164,7 +164,7 @@ void nsLayoutsTest::CreateHGroupLayout() {
 
 bool nsLayoutsTest::Init() {
     //_root.origin.scale = nsVec2(2, 2);
-    auto guiState = _device->StateLoad("scripts/rs/gui.txt");
+    auto guiState = _device->StateLoad("default/rs/gui.txt");
     auto back = new nsSprite();
     back->renState = guiState;
     back->desc.size = { 100, 100 };

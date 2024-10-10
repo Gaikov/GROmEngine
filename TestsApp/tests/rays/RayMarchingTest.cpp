@@ -14,15 +14,15 @@ bool nsRayMarchingTest::Init() {
     _lampsLayer = new nsVisualContainer2d();
 
     auto dev = nsRenDevice::Shared()->Device();
-    auto t = dev->TextureLoad("textures/dlight.jpg", false, TF_RGB);
+    auto t = dev->TextureLoad("tests/dlight.jpg", false, TF_RGB);
 
     CreateLight(t, 300, nsColor(1, 1, 0.8, 0.8));
     CreateLight(t, 500, nsColor(0, 1, 1, 0.8));
     CreateLight(t, 500, nsColor(0, 1, 0, 0.8));
 
     _floor = new nsSprite();
-    _floor->renState = dev->StateLoad("scripts/rs/lm.txt");
-    _floor->desc.tex = dev->TextureLoad("textures/rooms/3_02_floor.jpg");
+    _floor->renState = dev->StateLoad("default/rs/lm.txt");
+    _floor->desc.tex = dev->TextureLoad("tests/background.jpg");
     _root.AddChild(_floor);
 
     CreateBox(nsVec2(), 200, 50, 45);
@@ -76,8 +76,8 @@ void nsRayMarchingTest::Draw() {
     desc.center = size / 2;
 
     _lights[0]->origin.pos = _root.origin.ToLocal(_mousePos);
-    _lights[1]->origin.pos = nsVec2(-size.x / 2 + 20, size.y / 2 * sinf(_angle));
-    _lights[2]->origin.pos = nsVec2(size.x / 2 - 20, -size.y / 2 * sinf(_angle));
+    _lights[1]->origin.pos = nsVec2(-300, size.y / 2 * sinf(_angle));
+    _lights[2]->origin.pos = nsVec2(300, -size.y / 2 * sinf(_angle));
 
     for (int i = 0; i < _lights.size(); i++) {
         auto l = _lights[i];
@@ -108,8 +108,8 @@ void nsRayMarchingTest::CreateLight(ITexture *tex, float radius, nsColor color) 
     auto dev = nsRenDevice::Shared()->Device();
     auto lamp = new nsSprite();
     lamp->desc.color = nsColor(color, 1);
-    lamp->desc.tex = dev->TextureLoad("textures/editor/gizmos/lamp.png");
-    lamp->renState = dev->StateLoad("scripts/rs/gui.txt");
+    lamp->desc.tex = dev->TextureLoad("default/gizmos/lamp.png");
+    lamp->renState = dev->StateLoad("default/rs/gui.txt");
     lamp->desc.ResetSize().ComputeCenter();
     _lamps.push_back(lamp);
     _lampsLayer->AddChild(lamp);

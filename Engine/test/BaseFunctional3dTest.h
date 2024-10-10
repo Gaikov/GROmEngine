@@ -2,9 +2,7 @@
 // Created by Roman on 07/09/2019.
 //
 
-#ifndef __BASEFUNCTIONAL3DTEST_H__
-#define __BASEFUNCTIONAL3DTEST_H__
-
+#pragma once
 #include "BaseFunctionalTest.h"
 
 #include "engine/RenManager.h"
@@ -22,6 +20,3 @@ public:
 protected:
 	float       _angle;
 };
-
-
-#endif //__BASEFUNCTIONAL3DTEST_H__

@@ -4,9 +4,6 @@
 
 #include "Sprite3dTest.h"
 
-Sprite3dTest::Sprite3dTest() {
-}
-
 bool Sprite3dTest::Init()
 {
 	if (!BaseFunctional3dTest::Init())
@@ -14,8 +11,8 @@ bool Sprite3dTest::Init()
 		return false;
 	}
 
-	_tex = g_renDev->TextureLoad("textures/hero_life.png");
-    _state = g_renDev->StateLoad("scripts/rs/alpha_blend.txt");
+	_tex = _device->TextureLoad("tests/mask.png");
+    _state = _device->StateLoad("default/rs/alpha_blend.txt");
 
 	return true;
 }
@@ -24,9 +21,10 @@ void Sprite3dTest::Draw()
 {
 	BaseFunctional3dTest::Draw();
 
-	g_renDev->TextureBind(_tex);
-    g_renDev->StateApply(_state);
-	g_renDev->DrawSprite3D(nsVec3(), 0.5, 0.5, nsMath::ToRad(_angle));
+	_device->TextureBind(_tex);
+    _device->StateApply(_state);
+    _device->SetColor(nsColor::white);
+	_device->DrawSprite3D(nsVec3(), 0.5, 0.5, nsMath::ToRad(_angle));
 }
 
 void Sprite3dTest::Release()

@@ -13,8 +13,7 @@
 #include "Font.h"
 #include "GameApp.h"
 #include "KeyCodes.h"
-#include "Platform.h"
-#include "engine/renderer/sprites/SpriteDesc.h"
+#include "utils/AppUtils.h"
 
 extern float g_frameTime;
 
@@ -24,10 +23,9 @@ nsVar	*con_enable;
 static float			textMargin = 5.0f;
 static const nsVec2		textScale( 0.5f, 1.0f );
 static const nsColor	cLine( 0.5, 0.5, 1, 1 );
-static const float		textVertOffs = 5;
 
 #define	CON_LINE_OFFS	5
-#define CON_MAX_ARGS	10
+
 
 //---------------------------------------------------------
 // exec_f:
@@ -44,16 +42,16 @@ void exec_f( int argc, const char *argv[] )
 	if ( !file ) return;
 
 	char	*line = (char*)file->GetData();
-	while ( 1 )
+	while ( true )
 	{
 		int	add = 0;
-		char	*end = 0;
-		if ( end = strstr( line, "\r\n" ) )
+		char	*end = nullptr;
+		if ( (end = strstr( line, "\r\n" )) )
 		{
 			add = 2;
 			*end = 0;
 		}
-		else if ( end = strchr( line, '\n' ) )
+		else if ( (end = strchr( line, '\n' )) )
 		{
 			add = 1;
 			*end = 0;
@@ -77,15 +75,12 @@ void exec_f( int argc, const char *argv[] )
 //---------------------------------------------------------
 // nsConsole::nsConsole:
 //---------------------------------------------------------
-nsConsole::nsConsole() :
+nsConsole::nsConsole() : tex_offs{0, 0}, m_text{}, m_pPrint(nullptr),
 	m_line( 128 )
 {
-	m_tex = 0;
+	m_tex = nullptr;
 	m_bActive = false;
-
 	m_nLineUp = 0;
-
-	tex_offs[0] = tex_offs[1] = 0;
 
 	Clear();
 	Log::Shared()->AddPolicy(this);
@@ -109,9 +104,8 @@ void nsConsole::Draw()
 
 	tex_offs[0] += g_frameTime * 0.01f;
 	tex_offs[1] = tex_offs[0];
-	
-	int	width, height;
-	App_GetPlatform()->GetClientSize(width, height);
+
+	auto [width, height] = nsAppUtils::GetClientSize();
 	float	h_con = float(height) / 2.0f;
 
     nsSpriteDesc ds;
@@ -241,7 +235,7 @@ bool nsConsole::OnInit()
 	nsSubSystem::OnInit();
 
 	Log::Info( "init console" );
-	m_tex = g_renDev->TextureLoad( "textures/console.jpg", false, TF_RGB );
+	m_tex = g_renDev->TextureLoad( "default/console.jpg", false, TF_RGB );
 	con_line_step = g_cfg->RegVar( "con_line_step", "20.0", GVF_SAVABLE );
 	con_enable = g_cfg->RegVar( "con_enable", "1", 0 );
 	g_cfg->RegCmd( "exec", exec_f );

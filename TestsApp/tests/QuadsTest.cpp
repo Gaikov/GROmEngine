@@ -8,7 +8,7 @@
 
 bool nsQuadsTest::Init() {
     _quads = new nsQuadsBuffer(g_renDev, 4);
-    _tex = g_renDev->TextureLoad("textures/ui/text_field_frame.png", false);
+    _tex = g_renDev->TextureLoad("default/ui/frame.png", false);
 
     return true;
 }
