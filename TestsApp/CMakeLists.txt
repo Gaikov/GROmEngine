@@ -42,5 +42,5 @@ include_directories(./)
 
 target_link_libraries(
         functional_tests
-        ${GROM_ENGINE_LIBS}
+        ${ENGINE_LIBS}
 )

@@ -27,7 +27,7 @@ endif ()
 
 set(SOUND_LIB SoundOAL)
 
-set(GROM_ENGINE_LIBS
+set(ENGINE_LIBS
         ${PLATFORM}
         Engine
         RasterGL
@@ -38,7 +38,7 @@ set(GROM_ENGINE_LIBS
         nsLib
 )
 
-set(ENGINE_LIBS ${GROM_ENGINE_LIBS} PARENT_SCOPE)
+set(GROM_ENGINE_LIBS ${ENGINE_LIBS} PARENT_SCOPE)
 
 add_subdirectory(ThirdParty/OggVorbis)
 
