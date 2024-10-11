@@ -7,23 +7,42 @@
 #include "nsLib/log.h"
 #include "Core/Memory.h"
 #include "Core/ParseFile.h"
-#include "Core/StructUt.h"
-#include "Core/Config.h"
 #include "nsLib/color.h"
 #include "nsLib/StrTools.h"
 #include "RenManager.h"
+
+nsFont::nsFont() {
+    _device = nsRenDevice::Shared()->Device();
+}
 
 //---------------------------------------------------------
 // nsFont::Load: 
 //---------------------------------------------------------
 bool nsFont::Load( const char *fileName )
 {
-	if ( !StrCheck( fileName ) ) return false;
-	
-	LogPrintf( PRN_ALL, "loading font: %s\n", fileName );
-	
+    if ( !StrCheck( fileName ) ) return false;
+    LogPrintf( PRN_ALL, "loading font: %s\n", fileName );
+
+
+    nsFilePath  filePath(fileName);
+    auto ext = filePath.GetExtension();
+    ext.ToLower();
+
+    m_fileName = filePath;
+
+    if (ext == "txt")
+        return LoadGROmFont(filePath);
+    else if (ext == "fnt") {
+        return LoadBitmapFont(filePath);
+    }
+
+    Log::Warning("Unsupported font format: %s", fileName);
+    return false;
+}
+
+bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 	nsParseFile		pf;
-	script_state_t	*ss = pf.BeginFile( fileName );
+	script_state_t	*ss = pf.BeginFile( filePath );
 	if ( !ss )
 	{
 		LogPrintf( PRN_ALL, "WARNING: can't parsing font!\n" );
@@ -38,13 +57,13 @@ bool nsFont::Load( const char *fileName )
 		{
 			ITexture *tex = g_renDev->TextureLoad( ps_var_str( ss ), false, TF_RGBA );
 			if ( tex )
-				AddToArray( &tex_list, tex_count, tex );
+				_pages.push_back(tex);
 		}
 		while ( ps_var_next( ss ) );
 		ps_block_end( ss );
 	}
 	
-	if ( !tex_count )
+	if ( _pages.empty() )
 	{
 		LogPrintf( PRN_ALL, "WARNING: font textures not loaded!\n" );
 		return false;
@@ -67,7 +86,7 @@ bool nsFont::Load( const char *fileName )
 			int	tex_id;
 			ps_var_begin( ss, "tex_id" );
 			tex_id = (int)ps_var_f( ss );
-			ITexture *tex = tex_id >= 0 && tex_id < tex_count ? tex_list[tex_id] : 0;
+			ITexture *tex = tex_id >= 0 && tex_id < _pages.size() ? _pages[tex_id] : nullptr;
 			
 			bool	init_max = true;
 			
@@ -118,24 +137,97 @@ bool nsFont::Load( const char *fileName )
 		return false;
 	}
 	avg_height = max_h - min_h;
-	
-	id = RES_FONT;
-	m_fileName = fileName;
 	return true;
+}
+
+bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
+    std::vector<int> charsParsed;
+    auto file = g_pack.LoadFile(filePath);
+    if (file) {
+        const char *source = reinterpret_cast<const char *>(file->GetData());
+
+        auto page = source;
+        while ((page = strstr(page, "page "))) {
+            int id;
+            nsString    path;
+            sscanf( page, "page id=%i file=%255s", &id, path.AsChar());
+            if (!path.IsEmpty()) {
+                auto texPath = filePath.GetParent().ResolvePath(path.Replace("\"", ""));
+                _pages.push_back(_device->TextureLoad(texPath, false));
+            }
+            page ++;
+        }
+
+        auto symbol = source;
+        while ((symbol = strstr(symbol, "char"))) {
+            int charId = 0, pageId = 0;
+            int x = 0, y = 0, width = 0, height = 0, xoffset = 0, yoffset = 0, xadvance = 0;
+
+            sscanf(symbol, "char id=%i x=%i y=%i width=%i height=%i xoffset=%i yoffset=%i xadvance=%i page=%i",
+            &charId, &x, &y, &width, &height, &xoffset, &yoffset, &xadvance, &pageId );
+
+            if (charId >= 0 && charId < MAX_CHARS) {
+                if (pageId >= 0 && pageId < _pages.size()) {
+                    auto &charInfo = ch[charId];
+                    charsParsed.push_back(charId);
+                    auto tex = charInfo.tex = _pages[pageId];
+                    charInfo.xadvance = (float)xadvance;
+
+                    int texWidth, texHeight;
+                    tex->GetSize(texWidth, texHeight);
+
+                    auto &rc = charInfo.r;
+
+                    rc.coord[0] = float(x) / float(texWidth);
+                    rc.coord[1] = float(y) / float(texHeight);
+                    rc.size[0] = float(width);
+                    rc.size[1] = float(height);
+
+                    rc.offs[0] = float(xoffset);
+                    rc.offs[1] = -float(yoffset) - float(height);
+
+                    rc.tex_size[0] = float(width) / float(texWidth);
+                    rc.tex_size[1] = float(height) / float(texHeight);
+
+                } else {
+                    Log::Warning("Invalid page id: %i", pageId);
+                }
+            } else {
+                Log::Warning("Invalid char id: %i", charId);
+            }
+
+            symbol ++;
+        }
+
+
+        if (!charsParsed.empty()) {
+            float minOffset = ch[charsParsed[0]].r.offs[1];
+            for (auto charId: charsParsed) {
+                auto &info = ch[charId];
+                minOffset = std::min(minOffset, info.r.offs[1]);
+            }
+
+            for (auto charId: charsParsed) {
+                auto &info = ch[charId];
+                info.r.offs[1] -= minOffset;
+            }
+        } else {
+            Log::Warning("No symbols parsed!");
+        }
+    }
+
+    g_pack.ReleaseFile(file);
+    return !charsParsed.empty() && !_pages.empty();
 }
 
 //------------------------------------
 // Free: 
 //------------------------------------
-void nsFont::Free()
-{
-	if ( tex_list )
-	{
-		for ( int i = 0; i < tex_count; i++ )
-			g_renDev->TextureRelease( tex_list[i] );
-		my_free( tex_list );
-	}
-	memset( this, 0, sizeof(nsFont) );
+void nsFont::Free() {
+    for (auto t: _pages) {
+        g_renDev->TextureRelease(t);
+    }
+    memset(ch, 0, sizeof(ch));
 }
 
 //------------------------------------
@@ -143,11 +235,11 @@ void nsFont::Free()
 //------------------------------------
 void nsFont::Draw( const char *str, float pos[], float scale[], const float c[4], int len, float fixedWidth )
 {
-	if ( !str || !tex_list ) return;
+	if ( !str || _pages.empty() ) return;
 	
 	g_renDev->SetColor( c );
-	g_renDev->TextureBind( tex_list[0] );
-	void	*prev_tex = tex_list[0];
+	g_renDev->TextureBind( _pages[0] );
+	auto	prev_tex = _pages[0];
 
 	if ( !len ) len = strlen( str );
 
@@ -209,10 +301,10 @@ void nsFont::Draw( const char *str, float pos[], float scale[], const float c[4]
 //-----------------------------------------------------
 void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float c1[4], float scale2[2], const float c2[4], int len )
 {
-	if ( !str || !tex_list ) return;
+	if ( !str || _pages.empty() ) return;
 	
-	g_renDev->TextureBind( tex_list[0] );
-	void	*prev_tex = tex_list[0];
+	g_renDev->TextureBind( _pages[0] );
+	void	*prev_tex = _pages[0];
 
 	if ( !len ) len = strlen( str );
 
@@ -291,8 +383,8 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 	nsColor	col = c1;
 	
 	g_renDev->SetColor( col );
-	g_renDev->TextureBind( tex_list[0] );
-	void *prev_tex = tex_list[0];
+	g_renDev->TextureBind( _pages[0] );
+	void *prev_tex = _pages[0];
 
 	float	x = pos[0];
 	while ( *str )
@@ -353,51 +445,3 @@ void nsFont::GetCharDesc( uchar c, char_desc_t &cd )
 	cd.offs_y = ch[c].r.offs[1];
 }
 
-//------------------------------------------------------
-// nsFont::TestFont: 
-//------------------------------------------------------
-nsVar			*ft_file = 0;
-nsVar			*ft_str = 0;
-nsVar			*ft_pos_x = 0;
-nsVar			*ft_pos_y = 0;
-static nsFont	testFont;
-
-void nsFont::TestFont()
-{
-	/*g_renDev->SetRenderMode( RM_ORTHO_640 );
-	g_renDev->SetAlphaMode( ALPHA_GLASS );//*/
-
-	if ( strlen( ft_file->String() ) 
-		&& testFont.m_fileName != ft_file->String() )
-	{
-		testFont.Free();
-		if ( !testFont.Load( (char*)ft_file->String() ) )
-			return;
-	}
-	
-	if ( !testFont.m_fileName.Length() ) return;
-
-	float	pos[2] = { ft_pos_x->Value(), ft_pos_y->Value() };
-
-	float	s[2] = { 1, 1 };
-	testFont.Draw( (char*)ft_str->String(), pos, s, nsColor::white, 0, 0 );
-}
-
-//------------------------------------------------------
-// nsFont::TestInit: 
-//------------------------------------------------------
-void nsFont::TestInit()
-{
-	ft_file = g_cfg->RegVar( "ft_file", "", 0 );
-	ft_str = g_cfg->RegVar( "ft_str", "", 0 );
-	ft_pos_x = g_cfg->RegVar( "ft_pos_x", "100", 0 );
-	ft_pos_y = g_cfg->RegVar( "ft_pos_y", "100", 0 );
-}
-
-//------------------------------------------------------
-// nsFont::TestFree: 
-//------------------------------------------------------
-void nsFont::TestFree()
-{
-	testFont.Free();
-}

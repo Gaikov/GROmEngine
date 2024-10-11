@@ -260,3 +260,19 @@ bool nsString::operator == (const nsString &str) const
 {
 	return *this == (const char*)str;
 }
+
+nsString nsString::Replace(const char *find, const char *replace) {
+    nsString    res = *this;
+
+    int replaceLen = int(strlen(replace));
+    int findLen  = int(strlen(find));
+    int moveOffset = int(replaceLen - findLen);
+
+    while (auto found = strstr(res.m_str, find)) {
+        memmove(found + + findLen + moveOffset, found + findLen, strlen(found) + 1);
+        if (replaceLen > 0) {
+            strcpy(found, replace);
+        }
+    }
+    return res;
+}

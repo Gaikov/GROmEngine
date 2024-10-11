@@ -19,4 +19,5 @@ public:
 
 private:
 	nsFont _font;
+    nsFont _font2;
 };

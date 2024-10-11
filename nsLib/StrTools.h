@@ -55,6 +55,7 @@ public:
 	void				ToLower();
     void                ToUpper();
 	bool                IsEmpty() const { return Length() == 0; }
+    nsString            Replace(const char *find, const char *replace);
 
     friend nsString operator+(const nsString &s1, const char *s2);
 

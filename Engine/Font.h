@@ -3,12 +3,12 @@
 // file Font.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_Font_H_
-#define	_Font_H_
+#pragma once
 
 #include "nsLib/StrTools.h"
 #include "Engine/RenDevice.h"
 #include "nsLib/math/Rect.h"
+#include "nsLib/FilePath.h"
 
 #define		RES_FONT	0x5555
 
@@ -16,6 +16,7 @@ typedef struct
 {
 	ITexture	*tex;
 	rchar_t		r;
+    float       xadvance;
 }
 fchar_t;
 
@@ -31,23 +32,19 @@ char_desc_t;
 //---------------------------------------------------------
 // nsFont: 
 //---------------------------------------------------------
-struct nsFont  
+struct nsFont final
 {
 public:
-	int			id;
-
 	nsString	m_fileName;
-	ITexture	**tex_list;
-	int			tex_count;
+	std::vector<ITexture*>  _pages;
+
+	float		avg_height = 0;
 	
-	float		avg_height;
-	
-	fchar_t		ch[MAX_CHARS];
+	fchar_t		ch[MAX_CHARS] = {};
 
 public:
-	nsFont() { memset( this, 0, sizeof(nsFont) ); }
-
-	bool		Load( const char *filename );
+    nsFont();
+    bool		Load( const char *filename );
 	void		Free();
 	void		Draw( const char *str, float pos[2], float scale[2], const float c[4], int len = 0, float fixedWidth = 0 );
 	void		DrawFX( const char *str, float pos[2], float scale[2], const float c[4], float scale2[2], const float c2[2], int len );
@@ -57,9 +54,10 @@ public:
 	rchar_t*	GetRChar( uchar ch );
 	void		GetCharDesc( uchar ch, char_desc_t &cd );
 
-	static void TestFont();
-	static void TestInit();
-	static void TestFree();
+private:
+    IRenDevice  *_device;
+
+    bool LoadGROmFont(const nsFilePath &filePath);
+    bool LoadBitmapFont(const nsFilePath &filePath);
 };
 
-#endif //_Font_H_

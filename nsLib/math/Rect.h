@@ -18,6 +18,16 @@ struct nsRect {
     inline float minY() const { return std::min(y, y + height); }
     inline float maxY() const { return std::max(y, y + height); }
 
+    inline void SetPos(const nsVec2 &pos) {
+        x = pos.x;
+        y = pos.y;
+    }
+
+    inline void SetSize(const nsVec2 &size) {
+        width = size.x;
+        height = size.y;
+    }
+
     inline void setZero() {
         x = y = width = height = 0;
     }
