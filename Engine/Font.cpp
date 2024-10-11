@@ -71,13 +71,15 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 	
 	//-------------------------------------------
 	int	i = 0;
-	avg_height = 0;
+    _lineHeight = 0;
 	float	min_h = 0;
 	float	max_h = 0;
 	if ( ps_block_begin( ss, "chars_data" ) 
 		&& ps_block_begin( ss, "char" ) )
 	{
-		do
+        bool	init_max = true;
+
+        do
 		{
 			int	code;
 			ps_var_begin( ss, "code" );
@@ -87,9 +89,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 			ps_var_begin( ss, "tex_id" );
 			tex_id = (int)ps_var_f( ss );
 			ITexture *tex = tex_id >= 0 && tex_id < _pages.size() ? _pages[tex_id] : nullptr;
-			
-			bool	init_max = true;
-			
+
 			if ( code >= 0 && code < MAX_CHARS && tex )
 			{
 				ch[code].tex = tex;
@@ -111,6 +111,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 				ch[code].r.tex_size[1] = ch[code].r.size[1] / float(h);
 				ch[code].r.coord[0] /= float(w);
 				ch[code].r.coord[1] /= float(h);
+                ch[code].xadvance = ch[code].r.offs[0] + ch[code].r.size[0];
 				
 				if ( init_max )
 				{
@@ -136,7 +137,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 		LogPrintf( PRN_ALL, "WARNING: no chars data present!\n" );
 		return false;
 	}
-	avg_height = max_h - min_h;
+    _lineHeight = max_h - min_h;
 	return true;
 }
 
@@ -159,7 +160,7 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
         }
 
         auto symbol = source;
-        while ((symbol = strstr(symbol, "char"))) {
+        while ((symbol = strstr(symbol, "char "))) {
             int charId = 0, pageId = 0;
             int x = 0, y = 0, width = 0, height = 0, xoffset = 0, yoffset = 0, xadvance = 0;
 
@@ -207,10 +208,14 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
                 minOffset = std::min(minOffset, info.r.offs[1]);
             }
 
+            float height = 0;
             for (auto charId: charsParsed) {
                 auto &info = ch[charId];
                 info.r.offs[1] -= minOffset;
+
+                height = std::max(info.r.offs[1] + info.r.size[1], height);
             }
+            _lineHeight = height;
         } else {
             Log::Warning("No symbols parsed!");
         }
@@ -233,11 +238,11 @@ void nsFont::Free() {
 //------------------------------------
 // DrawContent:
 //------------------------------------
-void nsFont::Draw( const char *str, float pos[], float scale[], const float c[4], int len, float fixedWidth )
+void nsFont::Draw(const char *str, float pos[], float scale[], const float color[4], int len, float fixedWidth )
 {
 	if ( !str || _pages.empty() ) return;
 	
-	g_renDev->SetColor( c );
+	g_renDev->SetColor(color );
 	g_renDev->TextureBind( _pages[0] );
 	auto	prev_tex = _pages[0];
 
@@ -248,14 +253,8 @@ void nsFont::Draw( const char *str, float pos[], float scale[], const float c[4]
 	while ( *str && len )
 	{
 		auto	chr = (unsigned char)*str;
-/*#ifdef _DEBUG
-		if ( chr > 128 )
-		{
-			int i = 0;
-		}
-#endif//*/
 
-		fchar_t	*c = &ch[chr];
+        fchar_t	*c = &ch[chr];
 		if ( c->tex )
 		{
 			if ( *str != 32 )
@@ -267,28 +266,18 @@ void nsFont::Draw( const char *str, float pos[], float scale[], const float c[4]
 				}
 				
 				float	outX = x;
-				if ( fixedWidth )
+				if ( fixedWidth > 0 )
 				{
-					/*if ( chr != ':' )
-						outX = x + (fixedWidth - c->r.size[0]) * s05;
-					else
-						outX = x + (c->r.size[0] - c->r.size[0]) * s05;//*/
 					outX = x + (fixedWidth - c->r.size[0]) * s05;
-						
 				}
 				g_renDev->DrawCharScaled( outX, pos[1], &c->r, scale[0], scale[1] );
 			}
-			
-			if ( fixedWidth )
-			{
-				/*if ( chr != ':' )
-					x += fixedWidth * scale[0];
-				else
-					x += c->r.size[0] * scale[0];//*/
-				x += fixedWidth * scale[0];
-			}
-			else
-				x += (c->r.offs[0] + c->r.size[0]) * scale[0];
+
+            if (fixedWidth > 0) {
+                x += fixedWidth * scale[0];
+            } else {
+                x += c->xadvance * scale[0];
+            }
 		}
 
 		str++;
@@ -333,7 +322,7 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 				g_renDev->SetColor( c1 );
 				g_renDev->DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
 			}
-			x += (c->r.offs[0] + c->r.size[0]) * scale[0];
+			x += c->xadvance * scale[0];
 		}
 
 		str++;
@@ -350,17 +339,18 @@ void nsFont::GetSize( const char *str, float size[], int len )
 {
 	size[0] = size[1] = 0;
 	if ( !str ) return;
-	if ( !len ) len = strlen( str );
+	if ( !len ) len = (int)strlen( str );
 
 	while ( *str && len )
 	{
-		rchar_t	*c = &ch[(unsigned char)*str].r;
-		size[0] += (c->offs[0] + c->size[0]);
+        auto &info = ch[(unsigned char)*str];
+        size[0] += info.xadvance;
+
 		str++;
 		len--;
 	}
 
-	size[1] = avg_height;
+	size[1] = _lineHeight;
 }
 
 void nsFont::GetBounds( const char *str, nsRect &bounds) {
@@ -416,7 +406,7 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 				lerp -= 1.0;
 			}
 
-			x += (c->r.offs[0] + c->r.size[0]) * scale[0];
+			x += c->xadvance * scale[0];
 		}
 		
 		str++;

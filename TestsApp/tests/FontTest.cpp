@@ -19,7 +19,7 @@ void FontTest::Loop(float deltaTime)
 
 void FontTest::Draw()
 {
-	nsString    text = "TEXT FONT works fine ! 123124,_;{}";
+	nsString    text = "TEXT FONT works fine ! 123124,_;{}?/$#";
 	//nsString    text = "LOADING";
     nsRect  rect;
     nsVec2 size;
@@ -41,7 +41,7 @@ void FontTest::Draw()
 
     RX_DrawSprite(desc);
 
-    desc.tex = _font._pages[0];
+    desc.tex = _font.GetPage(0);
     desc.color = nsColor::white;
 
     RX_DrawSprite(desc);
