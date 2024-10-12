@@ -1,7 +1,6 @@
 #include "RenManager.h"
 #include "Core/Config.h"
 #include "Core/Memory.h"
-#include "Font.h"
 #include "RenAux.h"
 #include "Platform.h"
 #include "nsLib/log.h"
@@ -10,7 +9,6 @@
  * @deprecated
  */
 IRenDevice		*g_renDev = nullptr;
-nsFont			*g_sysFont = nullptr;
 
 nsVar	*r_fullscreen = nullptr;
 nsVar	*r_pixel_bits = nullptr;
@@ -56,9 +54,6 @@ bool nsRenDevice::OnInit() {
 
     if (!_current->Init(App_GetPlatform()->GetWindowHandler())) return false;
 
-    g_sysFont = _defaultFont = new nsFont();
-    _defaultFont->Load("default/sysfont.txt");
-
     return RX_Init();
 }
 
@@ -69,13 +64,6 @@ void nsRenDevice::OnRelease() {
     nsSubSystem::OnRelease();
 
 	RX_Release();
-
-	if ( _defaultFont )
-	{
-		_defaultFont->Free();
-		delete _defaultFont;
-		g_sysFont = _defaultFont = nullptr;
-	}
 
 	if ( _current ) {
         _current->Release();

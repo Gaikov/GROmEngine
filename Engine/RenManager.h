@@ -22,21 +22,15 @@ public:
         return _current;
     }
 
-    inline nsFont* Font() {
-        return _defaultFont;
-    }
-
 private:
     bool OnInit() override;
     void OnRelease() override;
 
 private:
     IRenDevice  *_current;
-    nsFont      *_defaultFont;
 };
 
 /**
  * @deprecated
  */
 extern IRenDevice	*g_renDev;
-extern nsFont		*g_sysFont;

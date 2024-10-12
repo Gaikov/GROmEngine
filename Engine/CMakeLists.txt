@@ -141,6 +141,8 @@ set(src
         renderer/particles/updater/ParticlesVelToAngleUpdater.h
         renderer/particles/updater/ParticlesColorTimelineUpdater.cpp
         renderer/particles/updater/ParticlesColorTimelineUpdater.h
+        renderer/font/FontsCache.cpp
+        renderer/font/FontsCache.h
 )
 
 include_directories(./)

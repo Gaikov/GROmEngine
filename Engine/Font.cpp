@@ -15,6 +15,10 @@ nsFont::nsFont() {
     _device = nsRenDevice::Shared()->Device();
 }
 
+nsFont::~nsFont() {
+    Free();
+}
+
 //---------------------------------------------------------
 // nsFont::Load: 
 //---------------------------------------------------------
@@ -202,20 +206,41 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
 
 
         if (!charsParsed.empty()) {
-            float minOffset = ch[charsParsed[0]].r.offs[1];
-            for (auto charId: charsParsed) {
-                auto &info = ch[charId];
-                minOffset = std::min(minOffset, info.r.offs[1]);
+            _lineHeight = -1;
+            auto common = strstr(source, "common");
+            if (common) {
+                int lineHeight = -1;
+                sscanf(common, "common lineHeight=%i", &lineHeight);
+                _lineHeight = (float)lineHeight;
+            } else {
+                Log::Warning("'common' header not found!");
             }
 
-            float height = 0;
-            for (auto charId: charsParsed) {
-                auto &info = ch[charId];
-                info.r.offs[1] -= minOffset;
+/*            if (_lineHeight > 0) {
+                for (auto charId : charsParsed) {
+                    auto &info = ch[charId];
+                    info.r.offs[1] = info.r.offs[1] + _lineHeight;
+                }
+            } else {*/
+            {
+                float minOffset = ch[charsParsed[0]].r.offs[1];
+                for (auto charId: charsParsed) {
+                    auto &info = ch[charId];
+                    minOffset = std::min(minOffset, info.r.offs[1]);
+                }
 
-                height = std::max(info.r.offs[1] + info.r.size[1], height);
+                float height = 0;
+                for (auto charId: charsParsed) {
+                    auto &info = ch[charId];
+                    info.r.offs[1] -= minOffset;
+
+                    height = std::max(info.r.offs[1] + info.r.size[1], height);
+                }
+
+                if (_lineHeight <= 0) {
+                    _lineHeight = height;
+                }
             }
-            _lineHeight = height;
         } else {
             Log::Warning("No symbols parsed!");
         }
@@ -246,7 +271,7 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 	g_renDev->TextureBind( _pages[0] );
 	auto	prev_tex = _pages[0];
 
-	if ( !len ) len = strlen( str );
+	if ( !len ) len = (int)strlen( str );
 
 	float	x = pos[0];
 	float	s05 = scale[0] * 0.5f;
@@ -295,7 +320,7 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 	g_renDev->TextureBind( _pages[0] );
 	void	*prev_tex = _pages[0];
 
-	if ( !len ) len = strlen( str );
+	if ( !len ) len = (int)strlen( str );
 
 	float	x = pos[0];
 	while ( *str && len )
@@ -379,7 +404,7 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 	float	x = pos[0];
 	while ( *str )
 	{
-		unsigned char	code = (unsigned char)*str;
+		auto	code = (unsigned char)*str;
 		fchar_t	*c = &ch[code];
 
 		if ( c->tex )
@@ -420,7 +445,7 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 rchar_t* nsFont::GetRChar( uchar c )
 {
 	if ( ch[c].tex ) return &ch[c].r;
-	return 0;
+	return nullptr;
 }
 
 //------------------------------------
@@ -434,4 +459,5 @@ void nsFont::GetCharDesc( uchar c, char_desc_t &cd )
 	cd.offs_x = ch[c].r.offs[0];
 	cd.offs_y = ch[c].r.offs[1];
 }
+
 

@@ -14,6 +14,7 @@
 #include "GameApp.h"
 #include "KeyCodes.h"
 #include "utils/AppUtils.h"
+#include "renderer/font/FontsCache.h"
 
 extern float g_frameTime;
 
@@ -159,15 +160,17 @@ void nsConsole::Draw()
 	DrawLine( str, vertPos, strlen( str ), nsColor::white );
 	DrawCursor( vertPos );
 
+    auto font = nsFontsCache::Shared()->SysFont();
+
 	//draw version
 	auto version = App_GetGame()->GetVersionInfo();
 	nsVec2 size;
 	int length = strlen(version);
-	g_sysFont->GetSize(version, size, length);
+	font->GetSize(version, size, length);
 	size *= textScale;
 
 	nsVec2 pos((float)width - size.x - textMargin, vertPos);
-	g_sysFont->Draw(version, pos, textScale, nsColor::white, length);
+	font->Draw(version, pos, textScale, nsColor::white, length);
 }
 
 //---------------------------------------------------------
@@ -187,10 +190,11 @@ void nsConsole::DrawCursor( float y )
 
 	if ( cursorDraw )
 	{
+        auto font = nsFontsCache::Shared()->SysFont();
 		float	lineSize[2];
-		g_sysFont->GetSize( "_", lineSize, 0 );
+		font->GetSize( "_", lineSize, 0 );
 		float	pos[2] = { textMargin + lineSize[0] * textScale.x * m_line.GetCursorPos(), y };
-		g_sysFont->Draw( "_", pos, textScale, nsColor::white, 0 );
+		font->Draw( "_", pos, textScale, nsColor::white, 0 );
 	}
 }
 
@@ -292,8 +296,9 @@ void nsConsole::DrawLine( const char *line, float y, int len, const nsColor &c )
 {
 	if ( len > 0 )
 	{
+        auto font = nsFontsCache::Shared()->SysFont();
 		float pos[2] = { textMargin, y };
-		g_sysFont->Draw( line, pos, textScale, c, len );
+		font->Draw( line, pos, textScale, c, len );
 	}
 }
 

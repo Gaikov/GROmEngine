@@ -4,12 +4,14 @@
 
 #include "FontTest.h"
 #include "Engine/renderer/sprites/SpriteDesc.h"
+#include "Engine/renderer/font/FontsCache.h"
 
 bool FontTest::Init()
 {
-    _font2.Load("tests/bmfont.fnt");
-
-	return _font.Load("default/sysfont.txt");
+    auto cache = nsFontsCache::Shared();
+    _font2 = cache->LoadFont("tests/bmfont.fnt");
+	_font = cache->LoadFont("default/sysfont.txt");
+    return _font && _font2;
 }
 
 void FontTest::Loop(float deltaTime)
@@ -24,8 +26,8 @@ void FontTest::Draw()
     nsRect  rect;
     nsVec2 size;
     nsVec2 pos = {100, 100};
-	_font.Draw(text, nsVec2(100, 100), nsVec2(1, 1), nsColor::red, text.Length());
-    _font.GetSize(text, size);
+	_font->Draw(text, nsVec2(100, 100), nsVec2(1, 1), nsColor::red, text.Length());
+    _font->GetSize(text, size);
 
     rect.SetPos(pos);
     rect.SetSize(size);
@@ -41,14 +43,14 @@ void FontTest::Draw()
 
     RX_DrawSprite(desc);
 
-    desc.tex = _font.GetPage(0);
+    desc.tex = _font->GetPage(0);
     desc.color = nsColor::white;
 
     RX_DrawSprite(desc);
 
     pos = {100, 600};
-    _font2.Draw(text, pos, nsVec2(1, 1), nsColor::blue, text.Length());
-    _font2.GetSize(text, size);
+    _font2->Draw(text, pos, nsVec2(1, 1), nsColor::blue, text.Length());
+    _font2->GetSize(text, size);
 
     rect.SetPos(pos);
     rect.SetSize(size);

@@ -3,11 +3,11 @@
 //
 
 #include "TextArea.h"
-#include "RenManager.h"
 #include "RenAux.h"
+#include "renderer/font/FontsCache.h"
 
 nsTextArea::nsTextArea() {
-    _font = nsRenDevice::Shared()->Font();
+    _font = nsFontsCache::Shared()->SysFont();
 }
 
 void nsTextArea::SetText(const char *text) {

@@ -11,6 +11,7 @@
 #include "nsLib/log.h"
 #include "Engine/GameApp.h"
 #include "renderer/sprites/SpriteDesc.h"
+#include "renderer/font/FontsCache.h"
 
 static IVertexBuffer	*g_sprBuff = nullptr;
 static IVertexBuffer	*g_lineBuff = nullptr;
@@ -94,7 +95,8 @@ void RX_DrawFPS(float x, float y, uint frameTime) {
         time = 0;
     }
 
-    g_sysFont->Draw(
+    auto font = nsFontsCache::Shared()->SysFont();
+    font->Draw(
             StrPrintf("%.2f fps", fps),
             nsVec2(x, y),
             nsVec2(0.5f, 1), nsColor::white, 0);

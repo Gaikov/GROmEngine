@@ -4,9 +4,10 @@
 
 #include "TextButton.h"
 #include "Engine/RenManager.h"
+#include "renderer/font/FontsCache.h"
 
 nsTextButton::nsTextButton() {
-    font = nsRenDevice::Shared()->Font();
+    font = nsFontsCache::Shared()->SysFont();
 }
 
 void nsTextButton::DrawContent(const nsVisualContext2d &context) {

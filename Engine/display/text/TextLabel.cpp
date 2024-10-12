@@ -5,9 +5,10 @@
 #include "TextLabel.h"
 #include "Engine/RenManager.h"
 #include "RenAux.h"
+#include "renderer/font/FontsCache.h"
 
 nsTextLabel::nsTextLabel() {
-    font = nsRenDevice::Shared()->Font();
+    font = nsFontsCache::Shared()->SysFont();
 }
 
 void nsTextLabel::GetLocalBounds(nsRect &bounds) {

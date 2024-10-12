@@ -18,6 +18,6 @@ public:
 	void Release() override;
 
 private:
-	nsFont _font;
-    nsFont _font2;
+	nsFont *_font;
+    nsFont *_font2;
 };

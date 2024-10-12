@@ -21,6 +21,7 @@
 #include "display/VisualSceneRender2d.h"
 #include "EngineContext.h"
 #include "renderer/particles/ParticlesManager.h"
+#include "renderer/font/FontsCache.h"
 
 #define DEBUG_BUILD "Debug"
 
@@ -65,6 +66,7 @@ bool nsEngine::Init()
 
     g_sndMgr.Init();
     if (!nsRenDevice::Init()) return false;
+    if (!nsFontsCache::Init()) return false;
 
 	g_inp.ShowCursor( false );
 	nsConsole::Init();
@@ -119,6 +121,7 @@ void nsEngine::Release(bool failed)
     nsParticlesManager::Release();
     nsEngineContext::Release();
 	nsConsole::Release();
+    nsFontsCache::Release();
 	nsRenDevice::Release();
 	g_sndMgr.Release();
 	g_resMap.Release();
@@ -230,9 +233,10 @@ void nsEngine::MainLoop()
 		nsConsole::Shared()->Draw();
 
 #ifdef DEBUG
+        auto sysFont = nsFontsCache::Shared()->SysFont();
         float size[2];
-        g_sysFont->GetSize(DEBUG_BUILD, size, 0);
-        g_sysFont->Draw(DEBUG_BUILD, nsVec2(w - size[0] / 2 - 10, 10), nsVec2(0.5, 1), nsColor::white, 0);
+        sysFont->GetSize(DEBUG_BUILD, size, 0);
+        sysFont->Draw(DEBUG_BUILD, nsVec2(w - size[0] / 2 - 10, 10), nsVec2(0.5, 1), nsColor::white, 0);
 #endif
 
         g_renDev->EndScene();
