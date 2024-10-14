@@ -12,6 +12,7 @@
 class nsTextLabel : public nsVisualObject2d {
 public:
     nsFont      *font = nullptr;
+    IRenState   *renState = nullptr;
     nsString    text;
     nsColor     color;
     bool        drawFrame = false;

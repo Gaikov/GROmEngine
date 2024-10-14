@@ -8,11 +8,13 @@
 #include "display/sprite/SpriteBuilder.h"
 #include "display/text/TextLabelBuilder.h"
 #include "display/container/VisualContainerBuilder.h"
+#include "LayoutRefBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
     RegisterBuilderWithName<nsTextLabelBuilder>();
     RegisterBuilderWithName<nsVisualContainerBuilder>();
+    RegisterBuilderWithName<nsLayoutRefBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {
@@ -47,16 +49,6 @@ nsVisualObject2d *nsVisualFactory2d::Create(const char *filePath) {
     }
     return nullptr;
 }
-
-/*
-bool nsVisualFactory2d::Parse(script_state_t *ss, nsVisualObject2d *object) {
-    auto builder = GetBuilder(ps_block_name(ss));
-    if (builder) {
-        return builder->Parse(ss, object, this);
-    }
-    return false;
-}
-*/
 
 nsVisualBuilder2d *nsVisualFactory2d::GetBuilder(const char *name) {
     if (!StrCheck(name)) {

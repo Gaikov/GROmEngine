@@ -14,7 +14,6 @@
 #include "Console.h"
 #include "Input.h"
 #include "SndManager.h"
-#include "ResourceMap.h"
 #include "Anim.h"
 #include "Platform.h"
 #include "input/SoftKeyboard.h"
@@ -58,7 +57,6 @@ bool nsEngine::Init()
 	g_cfg->RegCmd( "pause", pause_f );
 	g_cfg->RegCmd( "anim_make", nsAnim::anim_make_f );
 
-	g_resMap.Init();
 	nsRenDevice::RegVars();
 
 	if ( !app->InitDialog() ) return false;
@@ -128,7 +126,6 @@ void nsEngine::Release(bool failed)
     nsFontsCache::Release();
 	nsRenDevice::Release();
 	g_sndMgr.Release();
-	g_resMap.Release();
 
     App_GetPlatform()->Release();
 	nsCore::Release();

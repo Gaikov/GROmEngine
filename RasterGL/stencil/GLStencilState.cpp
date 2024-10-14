@@ -26,6 +26,10 @@ nsGLStencilState::~nsGLStencilState() {
 }
 
 nsGLStencilState *nsGLStencilState::Load(const char *fileName) {
+    if (!StrCheck(fileName)) {
+        return nullptr;
+    }
+
     auto state = new nsGLStencilState();
     state->_fileName = fileName;
     state->Reload();

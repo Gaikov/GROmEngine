@@ -154,6 +154,8 @@ set(src
         display/text/TextLabelBuilder.h
         display/container/VisualContainerBuilder.cpp
         display/container/VisualContainerBuilder.h
+        display/factory/LayoutRefBuilder.cpp
+        display/factory/LayoutRefBuilder.h
 )
 
 include_directories(./)

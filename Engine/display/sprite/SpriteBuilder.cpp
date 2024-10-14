@@ -16,12 +16,19 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
         return false;
     }
 
-    auto sprite = dynamic_cast<nsSprite*>(object);
+    auto sprite = dynamic_cast<nsSprite *>(object);
     auto dev = nsRenDevice::Shared()->Device();
 
-    sprite->desc.tex = dev->TextureLoad(ParseString(ss, "texture"), false);
-    sprite->renState = dev->StateLoad(ParseString(ss, "renState"));
-    sprite->desc.ResetSize();
+    auto tex = dev->TextureLoad(ParseString(ss, "texture"), false);
+    if (tex) {
+        sprite->desc.tex = tex;
+        sprite->desc.ResetSize();
+    }
+
+    auto state = dev->StateLoad(ParseString(ss, "renState"));
+    if (state) {
+        sprite->renState = state;
+    }
 
     return true;
 }
