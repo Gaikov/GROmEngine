@@ -143,6 +143,13 @@ set(src
         renderer/particles/updater/ParticlesColorTimelineUpdater.h
         renderer/font/FontsCache.cpp
         renderer/font/FontsCache.h
+        display/factory/VisualCreationContext.h
+        display/factory/VisualFactory2d.cpp
+        display/factory/VisualFactory2d.h
+        display/factory/VisualBuilder2d.h
+        display/sprite/SpriteBuilder.cpp
+        display/sprite/SpriteBuilder.h
+        display/factory/VisualBuilder2d.cpp
 )
 
 include_directories(./)
