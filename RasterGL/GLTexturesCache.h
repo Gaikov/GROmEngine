@@ -2,9 +2,7 @@
 // Created by Raman Haikou on 2019-07-27.
 //
 
-#ifndef _GROM_GLTEXTURESCACHE_H_
-#define _GROM_GLTEXTURESCACHE_H_
-
+#pragma once
 #include "GLCommon.h"
 #include "nsLib/factory/ResourcesCache.h"
 
@@ -22,12 +20,9 @@ public:
 
 private:
 	GLTexture *_current;
-	int       _bitmapId;
+	int       _bitmapId = 0;
 
 private:
 	GLTexture *AllocateResource(const char *id, int param) override;
 	void FreeResource(GLTexture *item) override;
 };
-
-
-#endif //_GROM_GLTEXTURESCACHE_H_

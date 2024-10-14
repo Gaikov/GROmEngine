@@ -14,10 +14,9 @@ public:
     nsVisualFactory2d();
 
     nsVisualObject2d *Create(script_state_t *ss) override;
-    nsVisualObject2d *Create(const char *filePath);
-    //bool Parse(script_state_t *ss, nsVisualObject2d *object) override;
+    nsVisualObject2d *Create(const char *filePath) override;
 
-    nsVisualBuilder2d* GetBuilder(const char *name);
+    nsVisualBuilder2d* GetBuilder(const char *name) override;
 
     template<class TBuilder>
     void RegisterBuilderWithName() {

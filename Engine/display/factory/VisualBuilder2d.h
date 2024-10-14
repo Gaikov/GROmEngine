@@ -16,5 +16,5 @@ public:
     virtual ~nsVisualBuilder2d() = default;
 
     virtual nsVisualObject2d* Create(script_state_t *ss, nsVisualCreationContext2d *context) = 0;
-    virtual bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context);
+    virtual bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context);
 };

@@ -9,7 +9,6 @@
 #include "Core/StructUt.h"
 #include "Core/Package.h"
 #include "nsLib/log.h"
-#include "ResourceMap.h"
 #include "RenManager.h"
 
 //---------------------------------------------------------

@@ -11,6 +11,10 @@ GLShadersManager::GLShadersManager() :
 
 GLShader *GLShadersManager::AllocateResource(const char *id, int param)
 {
+    if (!StrCheck(id)) {
+        return nullptr;
+    }
+
 	auto shader = new GLShader();
 	shader->m_fileName = id;
 	shader->Reload();

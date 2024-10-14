@@ -21,6 +21,10 @@ GLTexture::~GLTexture()
 
 GLTexture *GLTexture::Load(const char *filePath)
 {
+    if (!StrCheck(filePath)) {
+        return nullptr;
+    }
+
 	LogPrintf(PRN_ALL, "...creating texture: %s\n", filePath);
 	auto t = new GLTexture();
 	t->CreateFromFile(filePath);

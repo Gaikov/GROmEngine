@@ -22,6 +22,7 @@ void nsTextLabel::DrawContent(const nsVisualContext2d &context) {
         return;
     }
 
+    _device->StateApply(renState);
     font->Draw(text, nsVec2(0, 0), nsVec2(1, 1), color, text.Length());
 
     if (drawFrame) {

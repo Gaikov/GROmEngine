@@ -21,17 +21,14 @@ bool nsVisualContainerBuilder::Parse(script_state_t *ss, nsVisualObject2d *objec
 
     if (ps_block_begin(ss, "children")) {
         if (ps_block_begin(ss, nullptr)) {
-
             do {
                 auto child = context->Create(ss);
                 if (child) {
                     container->AddChild(child);
                 }
             } while (ps_block_next(ss));
-
             ps_block_end(ss);
         }
-
         ps_block_end(ss);
     }
 

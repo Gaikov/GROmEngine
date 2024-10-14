@@ -6,7 +6,6 @@
 #include "ParseFile.h"
 #include "nsLib/StrTools.h"
 #include "StructUt.h"
-#include "nsLib/log.h"
 
 //---------------------------------------------------------
 // nsParseFile::nsParseFile: 
@@ -42,7 +41,7 @@ nsParseFile::~nsParseFile()
 //---------------------------------------------------------
 script_state_t* nsParseFile::BeginFile( const char *fileName, char prefix )
 {
-	if ( !StrCheck( fileName ) ) return 0;
+	if ( !StrCheck( fileName ) ) return nullptr;
 
 	scriptFile_t	script = {};
 	MemZero( script );
