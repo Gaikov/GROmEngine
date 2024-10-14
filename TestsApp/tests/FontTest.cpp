@@ -9,7 +9,7 @@
 bool FontTest::Init()
 {
     auto cache = nsFontsCache::Shared();
-    _font2 = cache->LoadFont("tests/bmfont.fnt");
+    _font2 = cache->LoadFont("tests/fonts/bmfont.fnt");
 	_font = cache->LoadFont("default/sysfont.txt");
     return _font && _font2;
 }
