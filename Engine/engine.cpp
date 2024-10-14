@@ -22,6 +22,7 @@
 #include "EngineContext.h"
 #include "renderer/particles/ParticlesManager.h"
 #include "renderer/font/FontsCache.h"
+#include "display/factory/VisualFactory2d.h"
 
 #define DEBUG_BUILD "Debug"
 
@@ -79,6 +80,8 @@ bool nsEngine::Init()
         return false;
     }
 
+    nsVisualFactory2d::Init();
+
 	if ( !app->Init() ) return false;
 
 	prevTime = App_GetPlatform()->GetTime();
@@ -118,6 +121,7 @@ void nsEngine::Release(bool failed)
 	g_inp.Release();
 	App_GetGame()->Release();
 
+    nsVisualFactory2d::Release();
     nsParticlesManager::Release();
     nsEngineContext::Release();
 	nsConsole::Release();
