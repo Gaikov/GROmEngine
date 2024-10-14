@@ -150,6 +150,10 @@ set(src
         display/sprite/SpriteBuilder.cpp
         display/sprite/SpriteBuilder.h
         display/factory/VisualBuilder2d.cpp
+        display/text/TextLabelBuilder.cpp
+        display/text/TextLabelBuilder.h
+        display/container/VisualContainerBuilder.cpp
+        display/container/VisualContainerBuilder.h
 )
 
 include_directories(./)

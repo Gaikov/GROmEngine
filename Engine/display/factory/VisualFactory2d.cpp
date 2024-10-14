@@ -6,9 +6,13 @@
 #include "nsLib/log.h"
 #include "Core/ParseFile.h"
 #include "display/sprite/SpriteBuilder.h"
+#include "display/text/TextLabelBuilder.h"
+#include "display/container/VisualContainerBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
+    RegisterBuilderWithName<nsTextLabelBuilder>();
+    RegisterBuilderWithName<nsVisualContainerBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {
@@ -24,7 +28,7 @@ nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
     if (builder) {
         auto object = builder->Create(ss, this);
         if (object) {
-            if (builder->Parse(ss, object)) {
+            if (builder->Parse(ss, object, this)) {
                 return object;
             } else {
                 object->Destroy();
@@ -44,13 +48,15 @@ nsVisualObject2d *nsVisualFactory2d::Create(const char *filePath) {
     return nullptr;
 }
 
+/*
 bool nsVisualFactory2d::Parse(script_state_t *ss, nsVisualObject2d *object) {
     auto builder = GetBuilder(ps_block_name(ss));
     if (builder) {
-        return builder->Parse(ss, object);
+        return builder->Parse(ss, object, this);
     }
     return false;
 }
+*/
 
 nsVisualBuilder2d *nsVisualFactory2d::GetBuilder(const char *name) {
     if (!StrCheck(name)) {
