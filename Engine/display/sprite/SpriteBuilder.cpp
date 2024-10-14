@@ -11,8 +11,8 @@ nsVisualObject2d *nsSpriteBuilder::Create(script_state_t *ss, nsVisualCreationCo
     return new nsSprite();
 }
 
-bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object) {
-    if (!nsVisualBuilder2d::Parse(ss, object)) {
+bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::Parse(ss, object, context)) {
         return false;
     }
 

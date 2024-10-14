@@ -9,7 +9,6 @@
 #include "Engine/display/VisualObject2d.h"
 
 class nsVisualCreationContext2d {
+public:
     virtual nsVisualObject2d *Create(script_state_t *ss) = 0;
-    virtual nsVisualObject2d *Create(const char *filePath) = 0;
-    virtual bool Parse(script_state_t *ss, nsVisualObject2d *object) = 0;
 };
