@@ -30,5 +30,9 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
 
     system.spawnEnabled = ParseFloat(ss, "spawn", system.spawnEnabled) != 0.0f;
 
+    if (ps_var_begin(ss, "space")) {
+        p->space = StrEqual(ps_var_str(ss), "global") ? nsVisualParticles::GLOBAL : nsVisualParticles::LOCAL;
+    }
+
     return true;
 }
