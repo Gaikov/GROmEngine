@@ -26,6 +26,7 @@ public:
 	void SetData(const void *data);
 	void SetScanLine(int y, const void *data);
 	nsPixel* GetScanLine(int y);
+    void PremultiplyAlpha();
 
 protected:
 	nsBitmapData(int w, int h);

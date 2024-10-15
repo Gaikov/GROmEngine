@@ -47,3 +47,15 @@ nsPixel *nsBitmapData::GetScanLine(int y) {
 nsBitmapData::tSP nsBitmapData::Create(int width, int height) {
     return std::shared_ptr<nsBitmapData>(new nsBitmapData(width, height));
 }
+
+void nsBitmapData::PremultiplyAlpha() {
+    for (auto x = 0; x < _width; x++) {
+        for (auto y = 0; y < _height; y++) {
+            auto p = &_data[y * _width + x];
+            float a = float(p->a) / 255.0f;
+            p->r = (unsigned char) (float(p->r) * a);
+            p->g = (unsigned char) (float(p->g) * a);
+            p->b = (unsigned char) (float(p->b) * a);
+        }
+    }
+}
