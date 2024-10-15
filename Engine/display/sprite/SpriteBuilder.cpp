@@ -25,6 +25,18 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
         sprite->desc.ResetSize();
     }
 
+    if (ps_var_begin(ss, "pivot")) {
+        ps_var_2f(ss, sprite->desc.center);
+    }
+
+    if (ps_var_begin(ss, "size")) {
+        ps_var_2f(ss, sprite->desc.size);
+    }
+
+    if (ps_var_begin(ss, "color")) {
+        ps_var_4f(ss, sprite->desc.color);
+    }
+
     auto state = dev->StateLoad(ParseString(ss, "renState"));
     if (state) {
         sprite->renState = state;
