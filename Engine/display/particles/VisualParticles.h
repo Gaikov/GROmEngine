@@ -10,6 +10,13 @@
 
 class nsVisualParticles : public nsVisualObject2d {
 public:
+    enum Space {
+        LOCAL,
+        GLOBAL
+    };
+
+    Space space = LOCAL;
+
     nsParticleSystem& GetSystem() {
         return _system;
     }
@@ -17,6 +24,7 @@ public:
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
     void DrawContent(const nsVisualContext2d &context) override;
+    void ApplyWorldMatrix() override;
 
 private:
     nsParticleSystem    _system;
