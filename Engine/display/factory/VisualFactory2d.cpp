@@ -9,12 +9,14 @@
 #include "display/text/TextLabelBuilder.h"
 #include "display/container/VisualContainerBuilder.h"
 #include "LayoutRefBuilder.h"
+#include "display/particles/VisualParticlesBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
     RegisterBuilderWithName<nsTextLabelBuilder>();
     RegisterBuilderWithName<nsVisualContainerBuilder>();
     RegisterBuilderWithName<nsLayoutRefBuilder>();
+    RegisterBuilderWithName<nsVisualParticlesBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {
