@@ -156,6 +156,10 @@ set(src
         display/container/VisualContainerBuilder.h
         display/factory/LayoutRefBuilder.cpp
         display/factory/LayoutRefBuilder.h
+        display/particles/VisualParticles.cpp
+        display/particles/VisualParticles.h
+        display/particles/VisualParticlesBuilder.cpp
+        display/particles/VisualParticlesBuilder.h
 )
 
 include_directories(./)
