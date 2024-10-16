@@ -7,7 +7,7 @@
 #include "renderer/particles/ParticlesManager.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVisualParticlesBuilder::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
+nsVisualObject2d *nsVisualParticlesBuilder::CreateDefault() {
     return new nsVisualParticles();
 }
 

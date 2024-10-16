@@ -8,6 +8,7 @@
 #include "VisualCreationContext.h"
 #include "VisualBuilder2d.h"
 #include "nsLib/SubSystem.h"
+#include "nsLib/log.h"
 
 class nsVisualFactory2d : public nsVisualCreationContext2d, public nsSubSystem<nsVisualFactory2d> {
 public:
@@ -26,6 +27,20 @@ public:
 
     void RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder);
 
+    nsVisualObject2d *CreateByID(const char *bindingId) override;
+
+    template <class TVisualClass>
+    void BindClass(const char *id) {
+        if (_bindings.find(id) != _bindings.end()) {
+            Log::Warning("Visual id '%s' already bound!", id);
+        } else {
+            _bindings[id] = [] {
+                return new TVisualClass();
+            };
+        }
+    }
+
 private:
     std::map<std::string, nsVisualBuilder2d::sp_t>  _builders;
+    std::map<std::string, std::function<nsVisualObject2d*()>> _bindings;
 };

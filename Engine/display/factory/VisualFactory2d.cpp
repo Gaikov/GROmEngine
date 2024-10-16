@@ -67,4 +67,16 @@ nsVisualBuilder2d *nsVisualFactory2d::GetBuilder(const char *name) {
     return nullptr;
 }
 
+nsVisualObject2d *nsVisualFactory2d::CreateByID(const char *bindingId) {
+    if (!StrCheck(bindingId)) {
+        return nullptr;
+    }
+
+    auto it = _bindings.find(bindingId);
+    if (it != _bindings.end()) {
+        return it->second();
+    }
+    return nullptr;
+}
+
 
