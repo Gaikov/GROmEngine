@@ -161,3 +161,12 @@ void nsVisualContainer2d::DrawNode(const nsVisualContext2d &context) {
 
     mm->PopMasks(&_masks, context);
 }
+
+nsVisualObject2d *nsVisualContainer2d::GetChildById(const char *id) {
+    for (auto child : _children) {
+        if (child->id == id) {
+            return child;
+        }
+    }
+    return nullptr;
+}

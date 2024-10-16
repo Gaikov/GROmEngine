@@ -19,9 +19,8 @@ class nsVisualObject2d {
     friend class nsVisualContainer2d;
 
 public:
-    typedef std::vector<nsVisualObject2d *> list_t;
+    std::string id;
 
-public:
     nsTransform2    origin;
     bool            visible = true;
 
