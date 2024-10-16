@@ -31,8 +31,6 @@ bool nsVisualContainerBuilder::Parse(script_state_t *ss, nsVisualObject2d *objec
             ps_block_end(ss);
         }
         ps_block_end(ss);
-    } else {
-        Log::Warning("Container children are not specified!");
     }
 
     return true;
