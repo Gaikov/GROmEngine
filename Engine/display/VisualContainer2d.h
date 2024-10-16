@@ -14,6 +14,8 @@ public:
     void Destroy() override;
     virtual void DestroyChildren();
 
+    nsVisualObject2d* GetChildById(const char *id);
+
     virtual void AddChild(nsVisualObject2d *obj);
     virtual void RemoveChild(nsVisualObject2d *obj);
     virtual void RemoveChildren();

@@ -14,6 +14,11 @@ nsVisualObject2d *nsVisualBuilder2d::Create(script_state_t *ss, nsVisualCreation
 
 bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
 
+    auto id = ParseStrP(ss, "id");
+    if (id) {
+        o->id = id;
+    }
+
     o->origin.pos = {
             ParseFloat(ss, "x", o->origin.pos->x),
             ParseFloat(ss, "y", o->origin.pos->y)};
