@@ -11,6 +11,6 @@ class nsVisualContainerBuilder : public nsVisualBuilder2d {
 public:
     static constexpr auto NAME = "container";
 
-    nsVisualObject2d *Create(script_state_t *ss, nsVisualCreationContext2d *context) override;
+    nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;
 };

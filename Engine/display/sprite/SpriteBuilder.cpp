@@ -7,7 +7,7 @@
 #include "RenManager.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsSpriteBuilder::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
+nsVisualObject2d *nsSpriteBuilder::CreateDefault() {
     return new nsSprite();
 }
 
@@ -44,3 +44,5 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
 
     return true;
 }
+
+

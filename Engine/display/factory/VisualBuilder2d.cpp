@@ -4,6 +4,14 @@
 #include "VisualBuilder2d.h"
 #include "Core/ParserUtils.h"
 
+nsVisualObject2d *nsVisualBuilder2d::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
+    auto visual = context->CreateByID(ParseString(ss, "bindingId"));
+    if (!visual) {
+        visual = CreateDefault();
+    }
+    return visual;
+}
+
 bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
 
     o->origin.pos = {

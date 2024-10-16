@@ -6,7 +6,7 @@
 #include "Engine/display/VisualContainer2d.h"
 #include "nsLib/log.h"
 
-nsVisualObject2d *nsVisualContainerBuilder::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
+nsVisualObject2d *nsVisualContainerBuilder::CreateDefault() {
     return new nsVisualContainer2d();
 }
 

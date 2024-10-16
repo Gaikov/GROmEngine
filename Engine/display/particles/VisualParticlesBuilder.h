@@ -11,6 +11,6 @@ class nsVisualParticlesBuilder : public nsVisualBuilder2d {
 public:
     static constexpr auto NAME = "particles";
 
-    nsVisualObject2d *Create(script_state_t *ss, nsVisualCreationContext2d *context) override;
+    nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
 };

@@ -15,4 +15,5 @@ public:
     virtual nsVisualObject2d *Create(script_state_t *ss) = 0;
     virtual nsVisualObject2d *Create(const char *filePath) = 0;
     virtual nsVisualBuilder2d* GetBuilder(const char *name) = 0;
+    virtual nsVisualObject2d* CreateByID(const char *bindingId) = 0;
 };
