@@ -18,6 +18,8 @@ public:
         return GetResource(fileName, 0);
     }
 
+    void ReloadParticles();
+
 protected:
     bool OnInit() override;
     void OnRelease() override;
@@ -25,7 +27,6 @@ protected:
     nsParticlesBehaviour *AllocateResource(const char *resourceName, int param) override;
     void FreeResource(nsParticlesBehaviour *item) override;
     bool LoadBehaviour(const char *fileName, nsParticlesBehaviour *behaviour);
-    void ReloadParticles();
 
     static void ReloadParticles_f(int argc, const char *argv[]);
 

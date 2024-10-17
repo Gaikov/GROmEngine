@@ -56,19 +56,23 @@ int nsParticleSystem::Update(float deltaTime) {
             for (auto i = 0; i < amount; i++) {
                 float t = float(i) / float(amount);
                 auto p = _pool->Allocate();
+                float singleDeltaTime = amountDeltaTime * (1-t);
 
-                p->next = _active;
-                _active = p;
-
-                behaviour->spawner->Spawn(p, nsMath::Lerp(_currAngle, _prevAngle, t));
-                pos.FromLerp(_currPos, _prevPos, t);
-                p->pos += pos;
-
-                float singleDeltaTime = amountDeltaTime * t;
+                behaviour->spawner->Spawn(p, nsMath::Lerp(_prevAngle, _currAngle, t));
                 p->Update(singleDeltaTime);
-                behaviour->updater->Update(p, singleDeltaTime);
 
-                activeAmount++;
+                if (p->timeLeft > 0) {
+                    p->next = _active;
+                    _active = p;
+
+                    pos.FromLerp(_prevPos, _currPos, t);
+                    p->pos += pos;
+
+                    behaviour->updater->Update(p, singleDeltaTime);
+                    activeAmount++;
+                } else {
+                    _pool->Free(p);
+                }
             }
         } else {
             Log::Warning("Particles spawner is not specified!");
