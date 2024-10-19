@@ -169,3 +169,16 @@ nsVisualObject2d *nsVisualContainer2d::GetChildById(const char *id) {
     }
     return nullptr;
 }
+
+void nsVisualContainer2d::FindChildrenRecursive(std::function<bool(nsVisualObject2d *)> pred,
+                                                std::vector<nsVisualObject2d *> &result) {
+    for (auto child : _children) {
+        if (pred(child)) {
+            result.push_back(child);
+        }
+
+        if (auto container = dynamic_cast<nsVisualContainer2d*>(child)) {
+            container->FindChildrenRecursive(pred, result);
+        }
+    }
+}

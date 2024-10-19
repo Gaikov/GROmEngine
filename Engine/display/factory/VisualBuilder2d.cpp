@@ -19,6 +19,11 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
         o->id = id;
     }
 
+    ParseAnchor(ss, "xMin", o->xMin);
+    ParseAnchor(ss, "yMin", o->yMin);
+    ParseAnchor(ss, "xMax", o->xMax);
+    ParseAnchor(ss, "yMax", o->yMax);
+
     o->origin.pos = {
             ParseFloat(ss, "x", o->origin.pos->x),
             ParseFloat(ss, "y", o->origin.pos->y)};
@@ -32,6 +37,14 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
     }
 
     return true;
+}
+
+void nsVisualBuilder2d::ParseAnchor(script_state_t *ss, const char *name, nsLayoutAnchor &anchor) {
+    float val[2];
+    if (ParseFloat2(ss, name, val)) {
+        anchor.value = val[0];
+        anchor.type = val[1] > 0 ? nsLayoutAnchor::PERCENT : nsLayoutAnchor::NUMBER;
+    }
 }
 
 
