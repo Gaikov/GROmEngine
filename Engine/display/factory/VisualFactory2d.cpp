@@ -10,6 +10,8 @@
 #include "display/container/VisualContainerBuilder.h"
 #include "LayoutRefBuilder.h"
 #include "display/particles/VisualParticlesBuilder.h"
+#include "display/group/GroupLayoutBuilder.h"
+#include "display/group/vertical/VGroupLayoutBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -17,6 +19,8 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsVisualContainerBuilder>();
     RegisterBuilderWithName<nsLayoutRefBuilder>();
     RegisterBuilderWithName<nsVisualParticlesBuilder>();
+    RegisterBuilderWithName<nsGroupLayoutBuilder>();
+    RegisterBuilderWithName<nsVGroupLayoutBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {

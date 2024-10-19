@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/VisualObject2d.h"
-#include "renderer/particles/ParticleSystem.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/renderer/particles/ParticleSystem.h"
 
 class nsVisualParticles : public nsVisualObject2d {
 public:

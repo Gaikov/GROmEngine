@@ -160,6 +160,10 @@ set(src
         display/particles/VisualParticles.h
         display/particles/VisualParticlesBuilder.cpp
         display/particles/VisualParticlesBuilder.h
+        display/group/GroupLayoutBuilder.cpp
+        display/group/GroupLayoutBuilder.h
+        display/group/vertical/VGroupLayoutBuilder.cpp
+        display/group/vertical/VGroupLayoutBuilder.h
 )
 
 include_directories(./)
