@@ -19,7 +19,7 @@ file(GLOB sources
 
 set(src
         display/text/TextLabel.cpp
-        display/VisualContainer2d.cpp
+        display/container/VisualContainer2d.cpp
         display/VisualObject2d.cpp
         display/VisualContext2d.cpp
         display/VisualContext2d.h
