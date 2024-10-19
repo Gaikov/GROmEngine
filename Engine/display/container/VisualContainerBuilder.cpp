@@ -3,7 +3,7 @@
 //
 
 #include "VisualContainerBuilder.h"
-#include "Engine/display/VisualContainer2d.h"
+#include "Engine/display/container/VisualContainer2d.h"
 #include "nsLib/log.h"
 
 nsVisualObject2d *nsVisualContainerBuilder::CreateDefault() {

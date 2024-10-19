@@ -3,7 +3,6 @@
 //
 
 #include "VisualContainer2d.h"
-#include "VisualContext2d.h"
 #include "Engine/display/context/VisualMaskManager.h"
 
 void nsVisualContainer2d::Destroy() {
