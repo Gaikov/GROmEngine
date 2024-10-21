@@ -14,19 +14,17 @@ TEST(EventDispatcher, emmit) {
         count++;
     };
 
-    dispatcher.AddHandler(0, &handler);
+    int id = dispatcher.AddHandler(0, handler);
     dispatcher.Emmit(nsBaseEvent(0));
-    dispatcher.RemoveHandler(0, &handler);
+    dispatcher.RemoveHandler(0, id);
     dispatcher.Emmit(nsBaseEvent(0));
 
     ASSERT_EQ(count, 1);
 
-    nsEventDispatcher::tEventHandler removeHandler = [&](const nsBaseEvent &e) {
-        dispatcher.RemoveHandler(0, &handler);
-    };
-
-    dispatcher.AddHandler(0, &removeHandler);
-    dispatcher.AddHandler(0, &handler);
+    dispatcher.AddHandler(0, [&](const nsBaseEvent &e) {
+        dispatcher.RemoveHandler(0, id);
+    });
+    id = dispatcher.AddHandler(0, handler);
 
     dispatcher.Emmit(nsBaseEvent(0));
 

@@ -31,10 +31,10 @@ nsScrollBar::nsScrollBar() :
         }
         //Log::Info("scroll pos: %f", (float) scrollPosition);
     };
-    scrollPosition.AddHandler(nsPropChangedName::CHANGED, &_onScrollChanged);
-    contentSize.AddHandler(nsPropChangedName::CHANGED, &_onScrollChanged);
-    pageSize.AddHandler(nsPropChangedName::CHANGED, &_onScrollChanged);
-    thumbPaddings.AddHandler(nsPropChangedName::CHANGED, &_onScrollChanged);
+    scrollPosition.AddHandler(nsPropChangedName::CHANGED, _onScrollChanged);
+    contentSize.AddHandler(nsPropChangedName::CHANGED, _onScrollChanged);
+    pageSize.AddHandler(nsPropChangedName::CHANGED, _onScrollChanged);
+    thumbPaddings.AddHandler(nsPropChangedName::CHANGED, _onScrollChanged);
 }
 
 nsScrollBar::~nsScrollBar() {

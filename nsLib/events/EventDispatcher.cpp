@@ -4,12 +4,13 @@
 
 #include "EventDispatcher.h"
 
-void nsEventDispatcher::AddHandler(int eventId, const tEventHandler* handler) {
-    GetHandlers(eventId).push_back(handler);
+int nsEventDispatcher::AddHandler(int eventId, const tEventHandler &handler) {
+    GetHandlers(eventId)[_idCounter] = handler;
+    return _idCounter ++;
 }
 
-void nsEventDispatcher::RemoveHandler(int eventId, const tEventHandler* handler) {
-    GetHandlers(eventId).remove(handler);
+void nsEventDispatcher::RemoveHandler(int eventId, int handlerId) {
+    GetHandlers(eventId).erase(handlerId);
 }
 
 nsEventDispatcher::tHandlersList &nsEventDispatcher::GetHandlers(int eventId) {
@@ -18,7 +19,7 @@ nsEventDispatcher::tHandlersList &nsEventDispatcher::GetHandlers(int eventId) {
 
 void nsEventDispatcher::Emmit(const nsBaseEvent &event) {
     auto list = GetHandlers(event.GetId());
-    for (auto it : list) {
-        (*it)(event);
+    for (auto &it : list) {
+        it.second(event);
     }
 }

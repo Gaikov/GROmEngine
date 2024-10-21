@@ -6,8 +6,8 @@
 
 nsHGroupLayout::nsHGroupLayout() : gap(0),
                                    horizontalAlign(nsAlign::BEGIN) {
-    gap.AddHandler(nsPropChangedName::CHANGED, &_onChangeHandler);
-    horizontalAlign.AddHandler(nsPropChangedName::CHANGED, &_onChangeHandler);
+    gap.AddHandler(nsPropChangedName::CHANGED, _onChangeHandler);
+    horizontalAlign.AddHandler(nsPropChangedName::CHANGED, _onChangeHandler);
 }
 
 void nsHGroupLayout::ComputeChildSize(nsVisualObject2d *child) {

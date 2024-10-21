@@ -2,27 +2,24 @@
 // Created by Roman on 5/3/2024.
 //
 
-#ifndef _GROM_EVENTDISPATCHER_H
-#define _GROM_EVENTDISPATCHER_H
-
+#pragma once
 #include "BaseEvent.h"
 #include "nsLib/headers.h"
 
 class nsEventDispatcher {
 public:
     typedef std::function<void(const nsBaseEvent &event)> tEventHandler;
-    typedef std::list<const tEventHandler*> tHandlersList;
+    typedef std::map<int, tEventHandler> tHandlersList;
 
 public:
     virtual ~nsEventDispatcher() = default;
-    void AddHandler(int eventId, const tEventHandler* handler);
-    void RemoveHandler(int eventId, const tEventHandler* handler);
+    int AddHandler(int eventId, const tEventHandler &handler);
+    void RemoveHandler(int eventId, int handlerId);
     void Emmit(const nsBaseEvent &event);
 
 private:
     tHandlersList& GetHandlers(int eventId);
 
     std::map<int, tHandlersList> _handlers;
+    int _idCounter = 0;
 };
-
-#endif //_GROM_EVENTDISPATCHER_H
