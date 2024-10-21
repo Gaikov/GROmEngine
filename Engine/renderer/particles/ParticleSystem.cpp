@@ -128,7 +128,7 @@ void nsParticleSystem::SetRotation(float angle) {
     _prevAngle = _currAngle = angle;
 }
 
-void nsParticleSystem::RotateTo(float angle) {
-    _prevAngle = _currAngle;
-    _currAngle = angle;
+void nsParticleSystem::RotateTo(const float angle) {
+    _prevAngle = nsMath::NormalizeAngle(_currAngle);
+    _currAngle = nsMath::ClosestAngle(_prevAngle, angle);
 }
