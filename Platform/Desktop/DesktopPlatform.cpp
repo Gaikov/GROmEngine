@@ -19,7 +19,7 @@ bool DesktopPlatform::Init() {
         UpdateSoftInput();
     };
     _useSoftInput = g_cfg->RegVar("si_force_soft", "0", GVF_SAVABLE);
-    _useSoftInput->AddHandler(nsVar::NSVAR_CHANGED, &_softInputChanged);
+    _useSoftInput->AddHandler(nsVar::NSVAR_CHANGED, _softInputChanged);
     UpdateSoftInput();
 
     if (!glfwInit()) {

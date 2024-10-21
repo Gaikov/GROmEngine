@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Engine/test/BaseFunctionalTest.h"
-#include "Engine/display/VisualContainer2d.h"
+#include "Engine/display/container/VisualContainer2d.h"
 #include "RayBoxTest.h"
 #include "RayLightTest.h"
 #include "Engine/display/Sprite.h"

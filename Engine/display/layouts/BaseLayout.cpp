@@ -12,7 +12,7 @@ nsBaseLayout::nsBaseLayout() :
             InvalidateLayout();
         }) {
 
-    boundsType.AddHandler(nsPropChangedName::CHANGED, &_onChangeHandler);
+    boundsType.AddHandler(nsPropChangedName::CHANGED, _onChangeHandler);
 }
 
 void nsBaseLayout::InvalidateLayout() {

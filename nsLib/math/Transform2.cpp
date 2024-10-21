@@ -16,9 +16,9 @@ nsTransform2::nsTransform2() : pos(nsVec2(0, 0)),
         InvalidateWorld();
     };
 
-    pos.AddHandler(nsPropChangedName::CHANGED, &_onChanged);
-    scale.AddHandler(nsPropChangedName::CHANGED, &_onChanged);
-    angle.AddHandler(nsPropChangedName::CHANGED, &_onChanged);
+    pos.AddHandler(nsPropChangedName::CHANGED, _onChanged);
+    scale.AddHandler(nsPropChangedName::CHANGED, _onChanged);
+    angle.AddHandler(nsPropChangedName::CHANGED, _onChanged);
 }
 
 const nsMatrix2 & nsTransform2::GetLocal() {

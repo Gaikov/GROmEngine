@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
             Log::Info("swap interval changed");
             glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
         };
-        r_vsync->AddHandler(nsVar::NSVAR_CHANGED, &vSyncHandler);
+        r_vsync->AddHandler(nsVar::NSVAR_CHANGED, vSyncHandler);
         glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
 
         while (!glfwWindowShouldClose(wnd) && !Sys_IsExit()) {

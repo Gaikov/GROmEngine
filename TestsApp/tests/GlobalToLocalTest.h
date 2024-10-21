@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Engine/test/BaseFunctionalTest.h"
-#include "Engine/display/VisualContainer2d.h"
+#include "Engine/display/container/VisualContainer2d.h"
 
 class nsGlobalToLocalRect : public nsVisualObject2d {
 public:
