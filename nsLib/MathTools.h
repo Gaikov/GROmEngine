@@ -48,6 +48,8 @@ struct nsMath
     static inline float     ToDeg(float radians);
     static inline float     RandRange(float min, float max);
     static inline float     Random();
+	static inline float		NormalizeAngle(float angle);
+	static inline float		ClosestAngle(float from, float to);
 
 };
 
@@ -215,3 +217,28 @@ float nsMath::Random() {
     return RandRange(0, 1);
 }
 
+float nsMath::NormalizeAngle(float angle) {
+
+	angle = remainder(angle, static_cast<float>(M_2PI));
+	if (angle < 0)
+	{
+		angle = M_2PI + angle;
+	}
+	return angle;
+}
+
+float nsMath::ClosestAngle(float from, float to) {
+	from = NormalizeAngle(from);
+	to = NormalizeAngle(to);
+
+	const auto delta = to - from;
+	if (delta < -M_PI)
+	{
+		to += M_2PI;
+	}
+	else if (delta > M_PI)
+	{
+		to -= M_2PI;
+	}
+	return to;
+}
