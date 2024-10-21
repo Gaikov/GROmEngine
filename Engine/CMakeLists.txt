@@ -164,6 +164,10 @@ set(src
         display/group/GroupLayoutBuilder.h
         display/group/vertical/VGroupLayoutBuilder.cpp
         display/group/vertical/VGroupLayoutBuilder.h
+        display/button/BaseButtonBuilder.cpp
+        display/button/BaseButtonBuilder.h
+        display/button/TextButtonBuilder.cpp
+        display/button/TextButtonBuilder.h
 )
 
 include_directories(./)

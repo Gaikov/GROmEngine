@@ -1,16 +1,17 @@
 // Copyright (c) 2003-2024, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file VGroupLayoutBuilder.h
+// file TextButtonBuilder.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/group/GroupLayoutBuilder.h"
+#include "BaseButtonBuilder.h"
 
-class nsVGroupLayoutBuilder : public nsGroupLayoutBuilder {
+class nsTextButtonBuilder : public nsBaseButtonBuilder {
 public:
-    static constexpr auto NAME = "vgroup";
+    static constexpr auto NAME = "textButton";
 
     nsVisualObject2d *CreateDefault() override;
-    bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;
+
+    bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
 };
