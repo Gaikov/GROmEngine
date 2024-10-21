@@ -15,6 +15,7 @@ public:
     virtual void DestroyChildren();
 
     nsVisualObject2d *GetChildById(const char *id);
+    nsVisualObject2d *GetChildByIdRecursive(const char *id);
 
     virtual void AddChild(nsVisualObject2d *obj);
     virtual void RemoveChild(nsVisualObject2d *obj);
