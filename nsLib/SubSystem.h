@@ -46,7 +46,6 @@ bool nsSubSystem<T>::Init()
 template<typename T>
 void nsSubSystem<T>::Release()
 {
-	assert(_instance != nullptr);
 	if (_instance)
 	{
 		dynamic_cast<nsSubSystem<T>*>(_instance)->OnRelease();
