@@ -49,6 +49,7 @@ nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
 }
 
 nsVisualObject2d *nsVisualFactory2d::Create(const char *filePath) {
+    Log::Info("...creating layout: %s", filePath);
     nsParseFile pf;
     auto ss = pf.BeginFile(filePath);
     if (ss) {
