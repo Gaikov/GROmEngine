@@ -43,6 +43,11 @@ set(sources
         math/TriMath.h
         factory/AbstractFactory.cpp
         factory/AbstractFactory.h
+        locator/ServiceLocator.cpp
+        locator/ServiceLocator.h
+        locator/ClassMapping.cpp
+        locator/ClassMapping.h
+        locator/Locatable.h
 )
 
 add_library(nsLib STATIC ${sources})
