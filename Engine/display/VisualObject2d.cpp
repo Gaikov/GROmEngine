@@ -5,6 +5,7 @@
 #include "VisualObject2d.h"
 #include "RenManager.h"
 #include "Engine/display/context/VisualMaskManager.h"
+#include "display/container/VisualContainer2d.h"
 
 int nsVisualObject2d::_leakCounter = 0;
 
@@ -18,9 +19,9 @@ nsVisualObject2d::nsVisualObject2d() : _device(nsRenDevice::Shared()->Device()) 
 
 nsVisualObject2d::~nsVisualObject2d() {
     _leakCounter --;
-#ifdef DEBUG
-    printf("visual 2d destroyed: %s\n", typeid(this).name());
-#endif
+    if (_parent) {
+        _parent->RemoveChild(this);
+    }
 }
 
 void nsVisualObject2d::Destroy() {

@@ -6,12 +6,12 @@
 #include "Core/Memory.h"
 #include "nsLib/log.h"
 
-nsMemoryPool::nsMemoryPool(int blockSize) : _blockSize(blockSize) {
-    Reserve(10);
+nsMemoryPool::nsMemoryPool(int blockSize, int reservedBlocks) : _blockSize(blockSize) {
+    Reserve(reservedBlocks);
 }
 
 nsMemoryPool::~nsMemoryPool() {
-    Log::Info("releasing memory pool %i blocks", (int)_allocated.size());
+    Log::Info("releasing memory pool of %i blocks", (int)_allocated.size());
 
     for (auto block : _allocated) {
         my_free(block);

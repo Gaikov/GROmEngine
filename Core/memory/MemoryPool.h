@@ -9,7 +9,7 @@
 
 class nsMemoryPool {
 public:
-    explicit nsMemoryPool(int blockSize);
+    explicit nsMemoryPool(int blockSize, int reservedBlocks);
     virtual ~nsMemoryPool();
 
     void* Allocate();

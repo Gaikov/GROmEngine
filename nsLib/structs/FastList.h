@@ -19,6 +19,7 @@ public:
         return _prev;
     }
 
+private:
     TItem *_prev = nullptr;
     TItem *_next = nullptr;
 };
