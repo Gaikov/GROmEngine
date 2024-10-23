@@ -37,6 +37,7 @@ set(sources
         undo/UndoBatch.cpp
         undo/UndoBatch.h
         undo/UndoVectorInsert.h
+        memory/MemoryPool.cpp
 )
 
 include_directories(
