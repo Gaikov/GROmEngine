@@ -6,20 +6,18 @@
 #pragma once
 
 #include "nsLib/headers.h"
+#include "ObjectsPool.h"
 
-class nsMemoryPool {
+class nsMemoryPool : public nsObjectsPool<void> {
 public:
-    explicit nsMemoryPool(int blockSize, int reservedBlocks);
-    virtual ~nsMemoryPool();
+    explicit nsMemoryPool(int blockSize);
+    ~nsMemoryPool() override;
 
-    void* Allocate();
-    void Free(void *data);
+protected:
+    void *CreateObject() override;
+    void DestroyObject(void *object) override;
+    void PrepareObject(void *object) override;
 
 private:
     int _blockSize;
-
-    std::vector<void*>  _pool;
-    std::vector<void*>  _allocated;
-
-    void Reserve(int numBlocks);
 };
