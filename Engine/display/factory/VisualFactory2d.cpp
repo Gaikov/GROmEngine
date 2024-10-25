@@ -49,13 +49,13 @@ nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
 }
 
 nsVisualObject2d *nsVisualFactory2d::Create(const char *filePath) {
-    Log::Info("...creating layout: %s", filePath);
     nsParseFile pf;
     auto ss = pf.BeginFile(filePath);
     if (ss) {
         ps_block_begin(ss, nullptr);
         return Create(ss);
     }
+    Log::Warning("can't create layout: %s", filePath);
     return nullptr;
 }
 
