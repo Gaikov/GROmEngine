@@ -11,6 +11,7 @@
 
 static DesktopPlatform g_desktop;
 static nsArgs g_args;
+static std::vector<int> mouseButtons;
 
 const nsArgs &DesktopPlatform::GetArgs() {
     return g_args;
@@ -73,18 +74,24 @@ int main(int argc, char *argv[]) {
         });
 
         glfwSetCursorPosCallback(wnd, [](GLFWwindow *window, double xpos, double ypos) -> void {
-            nsEngine::OnPointerMove(-1, (int) xpos, (int) ypos);
+            if (!mouseButtons.empty()) {
+                for (auto button: mouseButtons) {
+                    nsEngine::OnPointerMove(button, (int) xpos, (int) ypos);
+                }
+            } else {
+                nsEngine::OnPointerMove(-1, (int) xpos, (int) ypos);
+            }
         });
 
         glfwSetMouseButtonCallback(wnd, [](GLFWwindow *window, int button, int action, int mods) -> void {
-            if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                double x, y;
-                glfwGetCursorPos(window, &x, &y);
-                if (action == GLFW_PRESS) {
-                    nsEngine::OnPointerDown(-1, (int) x, (int) y);
-                } else if (action == GLFW_RELEASE) {
-                    nsEngine::OnPointerUp(-1, (int) x, (int) y);
-                }
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            if (action == GLFW_PRESS) {
+                mouseButtons.push_back(button);
+                nsEngine::OnPointerDown(button, (int) x, (int) y);
+            } else if (action == GLFW_RELEASE) {
+                std::remove(mouseButtons.begin(), mouseButtons.end(),button);
+                nsEngine::OnPointerUp(button, (int) x, (int) y);
             }
         });
 
