@@ -16,16 +16,16 @@ bool nsMath::InRange(float a, float min, float max)
 }
 
 float nsMath::Move(float from, float to, float delta) {
-    float dir = to - from;
-    if (dir == 0.0f) {
+    if (from == to) {
         return to;
     }
 
+    float dir = to - from;
     dir /= fabs(dir);
 
     auto prev = from;
     auto curr = from + dir * delta;
-    if (InRange(to, prev, from)) {
+    if (InRange(to, prev, curr)) {
         curr = to;
     }
 
