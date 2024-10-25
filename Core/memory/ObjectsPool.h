@@ -40,9 +40,19 @@ public:
         return object;
     }
 
-    void FreeObject(TClass *object) {
+    void RecycleObject(TClass *object) {
         //TODO: check object already in pool and allocated by the pool
         _pool.push_back(object);
+    }
+
+    void Reserve(int numObjects) {
+        for (auto i = 0; i < numObjects; i++) {
+            auto object = CreateObject();
+            _allocated.push_back(object);
+            _pool.push_back(object);
+        }
+
+        Log::Info("objects reserved: %i/%i", numObjects, (int)_allocated.size());
     }
 
     nsObjectsPool<TClass>& operator = (const nsObjectsPool<TClass> &other) = delete;
@@ -54,16 +64,6 @@ protected:
     virtual TClass* CreateObject() = 0;
     virtual void DestroyObject(TClass *object) = 0;
     virtual void PrepareObject(TClass *object) = 0;
-
-    void Reserve(int numObjects) {
-        for (auto i = 0; i < numObjects; i++) {
-            auto object = CreateObject();
-            _allocated.push_back(object);
-            _pool.push_back(object);
-        }
-
-        Log::Info("objects reserved: %i/%i", numObjects, (int)_allocated.size());
-    }
 
 private:
     std::vector<TClass*>  _pool;
