@@ -5,7 +5,8 @@
 #include "MemoryPool.h"
 #include "Core/Memory.h"
 
-nsMemoryPool::nsMemoryPool(int blockSize) :
+nsMemoryPool::nsMemoryPool(const char *debugName, int blockSize) :
+        nsObjectsPool<void>(debugName),
         _blockSize(blockSize) {
 }
 

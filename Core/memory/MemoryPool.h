@@ -10,7 +10,7 @@
 
 class nsMemoryPool : public nsObjectsPool<void> {
 public:
-    explicit nsMemoryPool(int blockSize);
+    explicit nsMemoryPool(const char *debugName, int blockSize);
     ~nsMemoryPool() override;
 
 protected:

@@ -7,7 +7,7 @@
 
 class nsProfilerSample {
 public:
-    nsProfilerSample(const char *message);
+    explicit nsProfilerSample(const char *message);
     virtual ~nsProfilerSample();
 private:
     const char *_message;

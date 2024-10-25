@@ -11,11 +11,12 @@
 template <class TClass>
 class nsObjectsPool {
 public:
-    explicit nsObjectsPool() = default;
+    explicit nsObjectsPool(const char *name) : _debugName(name) {
+    }
     virtual ~nsObjectsPool() = default;
 
     void DestroyObjects() {
-        Log::Info("releasing objects pool of %i items", (int)_allocated.size());
+        Log::Info("releasing objects pool '%s' of %i items", _debugName.c_str(), (int)_allocated.size());
 
         for (auto object : _allocated) {
             DestroyObject(object);
@@ -52,7 +53,7 @@ public:
             _pool.push_back(object);
         }
 
-        Log::Info("objects reserved: %i/%i", numObjects, (int)_allocated.size());
+        Log::Info("objects '%s' reserved: %i/%i", _debugName.c_str(), numObjects, (int)_allocated.size());
     }
 
     nsObjectsPool<TClass>& operator = (const nsObjectsPool<TClass> &other) = delete;
@@ -68,4 +69,5 @@ protected:
 private:
     std::vector<TClass*>  _pool;
     std::vector<TClass*>  _allocated;
+    std::string _debugName;
 };
