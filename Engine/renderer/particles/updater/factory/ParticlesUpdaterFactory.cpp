@@ -10,6 +10,7 @@
 #include "renderer/particles/updater/size/ParticlesSizeTimelineUpdater.h"
 #include "renderer/particles/updater/ParticlesVelToAngleUpdater.h"
 #include "renderer/particles/updater/ParticlesColorTimelineUpdater.h"
+#include "renderer/particles/updater/velocity/ParticlesVelDampUpdater.h"
 
 nsParticlesUpdaterFactory::nsParticlesUpdaterFactory() {
     RegisterWithName<nsParticlesGravityUpdater>();
@@ -19,6 +20,7 @@ nsParticlesUpdaterFactory::nsParticlesUpdaterFactory() {
     RegisterWithName<nsParticlesSizeTimelineUpdater>();
     RegisterWithName<nsParticlesVelToAngleUpdater>();
     RegisterWithName<nsParticlesColorTimelineUpdater>();
+    RegisterWithName<nsParticlesVelDampUpdater>();
 }
 
 nsParticlesUpdater *nsParticlesUpdaterFactory::Parse(script_state_t *ss) {
