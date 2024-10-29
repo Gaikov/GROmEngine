@@ -116,3 +116,7 @@ bool ParseColor( script_state_t *ss, const char *name, float c[4] )
 	}
 	return true;
 }
+
+bool ParseBool(script_state_t *ss, const char *name, bool defValue) {
+    return ParseFloat(ss, name, defValue ? 1 : 0) > 0;
+}

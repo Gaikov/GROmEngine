@@ -36,6 +36,7 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
         o->origin.angle = nsMath::ToRad(ps_var_f(ss));
     }
 
+    o->visible = ParseBool(ss, "visible", o->visible);
     return true;
 }
 

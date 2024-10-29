@@ -168,6 +168,10 @@ set(src
         display/button/BaseButtonBuilder.h
         display/button/TextButtonBuilder.cpp
         display/button/TextButtonBuilder.h
+        display/helpers/VisualAnchor.cpp
+        display/helpers/VisualAnchor.h
+        display/helpers/VisualAnchorBuilder.cpp
+        display/helpers/VisualAnchorBuilder.h
 )
 
 include_directories(./)
