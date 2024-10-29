@@ -18,5 +18,6 @@ bool	ParseColor( script_state_t *ss, const char *name, float c[4] );
 bool	ParseFloat2( script_state_t *ss, const char *name, float val[2], float defVal[2] = nullptr );
 bool	ParseFloat3( script_state_t *ss, const char *name, float val[3] );
 bool	ParseFloat4( script_state_t *ss, const char *name, float val[4] );
+bool    ParseBool( script_state_t *ss, const char *name, bool defValue);
 
 #endif

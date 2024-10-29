@@ -13,6 +13,7 @@
 #include "display/group/GroupLayoutBuilder.h"
 #include "display/group/vertical/VGroupLayoutBuilder.h"
 #include "display/button/TextButtonBuilder.h"
+#include "display/helpers/VisualAnchorBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -23,6 +24,7 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsGroupLayoutBuilder>();
     RegisterBuilderWithName<nsVGroupLayoutBuilder>();
     RegisterBuilderWithName<nsTextButtonBuilder>();
+    RegisterBuilderWithName<nsVisualAnchorBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {
