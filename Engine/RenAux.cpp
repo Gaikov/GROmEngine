@@ -307,7 +307,7 @@ void RX_DrawRect(float const x1, float const y1, float const x2, float const y2,
 
 void nsGizmos::DrawCross(const nsVec2 &pos, float size, const nsColor &color) {
     g_renDev->TextureBind(nullptr);
-    g_renDev->LightDisable(false);
+    g_renDev->Lighting(false);
 
     size /= 2;
 
