@@ -32,3 +32,12 @@ void nsVisualParticles::ApplyWorldMatrix() {
         nsVisualObject2d::ApplyWorldMatrix();
     }
 }
+
+void nsVisualParticles::ResetPosition() {
+    if (space == GLOBAL) {
+        _system.SetPosition(origin.ToGlobal({}));
+
+        auto up = origin.GetWorld().TransformVector({0, 1});
+        _system.SetRotation(up.GetAngle());
+    }
+}

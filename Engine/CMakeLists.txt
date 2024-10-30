@@ -174,6 +174,8 @@ set(src
         display/helpers/VisualAnchorBuilder.h
         renderer/particles/updater/velocity/ParticlesVelDampUpdater.cpp
         renderer/particles/updater/velocity/ParticlesVelDampUpdater.h
+        utils/DebugDrawInfo.cpp
+        utils/DebugDrawInfo.h
 )
 
 include_directories(./)

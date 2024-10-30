@@ -199,3 +199,15 @@ void nsVisualContainer2d::FindChildrenRecursive(std::function<bool(nsVisualObjec
         }
     }
 }
+
+void nsVisualContainer2d::IterateRecursive(const tChildCallback &callback) {
+    for (auto child : _children) {
+        callback(child);
+
+        auto container = dynamic_cast<nsVisualContainer2d*>(child);
+        if (container) {
+            container->IterateRecursive(callback);
+        }
+    }
+}
+
