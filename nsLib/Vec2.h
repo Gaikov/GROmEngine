@@ -256,11 +256,11 @@ void nsVec2::Random(float length) {
 }
 
 nsVec2 nsVec2::FromAngle(float angle) {
-    return {sinf(-angle), cosf(-angle)};
+    return {sinf(angle), cosf(angle)};
 }
 
 nsVec2 nsVec2::Rotate(float angle) const {
-    nsVec2 axisY = nsVec2::FromAngle(angle);
+    nsVec2 axisY = nsVec2::FromAngle(-angle);
     nsVec2 axisX = axisY.GetRight();
 
     return {
