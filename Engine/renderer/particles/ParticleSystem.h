@@ -18,6 +18,7 @@ public:
     explicit nsParticleSystem();
     ~nsParticleSystem();
 
+    bool IsActive() { return _active; }
     void Emit(int amount = 0);
 
     void SetPosition(const nsVec2 &pos);

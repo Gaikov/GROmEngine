@@ -21,6 +21,8 @@ public:
         return _system;
     }
 
+
+    void ResetPosition();
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
     void DrawContent(const nsVisualContext2d &context) override;

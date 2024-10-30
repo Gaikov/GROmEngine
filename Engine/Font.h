@@ -47,6 +47,7 @@ private:
 	void		Free();
 
 public:
+    float       GetLineHeight() const { return _lineHeight; }
     ITexture*   GetPage(int index) { return _pages[index]; }
     void		Draw(const char *str, float pos[2], float scale[2], const float color[4], int len = 0, float fixedWidth = 0 );
 	void		DrawFX( const char *str, float pos[2], float scale[2], const float c[4], float scale2[2], const float c2[2], int len );
