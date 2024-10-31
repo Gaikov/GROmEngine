@@ -25,9 +25,7 @@ public:
         return *this;
     };
 
-    nsProperty(const nsProperty& other) {
-        SetValue(other._value);
-    }
+    nsProperty(const nsProperty& other) = delete;
 
     explicit nsProperty(const TType& value) {
         _value = value;
