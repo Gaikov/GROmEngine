@@ -20,8 +20,14 @@ public:
 template <typename TType>
 class nsProperty : public nsEventDispatcher {
 public:
-    const nsProperty& operator = (const nsProperty &other) = delete;
-    explicit nsProperty(const nsProperty& other) = delete;
+    nsProperty& operator = (const nsProperty &other) {
+        SetValue(other._value);
+        return *this;
+    };
+
+    nsProperty(const nsProperty& other) {
+        SetValue(other._value);
+    }
 
     explicit nsProperty(const TType& value) {
         _value = value;
@@ -32,17 +38,25 @@ public:
     }
 
     inline nsProperty& operator = (const TType& value) {
-        if (_value != value) {
-            nsPropChangedEvent<TType>    event(_value);
-            _value = value;
-            Emmit(event);
-        }
+        SetValue(value);
         return *this;
     }
 
     const TType* operator->() const
     {
         return &_value;
+    }
+
+    const TType& GetValue() {
+        return _value;
+    }
+
+    void SetValue(const TType &value) {
+        if (_value != value) {
+            nsPropChangedEvent<TType>    event(_value);
+            _value = value;
+            Emmit(event);
+        }
     }
 
 private:
