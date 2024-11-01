@@ -176,6 +176,7 @@ set(src
         renderer/particles/updater/velocity/ParticlesVelDampUpdater.h
         utils/DebugDrawInfo.cpp
         utils/DebugDrawInfo.h
+        display/CustomVisual.h
 )
 
 include_directories(./)

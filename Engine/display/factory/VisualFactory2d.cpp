@@ -14,6 +14,7 @@
 #include "display/group/vertical/VGroupLayoutBuilder.h"
 #include "display/button/TextButtonBuilder.h"
 #include "display/helpers/VisualAnchorBuilder.h"
+#include "CustomVisual.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -41,6 +42,13 @@ nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
         auto object = builder->Create(ss, this);
         if (object) {
             if (builder->Parse(ss, object, this)) {
+                if (auto custom = dynamic_cast<nsCustomVisual*>(object)) {
+                    if (!custom->ParseCustomProps(ss)) {
+                        object->Destroy();
+                        object = nullptr;
+                    }
+                }
+
                 return object;
             } else {
                 object->Destroy();
