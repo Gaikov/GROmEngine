@@ -176,7 +176,9 @@ set(src
         renderer/particles/updater/velocity/ParticlesVelDampUpdater.h
         utils/DebugDrawInfo.cpp
         utils/DebugDrawInfo.h
-        display/CustomVisual.h
+        renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.cpp
+        renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.h
+        renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.h
 )
 
 include_directories(./)
