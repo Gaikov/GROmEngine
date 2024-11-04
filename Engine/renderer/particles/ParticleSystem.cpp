@@ -45,7 +45,14 @@ int nsParticleSystem::Update(float deltaTime) {
     }
 
     if (spawnEnabled) {
-        if (behaviour->spawner) {
+        _emitTime += deltaTime;
+        if (behaviour->spawnTime > 0) {
+            spawnEnabled = _emitTime < behaviour->spawnTime;
+        }
+
+        if (!behaviour->spawner) {
+            Log::Warning("Particles spawner is not specified!");
+        } else if (spawnEnabled) {
             auto frameTime = deltaTime + _timeRest;
             auto perSecond = (float) behaviour->amountPerSecond;
             auto amount = int(frameTime * perSecond);
@@ -74,8 +81,6 @@ int nsParticleSystem::Update(float deltaTime) {
                     _pool->Free(p);
                 }
             }
-        } else {
-            Log::Warning("Particles spawner is not specified!");
         }
     }
 
@@ -95,8 +100,13 @@ void nsParticleSystem::Emit(int amount) {
         return;
     }
 
+    _emitTime = 0;
     if (!amount) {
-        amount = behaviour->amountPerSecond;
+        if (behaviour->spawnTime > 0) {
+            spawnEnabled = true;
+        } else {
+            amount = behaviour->amountPerSecond;
+        }
     }
 
     for (auto i = 0; i < amount; i++) {
