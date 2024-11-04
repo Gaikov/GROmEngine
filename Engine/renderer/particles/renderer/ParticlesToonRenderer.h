@@ -23,6 +23,7 @@ private:
     ITexture    *_back = nullptr;
     IRenState   *_state = nullptr;
     float       _borderSize = 0;
+    nsColor     _color;
     nsColor     _borderColor;
     nsQuadsBuffer _buffer;
 

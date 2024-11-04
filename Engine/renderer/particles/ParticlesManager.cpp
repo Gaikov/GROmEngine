@@ -37,6 +37,7 @@ bool nsParticlesManager::LoadBehaviour(const char *fileName, nsParticlesBehaviou
     }
 
     behaviour->amountPerSecond = static_cast<int>(ParseFloat(ss, "amountPerSecond", 100));
+    behaviour->spawnTime = ParseFloat(ss, "spawnTime", 0);
     behaviour->spawner = spawners;
     behaviour->updater = _updaterFactory.ParseList(ss);
     behaviour->renderer = _rendererFactory.Parse(ss);

@@ -12,6 +12,7 @@
 class nsParticlesBehaviour {
 public:
     int amountPerSecond = 100;
+    float spawnTime = 0;
 
     nsParticlesSpawner::sp_t        spawner;
     nsParticlesRenderer::sp_t       renderer;

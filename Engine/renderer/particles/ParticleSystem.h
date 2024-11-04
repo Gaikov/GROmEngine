@@ -40,4 +40,5 @@ private:
     nsParticlesPool         *_pool;
 
     float _timeRest = 0;
+    float _emitTime = 0;
 };
