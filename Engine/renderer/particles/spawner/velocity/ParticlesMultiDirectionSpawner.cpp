@@ -14,9 +14,8 @@ void nsParticlesMultiDirectionSpawner::Spawn(nsParticle *p, float angle) {
     float speed = nsMath::Lerp(dir.minSpeed, dir.maxSpeed, nsMath::Random());
 
     auto vel = nsVec2::FromAngle(partAngle) * speed;
-    vel.Rotate(angle);
 
-    p->vel = vel;
+    p->vel = vel.Rotate(angle);
 }
 
 bool nsParticlesMultiDirectionSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContext *context) {
