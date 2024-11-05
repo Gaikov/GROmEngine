@@ -179,6 +179,8 @@ set(src
         renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.cpp
         renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.h
         renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.h
+        display/graphics/VisualRect.cpp
+        display/graphics/VisualRect.h
 )
 
 include_directories(./)
