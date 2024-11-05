@@ -62,6 +62,7 @@ struct nsRect {
 
     bool IsInside(const nsVec2 &pos) const;
     bool Intersects(const nsRect& other) const;
+    void FromPoints(const nsVec2 points[], int count);
 };
 
 #endif //RECT_H

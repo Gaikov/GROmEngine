@@ -11,7 +11,7 @@ bool nsCollisionTest::Init() {
     _stage = new nsVisualContainer2d();
 
     _rect = CreateRect(600, 300);
-    _userRect = CreateRect(600, 100);
+    _userRect = CreateRect(500, 100);
 
     return true;
 }
@@ -30,8 +30,7 @@ void nsCollisionTest::Loop(float deltaTime) {
 }
 
 void nsCollisionTest::Draw() {
-    nsVec2  c;
-    auto collided = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect, c);
+    auto collided = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect);
     _rect->color = collided ? nsColor::red : nsColor::white;
 
     nsVisualSceneRender2d::DrawScene(_stage);

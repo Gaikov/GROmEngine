@@ -4,7 +4,7 @@
 
 #include "CollisionMath.h"
 
-bool nsCollisionMath::RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform2 &t2, const nsRect &r2, nsVec2 &contact) {
+bool nsCollisionMath::RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform2 &t2, const nsRect &r2) {
     //r2 local space
 
     nsVec2  v1[4] = {
@@ -18,38 +18,10 @@ bool nsCollisionMath::RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform
         v = t2.ToLocal(t1.ToGlobal(v));
     }
 
-    float minX;
-    float maxX;
-    float minY;
-    float maxY;
+    nsRect  bounds1;
+    bounds1.FromPoints(v1, 4);
 
-    minX = maxX = v1[0].x;
-    minY = maxY = v1[0].y;
-
-    for (auto i = 1; i < 4; i++) {
-        auto &v = v1[i];
-
-        minX = std::min(minX, v.x);
-        maxX = std::max(maxX, v.x);
-
-        minY = std::min(minY, v.y);
-        maxY = std::max(maxY, v.y);
-    }
-
-    nsRect  bounds = {
-            minX,
-            minY,
-            maxX - minX,
-            maxY - minY
-    };
-
-    if (bounds.Intersects(r2)) {
-        for (auto &v : v1) {
-            if (r2.IsInside(v)) {
-                contact = v;
-                return true;
-            }
-        }
+    if (bounds1.Intersects(r2)) {
 
         nsVec2  v2[4] = {
                 {r2.minX(), r2.minY()},
@@ -58,9 +30,15 @@ bool nsCollisionMath::RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform
                 {r2.maxX(), r2.minY()},
         };
 
+        for (auto &v : v2) {
+            v = t1.ToLocal(t2.ToGlobal(v));
+        }
 
+        nsRect bounds2;
+        bounds2.FromPoints(v2, 4);
+
+        return bounds2.Intersects(r1);
     }
-
 
     return false;
 }
