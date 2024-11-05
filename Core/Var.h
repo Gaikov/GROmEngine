@@ -3,16 +3,15 @@
 // file Var.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_Var_H_
-#define	_Var_H_
+#pragma once
 
 #include "nsLib/comm_types.h"
 #include "nsLib/events/EventDispatcher.h"
 
-#define	GVF_SAVABLE		1u	//����������� � config.cfg, ���� cfg_savevars 1 - ����������� ��� ������ GVF_INTERNAL
-#define GVF_READONLY	2u	//���������� �� ��������������� � �������
-#define GVF_INTERNAL	4u	//���������� ��� ����������� ������������� (��� �������� � ��������, ��������...)
-
+#define	GVF_SAVABLE		1u	//gets saved into config always
+#define GVF_READONLY	2u	//readonly and does not get saved into config except gc_savevars is set
+#define GVF_INTERNAL	4u	//never gets saved into config file and readonly
+//empty flags means that a var will not be saved except gc_savevars is set (debugging vars for example)
 
 //-----------------------------------------------------
 //  class nsVar:  
@@ -53,7 +52,5 @@ private:
 
 private:
 	nsVar( const char* name, const char* defValue, uint flags );
-	virtual ~nsVar();
+	~nsVar() override;
 };
-
-#endif //_Var_H_
