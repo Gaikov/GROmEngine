@@ -9,5 +9,5 @@
 #include "nsLib/math/Rect.h"
 
 struct nsCollisionMath final {
-    static bool RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform2 &t2, const nsRect &r2, nsVec2 &contact);
+    static bool RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform2 &t2, const nsRect &r2);
 };

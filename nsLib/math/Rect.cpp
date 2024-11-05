@@ -22,3 +22,28 @@ bool nsRect::Intersects(const nsRect &other) const {
 
     return false;
 }
+
+void nsRect::FromPoints(const nsVec2 points[], int count) {
+    float minX;
+    float maxX;
+    float minY;
+    float maxY;
+
+    minX = maxX = points[0].x;
+    minY = maxY = points[0].y;
+
+    for (auto i = 1; i < count; i++) {
+        auto &v = points[i];
+
+        minX = std::min(minX, v.x);
+        maxX = std::max(maxX, v.x);
+
+        minY = std::min(minY, v.y);
+        maxY = std::max(maxY, v.y);
+    }
+
+    x = minX;
+    y = minY;
+    width = maxX - minX;
+    height = maxY - minY;
+}
