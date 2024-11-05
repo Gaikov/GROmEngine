@@ -5,12 +5,13 @@
 #include "CollisionTest.h"
 #include "Engine/display/VisualSceneRender2d.h"
 #include "Engine/utils/AppUtils.h"
+#include "nsLib/math/collision/CollisionMath.h"
 
 bool nsCollisionTest::Init() {
     _stage = new nsVisualContainer2d();
 
     _rect = CreateRect(600, 300);
-    _userRect = CreateRect(250, 100);
+    _userRect = CreateRect(600, 100);
 
     return true;
 }
@@ -25,9 +26,14 @@ void nsCollisionTest::Loop(float deltaTime) {
     float angle = _rect->origin.angle;
     angle += deltaTime;
     _rect->origin.angle = angle;
+
 }
 
 void nsCollisionTest::Draw() {
+    nsVec2  c;
+    auto collided = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect, c);
+    _rect->color = collided ? nsColor::red : nsColor::white;
+
     nsVisualSceneRender2d::DrawScene(_stage);
 }
 

@@ -61,6 +61,7 @@ struct nsRect {
     inline float EndY() const { return y + height; }
 
     bool IsInside(const nsVec2 &pos) const;
+    bool Intersects(const nsRect& other) const;
 };
 
 #endif //RECT_H
