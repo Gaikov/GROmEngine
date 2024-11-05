@@ -17,6 +17,7 @@ protected:
     void *CreateObject() override;
     void DestroyObject(void *object) override;
     void PrepareObject(void *object) override;
+    void OnObjectRecycled(void *object) override;
 
 private:
     int _blockSize;
