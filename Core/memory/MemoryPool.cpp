@@ -25,3 +25,7 @@ void nsMemoryPool::DestroyObject(void *object) {
 void nsMemoryPool::PrepareObject(void *object) {
     memset(object, 0, _blockSize);
 }
+
+void nsMemoryPool::OnObjectRecycled(void *object) {
+
+}

@@ -44,6 +44,7 @@ public:
     void RecycleObject(TClass *object) {
         //TODO: check object already in pool and allocated by the pool
         _pool.push_back(object);
+        OnObjectRecycled(object);
     }
 
     void Reserve(int numObjects) {
@@ -56,6 +57,9 @@ public:
         Log::Info("objects '%s' reserved: %i/%i", _debugName.c_str(), numObjects, (int)_allocated.size());
     }
 
+    int GetReservedAmount() { return (int)_pool.size(); }
+    int GetAllocatedAmount() { return (int)_allocated.size(); }
+
     nsObjectsPool<TClass>& operator = (const nsObjectsPool<TClass> &other) = delete;
     nsObjectsPool(const nsObjectsPool<TClass> &other) = delete;
     bool operator == (const nsObjectsPool<TClass> &other) = delete;
@@ -65,6 +69,7 @@ protected:
     virtual TClass* CreateObject() = 0;
     virtual void DestroyObject(TClass *object) = 0;
     virtual void PrepareObject(TClass *object) = 0;
+    virtual void OnObjectRecycled(TClass *object) = 0;
 
 private:
     std::vector<TClass*>  _pool;
