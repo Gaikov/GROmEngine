@@ -48,6 +48,8 @@ set(sources
         locator/ClassMapping.cpp
         locator/ClassMapping.h
         locator/Locatable.h
+        math/collision/CollisionMath.cpp
+        math/collision/CollisionMath.h
 )
 
 add_library(nsLib STATIC ${sources})

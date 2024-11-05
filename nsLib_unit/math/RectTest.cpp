@@ -32,3 +32,18 @@ TEST(Rect, FarAdd) {
     ASSERT_EQ(r.width, 60);
     ASSERT_EQ(r.height, 50);
 }
+
+TEST(Rect, Inersection1) {
+    nsRect r = {0, 0, 100, 100};
+    nsRect r2 = {20, 40, 40, 10};
+
+    ASSERT_EQ(r.Intersects(r2), true);
+
+    r = {0, 0, 100, 100};
+    r2 = {10, 10, 10, 100};
+    ASSERT_EQ(r.Intersects(r2), true);
+
+    r = {0, 0, 10, 10};
+    r2 = {10, 10, 10, 10};
+    ASSERT_EQ(r.Intersects(r2), false);
+}
