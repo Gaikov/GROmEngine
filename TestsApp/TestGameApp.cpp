@@ -16,6 +16,7 @@
 #include "tests/StencilMaskTest.h"
 #include "tests/layouts/ScrollTest.h"
 #include "tests/sprites/ParticlesTest.h"
+#include "tests/collision/CollisionTest.h"
 
 TestGameApp *g_gameApp = nullptr;
 
@@ -41,6 +42,7 @@ void TestGameApp::RegisterTests() {
     RegisterTest("mask", new nsStencilMaskTest());
     RegisterTest("scroll", new nsScrollTest());
     RegisterTest("parts", new nsParticlesTest());
+    RegisterTest("collision", new nsCollisionTest());
 
     Log::Info("info test message: %i", 1);
     Log::Warning("warning test message: %i", 2);

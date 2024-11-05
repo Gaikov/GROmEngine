@@ -30,6 +30,8 @@ set(SRC
         tests/FontTest.cpp
         tests/LinesTest.cpp
         tests/SpriteTest.cpp
+        tests/collision/CollisionTest.cpp
+        tests/collision/CollisionTest.h
 )
 
 if (ANDROID)
