@@ -21,14 +21,17 @@ public:
 
     bool OnPointerMove(float x, float y, int pointerId) override;
     void OnKeyDown(int key, bool rept) override;
+    void OnMouseWheel(float delta) override;
 
 private:
     nsVisualContainer2d *_stage = nullptr;
     nsVisualRect        *_rect = nullptr;
+    nsVisualCircle      *_circle = nullptr;
     nsVisualRect        *_userRect = nullptr;
     nsVisualCircle      *_userCircle = nullptr;
 
     nsProperty<bool>    _rectColliding;
+    float _angle = 0;
 
     nsVisualRect *CreateRect(float width, float height);
 };
