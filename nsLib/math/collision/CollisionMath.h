@@ -11,4 +11,5 @@
 struct nsCollisionMath final {
     static bool RectToRect(nsTransform2 &t1, const nsRect &r1, nsTransform2 &t2, const nsRect &r2);
     static bool RectToCircle(nsTransform2 &t1, const nsRect &r1, nsTransform2 &t2, float radius);
+    static bool CircleToCircle(nsTransform2 &t1, float r1, nsTransform2 &t2, float r2);
 };

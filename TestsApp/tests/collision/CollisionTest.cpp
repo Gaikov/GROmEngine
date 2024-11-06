@@ -22,6 +22,10 @@ bool nsCollisionTest::Init() {
     _rect = CreateRect(600, 300);
     _userRect = CreateRect(500, 100);
 
+    _circle = new nsVisualCircle();
+    _circle->radius = 100;
+    _stage->AddChild(_circle);
+
     _userCircle = new nsVisualCircle();
     _userCircle->radius = 200;
     _userCircle->origin.pos = {300, 300};
@@ -38,20 +42,36 @@ void nsCollisionTest::Release() {
 
 void nsCollisionTest::Loop(float deltaTime) {
     auto size = nsAppUtils::GetClientSize();
-    _rect->origin.pos = size / 2;
+
+    _circle->origin.pos = {
+            size.x / 4,
+            size.y / 2,
+    };
+
+    _rect->origin.pos = {
+            size.x / 4 * 3,
+            size.y / 2,
+    };
+
     float angle = _rect->origin.angle;
     angle += deltaTime;
     _rect->origin.angle = angle;
 }
 
 void nsCollisionTest::Draw() {
-    bool collided = false;
+    bool collided1 = false;
+    bool collided2 = false;
+
     if (_rectColliding) {
-        collided = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect);
+        collided1 = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect);
+        collided2 = nsCollisionMath::RectToCircle(_userRect->origin, _userRect->rect, _circle->origin, _circle->radius);
     } else {
-        collided = nsCollisionMath::RectToCircle(_rect->origin, _rect->rect, _userCircle->origin, _userCircle->radius);
+        collided1 = nsCollisionMath::RectToCircle(_rect->origin, _rect->rect, _userCircle->origin, _userCircle->radius);
+        collided2 = nsCollisionMath::CircleToCircle(_userCircle->origin, _userCircle->radius, _circle->origin, _circle->radius);
     }
-    _rect->color = collided ? nsColor::red : nsColor::white;
+
+    _rect->color = collided1 ? nsColor::red : nsColor::white;
+    _circle->color = collided2 ? nsColor::red : nsColor::white;
 
     nsVisualSceneRender2d::DrawScene(_stage);
 }
@@ -80,5 +100,10 @@ void nsCollisionTest::OnKeyDown(int key, bool rept) {
     if (key == NS_KEY_SPACE) {
         _rectColliding = !_rectColliding;
     }
+}
+void nsCollisionTest::OnMouseWheel(float delta) {
+    BaseFunctionalTest::OnMouseWheel(delta);
+    _angle += nsMath::ToRad(delta * 10.0f);
+    _userRect->origin.angle = _angle;
 }
 

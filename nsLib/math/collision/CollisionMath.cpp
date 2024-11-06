@@ -74,3 +74,19 @@ bool nsCollisionMath::RectToCircle(nsTransform2 &t1, const nsRect &r1, nsTransfo
 
     return false;
 }
+
+bool nsCollisionMath::CircleToCircle(nsTransform2 &t1, float r1, nsTransform2 &t2, float r2) {
+    nsVec2  circle[2] = {
+            {},
+            {r2, 0}
+    };
+
+    for (auto &v : circle) {
+        v = t1.ToLocal(t2.ToGlobal(v));
+    }
+
+    r2 = (circle[1] - circle[0]).Length();
+    auto pos = circle[0];
+
+    return pos.Length() < r1 + r2;
+}
