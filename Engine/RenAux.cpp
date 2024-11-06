@@ -321,3 +321,41 @@ void nsGizmos::DrawCross(const nsVec2 &pos, float size, const nsColor &color) {
 void nsGizmos::DrawRect(const nsRect &rect, const nsColor &color) {
     RX_DrawRect(rect.minX(), rect.minY(), rect.maxX(), rect.maxY(), color);
 }
+
+#define CIRCLE_SEGMENTS 40
+
+void nsGizmos::DrawCircle(const nsVec2 &pos, float radius, const nsColor &color) {
+    auto dev = nsRenDevice::Shared()->Device();
+
+    static IVertexBuffer *circleBuff = nullptr;
+    if (!circleBuff) {
+        auto numIndexes = CIRCLE_SEGMENTS * 2;
+        circleBuff = dev->VerticesCreate(CIRCLE_SEGMENTS, numIndexes, true, false);
+        circleBuff->SetPrimitiveMode(PM_LINES);
+        circleBuff->SetValidVertices(CIRCLE_SEGMENTS);
+        circleBuff->SetValidIndices(numIndexes);
+
+        auto indexes = circleBuff->GetWriteIndices();
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
+            int i1 = i * 2;
+            int i2 = i1 + 1;
+
+            indexes[i1] = i;
+            indexes[i2] = (i+1) % CIRCLE_SEGMENTS;
+        }
+        Log::Info("created");
+    }
+
+    auto vertexes = circleBuff->GetWriteVertices();
+    auto angleStep = float(M_2PI / CIRCLE_SEGMENTS);
+
+    for (auto i = 0; i < CIRCLE_SEGMENTS; i++) {
+        auto angle = angleStep * float(i);
+        vertexes[i].v = nsVec2::FromAngle(angle) * radius + pos;
+    }
+
+    dev->TextureBind(nullptr);
+    dev->StateApply(nullptr);
+    dev->SetColor(color);
+    dev->VerticesDraw(circleBuff);
+}
