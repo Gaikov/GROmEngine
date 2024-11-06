@@ -43,6 +43,7 @@ void RX_DrawRect( float x1, float y1, float x2, float y2, const nsColor &c );
 struct nsGizmos final {
     static void DrawCross(const nsVec2 &pos, float size, const nsColor &color);
     static void DrawRect(const nsRect &rect, const nsColor &color);
+    static void DrawCircle(const nsVec2 &pos, float radius, const nsColor &color);
 };
 
 #endif //_RenAux_H_
