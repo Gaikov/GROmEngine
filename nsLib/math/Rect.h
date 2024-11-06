@@ -23,6 +23,13 @@ struct nsRect {
         y = pos.y;
     }
 
+    inline nsVec2 GetCenter() const {
+        return {
+                (minX() + maxX()) / 2,
+                (minY() + maxY()) / 2
+         };
+    }
+
     inline void SetSize(const nsVec2 &size) {
         width = size.x;
         height = size.y;

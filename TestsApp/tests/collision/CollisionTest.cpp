@@ -45,7 +45,12 @@ void nsCollisionTest::Loop(float deltaTime) {
 }
 
 void nsCollisionTest::Draw() {
-    auto collided = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect);
+    bool collided = false;
+    if (_rectColliding) {
+        collided = nsCollisionMath::RectToRect(_rect->origin, _rect->rect, _userRect->origin, _userRect->rect);
+    } else {
+        collided = nsCollisionMath::RectToCircle(_rect->origin, _rect->rect, _userCircle->origin, _userCircle->radius);
+    }
     _rect->color = collided ? nsColor::red : nsColor::white;
 
     nsVisualSceneRender2d::DrawScene(_stage);
