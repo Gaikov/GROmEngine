@@ -10,7 +10,7 @@
 
 class nsVisualCircle : public nsVisualObject2d {
 public:
-    float radius;
+    float radius = 100;
     nsColor color;
 
     void GetLocalBounds(nsRect &bounds) override;
