@@ -19,6 +19,7 @@ nsVar	*r_brightness = nullptr;
 nsVar	*r_width = nullptr;
 nsVar	*r_height = nullptr;
 nsVar	*r_refresh = nullptr;
+nsVar   *r_draw_particles = nullptr;
 
 extern IRenDevice* GetRenDevice();
 
@@ -40,6 +41,7 @@ bool nsRenDevice::RegVars()
 	r_width = g_cfg->RegVar( "r_width", "640", GVF_SAVABLE );
 	r_height = g_cfg->RegVar( "r_height", "480", GVF_SAVABLE );
 	r_refresh = g_cfg->RegVar( "r_refresh", "0", GVF_SAVABLE );
+    r_draw_particles = g_cfg->RegVar("r_draw_particles", "1", 0);
 
 	return true;
 }
