@@ -4,6 +4,9 @@
 
 #include "ParticleSystem.h"
 #include "nsLib/log.h"
+#include "Core/Var.h"
+
+extern nsVar   *r_draw_particles;
 
 nsParticleSystem::nsParticleSystem() :
         behaviour(nullptr),
@@ -120,6 +123,10 @@ void nsParticleSystem::Emit(int amount) {
 }
 
 void nsParticleSystem::Draw() const {
+    if (!r_draw_particles->Bool()) {
+        return;
+    }
+
     if (behaviour && behaviour->renderer) {
         behaviour->renderer->Draw(_active);
     }
