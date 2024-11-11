@@ -8,11 +8,16 @@
 #include "Engine/RenManager.h"
 #include "nsLib/log.h"
 
+nsBaseButton::nsBaseButton() {
+    renState = _device->StateLoad("default/rs/gui.txt");
+}
+
 void nsBaseButton::SetClickHandler(const handler_t &handler) {
     _handler = handler;
 }
 
 void nsBaseButton::DrawContent(const nsVisualContext2d &context) {
+    _device->StateApply(renState);
     nsRect r;
     GetLocalBounds(r);
 
@@ -60,3 +65,4 @@ void nsBaseButton::Loop() {
 bool nsBaseButton::HitTest(float x, float y) {
     return nsVisualObject2d::HitTest(x, y);
 }
+
