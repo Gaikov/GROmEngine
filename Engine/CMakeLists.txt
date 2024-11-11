@@ -185,6 +185,8 @@ set(src
         display/graphics/VisualCircle.h
         display/graphics/VirtualCircleBuilder.cpp
         display/graphics/VirtualCircleBuilder.h
+        display/graphics/VisualRectBuilder.cpp
+        display/graphics/VisualRectBuilder.h
 )
 
 include_directories(./)

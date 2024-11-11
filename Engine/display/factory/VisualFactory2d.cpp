@@ -16,6 +16,7 @@
 #include "display/helpers/VisualAnchorBuilder.h"
 #include "CustomVisual.h"
 #include "display/graphics/VirtualCircleBuilder.h"
+#include "display/graphics/VisualRectBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -28,6 +29,7 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsTextButtonBuilder>();
     RegisterBuilderWithName<nsVisualAnchorBuilder>();
     RegisterBuilderWithName<nsVirtualCircleBuilder>();
+    RegisterBuilderWithName<nsVisualRectBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {

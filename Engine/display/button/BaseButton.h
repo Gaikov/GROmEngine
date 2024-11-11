@@ -11,6 +11,8 @@ class nsBaseButton : public nsVisualObject2d, public nsInteractiveElement {
 public:
     typedef std::function<void()> handler_t;
 
+    IRenState   *renState = nullptr;
+    nsBaseButton();
     float       paddings = 5;
     float       minWidth = 0;
     bool        drawFrame = true;
