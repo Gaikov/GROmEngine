@@ -32,7 +32,19 @@ public:
     void DrawNode(const nsVisualContext2d &context) override;
     void DrawContent(const nsVisualContext2d &context) override;
 
-    void FindChildrenRecursive(std::function<bool(nsVisualObject2d *child)> pred, std::vector<nsVisualObject2d *> &result);
+    template <class TClass>
+    void GetChildrenRecursive(std::vector<TClass*> &list) {
+        for (auto child : _children) {
+            if (auto obj = dynamic_cast<TClass*>(child)) {
+                list.push_back(obj);
+            }
+
+            if (auto container = dynamic_cast<nsVisualContainer2d*>(child)) {
+                container->GetChildrenRecursive<TClass>(list);
+            }
+        }
+    }
+
     bool IterateRecursive(const tChildCallback &callback);
 
 protected:
