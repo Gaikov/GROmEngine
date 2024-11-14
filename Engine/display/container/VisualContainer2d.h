@@ -11,7 +11,7 @@
 
 class nsVisualContainer2d : public nsVisualObject2d, public IUserInput {
 public:
-    typedef std::function<void(nsVisualObject2d*)>  tChildCallback;
+    typedef std::function<bool(nsVisualObject2d*)>  tChildCallback;
 
     void Destroy() override;
     virtual void DestroyChildren();
@@ -33,7 +33,7 @@ public:
     void DrawContent(const nsVisualContext2d &context) override;
 
     void FindChildrenRecursive(std::function<bool(nsVisualObject2d *child)> pred, std::vector<nsVisualObject2d *> &result);
-    void IterateRecursive(const tChildCallback &callback);
+    bool IterateRecursive(const tChildCallback &callback);
 
 protected:
     bool OnPointerUp(float x, float y, int pointerId) override;
