@@ -5,6 +5,10 @@
 #include "VisualAnchor.h"
 #include "RenAux.h"
 
+nsVisualAnchor::nsVisualAnchor() {
+    renState = _device->StateLoad("default/rs/gui.txt");
+}
+
 void nsVisualAnchor::GetLocalBounds(nsRect &bounds) {
     auto size2 = size / 2;
     bounds = {size2, size2, size, size};
@@ -15,5 +19,7 @@ void nsVisualAnchor::Loop() {
 }
 
 void nsVisualAnchor::DrawContent(const nsVisualContext2d &context) {
+    _device->StateApply(renState);
     nsGizmos::DrawCross({}, size, color);
 }
+

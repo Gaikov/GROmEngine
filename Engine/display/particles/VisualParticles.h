@@ -12,7 +12,8 @@ class nsVisualParticles : public nsVisualObject2d {
 public:
     enum Space {
         LOCAL,
-        GLOBAL
+        GLOBAL,
+        PARENT
     };
 
     Space space = LOCAL;

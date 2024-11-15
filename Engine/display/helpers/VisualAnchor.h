@@ -10,8 +10,11 @@
 
 class nsVisualAnchor : public nsVisualObject2d {
 public:
+    nsVisualAnchor();
+
     float   size = 10;
     nsColor color = nsColor::red;
+    IRenState *renState = nullptr;
 
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;

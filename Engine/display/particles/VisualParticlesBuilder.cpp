@@ -31,7 +31,14 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
     system.spawnEnabled = ParseFloat(ss, "spawn", system.spawnEnabled) != 0.0f;
 
     if (ps_var_begin(ss, "space")) {
-        p->space = StrEqual(ps_var_str(ss), "global") ? nsVisualParticles::GLOBAL : nsVisualParticles::LOCAL;
+        const auto space = ps_var_str(ss);
+        if (StrEqual(space, "global")) {
+            p->space = nsVisualParticles::GLOBAL;
+        } else if (StrEqual(space, "parent")) {
+            p->space = nsVisualParticles::PARENT;
+        } else {
+            p->space = nsVisualParticles::LOCAL;
+        }
     }
 
     return true;
