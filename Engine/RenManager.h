@@ -15,6 +15,7 @@ class nsRenDevice : public nsSubSystem<nsRenDevice>
 public:
     static void Invalidate_f(int argc, const char* argv[]);
     static void Portrait_f(int argc, const char* argv[]);
+    static void Landscape_f(int argc, const char* argv[]);
 
 	static bool		RegVars();
 

@@ -30,6 +30,7 @@ bool nsRenDevice::RegVars()
 {
     g_cfg->RegCmd("r_invalidate", Invalidate_f);
     g_cfg->RegCmd("r_portrait", Portrait_f);
+    g_cfg->RegCmd("r_landscape", Landscape_f);
 
 	r_fullscreen = g_cfg->RegVar( "r_fullscreen", "0", GVF_SAVABLE );
 	r_pixel_bits = g_cfg->RegVar( "r_pixel_bits", "16", GVF_SAVABLE );
@@ -98,6 +99,29 @@ void nsRenDevice::Portrait_f(int argc, const char **argv) {
 
     r_height->SetValue(height);
     r_width->SetValue(height / aspect);
+    g_cfg->ExecLine("r_restart");
+}
+
+void nsRenDevice::Landscape_f(int argc, const char **argv) {
+    if (argc < 3) {
+        Log::Info("usage: [width] [aspect]");
+        return;
+    }
+
+    auto width = (float)atoi(argv[1]);
+    if (width < 50) {
+        Log::Warning("Invalid width!");
+        return;
+    }
+
+    auto aspect = (float)atof(argv[2]);
+    if (aspect < 0.3) {
+        Log::Warning("Invalid aspect!");
+        return;
+    }
+
+    r_height->SetValue(width / aspect);
+    r_width->SetValue(width);
     g_cfg->ExecLine("r_restart");
 }
 
