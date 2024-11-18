@@ -28,6 +28,11 @@ bool nsTextLabelBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
     }
 
     label->text = ParseStrP(ss, "text", label->text);
+    if (ps_var_begin(ss, "color")) {
+        ps_var_4f(ss, label->color);
+    }
+
+    label->drawFrame = ParseBool(ss, "drawFrame", label->drawFrame);
 
     return true;
 }

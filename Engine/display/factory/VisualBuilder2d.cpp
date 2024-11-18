@@ -23,6 +23,8 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
     ParseAnchor(ss, "yMin", o->yMin);
     ParseAnchor(ss, "xMax", o->xMax);
     ParseAnchor(ss, "yMax", o->yMax);
+    ParseAnchor(ss, "xCenter", o->xCenter);
+    ParseAnchor(ss, "yCenter", o->yCenter);
 
     o->origin.pos = {
             ParseFloat(ss, "x", o->origin.pos->x),
