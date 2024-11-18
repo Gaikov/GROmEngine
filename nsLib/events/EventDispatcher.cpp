@@ -20,6 +20,6 @@ nsEventDispatcher::tHandlersList &nsEventDispatcher::GetHandlers(int eventId) {
 void nsEventDispatcher::Emmit(const nsBaseEvent &event) {
     auto list = GetHandlers(event.GetId());
     for (auto &it : list) {
-        it.second(event);
+        it.second(&event);
     }
 }

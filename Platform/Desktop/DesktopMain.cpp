@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
             }
         });
 
-        r_vsync->AddHandler(nsVar::NSVAR_CHANGED, [](const nsBaseEvent &e) {
+        r_vsync->AddHandler(nsVar::NSVAR_CHANGED, [](const nsBaseEvent *e) {
             Log::Info("swap interval changed");
             glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
         });

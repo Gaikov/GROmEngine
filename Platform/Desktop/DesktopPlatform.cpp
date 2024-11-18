@@ -15,7 +15,7 @@
 bool DesktopPlatform::Init() {
     Log::Info("##### Init Desktop #####");
 
-    _softInputChanged = [this](const nsBaseEvent &e) -> void {
+    _softInputChanged = [this](const nsBaseEvent*) -> void {
         UpdateSoftInput();
     };
     _useSoftInput = g_cfg->RegVar("si_force_soft", "0", GVF_SAVABLE);

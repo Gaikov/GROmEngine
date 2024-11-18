@@ -8,7 +8,7 @@
 
 nsBaseLayout::nsBaseLayout() :
         boundsType(RECTANGLE),
-        _onChangeHandler([this](const nsBaseEvent &) -> void {
+        _onChangeHandler([this](const nsBaseEvent*) -> void {
             InvalidateLayout();
         }) {
 
