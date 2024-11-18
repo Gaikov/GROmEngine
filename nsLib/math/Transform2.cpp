@@ -11,14 +11,14 @@ nsTransform2::nsTransform2() : pos(nsVec2(0, 0)),
     _worldMatrix.Identity();
     _invWorldMatrix.Identity();
 
-    _onChanged = [this](const nsBaseEvent*)-> void {
+    auto onChanged = [this](const nsBaseEvent*)-> void {
         _localValid = false;
         InvalidateWorld();
     };
 
-    pos.AddHandler(nsPropChangedName::CHANGED, _onChanged);
-    scale.AddHandler(nsPropChangedName::CHANGED, _onChanged);
-    angle.AddHandler(nsPropChangedName::CHANGED, _onChanged);
+    pos.AddHandler(nsPropChangedName::CHANGED, onChanged);
+    scale.AddHandler(nsPropChangedName::CHANGED, onChanged);
+    angle.AddHandler(nsPropChangedName::CHANGED, onChanged);
 }
 
 const nsMatrix2 & nsTransform2::GetLocal() {
