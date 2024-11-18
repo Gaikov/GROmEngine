@@ -28,6 +28,7 @@ public:
     nsProperty(const nsProperty& other) = delete;
 
     explicit nsProperty(const TType& value) {
+        _defaultValue = value;
         _value = value;
     }
 
@@ -57,8 +58,12 @@ public:
         }
     }
 
+    void Reset() {
+        SetValue(_defaultValue);
+    }
+
 private:
     TType   _value;
-
+    TType   _defaultValue;
 
 };
