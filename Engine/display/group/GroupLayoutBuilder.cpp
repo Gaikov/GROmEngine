@@ -21,5 +21,16 @@ bool nsGroupLayoutBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, n
     }
 
     g->drawFrame = ParseFloat(ss, "drawFrame") > 0;
+
+    auto width = ParseFloat(ss, "width");
+    if (width > 0) {
+        g->SetWidth(width);
+    }
+
+    auto height = ParseFloat(ss, "height");
+    if (height > 0) {
+        g->SetHeight(height);
+    }
+
     return true;
 }
