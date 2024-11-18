@@ -25,7 +25,7 @@ nsScrollBar::nsScrollBar() :
 
     nsBaseLayout::SetWidth(16);
 
-    _onScrollChanged = [this](const nsBaseEvent &) -> void {
+    _onScrollChanged = [this](const nsBaseEvent*) -> void {
         if (_thumb) {
             _thumb->origin.pos = {thumbPaddings, ComputeThumbPos()};
         }

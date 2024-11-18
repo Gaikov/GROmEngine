@@ -11,7 +11,7 @@ nsTransform2::nsTransform2() : pos(nsVec2(0, 0)),
     _worldMatrix.Identity();
     _invWorldMatrix.Identity();
 
-    _onChanged = [this](const nsBaseEvent&)-> void {
+    _onChanged = [this](const nsBaseEvent*)-> void {
         _localValid = false;
         InvalidateWorld();
     };

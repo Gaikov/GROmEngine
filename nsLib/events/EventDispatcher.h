@@ -8,7 +8,7 @@
 
 class nsEventDispatcher {
 public:
-    typedef std::function<void(const nsBaseEvent &event)> tEventHandler;
+    typedef std::function<void(const nsBaseEvent *event)> tEventHandler;
     typedef std::map<int, tEventHandler> tHandlersList;
 
 public:
