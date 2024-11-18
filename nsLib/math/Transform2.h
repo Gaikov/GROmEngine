@@ -37,7 +37,6 @@ private:
     nsMatrix2 _localMatrix;
     nsMatrix2 _worldMatrix;
     nsMatrix2 _invWorldMatrix;
-    nsEventDispatcher::tEventHandler _onChanged;
 
     void InvalidateWorld();
 };
