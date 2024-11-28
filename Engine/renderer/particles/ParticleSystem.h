@@ -18,7 +18,7 @@ public:
     explicit nsParticleSystem();
     ~nsParticleSystem();
 
-    bool IsActive() { return _active; }
+    bool IsActive() { return _active || spawnEnabled; }
     void Emit(int amount = 0);
 
     void SetPosition(const nsVec2 &pos);
