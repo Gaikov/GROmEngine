@@ -187,6 +187,8 @@ set(src
         display/graphics/VirtualCircleBuilder.h
         display/graphics/VisualRectBuilder.cpp
         display/graphics/VisualRectBuilder.h
+        renderer/particles/spawner/ParticlesColorSpawner.cpp
+        renderer/particles/spawner/ParticlesColorSpawner.h
 )
 
 include_directories(./)
