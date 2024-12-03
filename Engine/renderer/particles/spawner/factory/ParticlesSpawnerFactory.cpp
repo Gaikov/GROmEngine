@@ -13,6 +13,7 @@
 #include "renderer/particles/spawner/velocity/ParticlesVectorVelSpawner.h"
 #include "renderer/particles/spawner/velocity/ParticlesRightVelSpawner.h"
 #include "renderer/particles/spawner/velocity/ParticlesMultiDirectionSpawner.h"
+#include "renderer/particles/spawner/ParticlesColorSpawner.h"
 
 nsParticlesSpawnerFactory::nsParticlesSpawnerFactory() {
     RegisterWithName<nsParticlesAngleSpawner>();
@@ -26,6 +27,7 @@ nsParticlesSpawnerFactory::nsParticlesSpawnerFactory() {
     RegisterWithName<nsParticlesEdgesSpawner>();
     RegisterWithName<nsParticlesRightVelSpawner>();
     RegisterWithName<nsParticlesMultiDirectionSpawner>();
+    RegisterWithName<nsParticlesColorSpawner>();
 }
 
 nsParticlesSpawner *nsParticlesSpawnerFactory::Parse(script_state_t *ss) {
