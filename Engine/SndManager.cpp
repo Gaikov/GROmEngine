@@ -5,37 +5,19 @@
 //--------------------------------------------------------------------------------------------------
 #include "SndManager.h"
 
-nsSndManager g_sndMgr;
-ISndDevice	*g_sndDev = 0;
+bool nsSoundDevice::OnInit() {
+    nsSubSystem::OnInit();
 
-//---------------------------------------------------------
-// nsSndManager::nsSndManager: 
-//---------------------------------------------------------
-nsSndManager::nsSndManager()
-{
-
+    _device = GetSoundDevice();
+    return _device && _device->Init();
 }
 
-//---------------------------------------------------------
-// nsSndManager::Init: 
-//---------------------------------------------------------
-bool nsSndManager::Init()
-{
-	g_sndDev = GetSoundDevice();
-	if ( !g_sndDev || !g_sndDev->Init() ) return false;
-	
-	return true;
-}
+void nsSoundDevice::OnRelease() {
 
-//---------------------------------------------------------
-// nsSndManager::Release: 
-//---------------------------------------------------------
-void nsSndManager::Release()
-{
-	if ( g_sndDev )
-	{
-		g_sndDev->Release();
-		g_sndDev = 0;
-	}
-}
+    if (_device) {
+        _device->Release();
+        _device = nullptr;
+    }
 
+    nsSubSystem::OnRelease();
+}

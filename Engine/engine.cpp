@@ -63,7 +63,7 @@ bool nsEngine::Init()
 
     if (!App_GetPlatform()->Init()) return false;
 
-    g_sndMgr.Init();
+    nsSoundDevice::Init();
     if (!nsRenDevice::Init()) return false;
     if (!nsFontsCache::Init()) return false;
 
@@ -125,7 +125,7 @@ void nsEngine::Release(bool failed)
 	nsConsole::Release();
     nsFontsCache::Release();
 	nsRenDevice::Release();
-	g_sndMgr.Release();
+	nsSoundDevice::Release();
 
     App_GetPlatform()->Release();
 	nsCore::Release();
@@ -178,7 +178,7 @@ void nsEngine::MainLoop()
 
 			g_inp.Process();
 			game->Loop( g_frameTime );
-			g_sndDev->Update();
+			nsSoundDevice::Shared()->Device()->Update();
 		}
 		else
 		{
@@ -197,7 +197,7 @@ void nsEngine::MainLoop()
 
 				g_inp.Process();
 				game->Loop( g_frameTime );
-				g_sndDev->Update();
+                nsSoundDevice::Shared()->Device()->Update();
 			}
 		}
 	}
@@ -302,7 +302,7 @@ void nsEngine::OnActivateApp(bool active) {
 
     prevTime = App_GetPlatform()->GetTime();
     g_inp.OnActivateApp(active);
-    g_sndDev->OnActivate(active);
+    nsSoundDevice::Shared()->Device()->OnActivate(active);
     App_GetGame()->OnActivate(active);
 
     if (!active) {

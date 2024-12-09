@@ -3,24 +3,23 @@
 // file SndManager.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_SndManager_H_
-#define	_SndManager_H_
-
+#pragma once
 #include "SoundBase/SndDevice.h"
+#include "nsLib/SubSystem.h"
 
-class nsSndManager
+class nsSoundDevice : public nsSubSystem<nsSoundDevice>
 {
 public:
-	nsSndManager();
+    inline ISndDevice* Device() {
+        return _device;
+    }
 
-	bool	Init();
-	void	Release();
+protected:
+    bool OnInit() override;
+    void OnRelease() override;
+
 
 private:
-
+    ISndDevice  *_device = nullptr;
 };
 
-extern nsSndManager g_sndMgr;
-extern ISndDevice	*g_sndDev;
-
-#endif //_SndManager_H_
