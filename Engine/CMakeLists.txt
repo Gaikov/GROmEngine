@@ -189,6 +189,8 @@ set(src
         display/graphics/VisualRectBuilder.h
         renderer/particles/spawner/ParticlesColorSpawner.cpp
         renderer/particles/spawner/ParticlesColorSpawner.h
+        display/group/horizontal/HGroupLayoutBuilder.cpp
+        display/group/horizontal/HGroupLayoutBuilder.h
 )
 
 include_directories(./)
