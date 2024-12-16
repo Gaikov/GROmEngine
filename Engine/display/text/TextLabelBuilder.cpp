@@ -33,6 +33,8 @@ bool nsTextLabelBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
     }
 
     label->drawFrame = ParseBool(ss, "drawFrame", label->drawFrame);
+    label->hAlign = nsAlign::Parse(ss, "hAlign", label->hAlign);
+    label->letterSpace = ParseFloat(ss, "letterSpace", label->letterSpace);
 
     return true;
 }

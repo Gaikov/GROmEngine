@@ -14,6 +14,12 @@ nsTextLabel::nsTextLabel() {
 void nsTextLabel::GetLocalBounds(nsRect &bounds) {
     if (font) {
         font->GetBounds(text, bounds);
+        bounds.width += (letterSpace * (float)text.Length() - 1);
+        if (hAlign == nsAlign::CENTER) {
+            bounds.x -= bounds.width / 2;
+        } else if (hAlign == nsAlign::END) {
+            bounds.x -= bounds.width;
+        }
     }
 }
 
@@ -22,12 +28,13 @@ void nsTextLabel::DrawContent(const nsVisualContext2d &context) {
         return;
     }
 
+    nsRect rect;
+    GetLocalBounds(rect);
+
     _device->StateApply(renState);
-    font->Draw(text, nsVec2(0, 0), nsVec2(1, 1), color, text.Length());
+    font->Draw(text, nsVec2(rect.x, rect.y), nsVec2(1, 1), color, text.Length(), 0, letterSpace);
 
     if (drawFrame) {
-        nsRect rect;
-        GetLocalBounds(rect);
         nsGizmos::DrawRect(rect, nsColor::white);
     }
 }
