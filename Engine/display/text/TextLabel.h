@@ -8,14 +8,17 @@
 #include "Engine/display/VisualObject2d.h"
 #include "Engine/Font.h"
 #include "nsLib/color.h"
+#include "Engine/display/align/Align.h"
 
 class nsTextLabel : public nsVisualObject2d {
 public:
-    nsFont      *font = nullptr;
-    IRenState   *renState = nullptr;
-    nsString    text;
-    nsColor     color;
-    bool        drawFrame = false;
+    nsFont          *font = nullptr;
+    IRenState       *renState = nullptr;
+    nsString        text;
+    nsColor         color;
+    bool            drawFrame = false;
+    nsAlign::Type   hAlign = nsAlign::BEGIN;
+    float           letterSpace = 0;
 
     void SetInt(int value);
 

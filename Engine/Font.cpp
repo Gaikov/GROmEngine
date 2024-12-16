@@ -263,7 +263,7 @@ void nsFont::Free() {
 //------------------------------------
 // DrawContent:
 //------------------------------------
-void nsFont::Draw(const char *str, float pos[], float scale[], const float color[4], int len, float fixedWidth )
+void nsFont::Draw(const char *str, float pos[], float scale[], const float color[4], int len, float fixedWidth, float letterSpace)
 {
 	if ( !str || _pages.empty() ) return;
 	
@@ -299,9 +299,9 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 			}
 
             if (fixedWidth > 0) {
-                x += fixedWidth * scale[0];
+                x += fixedWidth * scale[0] + letterSpace;
             } else {
-                x += c->xadvance * scale[0];
+                x += c->xadvance * scale[0] + letterSpace;
             }
 		}
 
