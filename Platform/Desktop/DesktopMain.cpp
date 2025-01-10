@@ -90,7 +90,10 @@ int main(int argc, char *argv[]) {
                 mouseButtons.push_back(button);
                 nsEngine::OnPointerDown(button, (int) x, (int) y);
             } else if (action == GLFW_RELEASE) {
-                std::remove(mouseButtons.begin(), mouseButtons.end(),button);
+                auto it = std::remove(mouseButtons.begin(), mouseButtons.end(),button);
+                if (it != mouseButtons.end()) {
+                    mouseButtons.erase(it);
+                }
                 nsEngine::OnPointerUp(button, (int) x, (int) y);
             }
         });
