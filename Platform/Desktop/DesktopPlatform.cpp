@@ -59,7 +59,7 @@ void DesktopPlatform::Release() {
         glfwDestroyWindow(_wnd);
         _wnd = nullptr;
     }
-
+    _softInput = nullptr;
     glfwTerminate();
 }
 
