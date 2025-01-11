@@ -8,32 +8,18 @@
 #include "StructUt.h"
 
 //---------------------------------------------------------
-// nsParseFile::nsParseFile: 
-//---------------------------------------------------------
-nsParseFile::nsParseFile() :
-	m_files( 0 ),
-	m_fileCount( 0 )	
-{
-	
-}
-
-//---------------------------------------------------------
 // nsParseFile::~nsParseFile: 
 //---------------------------------------------------------
 nsParseFile::~nsParseFile()
 {
-	if ( !m_files ) return;
-
-	for ( int i = 0; i < m_fileCount; ++i )
+	for (auto &file : m_files)
 	{
-		if ( m_files[i].ss )
-			ps_end( m_files[i].ss );
+		if ( file.ss )
+            ps_end(file.ss);
 
-		if ( m_files[i].file )
-			g_pack.ReleaseFile( m_files[i].file );
+		if ( file.file )
+			g_pack.ReleaseFile( file.file );
 	}
-
-	my_free( m_files );
 }
 
 //---------------------------------------------------------
@@ -51,6 +37,6 @@ script_state_t* nsParseFile::BeginFile( const char *fileName, char prefix )
 	
 	script.ss = ps_begin( (char*)script.file->GetData(), prefix );
 
-	AddToArray( &m_files, m_fileCount, script );
+	m_files.push_back(script);
 	return script.ss;
 }
