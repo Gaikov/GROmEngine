@@ -8,6 +8,7 @@
 #include "Engine/RenDevice.h"
 #include "Core/Var.h"
 #include "Engine/display/VisualObject2d.h"
+#include "Core/Memory.h"
 
 static DesktopPlatform g_desktop;
 static nsArgs g_args;
@@ -24,6 +25,7 @@ Platform *App_GetPlatform() {
 void onExit() {
     printf("======== AtExit =======\n");
     nsVisualObject2d::LeaksCheck();
+    mem_report();
 }
 
 int main(int argc, char *argv[]) {
@@ -110,6 +112,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    mouseButtons.clear();
     nsEngine::Release(!success);
     glfwTerminate();
     return 0;

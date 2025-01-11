@@ -147,8 +147,11 @@ void mem_free( void *data )
 
 #else
 
+static int g_allocatedBlocks = 0;
+
 void *mem_malloc(uint size, const char *file, int line)
 {
+    g_allocatedBlocks ++;
 	auto data = malloc(size);
 	memset(data, 0, size);
 	return data;
@@ -164,6 +167,7 @@ void mem_free(void *data)
 {
 	if (data)
 	{
+        g_allocatedBlocks --;
 		free(data);
 	}
 }
@@ -217,6 +221,10 @@ void mem_report()
 
 		Sys_Message("Memory leaks detected!");
 	}
+
+    if (g_allocatedBlocks != 0) {
+        printf("WARNING: Leaked mem blocks: %i\n", g_allocatedBlocks);
+    }
 }
 
 

@@ -129,7 +129,6 @@ void nsEngine::Release(bool failed)
 
     App_GetPlatform()->Release();
 	nsCore::Release();
-	mem_report();
 }
 
 //---------------------------------------------------------
