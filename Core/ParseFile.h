@@ -12,7 +12,7 @@
 class nsParseFile
 {
 public:
-	nsParseFile();
+    nsParseFile() = default;
 	virtual			~nsParseFile();
 	script_state_t* BeginFile( const char *fileName, char prefix = '$' );
 
@@ -24,11 +24,10 @@ private:
 	};
 
 private:
-	scriptFile_t	*m_files;
-	int				m_fileCount;
+	std::vector<scriptFile_t>   m_files;
 
 private:
-	//нефиг копировать
+	//пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	nsParseFile( const nsParseFile& );
 	const nsParseFile& operator = ( const nsParseFile& );
 };
