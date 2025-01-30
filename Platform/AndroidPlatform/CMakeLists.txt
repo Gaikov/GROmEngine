@@ -13,7 +13,7 @@ set(sources
 
 include_directories(.)
 
-add_library(Platform
+add_library(AndroidPlatform
         STATIC
         ${sources}
 )
