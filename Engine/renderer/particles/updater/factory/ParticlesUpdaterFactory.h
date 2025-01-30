@@ -6,7 +6,7 @@
 #pragma once
 
 #include "nsLib/factory/AbstractFactory.h"
-#include "GROmEngine/engine/renderer/particles/updater/ParticlesUpdater.h"
+#include "GROmEngine/Engine/renderer/particles/updater/ParticlesUpdater.h"
 #include "Core/Parser.h"
 #include "ParticlesUpdaterContext.h"
 

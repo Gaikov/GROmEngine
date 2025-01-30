@@ -44,5 +44,5 @@ void nsTextLabel::Loop() {
 }
 
 void nsTextLabel::SetInt(int value) {
-    itoa(value, text.AsChar(), 10);
+    text.Format("%i", value);
 }
