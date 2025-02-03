@@ -34,3 +34,12 @@ void nsSpriteDesc::Draw(IRenDevice *dev) const {
     _buff->AddQuad(pos - center, {}, size, nsColor::white, tex1, tex2);
     _buff->Draw();
 }
+
+void nsSpriteDesc::GetBounds(nsRect &rect) const {
+    nsVec2 p = pos - center;
+
+    rect.x = p.x;
+    rect.y = p.y;
+    rect.width = size.x;
+    rect.height = size.y;
+}

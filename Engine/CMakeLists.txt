@@ -191,6 +191,10 @@ set(src
         renderer/particles/spawner/ParticlesColorSpawner.h
         display/group/horizontal/HGroupLayoutBuilder.cpp
         display/group/horizontal/HGroupLayoutBuilder.h
+        display/button/ImageButton.cpp
+        display/button/ImageButton.h
+        display/button/ImageButtonBuilder.cpp
+        display/button/ImageButtonBuilder.h
 )
 
 include_directories(./)
