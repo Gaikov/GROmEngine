@@ -8,9 +8,9 @@
 #include "nsLib/comm_types.h"
 #include "nsLib/Vec2.h"
 #include "nsLib/color.h"
-#include "nsLib/BBox2.h"
 #include "Engine/RenDevice.h"
 #include "Engine/renderer/QuadsBuffer.h"
+#include "nsLib/math/Rect.h"
 
 struct nsSpriteDesc
 {
@@ -27,6 +27,7 @@ struct nsSpriteDesc
 
     nsSpriteDesc& ResetSize();
     nsSpriteDesc& ComputeCenter();
+    void GetBounds(nsRect &rect) const;
 
     void Draw(IRenDevice *dev) const;
 
