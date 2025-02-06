@@ -11,7 +11,7 @@ void nsVisualContainer2d::Destroy() {
 }
 
 void nsVisualContainer2d::DestroyChildren() {
-    auto children = _children;
+    auto children = _children; //copy to not break iterator
     for (auto child: children) {
         RemoveChild(child);
         child->Destroy();
