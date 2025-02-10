@@ -214,7 +214,7 @@ float nsMath::RandRange(float min, float max) {
 }
 
 float nsMath::Random() {
-    return RandRange(0, 1);
+    return float(rand()) / float(RAND_MAX);
 }
 
 float nsMath::NormalizeAngle(float angle) {
