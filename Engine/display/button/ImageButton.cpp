@@ -22,18 +22,7 @@ void nsImageButton::DrawContent(const nsVisualContext2d &context) {
     _currentState->Draw(_device);
 
     if (font) {
-        nsRect  rect;
-        GetLocalBounds(rect);
-
-        float size[2];
-        font->GetSize(text, size);
-
-        nsVec2 pos = {
-                nsAlign::Compute(nsAlign::CENTER, size[0], rect.width),
-                nsAlign::Compute(nsAlign::CENTER, size[1], rect.height),
-        };
-
-        font->Draw(text, pos, nsVec2(1, 1), nsColor::white);
+        font->Draw(text, labelPos, nsVec2(1, 1), nsColor::white);
     }
 }
 
@@ -60,6 +49,25 @@ void nsImageButton::OnPointerUp() {
 void nsImageButton::OnClick() {
     if (onClick) {
         onClick();
+    }
+}
+
+void nsImageButton::AlignText(nsAlign::Type hAlign, nsAlign::Type vAlign) {
+    nsVec2 areaSize;
+    if (up.tex) {
+        int w, h;
+        up.tex->GetSize(w, h);
+        areaSize = {(float) w, (float) h};
+    }
+
+    if (font) {
+        float size[2];
+        font->GetSize(text, size);
+
+        labelPos = {
+                nsAlign::Compute(hAlign, size[0], areaSize.x),
+                nsAlign::Compute(vAlign, size[1], areaSize.y)
+        };
     }
 }
 

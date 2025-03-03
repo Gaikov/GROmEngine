@@ -9,6 +9,7 @@
 #include "input/InteractiveElement.h"
 #include "renderer/sprites/SpriteDesc.h"
 #include "BaseButton.h"
+#include "display/align/Align.h"
 
 class nsImageButton : public nsVisualObject2d, public nsInteractiveElement {
 public:
@@ -20,11 +21,13 @@ public:
 
     nsString    text;
     nsFont      *font = nullptr;
+    nsVec2      labelPos;
 
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
     void DrawContent(const nsVisualContext2d &context) override;
     bool HitTest(float x, float y) override;
+    void AlignText(nsAlign::Type hAlign, nsAlign::Type vAlign);
 
 protected:
     nsSpriteDesc    *_currentState;
