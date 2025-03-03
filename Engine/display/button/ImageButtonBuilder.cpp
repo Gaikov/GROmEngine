@@ -24,8 +24,23 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
     ParseState(ss, "disabled", button->disabled);
 
     if (ps_block_begin(ss, "label")) {
-        button->text = ParseStrP(ss, "text");
-        button->font = nsFontsCache::Shared()->LoadFont(ParseString(ss, "font"));
+        if (ps_var_begin(ss, "font")) {
+            nsString    fileName = ps_var_str(ss);
+            button->font = nsFontsCache::Shared()->LoadFont(fileName);
+        }
+
+        if (ps_var_begin(ss, "text")) {
+            button->text = ps_var_str(ss);
+        }
+
+        button->AlignText(nsAlign::CENTER, nsAlign::CENTER);
+
+        nsVec2 offset;
+        if (ps_var_begin(ss, "offset")) {
+            ps_var_2f(ss, offset);
+            button->labelPos += offset;
+        }
+
         ps_block_end(ss);
     }
 
@@ -34,8 +49,11 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
 
 void nsImageButtonBuilder::ParseState(script_state_t *ss, const char *name, nsSpriteDesc &desc) {
     auto dev = nsRenDevice::Shared()->Device();
-    desc.tex = dev->TextureLoad(ParseString(ss, name), false);
-    desc.ResetSize();
+    if (ps_var_begin(ss, name)) {
+        nsString    fileName = ps_var_str(ss);
+        desc.tex = dev->TextureLoad(fileName, false);
+        desc.ResetSize();
+    }
 }
 
 
