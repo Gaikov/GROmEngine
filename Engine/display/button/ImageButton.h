@@ -18,6 +18,9 @@ public:
     IRenState       *renState = nullptr;
     nsSpriteDesc    up, over, down, disabled;
 
+    nsString    text;
+    nsFont      *font = nullptr;
+
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
     void DrawContent(const nsVisualContext2d &context) override;
