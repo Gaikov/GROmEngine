@@ -14,7 +14,17 @@ nsParticleSystem::nsParticleSystem() :
 }
 
 nsParticleSystem::~nsParticleSystem() {
+    RemoveAll();
+}
+
+void nsParticleSystem::RemoveAll() {
     _pool->FreeList(_active);
+    _active = nullptr;
+}
+
+void nsParticleSystem::Reset(bool spawn) {
+    RemoveAll();
+    spawnEnabled = spawn;
 }
 
 int nsParticleSystem::Update(float deltaTime) {

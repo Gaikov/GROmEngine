@@ -5,11 +5,11 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/VisualObject2d.h"
-#include "input/InteractiveElement.h"
-#include "renderer/sprites/SpriteDesc.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/input/InteractiveElement.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
 #include "BaseButton.h"
-#include "display/align/Align.h"
+#include "Engine/display/align/Align.h"
 
 class nsImageButton : public nsVisualObject2d, public nsInteractiveElement {
 public:
