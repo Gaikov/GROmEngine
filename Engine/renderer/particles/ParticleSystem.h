@@ -30,6 +30,9 @@ public:
     int Update(float deltaTime);
     void Draw() const;
 
+    void RemoveAll();
+    void Reset(bool spawn);
+
 private:
     nsVec2  _prevPos;
     nsVec2  _currPos;
