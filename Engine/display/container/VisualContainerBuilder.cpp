@@ -53,5 +53,9 @@ bool nsVisualContainerBuilder::Parse(script_state_t *ss, nsVisualObject2d *objec
         ps_block_end(ss);
     }
 
+    if (ps_var_begin(ss, "interactiveChildren")) {
+        container->interactiveChildren = ps_var_f(ss) != 0.0f;
+    }
+
     return true;
 }

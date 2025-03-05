@@ -98,10 +98,13 @@ bool nsVisualContainer2d::HitTest(float x, float y) {
 }
 
 #define ITER_INPUT_CHILDREN(expr) \
-    for (auto it = _children.rbegin(); it != _children.rend(); ++it) { \
-        auto input = dynamic_cast<IUserInput*>(*it); \
-        if (input && (*it)->visible) { \
-            expr; \
+    if (interactiveChildren) \
+    { \
+        for (auto it = _children.rbegin(); it != _children.rend(); ++it) { \
+            auto input = dynamic_cast<IUserInput*>(*it); \
+            if (input && (*it)->visible) { \
+                expr; \
+            } \
         } \
     }
 
@@ -116,6 +119,10 @@ bool nsVisualContainer2d::OnPointerDown(float x, float y, int pointerId) {
 }
 
 bool nsVisualContainer2d::OnPointerMove(float x, float y, int pointerId) {
+    if (!interactiveChildren) {
+        return false;
+    }
+
     for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
         auto input = dynamic_cast<IUserInput *>(*it);
         if (input && (*it)->visible) {

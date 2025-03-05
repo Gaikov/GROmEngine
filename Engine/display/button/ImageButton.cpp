@@ -3,7 +3,6 @@
 //
 
 #include "ImageButton.h"
-#include "display/align/Align.h"
 
 nsImageButton::nsImageButton() : _currentState(&up) {
 
