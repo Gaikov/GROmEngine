@@ -9,9 +9,10 @@
 #include "Engine/input/InteractiveElement.h"
 #include "Engine/display/VisualObject2d.h"
 
-class nsVisualContainer2d : public nsVisualObject2d, public IUserInput {
+class nsVisualContainer2d : public nsVisualObject2d, virtual public IUserInput {
 public:
     typedef std::function<bool(nsVisualObject2d*)>  tChildCallback;
+    bool interactiveChildren = true;
 
     void Destroy() override;
     virtual void DestroyChildren();

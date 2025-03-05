@@ -7,7 +7,7 @@
 
 #include "Engine/UserInput.h"
 
-class   nsInteractiveElement : public IUserInput {
+class   nsInteractiveElement : virtual public IUserInput {
 public:
     virtual void SetEnabled(bool enabled);
     virtual bool IsEnabled() const;
