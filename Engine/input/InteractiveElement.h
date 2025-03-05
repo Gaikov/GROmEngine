@@ -7,7 +7,17 @@
 
 #include "Engine/UserInput.h"
 
-class   nsInteractiveElement : virtual public IUserInput {
+class nsInteractivePolicy {
+public:
+    virtual void OnPointerOver() = 0;
+    virtual void OnPointerOut() = 0;
+
+    virtual void OnPointerDown() = 0;
+    virtual void OnPointerUp() = 0;
+    virtual void OnClick() = 0;
+};
+
+class   nsInteractiveElement : virtual public IUserInput, virtual public nsInteractivePolicy {
 public:
     virtual void SetEnabled(bool enabled);
     virtual bool IsEnabled() const;
@@ -15,9 +25,12 @@ public:
     bool IsPointerOver() const;
     bool IsPointerDown() const;
 
+    nsInteractiveElement();
     virtual ~nsInteractiveElement() = default;
 
     virtual bool HitTest(float x, float y) = 0;
+
+    void AddPolicy(nsInteractivePolicy *p);
 
 protected:
     void OnKeyUp(int key) override;
@@ -33,20 +46,16 @@ protected:
     bool OnPointerMove(float x, float y, int pointerId) override;
 
     void OnPointerCancel(int pointerId) override;
-protected:
 
     void OnMouseWheel(float delta) override;
 
-    virtual void OnPointerOver() = 0;
-    virtual void OnPointerOut() = 0;
-
-    virtual void OnPointerDown() = 0;
-    virtual void OnPointerUp() = 0;
-    virtual void OnClick() = 0;
-
 private:
     bool _pointerDown = false;
+    int _pointerDownId = -1;
     bool _pointerOver = false;
-    int _pointerId = -1;
+    int _pointerOverId = -1;
+
     bool _enabled = true;
+
+    std::vector<nsInteractivePolicy*>   _policies;
 };
