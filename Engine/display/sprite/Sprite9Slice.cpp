@@ -16,6 +16,7 @@ void nsSprite9Slice::Loop() {
 }
 
 void nsSprite9Slice::DrawContent(const nsVisualContext2d &context) {
+    _device->StateApply(renState);
     desc.Draw(_device);
 }
 

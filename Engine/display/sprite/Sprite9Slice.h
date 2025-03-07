@@ -11,6 +11,7 @@
 class nsSprite9Slice : public nsVisualObject2d {
 public:
     nsSprite9SliceDesc desc;
+    IRenState           *renState = nullptr;
 
     void SetWidth(float width) override;
     void SetHeight(float height) override;

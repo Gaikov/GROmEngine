@@ -19,6 +19,7 @@
 #include "display/graphics/VisualRectBuilder.h"
 #include "display/group/horizontal/HGroupLayoutBuilder.h"
 #include "display/button/ImageButtonBuilder.h"
+#include "display/sprite/Sprite9SliceBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -34,6 +35,7 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsVirtualCircleBuilder>();
     RegisterBuilderWithName<nsVisualRectBuilder>();
     RegisterBuilderWithName<nsImageButtonBuilder>();
+    RegisterBuilderWithName<nsSprite9SliceBuilder>();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {
