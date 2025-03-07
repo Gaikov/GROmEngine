@@ -195,6 +195,8 @@ set(src
         display/button/ImageButton.h
         display/button/ImageButtonBuilder.cpp
         display/button/ImageButtonBuilder.h
+        display/sprite/Sprite9SliceBuilder.cpp
+        display/sprite/Sprite9SliceBuilder.h
 )
 
 include_directories(./)

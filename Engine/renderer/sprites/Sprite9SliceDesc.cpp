@@ -32,15 +32,15 @@ void nsSprite9SliceDesc::AddToBuffer(nsQuadsBuffer *buffer) {
 
     auto midHorz = texWidth - (_xMinPad + _xMaxPad);
     auto midVert = texHeight - (_yMinPad + _yMaxPad);
-    auto right = texWidth - _xMinPad;
-    auto bottom = texHeight - _xMaxPad;
+    auto right = texWidth - _xMaxPad;
+    auto bottom = texHeight - _yMaxPad;
     auto left = _xMinPad;
     auto top = _yMinPad;
 
     float posX[] = {0, left, right};
     float sizeX[] = {_xMinPad, midHorz, _xMaxPad};
     float posY[] = {bottom, top, 0};
-    float sizeY[] = {_yMaxPad, midVert, top};
+    float sizeY[] = {_yMaxPad, midVert, _yMinPad};
 
     nsTileDef   tiles[3][3];
     for (int x = 0; x < 3; x++) {
@@ -58,8 +58,8 @@ void nsSprite9SliceDesc::AddToBuffer(nsQuadsBuffer *buffer) {
     }
     float tileSizeX[] = {left, midHorz, right};
 
-    bottom = _yMinPad;
-    top = _yMaxPad;
+    bottom = _yMaxPad;
+    top = _yMinPad;
     midVert = _height - (_yMinPad + _yMaxPad);
     if (midVert < 0) {
         bottom = top = std::max(_height + midVert, 0.0f) / 2.0f;
