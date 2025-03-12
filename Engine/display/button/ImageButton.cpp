@@ -21,7 +21,7 @@ void nsImageButton::DrawContent(const nsVisualContext2d &context) {
     _currentState->Draw(_device);
 
     if (font) {
-        font->Draw(text, labelPos, nsVec2(1, 1), nsColor::white);
+        font->Draw(text, labelPos, nsVec2(1, 1), textColor);
     }
 }
 
