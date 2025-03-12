@@ -16,9 +16,8 @@ bool nsSprite9SliceBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVis
         return false;
     }
 
-    auto *sprite = dynamic_cast<nsSprite9Slice *>(o);
+    auto *sprite = Cast<nsSprite9Slice>(o);
     if (!sprite) {
-        Log::Error("Invalid visual class: nsSprite9Slice");
         return false;
     }
 
