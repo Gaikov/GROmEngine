@@ -3,7 +3,6 @@
 //
 
 #include "PopupManager.h"
-#include "display/Sprite.h"
 #include "nsLib/log.h"
 
 class nsPopupOverlay final : public nsSprite, public IUserInput {
@@ -48,12 +47,18 @@ nsPopupManager::nsPopupManager() {
 
 void nsPopupManager::OnRelease() {
     Log::Info("...destroying popup manager");
+
+    auto list = _popupsList;
+    for (auto &p : list) {
+        DestroyPopup(p.popup);
+    }
+    _popupsList.clear();
+
     const auto parent = _root.GetParent();
     if (parent) {
         parent->RemoveChild(&_root);
     }
-    _root.DestroyChildren();
-    _popupsList.clear();
+
     nsSubSystem::OnRelease();
 }
 
@@ -81,6 +86,12 @@ void nsPopupManager::DestroyPopup(nsBasePopup *popup) {
 
         _popupsList.erase(it);
     }
+}
+
+void nsPopupManager::OnResize(float x, float y, float width, float height) {
+    _root.origin.pos = {x, y};
+    _root.SetWidth(width);
+    _root.SetHeight(height);
 }
 
 

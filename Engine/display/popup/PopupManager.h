@@ -31,6 +31,7 @@ public:
     nsVisualObject2d* GetRoot() { return &_root; }
 
     void DestroyPopup(nsBasePopup *popup);
+    void OnResize(float x, float y, float width, float height);
 
 private:
     struct PopupInfo {
