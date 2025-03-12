@@ -33,6 +33,10 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
             button->text = ps_var_str(ss);
         }
 
+        if (ps_var_begin(ss, "color")) {
+            ps_var_4f(ss, button->textColor);
+        }
+
         button->AlignText(nsAlign::CENTER, nsAlign::CENTER);
 
         nsVec2 offset;

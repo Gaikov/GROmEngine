@@ -22,6 +22,7 @@ public:
     nsString    text;
     nsFont      *font = nullptr;
     nsVec2      labelPos;
+    nsColor     textColor;
 
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
