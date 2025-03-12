@@ -19,8 +19,8 @@ public:
 
     template<typename TPopupClass>
     TPopupClass* CreatePopup() {
-        auto    popup = new TPopupClass();
-        if (popup->OnCreate()) {
+        auto *popup = new TPopupClass();
+        if (((nsBasePopup*)popup)->OnCreate()) {
             AddPopup(popup);
             return popup;
         }

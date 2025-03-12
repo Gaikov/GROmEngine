@@ -6,13 +6,14 @@
 #include "BasePopup.h"
 #include "Engine/display/text/TextArea.h"
 #include "Engine/display/button/TextButton.h"
+#include "DefaultPopup.h"
 
 struct nsButtonInfo {
     nsString    label;
     nsTextButton::handler_t onClick;
 };
 
-class nsMessagePopup : public nsBasePopup {
+class nsMessagePopup : public nsDefaultPopup {
 public:
     typedef std::vector<nsButtonInfo> buttonsList_t;
 

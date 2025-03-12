@@ -197,6 +197,8 @@ set(src
         display/button/ImageButtonBuilder.h
         display/sprite/Sprite9SliceBuilder.cpp
         display/sprite/Sprite9SliceBuilder.h
+        display/popup/DefaultPopup.cpp
+        display/popup/DefaultPopup.h
 )
 
 include_directories(./)
