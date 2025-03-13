@@ -6,6 +6,7 @@
 #pragma once
 
 #include "BasePopup.h"
+#include "Engine/display/Sprite.h"
 
 class nsDefaultPopup : public nsBasePopup {
 protected:

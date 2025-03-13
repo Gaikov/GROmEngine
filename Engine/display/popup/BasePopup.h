@@ -7,7 +7,6 @@
 
 #include "Engine/display/layouts/GroupLayout.h"
 #include "Engine/display/text/TextLabel.h"
-#include "Engine/display/Sprite.h"
 
 class nsBasePopup : public nsGroupLayout {
     friend class nsPopupManager;

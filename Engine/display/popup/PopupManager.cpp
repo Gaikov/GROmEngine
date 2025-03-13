@@ -3,6 +3,8 @@
 //
 
 #include "PopupManager.h"
+
+#include "display/Sprite.h"
 #include "nsLib/log.h"
 
 class nsPopupOverlay final : public nsSprite, public IUserInput {
@@ -92,6 +94,10 @@ void nsPopupManager::OnResize(float x, float y, float width, float height) {
     _root.origin.pos = {x, y};
     _root.SetWidth(width);
     _root.SetHeight(height);
+}
+
+bool nsPopupManager::IsActive() const {
+    return !_popupsList.empty();
 }
 
 

@@ -9,6 +9,8 @@
 
 class nsInteractivePolicy {
 public:
+    virtual ~nsInteractivePolicy() = default;
+
     virtual void OnPointerOver() = 0;
     virtual void OnPointerOut() = 0;
 
@@ -26,7 +28,6 @@ public:
     bool IsPointerDown() const;
 
     nsInteractiveElement();
-    virtual ~nsInteractiveElement() = default;
 
     virtual bool HitTest(float x, float y) = 0;
 

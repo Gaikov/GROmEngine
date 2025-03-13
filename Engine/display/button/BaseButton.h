@@ -7,6 +7,7 @@
 #include "Engine/input/InteractiveElement.h"
 #include "nsLib/color.h"
 
+//TODO: nsDefaultButton (for UI tools), make BaseButton with onClick handler
 class nsBaseButton : public nsVisualObject2d, public nsInteractiveElement {
 public:
     typedef std::function<void()> handler_t;

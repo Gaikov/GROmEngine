@@ -32,6 +32,7 @@ public:
 
     void DestroyPopup(nsBasePopup *popup);
     void OnResize(float x, float y, float width, float height);
+    bool IsActive() const;
 
 private:
     struct PopupInfo {
