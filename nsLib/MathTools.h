@@ -50,7 +50,6 @@ struct nsMath
     static inline float     Random();
 	static inline float		NormalizeAngle(float angle);
 	static inline float		ClosestAngle(float from, float to);
-
 };
 
 //---------------------------------------------------------
