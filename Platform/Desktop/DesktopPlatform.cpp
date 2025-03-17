@@ -213,3 +213,7 @@ IDataReader *DesktopPlatform::InternalRead(const char *fileName) {
 ISoftInput *DesktopPlatform::GetSoftInput() {
     return _softInput;
 }
+
+void DesktopPlatform::OpenUrl(const char *url) {
+    ShellExecute(nullptr, "open", url, nullptr, nullptr, SW_SHOWNORMAL);
+}

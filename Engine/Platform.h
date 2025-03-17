@@ -6,7 +6,6 @@
 #define _GROM_ENGINE_PLATFORM_H
 
 #include "Core/Args.h"
-#include "Core/BitmapData.h"
 #include "Core/DataWriter.h"
 #include "nsLib/FilePath.h"
 #include "input/ISoftInput.h"
@@ -46,6 +45,7 @@ public:
     virtual void SetAppTitle(const char *text) = 0;
     virtual void GetClientSize(int &width, int &height) = 0;
     virtual void* GetWindowHandler() = 0;
+    virtual void OpenUrl(const char *url) = 0;
 
     //Display modes
     virtual void GetDisplayModes(tDisplayModesList &modes) = 0;
