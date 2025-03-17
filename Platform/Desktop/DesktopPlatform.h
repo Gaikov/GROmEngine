@@ -64,6 +64,8 @@ public:
 
     ISoftInput *GetSoftInput() override;
 
+    void OpenUrl(const char *url) override;
+
 private:
     DesktopKeyNames _keyNames;
 
