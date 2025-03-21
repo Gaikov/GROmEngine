@@ -25,8 +25,6 @@ bool nsParticlesMultiDirectionSpawner::Parse(script_state_t *ss, nsParticlesSpaw
             Direction   dir;
             dir.minAngle = nsMath::ToRad(ParseFloat(ss, "minAngle"));
             dir.maxAngle = nsMath::ToRad(ParseFloat(ss, "maxAngle"));
-            dir.minAngle = nsMath::NormalizeAngle(dir.minAngle);
-            dir.maxAngle = nsMath::ClosestAngle(dir.minAngle, dir.maxAngle);
 
             dir.minSpeed = ParseFloat(ss, "minSpeed");
             dir.maxSpeed = ParseFloat(ss, "maxSpeed");
