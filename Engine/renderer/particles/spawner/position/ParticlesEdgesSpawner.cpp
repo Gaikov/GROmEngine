@@ -7,14 +7,14 @@
 #include "nsLib/log.h"
 
 void nsParticlesEdgesSpawner::Spawn(nsParticle *p, float angle) {
-    if (_frame.size() > 1) {
+    if (!_frame.empty()) {
         float dist = nsMath::Random() * _length * 0.999f;
 
         for (auto &e: _frame) {
             dist -= e.length;
             if (dist < 0) {
                 p->pos = (e.pos + e.dir * (e.length + dist)).Rotate(angle);
-                return;
+                break;
             }
         }
     }
