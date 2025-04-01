@@ -194,4 +194,8 @@ void AndroidPlatform::SetSoftInput(ISoftInput *si) {
     }
 }
 
+void AndroidPlatform::OpenUrl(const char *url) {
+    Log::Warning("OpenUrl is not implemented!");
+}
+
 
