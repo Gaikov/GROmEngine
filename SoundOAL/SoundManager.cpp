@@ -40,7 +40,7 @@ nsALSound* nsSoundManager::LoadSound( const char *fileName )
 		else
 			name += ".wav";
 	}
-	name.ToLower();
+	//name.ToLower();
 		
 	nsALSound	*s = 0;
 	LogPrintf( PRN_ALL, "loading sound '%s'\n", name.AsChar() );
