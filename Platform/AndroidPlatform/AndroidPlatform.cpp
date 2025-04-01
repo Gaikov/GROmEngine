@@ -195,7 +195,22 @@ void AndroidPlatform::SetSoftInput(ISoftInput *si) {
 }
 
 void AndroidPlatform::OpenUrl(const char *url) {
-    Log::Warning("OpenUrl is not implemented!");
+    if (!_activity) {
+        Log::Warning("Activity object is not initialized!");
+        return;
+    }
+
+    auto method = _activity->BeginMethod("openUrl", "(Ljava/lang/String;)V");
+    if (method) {
+        auto env = _activity->GetEnv();
+        auto javaUrl = env->NewStringUTF(url);
+        env->CallVoidMethod(_activity->GetObject(), method, javaUrl);
+        env->DeleteLocalRef(javaUrl);
+        _activity->EndMethod();
+        return;
+    }
+
+    Log::Warning("Failed to open url!");
 }
 
 
