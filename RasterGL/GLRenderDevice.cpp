@@ -88,6 +88,8 @@ bool GLRenderDevice::PrepareOpenGL()
 void GLRenderDevice::CleanupOpenGL()
 {
 	//TODO: destroy gl context
+    _shaders.Apply(nullptr);
+    _textures.BindTexture(nullptr);
 }
 
 void GLRenderDevice::Release()
