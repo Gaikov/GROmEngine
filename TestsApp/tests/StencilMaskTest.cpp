@@ -67,14 +67,16 @@ bool nsStencilMaskTest::Init() {
         _wall.RemoveMask(&_block);
     });
 
-    auto track = g_sndDev->TrackLoad("tests/test.ogg");
-    g_sndDev->TrackPlay(track);
+    auto sd = nsSoundDevice::Shared()->Device();
+
+    auto track = sd->TrackLoad("tests/test.ogg");
+    sd->TrackPlay(track);
 
     return true;
 }
 
 void nsStencilMaskTest::Release() {
-    g_sndDev->TrackPlay(nullptr);
+    nsSoundDevice::Shared()->Device()->TrackPlay(nullptr);
 }
 
 void nsStencilMaskTest::Loop(float deltaTime) {

@@ -10,7 +10,7 @@
 #include "Engine/KeyCodes.h"
 
 nsCollisionTest::nsCollisionTest() : _rectColliding(false) {
-    _rectColliding.AddHandler(nsPropChangedName::CHANGED, [this](const nsBaseEvent &e) {
+    _rectColliding.AddHandler(nsPropChangedName::CHANGED, [this](const nsBaseEvent *e) {
         _userRect->visible = _rectColliding;
         _userCircle->visible = !_rectColliding;
     });
