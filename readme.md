@@ -1,6 +1,6 @@
 # C++ Game Engine
 - Based on OpenGL and OpenAL
-- Supported platforms: Windows, Linux, MacOS, Android
+- Supported platforms: Windows, Linux, MacOS, Android, HTML/WASM
 
 ## How to start to make a game
 Use [Game Template](https://github.com/Gaikov/GROmGameTemplate)
@@ -15,7 +15,6 @@ GameProject /
 CMakeLists.txt root example for a game project:
 
 ```cmake
-cmake_minimum_required(VERSION 3.13)
 project(GROmGameTemplate) #1. change to game name
 
 set(CMAKE_CXX_STANDARD 20)
@@ -34,6 +33,7 @@ add_subdirectory(GROmEngine)
 add_subdirectory(GameSources) #2. game source code
 ```
 # Games
+- [Friendship's StarWar](https://play.google.com/store/apps/details?id=com.grom.fsw)
 - [Castles Keeper](https://play.google.com/store/apps/details?id=com.grom.castleskeeper)
 
 # Links

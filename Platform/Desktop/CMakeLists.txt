@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(Platform)
 
-set(CMAKE_CXX_STANDARD 17)
+if (NOT WEB_ASM)
 find_package(GLFW3 REQUIRED)
+endif()
+
 set(sources
         DesktopKeyNames.cpp
         DesktopPlatform.cpp

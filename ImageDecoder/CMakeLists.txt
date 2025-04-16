@@ -7,11 +7,12 @@ file(GLOB sources
 
 include_directories(
         ./
+        ./zlib
 )
 
-add_subdirectory(png)
 add_subdirectory(zlib)
+add_subdirectory(png)
 add_subdirectory(jpeg)
 
 add_library(ImageDecoder STATIC ${sources})
-target_link_libraries(ImageDecoder myJpeg libpng zlib)
+target_link_libraries(ImageDecoder PRIVATE myJpeg libpng zlib)

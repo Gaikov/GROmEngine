@@ -6,7 +6,17 @@ project(zlib C)
 set(VERSION "1.3.1")
 
 file(GLOB sources
-        "*.c"
+        adler32.c
+        compress.c
+        crc32.c
+        deflate.c
+        inflate.c
+        infback.c
+        inftrees.c
+        inffast.c
+        trees.c
+        uncompr.c
+        zutil.c
 )
 
 include_directories(

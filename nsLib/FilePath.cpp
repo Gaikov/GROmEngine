@@ -81,7 +81,7 @@ bool nsFilePath::Remove() const
 				return false;
 			}
 		}
-#ifndef ANDROID
+#if !(defined(ANDROID) || defined(WEB_ASM))
 		return rmdir(_path) == 0;
 #endif
 	}
