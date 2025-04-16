@@ -28,6 +28,8 @@ extern IRenDevice* GetRenDevice();
 //---------------------------------------------------------
 bool nsRenDevice::RegVars()
 {
+    Log::Info("...registering renderer vars");
+
     g_cfg->RegCmd("r_invalidate", Invalidate_f);
     g_cfg->RegCmd("r_portrait", Portrait_f);
     g_cfg->RegCmd("r_landscape", Landscape_f);

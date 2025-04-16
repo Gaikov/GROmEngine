@@ -31,7 +31,7 @@ bool nsCore::Init()
     }
 	if (!nsConfig::Init()) return false;
 
-	LogPrintf(PRN_ALL, "\n");
+	Log::Info("*** Core Started ***");
 	return true;
 }
 

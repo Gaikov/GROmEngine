@@ -2,9 +2,6 @@
 // Created by Roman on 3/26/2024.
 //
 
-#if !defined(WEB_ASM)
-#include <windows.h>
-#endif
 #include "DesktopPlatform.h"
 #include "nsLib/log.h"
 #include "Core/sys.h"
@@ -13,6 +10,7 @@
 #include "Engine/input/SoftInputEmpty.h"
 #include "Engine/input/soft/SoftInputKeyboard.h"
 #include "Core/Config.h"
+
 
 bool DesktopPlatform::Init() {
     Log::Info("##### Init Desktop #####");
@@ -142,7 +140,7 @@ void DesktopPlatform::GetDisplayModes(Platform::tDisplayModesList &result) {
 bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, int bits, int frequency) {
 #if !defined(WEB_ASM)
     glfwGetError(nullptr);
-#endif
+
     LogPrintf(PRN_ALL, "Applying display mode: %ix%i...\n", width, height);
 
     if (fullScreen) {
@@ -166,15 +164,15 @@ bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, i
         Log::Info("Monitor content scale: %fx%f", sx, sy);
     }
 
-#if !defined(WEB_ASM)
     if (glfwGetError(nullptr) != GLFW_NO_ERROR) {
         Sys_Message("Can't apply display mode: %ix%i", width, height);
         return false;
     }
-#endif
+
 
     //glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
     LogPrintf(PRN_ALL, "DONE\n");
+#endif
     return true;
 }
 
@@ -205,9 +203,7 @@ bool DesktopPlatform::ShowInterstitialAd() {
 }
 
 void DesktopPlatform::MessagePopup(const char *caption, const char *message) {
-#if !defined(WEB_ASM)
-    ::MessageBox(nullptr, message, caption, 0);
-#endif
+    nsEnv::Shared()->MessagePopup(caption, message);
 }
 
 IDataWriter *DesktopPlatform::InternalWrite(const char *fileName) {
@@ -223,7 +219,5 @@ ISoftInput *DesktopPlatform::GetSoftInput() {
 }
 
 void DesktopPlatform::OpenUrl(const char *url) {
-#if !defined(WEB_ASM)
-    ShellExecute(nullptr, "open", url, nullptr, nullptr, SW_SHOWNORMAL);
-#endif
+    nsEnv::Shared()->OpenUrl(url);
 }

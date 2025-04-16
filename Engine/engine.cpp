@@ -48,7 +48,7 @@ bool nsEngine::Init()
 	g_frameTime = 0;
 	if ( !nsCore::Init() ) return false;
 
-    Log::Info("...Starting engine\n");
+    Log::Info("...Starting engine");
 	com_maxfps = g_cfg->RegVar( "com_maxfps", "0", GVF_SAVABLE );
 	com_min_time = g_cfg->RegVar( "com_min_time", "200", 0 );
 	com_time_scale = g_cfg->RegVar( "com_time_scale", "0", 0 );
