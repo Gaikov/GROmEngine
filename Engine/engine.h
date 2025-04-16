@@ -7,7 +7,6 @@
 #define	_engine_H_
 
 #include "UserInput.h"
-#include "nsLib/math/ortho/OrthogonalNativeView.h"
 
 struct nsEngine
 {

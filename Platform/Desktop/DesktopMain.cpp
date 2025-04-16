@@ -10,11 +10,6 @@
 #include "Engine/display/VisualObject2d.h"
 #include "Core/Memory.h"
 
-#ifdef WEB_ASM
-#include <emscripten/emscripten.h>
-#include <emscripten/console.h>
-#endif
-
 static DesktopPlatform g_desktop;
 static nsArgs g_args;
 static std::vector<int> mouseButtons;
@@ -34,17 +29,17 @@ void onExit() {
 
     mouseButtons.clear();
     nsEngine::Release(!success);
-    glfwTerminate();
+    nsEnv::Destroy();
 
     nsVisualObject2d::LeaksCheck();
     mem_report();
 }
 
 int main(int argc, char *argv[]) {
-#ifdef WEB_ASM
-    emscripten_console_log("Hello from GROm !");
-#endif
     std::atexit(onExit);
+    if (!nsEnv::Create()) {
+        return -1;
+    }
 
     g_args.FromArgs(argc, (const char **) argv);
 

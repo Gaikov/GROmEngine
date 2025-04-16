@@ -69,10 +69,10 @@ public:
 private:
     DesktopKeyNames _keyNames;
 
-    GLFWwindow  *_wnd;
-    GLFWmonitor *_display;
+    GLFWwindow  *_wnd = nullptr;
+    GLFWmonitor *_display = nullptr;
     ISoftInput::sp_t _softInput;
-    nsVar   *_useSoftInput;
+    nsVar   *_useSoftInput = nullptr;
     nsEventDispatcher::tEventHandler _softInputChanged;
 
     void UpdateSoftInput();
