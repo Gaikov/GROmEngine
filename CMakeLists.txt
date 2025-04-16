@@ -46,19 +46,24 @@ include_directories(
         ./
         Platform
         ThirdParty/OggVorbis/include
-        ThirdParty/openal-soft/include
 )
+
+if (NOT WEB_ASM)
+    include_directories(
+        ThirdParty/openal-soft/include
+    )
+    add_subdirectory(ThirdParty/openal-soft)
+endif()
 
 add_subdirectory(nsLib)
 add_subdirectory(Core)
 add_subdirectory(ImageDecoder)
 add_subdirectory(SoundBase)
-add_subdirectory(ThirdParty/openal-soft)
 add_subdirectory(${SOUND_LIB})
 add_subdirectory(RasterGL)
 add_subdirectory(Engine)
 
-if (NOT ANDROID) #TODO: not mobile
+if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_subdirectory(nsLib_unit)
     add_dependencies(nsLib_unit nsLib)
     add_subdirectory(Core_unit)

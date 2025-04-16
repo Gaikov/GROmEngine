@@ -10,6 +10,11 @@
 #include "Engine/display/VisualObject2d.h"
 #include "Core/Memory.h"
 
+#ifdef WEB_ASM
+#include <emscripten/emscripten.h>
+#include <emscripten/console.h>
+#endif
+
 static DesktopPlatform g_desktop;
 static nsArgs g_args;
 static std::vector<int> mouseButtons;
@@ -22,24 +27,30 @@ Platform *App_GetPlatform() {
     return &g_desktop;
 }
 
+static bool success = false;
+
 void onExit() {
     printf("======== AtExit =======\n");
+
+    mouseButtons.clear();
+    nsEngine::Release(!success);
+    glfwTerminate();
+
     nsVisualObject2d::LeaksCheck();
     mem_report();
 }
 
 int main(int argc, char *argv[]) {
+#ifdef WEB_ASM
+    emscripten_console_log("Hello from GROm !");
+#endif
     std::atexit(onExit);
 
     g_args.FromArgs(argc, (const char **) argv);
 
-    bool success = nsEngine::Init();
+    success = nsEngine::Init();
     if (success) {
         auto wnd = g_desktop.GetWindow();
-
-        glfwSetWindowSizeCallback(wnd, [](GLFWwindow *window, int width, int height) {
-            glViewport(0, 0, width, height);
-        });
 
         glfwSetJoystickCallback([](int id, int status) {
             if (status == GLFW_CONNECTED) {
@@ -112,8 +123,5 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    mouseButtons.clear();
-    nsEngine::Release(!success);
-    glfwTerminate();
     return 0;
 }

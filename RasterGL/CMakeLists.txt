@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(RasterGL)
 
-if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+if (WEB_ASM)
+    message(STATUS "No gl linking for webasm")
+elseif (CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(OPENGL_LIBRARIES GL GLU)
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     find_package(OpenGL REQUIRED)
