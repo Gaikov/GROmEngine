@@ -1,15 +1,9 @@
 // Copyright (c) 2003-2025, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file DesktopEnv.h
+// file DesktopCommon.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-#include "env/Env.h"
 
-class nsDesktopEnv : public nsEnv {
-    bool Init() override;
-    void MessagePopup(const char *title, const char *message) override;
-    void OpenUrl(const char *url) override;
-
-    void MainLoop(GLFWwindow *wnd) override;
-};
+#include <GLES/gl.h>
+#include <GLFW/glfw3.h>

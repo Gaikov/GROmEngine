@@ -19,8 +19,8 @@ public:
     };
 
     typedef std::vector<DisplayMode>    tDisplayModesList;
+    virtual ~Platform() = default;
 
-public:
     //App
     virtual bool Init() = 0;
     virtual void Release() = 0;
