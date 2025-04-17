@@ -7,18 +7,20 @@
 
 #include "DesktopCommon.h"
 
-class nsEnv {
+class nsEnv final {
 public:
-    virtual ~nsEnv() = default;
-    virtual bool Init() = 0;
-    virtual void MessagePopup(const char *title, const char *message) = 0;
-    virtual void OpenUrl(const char *url) = 0;
-    virtual void MainLoop(GLFWwindow *wnd) = 0;
+    bool Init();
+    GLFWwindow* CreateGameWindow();
+    void GetClientSize(int &width, int &height);
+    void MessagePopup(const char *title, const char *message);
+    void OpenUrl(const char *url);
+    void MainLoop();
 
     static bool Create();
     static void Destroy();
     static nsEnv* Shared() { return _shared; }
 
 private:
+    GLFWwindow *_wnd = nullptr;
     static nsEnv *_shared;
 };
