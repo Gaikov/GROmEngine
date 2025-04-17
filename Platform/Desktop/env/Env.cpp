@@ -4,21 +4,14 @@
 
 #include "Env.h"
 
-#ifdef WEB_ASM
-#include "env/web/WebEnv.h"
-#else
-#include "env/desktop/DesktopEnv.h"
-#endif
-
 nsEnv* nsEnv::_shared = nullptr;
 
 bool nsEnv::Create() {
-#ifdef WEB_ASM
-    _shared = new nsWebEnv();
-#else
-    _shared = new nsDesktopEnv();
-#endif
-    return _shared->Init();
+    if (!_shared) {
+        _shared = new nsEnv();
+        return _shared->Init();
+    }
+    return true;
 }
 
 void nsEnv::Destroy() {

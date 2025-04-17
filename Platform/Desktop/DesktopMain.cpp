@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
         });
         glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
 
-        nsEnv::Shared()->MainLoop(wnd);
+        nsEnv::Shared()->MainLoop();
     }
 
     return 0;

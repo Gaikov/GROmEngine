@@ -27,13 +27,13 @@ bool DesktopPlatform::Init() {
         return false;
     }
 
-    _wnd = glfwCreateWindow(800, 600, "GROm Engine", nullptr, nullptr);
+    _wnd = nsEnv::Shared()->CreateGameWindow();
     if (!_wnd) {
         Sys_FatalError("Could not create game window!");
         return false;
     }
-
     glfwMakeContextCurrent(_wnd);
+
     _display = glfwGetPrimaryMonitor();
 
     GLint stencilBits = 0;
@@ -82,7 +82,7 @@ void DesktopPlatform::SetAppTitle(const char *text) {
 }
 
 void DesktopPlatform::GetClientSize(int &width, int &height) {
-    glfwGetWindowSize(_wnd, &width, &height);
+    nsEnv::Shared()->GetClientSize(width, height);
 }
 
 bool DesktopPlatform::IsKeyPressed(int key) {

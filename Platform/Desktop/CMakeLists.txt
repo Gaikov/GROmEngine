@@ -3,16 +3,12 @@ project(Platform)
 
 if (WEB_ASM)
     set(env-sources
-            env/web/WebLog.cpp
-            env/web/WebLog.h
             env/web/WebEnv.cpp
-            env/web/WebEnv.h
     )
 else ()
     find_package(GLFW3 REQUIRED)
     set(env-sources
             env/desktop/DesktopEnv.cpp
-            env/desktop/DesktopEnv.h
     )
 endif ()
 
