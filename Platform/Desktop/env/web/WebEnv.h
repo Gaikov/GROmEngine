@@ -11,4 +11,5 @@ public:
     bool Init() override;
     void MessagePopup(const char *title, const char *message) override;
     void OpenUrl(const char *url) override;
+    void MainLoop(GLFWwindow *wnd) override;
 };
