@@ -5,12 +5,15 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "DesktopCommon.h"
+
 class nsEnv {
 public:
     virtual ~nsEnv() = default;
     virtual bool Init() = 0;
     virtual void MessagePopup(const char *title, const char *message) = 0;
     virtual void OpenUrl(const char *url) = 0;
+    virtual void MainLoop(GLFWwindow *wnd) = 0;
 
     static bool Create();
     static void Destroy();

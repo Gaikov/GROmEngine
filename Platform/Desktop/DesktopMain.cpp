@@ -9,6 +9,7 @@
 #include "Core/Var.h"
 #include "Engine/display/VisualObject2d.h"
 #include "Core/Memory.h"
+#include "env/Env.h"
 
 static DesktopPlatform g_desktop;
 static nsArgs g_args;
@@ -112,10 +113,7 @@ int main(int argc, char *argv[]) {
         });
         glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
 
-        while (!glfwWindowShouldClose(wnd) && !Sys_IsExit()) {
-            nsEngine::MainLoop();
-            glfwPollEvents();
-        }
+        nsEnv::Shared()->MainLoop(wnd);
     }
 
     return 0;

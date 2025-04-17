@@ -22,6 +22,7 @@ set(sources
         DesktopMain.cpp
         env/Env.cpp
         env/Env.h
+        DesktopCommon.h
 )
 
 include_directories(.)

@@ -2,18 +2,17 @@
 // Created by Roman on 3/26/2024.
 //
 
-#ifndef _GROM_PLATFORM_DESKTOPPLATFORM_H
-#define _GROM_PLATFORM_DESKTOPPLATFORM_H
+#pragma once
 
-#include <GLES/gl.h>
-#include <GLFW/glfw3.h>
+
+#include "DesktopCommon.h"
 #include "Engine/Platform.h"
 #include "DesktopKeyNames.h"
 #include "Core/DataWriter.h"
 #include "nsLib/FilePath.h"
 #include "Core/Var.h"
 
-class DesktopPlatform : public Platform {
+class DesktopPlatform final : public Platform {
 public:
     bool Init() override;
     void Release() override;
@@ -77,6 +76,3 @@ private:
 
     void UpdateSoftInput();
 };
-
-
-#endif //_GROM_PLATFORM_DESKTOPPLATFORM_H
