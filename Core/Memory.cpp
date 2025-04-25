@@ -4,6 +4,9 @@
 #include "nsLib/StrTools.h"
 #include <cstdlib>
 
+static bool g_inLoop = true;
+static int g_loopAllocations = 0;
+
 void *operator new(size_t size)
 {
 	return mem_malloc(size, "unknown file", 0);
@@ -22,6 +25,18 @@ void operator delete(void *p) noexcept
 void operator delete[](void *p) noexcept
 {
 	mem_free(p);
+}
+
+void nsMemory::BeginLoop() {
+	g_inLoop = true;
+}
+
+void nsMemory::EndLoop() {
+	g_inLoop = false;
+	if (g_loopAllocations) {
+		Log::Warning("Memory allocations in game loop: %i", g_loopAllocations);
+	}
+	g_loopAllocations = 0;
 }
 
 #define    MEM_ID    0xAFAF
@@ -151,6 +166,7 @@ static int g_allocatedBlocks = 0;
 
 void *mem_malloc(uint size, const char *file, int line)
 {
+	g_loopAllocations++;
     g_allocatedBlocks ++;
 	auto data = malloc(size);
 	memset(data, 0, size);
@@ -159,6 +175,7 @@ void *mem_malloc(uint size, const char *file, int line)
 
 void *mem_realloc(void *data, uint size, const char *file, int line)
 {
+	g_loopAllocations++;
 	assert(data);
 	return realloc(data, size);
 }
