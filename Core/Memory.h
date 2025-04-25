@@ -35,27 +35,11 @@ void operator delete( void* p ) noexcept;
 void operator delete [] ( void* p ) noexcept;
 
 
-/*inline void* operator new ( size_t size, const char* file, int line )
-{
-	return mem_malloc( size, (char*)file, line );
-}
+class nsMemory final {
+public:
+	static void BeginLoop();
+	static void EndLoop();
+};
 
-inline void* operator new[] ( size_t size, const char* file, int line )
-{
-	return mem_malloc( size, (char*)file, line );
-}
 
-inline void operator delete( void* p )
-{
-	mem_free( p );
-}
-
-inline void operator delete [] ( void* p )
-{
-	mem_free( p );
-}
-
-#define new new( __FILE__, __LINE__ )//*/
-
-//#pragma warning( disable : 4291 )
 #endif

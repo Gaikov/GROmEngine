@@ -25,10 +25,9 @@
 
 #define DEBUG_BUILD "Debug"
 
-//��� ������� ������� �����
-dword	prevTime;		//���������� �����
-uint	frametime;		//����� ����� � ��
-float	g_frameTime;	//����� ����� � ���
+dword	prevTime;
+uint	frametime;
+float	g_frameTime;
 
 nsVar	*com_maxfps = nullptr;
 nsVar	*com_min_time = nullptr;
@@ -152,6 +151,7 @@ dword	add = 0;
 
 void nsEngine::MainLoop()
 {
+	nsMemory::BeginLoop();
 	IGameApp	*game = App_GetGame();
 
 	dword	currtime = 0;
@@ -164,8 +164,12 @@ void nsEngine::MainLoop()
 			frametime = (uint)com_min_time->Value();
 	}
 
-	if ( com_maxfps->Value() > 0 )
-		if ( frametime < 1000 / com_maxfps->Value() ) return;
+	if ( com_maxfps->Value() > 0 ) {
+		if ( frametime < 1000 / com_maxfps->Value() ) {
+			nsMemory::EndLoop();
+			return;
+		}
+	}
 
 
 	{
@@ -242,6 +246,8 @@ void nsEngine::MainLoop()
         g_renDev->EndScene();
         App_GetPlatform()->SwapBuffers();
 	}
+
+	nsMemory::EndLoop();
 }
 
 void nsEngine::OnKeyDown(int keyCode, bool repeat)
