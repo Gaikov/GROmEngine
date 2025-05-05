@@ -185,7 +185,7 @@ bool DesktopPlatform::FolderListing(const nsFilePath &folder, nsFilePath::tList 
 }
 
 bool DesktopPlatform::IsMobile() {
-    return false;
+    return nsEnv::Shared()->IsMobile();
 }
 
 void DesktopPlatform::SwapBuffers() {
