@@ -16,6 +16,10 @@ EM_JS(int, GetCanvasHeight, (), {
 	return Module['canvas'].height;
 });
 
+EM_JS(bool, IsMobileExternal, (), {
+  return isMobile();
+});
+
 static void Loop() {
 	nsEngine::MainLoop();
 	glfwPollEvents();
@@ -46,4 +50,8 @@ void nsEnv::GetClientSize(int &width, int &height) {
 GLFWwindow* nsEnv::CreateGameWindow() {
 	_wnd = glfwCreateWindow(GetCanvasWidth(), GetCanvasHeight(), "GROm Engine", nullptr, nullptr);
 	return _wnd;
+}
+
+bool nsEnv::IsMobile() {
+	return IsMobileExternal();
 }

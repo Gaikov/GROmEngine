@@ -35,3 +35,8 @@ GLFWwindow* nsEnv::CreateGameWindow() {
     _wnd = glfwCreateWindow(800, 600, "GROm Engine", nullptr, nullptr);
     return _wnd;
 }
+
+bool nsEnv::IsMobile() {
+    return false;
+}
+

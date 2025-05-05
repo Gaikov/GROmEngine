@@ -15,6 +15,7 @@ public:
     void MessagePopup(const char *title, const char *message);
     void OpenUrl(const char *url);
     void MainLoop();
+    bool IsMobile();
 
     static bool Create();
     static void Destroy();
