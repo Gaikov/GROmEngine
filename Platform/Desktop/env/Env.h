@@ -6,6 +6,7 @@
 #pragma once
 
 #include "DesktopCommon.h"
+#include "nsLib/headers.h"
 
 class nsEnv final {
 public:
@@ -16,6 +17,9 @@ public:
     void OpenUrl(const char *url);
     void MainLoop();
     bool IsMobile();
+    const char* GetDomainName() const {
+        return _domainName.c_str();
+    }
 
     static bool Create();
     static void Destroy();
@@ -24,4 +28,5 @@ public:
 private:
     GLFWwindow *_wnd = nullptr;
     static nsEnv *_shared;
+    std::string  _domainName;
 };
