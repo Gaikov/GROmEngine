@@ -221,3 +221,7 @@ ISoftInput *DesktopPlatform::GetSoftInput() {
 void DesktopPlatform::OpenUrl(const char *url) {
     nsEnv::Shared()->OpenUrl(url);
 }
+
+const char * DesktopPlatform::GetDomainName() {
+    return nsEnv::Shared()->GetDomainName();
+}

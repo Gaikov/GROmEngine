@@ -20,6 +20,14 @@ EM_JS(bool, IsMobileExternal, (), {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 });
 
+EM_JS(const char*, GetDomainNameExternal, (), {
+  var str = document.location.host || document.location.hostname || "";
+  var lengthBytes = lengthBytesUTF8(str) + 1;
+  var ptr = _malloc(lengthBytes);
+  stringToUTF8(str, ptr, lengthBytes);
+  return ptr;
+});
+
 static void Loop() {
 	nsEngine::MainLoop();
 	glfwPollEvents();
@@ -28,6 +36,7 @@ static void Loop() {
 bool nsEnv::Init() {
     Log::Init();
     Log::Info("Hello from GROm!");
+	_domainName = GetDomainNameExternal();
     return true;
 }
 

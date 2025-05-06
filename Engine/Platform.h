@@ -27,6 +27,7 @@ public:
     virtual const nsArgs &GetArgs() = 0;
     virtual bool IsMobile() = 0;
     virtual bool ShowInterstitialAd() = 0;
+    virtual const char* GetDomainName() = 0;
 
     //Input
     virtual void GetCursorPos(int &x, int &y) = 0;
