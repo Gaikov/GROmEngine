@@ -17,7 +17,7 @@ EM_JS(int, GetCanvasHeight, (), {
 });
 
 EM_JS(bool, IsMobileExternal, (), {
-  return isMobile();
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 });
 
 static void Loop() {
