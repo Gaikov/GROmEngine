@@ -11,6 +11,7 @@ nsTextArea::nsTextArea() {
 }
 
 void nsTextArea::SetText(const char *text) {
+    _text = text;
     _validMetrics = false;
     _lines.clear();
     if (!StrCheck(text)) {
@@ -63,6 +64,8 @@ void nsTextArea::Loop() {
 
 void nsTextArea::DrawContent(const nsVisualContext2d &context) {
     ValidateMetrics();
+
+    _device->StateApply(renState);
 
     if (_font) {
         nsVec2 scale(1, 1);
