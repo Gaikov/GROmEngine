@@ -199,6 +199,8 @@ set(src
         display/sprite/Sprite9SliceBuilder.h
         display/popup/DefaultPopup.cpp
         display/popup/DefaultPopup.h
+        display/text/TextAreaBuilder.cpp
+        display/text/TextAreaBuilder.h
 )
 
 include_directories(./)

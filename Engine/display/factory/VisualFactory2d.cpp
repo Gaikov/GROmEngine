@@ -20,6 +20,7 @@
 #include "display/group/horizontal/HGroupLayoutBuilder.h"
 #include "display/button/ImageButtonBuilder.h"
 #include "display/sprite/Sprite9SliceBuilder.h"
+#include "display/text/TextAreaBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -31,6 +32,7 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsVGroupLayoutBuilder>();
     RegisterBuilderWithName<nsHGroupLayoutBuilder>();
     RegisterBuilderWithName<nsTextButtonBuilder>();
+    RegisterBuilderWithName<nsTextAreaBuilder>();
     RegisterBuilderWithName<nsVisualAnchorBuilder>();
     RegisterBuilderWithName<nsVirtualCircleBuilder>();
     RegisterBuilderWithName<nsVisualRectBuilder>();
