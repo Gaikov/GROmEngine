@@ -18,7 +18,7 @@ EM_JS(int, GetCanvasHeight, (), {
 
 EM_JS(bool, IsMobileExternal, (), {
   const isPhone = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/ig.test(navigator.userAgent);
-  const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/ig.test(userAgent);
+  const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/ig.test(navigator.userAgent);
   const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   return isPhone || isTablet || isTouchDevice;
 });
