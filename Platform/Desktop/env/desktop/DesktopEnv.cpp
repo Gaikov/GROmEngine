@@ -40,3 +40,8 @@ bool nsEnv::IsMobile() {
     return false;
 }
 
+void nsEnv::PrepareInput() {
+    PrepareDesktopInput();
+}
+
+

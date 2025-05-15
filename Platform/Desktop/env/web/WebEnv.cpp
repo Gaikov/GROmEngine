@@ -6,6 +6,7 @@
 #include "Engine/engine.h"
 #include <emscripten/emscripten.h>
 #include <emscripten/console.h>
+#include <emscripten/html5.h>
 #include "nsLib/log.h"
 
 EM_JS(int, GetCanvasWidth, (), {
@@ -72,4 +73,30 @@ GLFWwindow* nsEnv::CreateGameWindow() {
 
 bool nsEnv::IsMobile() {
 	return IsMobileExternal();
+}
+
+EM_BOOL touch_callback(int eventType, const EmscriptenTouchEvent *touchEvent, void *userData) {
+	for (int i = 0; i < touchEvent->numTouches; i++) {
+		const EmscriptenTouchPoint *touch = &touchEvent->touches[i];
+		if (eventType == EMSCRIPTEN_EVENT_TOUCHSTART) {
+			nsEngine::OnPointerDown(touch->identifier, touch->targetX, touch->targetY);
+		} else if (eventType == EMSCRIPTEN_EVENT_TOUCHMOVE) {
+			nsEngine::OnPointerMove(touch->identifier, touch->targetX, touch->targetY);
+		} else {
+			nsEngine::OnPointerUp(touch->identifier, touch->targetX, touch->targetY);
+		}
+	}
+
+	return EM_TRUE; // Return EM_TRUE to prevent default event handling
+}
+
+void nsEnv::PrepareInput() {
+  	if (IsMobile()) {
+		emscripten_set_touchstart_callback("#canvas", NULL, 1, touch_callback);
+		emscripten_set_touchmove_callback("#canvas", NULL, 1, touch_callback);
+		emscripten_set_touchend_callback("#canvas", NULL, 1, touch_callback);
+		emscripten_set_touchcancel_callback("#canvas", NULL, 1, touch_callback);
+	} else {
+        PrepareDesktopInput();
+	}
 }
