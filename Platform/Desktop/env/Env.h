@@ -17,6 +17,8 @@ public:
     void OpenUrl(const char *url);
     void MainLoop();
     bool IsMobile();
+    void PrepareInput();
+    void PrepareDesktopInput();
     const char* GetDomainName() const {
         return _domainName.c_str();
     }
