@@ -55,6 +55,7 @@ public:
 	void		GetSize( const char *str, float size[2], int len = 0 );
     void        GetBounds( const char *str, nsRect &bounds);
 	rchar_t*	GetRChar( uchar ch );
+	const fchar_t*	GetSymbolInfo( uchar code ) const;
 	void		GetCharDesc( uchar ch, char_desc_t &cd );
 
 private:
