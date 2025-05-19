@@ -448,6 +448,10 @@ rchar_t* nsFont::GetRChar( uchar c )
 	return nullptr;
 }
 
+const fchar_t * nsFont::GetSymbolInfo(uchar code) const {
+	return &ch[code];
+}
+
 //------------------------------------
 // GetCharDesc: 
 //------------------------------------
