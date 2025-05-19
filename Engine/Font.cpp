@@ -134,6 +134,10 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 			}
 		}
 		while ( ps_block_next( ss ) && i < MAX_CHARS );
+
+		for (auto &s : ch) {
+			s.r.offs[1] -= min_h;
+        }
 	}
 	
 	if ( !i )
@@ -383,7 +387,7 @@ void nsFont::GetBounds( const char *str, nsRect &bounds) {
     GetSize(str, size, (int)strlen(str));
 
     bounds.x = 0;
-    bounds.y = 0;
+    bounds.y = _base;
     bounds.width = size.x;
     bounds.height = size.y;
 }
