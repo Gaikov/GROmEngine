@@ -387,7 +387,7 @@ void nsFont::GetBounds( const char *str, nsRect &bounds) {
     GetSize(str, size, (int)strlen(str));
 
     bounds.x = 0;
-    bounds.y = _base;
+    bounds.y = 0;
     bounds.width = size.x;
     bounds.height = size.y;
 }
