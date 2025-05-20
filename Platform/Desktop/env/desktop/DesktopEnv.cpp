@@ -44,4 +44,8 @@ void nsEnv::PrepareInput() {
     PrepareDesktopInput();
 }
 
-
+void nsEnv::ShowCursor(bool show) const {
+    glfwSetInputMode(_wnd,
+                     GLFW_CURSOR,
+                     show ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
+}
