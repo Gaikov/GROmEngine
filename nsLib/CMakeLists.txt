@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(nsLib)
 
 include_directories(
-    "./"
+    .
 )
 
 set(sources
@@ -50,6 +50,8 @@ set(sources
         locator/Locatable.h
         math/collision/CollisionMath.cpp
         math/collision/CollisionMath.h
+        utils/AutoDestroy.cpp
+        utils/AutoDestroy.h
 )
 
 add_library(nsLib STATIC ${sources})
