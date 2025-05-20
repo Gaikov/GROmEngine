@@ -21,6 +21,7 @@ class nsOggReader
 {
 public:
 	nsOggReader();
+	~nsOggReader();
 	bool			StartReading( const char* fileName, bool looped );
 	vorbis_info*	GetVorbisInfo();
 	void			Seek( long pos );
@@ -38,7 +39,7 @@ private:
 	}
 	oggerr_t;
 
-	OggVorbis_File			m_oggFile;
+	OggVorbis_File			m_oggFile = {};
 	nsFile					*m_file;
     uint                    m_offset;
 	int						m_oggSection;

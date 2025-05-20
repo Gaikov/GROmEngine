@@ -14,25 +14,24 @@ class nsALSound : public ISound
 friend class nsSoundManager;
 
 public:
-	nsALSound	*prev, *next;	//для менеджера (хранить список)
+	nsALSound	*prev, *next;	//пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
 
-public:
-	nsALSound( const char *fileName );
+	explicit nsALSound( const char *fileName );
 	virtual ~nsALSound();
 
 	bool			Reload();
-	bool			Free();		//false - если буфер занят (проигрывается)
+	bool			Free();		//false - пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 
-	static ALuint	CreateSBFromOgg( const char *fileName, bool sound3d );
-	static ALuint	CreateSBFromWav( const char *filename, bool sound3d );
-
-	const char*		GetFileName() { return m_fileName; }
-	ALuint			GetALBuffer() { return m_alBuff; }
+	const char*		GetFileName() const { return m_fileName; }
+	ALuint			GetALBuffer() const { return m_alBuff; }
 	
 private:
 	nsString	m_fileName;
 	int			m_refCount;
 	ALuint		m_alBuff;
+
+	bool	CreateSBFromOgg( const char *fileName, bool sound3d );
+	bool	CreateSBFromWav( const char *filename, bool sound3d );
 };
 
 #endif //_ALSound_H_
