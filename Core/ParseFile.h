@@ -32,4 +32,16 @@ private:
 	const nsParseFile& operator = ( const nsParseFile& );
 };
 
+class nsParseBlock {
+public:
+	explicit nsParseBlock(script_state_t *ss);
+	~nsParseBlock();
+	bool Begin(const char *blockName);
+	void End();
+
+private:
+	script_state_t	*_ss;
+	int _openedBlocks = 0;
+};
+
 #endif //_ParseFile_H_
