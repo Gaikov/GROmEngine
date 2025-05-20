@@ -40,3 +40,28 @@ script_state_t* nsParseFile::BeginFile( const char *fileName, char prefix )
 	m_files.push_back(script);
 	return script.ss;
 }
+
+nsParseBlock::nsParseBlock(script_state_t *ss) : _ss(ss) {
+}
+
+nsParseBlock::~nsParseBlock() {
+	while (_openedBlocks > 0) {
+		ps_block_end(_ss);
+		--_openedBlocks;
+	}
+}
+
+bool nsParseBlock::Begin(const char *blockName) {
+	if (ps_block_begin(_ss, blockName)) {
+		_openedBlocks ++;
+		return true;
+	}
+	return false;
+}
+
+void nsParseBlock::End() {
+	if (_openedBlocks > 0) {
+		_openedBlocks --;
+		ps_end(_ss);
+	}
+}
