@@ -32,9 +32,13 @@ const int nsOggReader::m_errCount = sizeof(nsOggReader::m_oggerr) / sizeof(nsOgg
 // nsOggReader::nsOggReader: 
 //---------------------------------------------------------
 nsOggReader::nsOggReader() :
-	m_file( 0 ), m_offset(0)
+	m_file( 0 ), m_offset(0), m_oggSection(0), m_looped(false)
 {
 
+}
+
+nsOggReader::~nsOggReader() {
+	Free();
 }
 
 //---------------------------------------------------------

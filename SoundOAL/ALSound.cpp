@@ -13,160 +13,135 @@
 //---------------------------------------------------------
 // nsALSound::nsALSound: 
 //---------------------------------------------------------
-nsALSound::nsALSound( const char *fileName ) :
-	m_fileName( fileName ),
-	m_refCount( 0 ),
-	m_alBuff( 0 )
-{
+nsALSound::nsALSound(const char *fileName) : prev(nullptr),
+                                             next(nullptr),
+                                             m_fileName(fileName),
+                                             m_refCount(0),
+                                             m_alBuff(0) {
 }
 
 //---------------------------------------------------------
-// nsALSound::~nsALSound: 
+// nsALSound::~nsALSound:
 //---------------------------------------------------------
-nsALSound::~nsALSound()
-{
-	
+nsALSound::~nsALSound() {
+    Free();
 }
 
 //---------------------------------------------------------
-// nsALSound::Reload: 
+// nsALSound::Reload:
 //---------------------------------------------------------
-bool nsALSound::Reload()
-{
-	if ( !m_fileName.Length() ) return false;
+bool nsALSound::Reload() {
+    if (!m_fileName.Length()) return false;
 
-	if ( !Free() )
-	{
-		LogPrintf( PRN_ALL, "WARNING: al buffer is busy!\n" );
-		return false;
-	}
+    if (!Free()) {
+        LogPrintf(PRN_ALL, "WARNING: al buffer is busy!\n");
+        return false;
+    }
 
-	if ( strstr( m_fileName, ".ogg" ) )
-	{
-		if ( !(m_alBuff = CreateSBFromOgg( m_fileName, true )) )
-			return false;
-	}
-	else if ( !(m_alBuff = CreateSBFromWav( m_fileName, true )) )
-		return false;
+    if (strstr(m_fileName, ".ogg")) {
+        if (!CreateSBFromOgg(m_fileName, true))
+            return false;
+    } else if (!CreateSBFromWav(m_fileName, true))
+        return false;
 
-	return true;
+    return true;
 }
 
 //---------------------------------------------------------
-// nsALSound::Free: 
+// nsALSound::Free:
 //---------------------------------------------------------
-bool nsALSound::Free()
-{
-	if ( !m_alBuff ) return true;
+bool nsALSound::Free() {
+    if (!m_alBuff) return true;
 
-	ALenum	code;
+    alDeleteBuffers(1, &m_alBuff);
+    if (const ALenum code = alGetError()) {
+        LogPrintf(PRN_ALL, "WARNING: delete buffer: %s\n", AL_GetError(code));
+        return false;
+    }
 
-	alDeleteBuffers( 1, &m_alBuff );
-	if ( code = alGetError() )
-	{
-		LogPrintf( PRN_ALL, "WARNING: delete buffer: %s\n", AL_GetError( code ) );
-		return false;
-	}
-	else
-		m_alBuff = 0;
-
-	return true;
+    m_alBuff = 0;
+    return true;
 }
 
 //---------------------------------------------------------
-// nsALSound::CreateSBFromOgg: 
+// nsALSound::CreateSBFromOgg:
 //---------------------------------------------------------
-ALuint nsALSound::CreateSBFromOgg( const char *fileName, bool sound3d )
-{
-	nsOggReader	ogg;
-	ALuint		alBuff = 0;
-	void		*buff = 0;
-	ALenum		code;
-	
-	try
-	{
-		alGenBuffers( 1, &alBuff );
-		if ( code = alGetError() ) 
-			throw StrPrintf( "ERROR: gen buffer: %s\n", AL_GetError( code ) );
+bool nsALSound::CreateSBFromOgg(const char *fileName, bool sound3d) {
+    nsOggReader ogg;
+    ALenum code;
 
-		if ( !ogg.StartReading( fileName, false ) ) throw "";
+    alGenBuffers(1, &m_alBuff);
+    if ((code = alGetError())) {
+        Log::Error("gen buffer: %s", AL_GetError(code));
+        return false;
+    }
 
-		long	size;
-		buff = ogg.ReadWhole( size );
-		if ( !buff ) throw "";
+    if (!ogg.StartReading(fileName, false)) {
+        return false;
+    }
 
-		vorbis_info	*info = ogg.GetVorbisInfo();
+    long size;
+    const auto buff = ogg.ReadWhole(size);
+    if (!buff) {
+        return false;
+    }
 
-		ALenum	format = 0;
+    ALenum format = 0;
+    const vorbis_info *info = ogg.GetVorbisInfo();
+    if (info->channels > 1)
+        format = AL_FORMAT_STEREO16;
+    else
+        format = AL_FORMAT_MONO16;
 
-		if ( info->channels > 1 )
-			format = AL_FORMAT_STEREO16;
-		else
-			format = AL_FORMAT_MONO16;
+    alBufferData(m_alBuff, format, buff, size, info->rate);
+    my_free(buff);
 
-		alBufferData( alBuff, format, buff, size, info->rate );
-		if ( code = alGetError() )
-			throw StrPrintf( "ERROR: copy OGG to buff: %s\n", AL_GetError( code ) );
-	}
-	catch ( const char *error )
-	{
-		LogPrintf( PRN_ALL, error );
-		if ( alBuff )
-		{
-			alDeleteBuffers( 1, &alBuff );
-			alBuff = 0;
-		}
-	}
-	
-	if ( buff )	my_free( buff );
-	ogg.Free();
-	return alBuff;
+    if ((code = alGetError())) {
+        Log::Error("copy OGG to buff: %s\n", AL_GetError(code));
+        return false;
+    }
+
+    return true;
 }
 
 //---------------------------------------------------------
-// nsALSound::CreateSBFromWav: 
+// nsALSound::CreateSBFromWav:
 //---------------------------------------------------------
-ALuint nsALSound::CreateSBFromWav( const char *filename, bool sound3d )
-{
-	ALuint				al_buff = 0;
-	nsWavReader			wav;
-	ALenum				code;
+bool nsALSound::CreateSBFromWav(const char *filename, bool sound3d) {
+    nsWavReader wav;
+    ALenum code;
 
-	try
-	{
-		if ( !wav.Read( filename ) ) throw "WARNING: invalid wav file\n";
-		auto fmt = wav.GetFormat();
-		
-		if ( sound3d && fmt->nChannels > 1 ) throw "WARNING: invalid 3D sound!!!\n";
-		
-		alGenBuffers( 1, &al_buff );
-		if ( code = alGetError() ) throw StrPrintf( "ERROR: gen buffer: %s\n", AL_GetError( code ) );
+    if (!wav.Read(filename)) {
+        return false;
+    }
 
-		ALenum	format = 0;
-		if ( fmt->nChannels > 1 )
-			format = fmt->wBitsPerSample == 8 ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
-		else
-			format = fmt->wBitsPerSample == 8 ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
+    auto fmt = wav.GetFormat();
+    if (sound3d && fmt->nChannels > 1) {
+        Log::Warning("invalid 3D sound $s!", filename);
+        return false;
+    }
 
-		alBufferData( al_buff, format, wav.GetSamples(), wav.GetSamplesSize(), fmt->nSamplesPerSec );
-		if ( code = alGetError() )
-		{
-			LogPrintf( PRN_DEV, "\nch: %i\nbits: %i\nhz: %i\n",
-				fmt->nChannels,
-				fmt->wBitsPerSample,
-				fmt->nSamplesPerSec );
-			throw StrPrintf( "ERROR: copy WAV to buff: %s\n", AL_GetError( code ) );
-		}
-	}
-	catch ( const char *error )
-	{
-		LogPrintf( PRN_ALL, error );
-		if ( al_buff )
-		{
-			alDeleteBuffers( 1, &al_buff );
-			al_buff = 0;
-		}
-	}
+    alGenBuffers(1, &m_alBuff);
+    if ((code = alGetError())) {
+        Log::Error("gen buffer: %s\n", AL_GetError(code));
+        return false;
+    }
 
-	return al_buff;
+    ALenum format = 0;
+    if (fmt->nChannels > 1)
+        format = fmt->wBitsPerSample == 8 ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
+    else
+        format = fmt->wBitsPerSample == 8 ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
+
+    alBufferData(m_alBuff, format, wav.GetSamples(), wav.GetSamplesSize(), fmt->nSamplesPerSec);
+    if ((code = alGetError())) {
+        LogPrintf(PRN_DEV, "\nch: %i\nbits: %i\nhz: %i\n",
+                  fmt->nChannels,
+                  fmt->wBitsPerSample,
+                  fmt->nSamplesPerSec);
+        Log::Error("ERROR: copy WAV to buff: %s\n", AL_GetError(code));
+        return false;
+    }
+
+    return true;
 }
