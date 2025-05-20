@@ -97,9 +97,7 @@ void DesktopPlatform::GetCursorPos(int &x, int &y) {
 }
 
 void DesktopPlatform::ShowCursor(bool show) {
-    glfwSetInputMode(_wnd,
-                     GLFW_CURSOR,
-                     show ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
+    nsEnv::Shared()->ShowCursor(show);
 }
 
 void DesktopPlatform::SetCursorPos(int x, int y) {

@@ -6,7 +6,7 @@
 #include "Engine/engine.h"
 
 static std::vector<int> mouseButtons;
-nsEnv* nsEnv::_shared = nullptr;
+nsEnv *nsEnv::_shared = nullptr;
 
 bool nsEnv::Create() {
     if (!_shared) {
@@ -44,7 +44,7 @@ void nsEnv::PrepareDesktopInput() {
             mouseButtons.push_back(button);
             nsEngine::OnPointerDown(button, (int) x, (int) y);
         } else if (action == GLFW_RELEASE) {
-            auto it = std::remove(mouseButtons.begin(), mouseButtons.end(),button);
+            auto it = std::remove(mouseButtons.begin(), mouseButtons.end(), button);
             if (it != mouseButtons.end()) {
                 mouseButtons.erase(it);
             }
@@ -52,4 +52,3 @@ void nsEnv::PrepareDesktopInput() {
         }
     });
 }
-

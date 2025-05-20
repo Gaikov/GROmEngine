@@ -22,6 +22,7 @@ public:
     const char* GetDomainName() const {
         return _domainName.c_str();
     }
+    void ShowCursor(bool show) const;
 
     static bool Create();
     static void Destroy();

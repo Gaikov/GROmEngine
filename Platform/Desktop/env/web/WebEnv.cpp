@@ -17,6 +17,10 @@ EM_JS(int, GetCanvasHeight, (), {
 	return Module['canvas'].height;
 });
 
+EM_JS(void, ShowCursorExternal, (bool show), {
+	Module['canvas'].style.cursor = show ? 'default' : 'none';
+});
+
 EM_JS(bool, IsMobileExternal, (), {
   const isPhone = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/ig.test(navigator.userAgent);
   const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/ig.test(navigator.userAgent);
@@ -45,6 +49,7 @@ static void Loop() {
 bool nsEnv::Init() {
     Log::Init();
     Log::Info("Hello from GROm!");
+    Log::Info("http://grom-games.com");
 	_domainName = emscripten_run_script_string("window.location.hostname");
     return true;
 }
@@ -99,4 +104,8 @@ void nsEnv::PrepareInput() {
 	} else {
         PrepareDesktopInput();
 	}
+}
+
+void nsEnv::ShowCursor(bool show) const {
+	ShowCursorExternal(show);
 }
