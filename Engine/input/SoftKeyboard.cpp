@@ -3,6 +3,7 @@
 //
 
 #include "SoftKeyboard.h"
+#include "RenManager.h"
 #include "Engine/KeyCodes.h"
 #include "nsLib/log.h"
 #include "display/layouts/HGroupLayout.h"
