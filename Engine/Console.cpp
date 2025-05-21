@@ -76,16 +76,18 @@ void exec_f( int argc, const char *argv[] )
 //---------------------------------------------------------
 // nsConsole::nsConsole:
 //---------------------------------------------------------
-nsConsole::nsConsole() : tex_offs{0, 0}, m_text{}, m_pPrint(nullptr),
-	m_line( 128 )
-{
+nsConsole::nsConsole() : m_text{},
+                         m_line(128),
+                         m_pPrint(nullptr),
+                         _renState(nullptr),
+                         tex_offs{0, 0} {
 	m_tex = nullptr;
 	m_bActive = false;
 	m_nLineUp = 0;
 
 	Clear();
 	Log::Shared()->AddPolicy(this);
-    g_cfg->RegCmd("cls", clear_f);
+	g_cfg->RegCmd("cls", clear_f);
 }
 
 //---------------------------------------------------------
@@ -102,6 +104,8 @@ nsConsole::~nsConsole()
 void nsConsole::Draw()
 {
 	if ( !m_bActive ) return;
+
+	const auto renDev = nsRenDevice::Shared()->Device();
 
 	tex_offs[0] += g_frameTime * 0.01f;
 	tex_offs[1] = tex_offs[0];
@@ -121,9 +125,10 @@ void nsConsole::Draw()
         m_tex->GetSize(tw, th);
         ds.tex2 = nsVec2(width / (float)tw, h_con / (float)th);
     }
-    g_renDev->TextureTranform(tex_offs, nullptr);
+	renDev->StateApply(_renState);
+    renDev->TextureTranform(tex_offs, nullptr);
     RX_DrawSprite(ds);
-    g_renDev->TextureTranform(nullptr, nullptr);
+    renDev->TextureTranform(nullptr, nullptr);
 
 	RX_DrawLine( nsVec2( 0, h_con ), nsVec2( float(width), h_con ), cLine );
 	
@@ -238,8 +243,11 @@ bool nsConsole::OnInit()
 {
 	nsSubSystem::OnInit();
 
+	auto renDev = nsRenDevice::Shared()->Device();
+
 	Log::Info( "init console" );
-	m_tex = g_renDev->TextureLoad( "default/console.jpg", false, TF_RGB );
+	m_tex = renDev->TextureLoad( "default/console.jpg", false, TF_RGB );
+	_renState = renDev->StateLoad("scripts/rs/gui.txt");
 	con_line_step = g_cfg->RegVar( "con_line_step", "20.0", GVF_SAVABLE );
 	con_enable = g_cfg->RegVar( "con_enable", "1", 0 );
 	g_cfg->RegCmd( "exec", exec_f );

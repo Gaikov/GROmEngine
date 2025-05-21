@@ -36,12 +36,14 @@ protected:
 	int				m_nLineUp;
 	char			*m_pPrint;
 
-	ITexture			*m_tex;
+	ITexture		*m_tex;
+	IRenState		*_renState;
 	float			tex_offs[2];
 
 	bool						m_bActive;
 
 	nsCycleList<nsString, 10>	m_hyst;
+
 
 protected:
 	void			DrawCursor( float y );
