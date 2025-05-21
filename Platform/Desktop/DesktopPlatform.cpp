@@ -44,7 +44,7 @@ bool DesktopPlatform::Init() {
 }
 
 void DesktopPlatform::UpdateSoftInput() {
-    if (_useSoftInput->Bool()) {
+    if (_useSoftInput->Bool() || IsMobile()) {
         _softInput = new nsSoftInputKeyboard();
     } else {
         _softInput = new SoftInputEmpty();
