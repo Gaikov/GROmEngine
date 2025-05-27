@@ -13,7 +13,8 @@
 //---------------------------------------------------------
 struct IAppInfo
 {
-    virtual bool            Init() { return true; }
+	virtual ~IAppInfo() = default;
+	virtual bool            Init() { return true; }
 
 	virtual const char*		GetAppName() = 0;
 	
