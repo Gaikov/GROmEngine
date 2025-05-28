@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 typedef int socklen_t;
@@ -21,5 +21,7 @@ struct nsNet final {
     static void Release();
     static int GetLastError();
     static const char* GetErrorMessage(int code);
-    static bool CheckLastError();
+    static bool CheckLastError(const char* message);
 };
+
+#define NET_ERROR(message, result) if (!nsNet::CheckLastError(message)) return result;
