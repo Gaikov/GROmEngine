@@ -7,6 +7,8 @@ include_directories(
 set(sources
         Net.cpp
         Net.h
+        SocketServer.cpp
+        SocketServer.h
 )
 
 add_library(Networking STATIC ${sources})

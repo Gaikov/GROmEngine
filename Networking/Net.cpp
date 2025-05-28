@@ -83,9 +83,7 @@ bool nsNet::Init() {
 
     WSADATA wsaData = {};
     WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (CheckLastError()) {
-        return false;
-    }
+    NET_ERROR("WSAStartup", false);
 
     Log::Info("Net desc: %s", wsaData.szDescription);
     Log::Info("Net status: %s", wsaData.szSystemStatus);
@@ -112,10 +110,10 @@ const char* nsNet::GetErrorMessage(int code) {
     return "Unknown error code.";
 }
 
-bool nsNet::CheckLastError() {
+bool nsNet::CheckLastError(const char* message) {
     if (const auto code = GetLastError()) {
-        Log::Error("Winsock: %i (%s)", code, GetErrorMessage(code));
-        return true;
+        Log::Error("%s: %i (%s)", message, code, GetErrorMessage(code));
+        return false;
     }
-    return false;
+    return true;
 }
