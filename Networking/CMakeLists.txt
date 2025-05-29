@@ -1,9 +1,5 @@
 project(Networking)
 
-include_directories(
-        .
-)
-
 set(sources
         Net.cpp
         Net.h
@@ -11,6 +7,8 @@ set(sources
         SocketServer.h
         ClientSocket.cpp
         ClientSocket.h
+        server/Server.cpp
+        server/Server.h
 )
 
 add_library(Networking STATIC ${sources})

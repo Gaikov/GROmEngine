@@ -9,8 +9,14 @@
 nsServerSocket::nsServerSocket() : _socket(-1) {}
 
 nsServerSocket::~nsServerSocket() {
+    Close();
+}
+
+void nsServerSocket::Close() {
     if (_socket >= 0) {
         closesocket(_socket);
+        _socket = -1;
+        Log::Info("Server socked closed");
     }
 }
 
