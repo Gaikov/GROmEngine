@@ -3,12 +3,14 @@ project(Networking)
 set(sources
         Net.cpp
         Net.h
-        SocketServer.cpp
-        SocketServer.h
-        ClientSocket.cpp
-        ClientSocket.h
+        server/SocketServer.cpp
+        server/SocketServer.h
+        client/ClientSocket.cpp
+        client/ClientSocket.h
         server/Server.cpp
         server/Server.h
+        Packet.cpp
+        Packet.h
 )
 
 add_library(Networking STATIC ${sources})

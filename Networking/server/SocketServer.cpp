@@ -4,7 +4,7 @@
 
 #include "SocketServer.h"
 #include "nsLib/log.h"
-#include "Net.h"
+#include "Networking/Net.h"
 
 nsServerSocket::nsServerSocket() : _socket(-1) {}
 

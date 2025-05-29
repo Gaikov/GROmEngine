@@ -3,7 +3,7 @@
 //
 
 #include "ClientSocket.h"
-#include "Net.h"
+#include "Networking/Net.h"
 #include "nsLib/log.h"
 
 nsClientSocket::nsClientSocket() : _socket(-1) {

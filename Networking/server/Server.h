@@ -4,9 +4,8 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-#include <thread>
-
-#include "Networking/SocketServer.h"
+#include "Networking/Net.h"
+#include "SocketServer.h"
 
 class nsServer {
 public:
@@ -16,8 +15,8 @@ public:
     void Stop();
 
 private:
-    int _port;
-    nsServerSocket _socket;
-    std::thread _clientsThread;
-    bool _isRunning = false;
+    int             _port;
+    nsServerSocket  _socket;
+    std::thread     _clientsThread;
+    bool            _isRunning = false;
 };
