@@ -5,24 +5,29 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#define MAX_PACKET_SIZE 128
+
 enum nsTargetType {
     ALL = 0,
     SERVER = 1,
     CLIENT = 2,
 };
 
-struct nsPacket {
+struct alignas(1) nsPacketHeader {
     unsigned short id;
     unsigned int size;
-    unsigned short owner;
-    unsigned char targetType;
-    unsigned short targetClient;
 };
 
-enum nsPackageId {
-    MESSAGE = 0,
+struct nsPacket : nsPacketHeader {
+    unsigned short owner;       //server -1
+    unsigned char targetType;
+    unsigned char targetClient;
+};
+
+struct nsPackageId {
+    static constexpr unsigned short MESSAGE = 0;
 };
 
 struct nsMessagePacket : nsPacket {
-    char message[64];
+    char message[96];
 };

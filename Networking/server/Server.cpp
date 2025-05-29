@@ -3,6 +3,9 @@
 //
 
 #include "Server.h"
+
+#include "ClientConnection.h"
+#include "Networking/Packet.h"
 #include "nsLib/log.h"
 
 nsServer::nsServer(int port) : _port(port) {
@@ -19,7 +22,7 @@ bool nsServer::Start() {
     }
 
     _clientsThread = std::thread([this]() {
-        auto client = _socket.Accept();
+        OnAcceptClient(_socket.Accept());
     });
     Log::Info("Server started");
     _isRunning = true;
@@ -34,5 +37,28 @@ void nsServer::Stop() {
         _socket.Close();
         _clientsThread.join();
     }
+}
+
+void nsServer::OnAcceptClient(int socket) {
+    std::lock_guard lock(_clientsMutex);
+
+    auto c = new nsClientConnection(socket, _clientLastId++);
+    Log::Info("Client id assigned: %i", c->GetId());
+
+    _clients.push_back(c);
+
+    nsMessagePacket p = {};
+    p.id = nsPackageId::MESSAGE;
+    p.owner = -1;
+    p.size = sizeof(p);
+    strcpy(p.message,  "Hello from server!");
+
+    if (!c->Send(&p, sizeof(p))) {
+        Log::Error("Failed to send hello to client", c->GetId());
+    }
+
+    std::thread([this, c]() {
+        c->Receive()
+    });
 }
 
