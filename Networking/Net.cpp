@@ -112,7 +112,7 @@ const char* nsNet::GetErrorMessage(int code) {
 
 bool nsNet::CheckLastError(const char* message) {
     if (const auto code = GetLastError()) {
-        Log::Error("%s: %i (%s)", message, code, GetErrorMessage(code));
+        Log::Error("%s: %i - %s", message, code, GetErrorMessage(code));
         return false;
     }
     return true;

@@ -53,5 +53,6 @@ void nsClientSocket::Close() {
     if (_socket >= 0) {
         closesocket(_socket);
         _socket = -1;
+        Log::Info("Client socked closed");
     }
 }
