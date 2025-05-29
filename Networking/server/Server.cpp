@@ -4,7 +4,6 @@
 
 #include "Server.h"
 #include "nsLib/log.h"
-#include "Networking/Net.h"
 
 nsServer::nsServer(int port) : _port(port) {
 }
