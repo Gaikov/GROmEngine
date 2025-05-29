@@ -9,6 +9,8 @@ set(sources
         Net.h
         SocketServer.cpp
         SocketServer.h
+        ClientSocket.cpp
+        ClientSocket.h
 )
 
 add_library(Networking STATIC ${sources})
