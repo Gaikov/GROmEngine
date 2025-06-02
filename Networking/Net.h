@@ -15,7 +15,8 @@ typedef int socklen_t;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
-#include "thread"
+#include <thread>
+#include <vector>
 
 struct nsNet final {
     static bool Init();

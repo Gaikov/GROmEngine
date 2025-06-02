@@ -5,19 +5,28 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-class nsClientConnection {
+#include "Networking/Net.h"
+#include "Networking/common/BaseClientSocket.h"
 
+class nsClientConnection;
+
+class nsClientConnectionContext {
 public:
-    nsClientConnection(int socket, int id);
-    ~nsClientConnection();
-    bool Send(const void *data, int size) const;
-    int Receive(void* buffer, int size) const;
-    void Close();
+    virtual ~nsClientConnectionContext() = default;
+    virtual void ProcessPacket(nsClientConnection *from, nsPacket *packet) = 0;
+    virtual void OnClientDisconnect(nsClientConnection *connection) = 0;
+};
+
+class nsClientConnection : public nsBaseClientSocket {
+public:
+    nsClientConnection(int socket, int id, nsClientConnectionContext *context);
+    ~nsClientConnection() override;
     int GetId() const { return _id; }
 
 private:
-    int         _socket;
     int         _id;
+
+    std::thread _thread;
 };
 
 

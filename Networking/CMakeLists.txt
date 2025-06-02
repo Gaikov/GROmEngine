@@ -15,8 +15,8 @@ set(sources
         Packet.h
         server/ClientConnection.cpp
         server/ClientConnection.h
-        common/BaseSocket.cpp
-        common/BaseSocket.h
+        common/BaseClientSocket.cpp
+        common/BaseClientSocket.h
 )
 
 add_library(Networking STATIC ${sources})

@@ -4,17 +4,18 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-#include <vector>
 
-#include "ClientConnection.h"
+
 #include "Networking/Net.h"
-#include "SocketServer.h"
+#include "Networking/server/ClientConnection.h"
+
+#include "Networking/server/SocketServer.h"
 #include "Networking/Packet.h"
 
-class nsServer {
+class nsServer : public nsClientConnectionContext {
 public:
     explicit nsServer(int port);
-    virtual ~nsServer();
+    ~nsServer() override;
     bool Start();
     void Stop();
 
@@ -29,4 +30,8 @@ private:
 
 private:
     void OnAcceptClient(int socket);
+
+public:
+    void ProcessPacket(nsClientConnection *from, nsPacket *packet) override;
+    void OnClientDisconnect(nsClientConnection *c) override;
 };
