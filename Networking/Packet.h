@@ -13,12 +13,9 @@ enum nsTargetType {
     CLIENT = 2,
 };
 
-struct alignas(1) nsPacketHeader {
+struct alignas(1) nsPacket {
     unsigned short id;
     unsigned int size;
-};
-
-struct nsPacket : nsPacketHeader {
     unsigned short owner;       //server -1
     unsigned char targetType;
     unsigned char targetClient;
@@ -26,8 +23,13 @@ struct nsPacket : nsPacketHeader {
 
 struct nsPackageId {
     static constexpr unsigned short MESSAGE = 0;
+    static constexpr unsigned short CLIENT_ID = 1;
 };
 
 struct nsMessagePacket : nsPacket {
     char message[96];
+};
+
+struct nsClientIdPacket : nsPacket {
+    int clientId;
 };

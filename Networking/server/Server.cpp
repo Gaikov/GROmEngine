@@ -22,7 +22,9 @@ bool nsServer::Start() {
     }
 
     _clientsThread = std::thread([this]() {
-        OnAcceptClient(_socket.Accept());
+        while (_isRunning) {
+            OnAcceptClient(_socket.Accept());
+        }
     });
     Log::Info("Server started");
     _isRunning = true;
@@ -42,23 +44,34 @@ void nsServer::Stop() {
 void nsServer::OnAcceptClient(int socket) {
     std::lock_guard lock(_clientsMutex);
 
-    auto c = new nsClientConnection(socket, _clientLastId++);
+    auto c = new nsClientConnection(socket, _clientLastId++, this);
     Log::Info("Client id assigned: %i", c->GetId());
 
     _clients.push_back(c);
 
-    nsMessagePacket p = {};
-    p.id = nsPackageId::MESSAGE;
-    p.owner = -1;
+    nsClientIdPacket p = {};
+    p.id = nsPackageId::CLIENT_ID;
+    p.clientId = c->GetId();
     p.size = sizeof(p);
-    strcpy(p.message,  "Hello from server!");
 
-    if (!c->Send(&p, sizeof(p))) {
+    if (!c->Send(&p, p.size)) {
         Log::Error("Failed to send hello to client", c->GetId());
     }
-
-    std::thread([this, c]() {
-        c->Receive()
-    });
 }
 
+void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
+    Log::Info("packet from client (%i): %i", from->GetId(), packet->id);
+}
+
+void nsServer::OnClientDisconnect(nsClientConnection *c) {
+    std::lock_guard lock(_clientsMutex);
+    auto it = std::find(_clients.begin(), _clients.end(), c);
+    if (it == _clients.end()) {
+        Log::Error("Client not found in list");
+        return;
+    }
+    _clients.erase(it);
+
+    Log::Info("Client disconnected: %i", c->GetId());
+    delete c;
+}
