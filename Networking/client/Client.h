@@ -20,6 +20,7 @@ public:
    virtual ~nsClient();
 
    void Connect(const char *ip, int port);
+   void Disconnect();
 
 private:
    nsClientSocket _socket;
@@ -28,7 +29,7 @@ private:
    State          _state = DISCONNECTED;
    nsPacketsPool  _packetsPool;
    std::mutex     _packetMutex;
-   std::vector<nsPacket *> _receivedPackets;
+   std::vector<nsPacketBuffer *> _receivedPackets;
 
    void OnConnected();
    void OnPacketReceived(const nsPacket *packet);

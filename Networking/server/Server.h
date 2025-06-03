@@ -28,11 +28,10 @@ private:
     int             _clientLastId = 0;
     std::mutex      _clientsMutex;
     std::vector<nsClientConnection*> _clients;
+    std::vector<nsClientConnection*> _disconnectedClients;
 
 private:
     void OnAcceptClient(int socket);
-
-public:
     void ProcessPacket(nsClientConnection *from, nsPacket *packet) override;
     void OnClientDisconnect(nsClientConnection *c) override;
 };

@@ -28,6 +28,8 @@ private:
     int         _id;
 
     std::thread _thread;
+
+    void WaitThread();
 };
 
 

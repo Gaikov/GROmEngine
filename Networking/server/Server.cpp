@@ -12,6 +12,9 @@ nsServer::nsServer(int port) : _port(port) {
 }
 
 nsServer::~nsServer() {
+    for (const auto c : _disconnectedClients) {
+        delete c;
+    }
     Log::Info("Server destroyed");
 }
 
@@ -94,5 +97,5 @@ void nsServer::OnClientDisconnect(nsClientConnection *c) {
     _clients.erase(it);
 
     Log::Info("Client disconnected: %i", c->GetId());
-    delete c;
+    _disconnectedClients.push_back(c);
 }

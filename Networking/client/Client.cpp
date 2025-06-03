@@ -10,6 +10,7 @@ nsClient::nsClient() {
 }
 
 nsClient::~nsClient() {
+    Disconnect();
     if (_packetThread.joinable()) {
         _packetThread.join();
     }
@@ -35,6 +36,16 @@ void nsClient::Connect(const char *ip, int port) {
     }
 }
 
+void nsClient::Disconnect() {
+    std::lock_guard lock(_packetMutex);
+    _socket.Close();
+    _state = DISCONNECTED;
+    for (auto p : _receivedPackets) {
+        _packetsPool.RecycleObject(p);
+    }
+    _receivedPackets.clear();
+}
+
 void nsClient::OnConnected() {
     if (_packetThread.joinable()) {
         _packetThread.join();
@@ -58,5 +69,5 @@ void nsClient::OnPacketReceived(const nsPacket *packet) {
 
     auto buffer = _packetsPool.AllocateObject();
     memcpy(buffer, packet, sizeof(nsPacketBuffer));
-    _receivedPackets.push_back(reinterpret_cast<nsPacket*>(buffer));
+    _receivedPackets.push_back(buffer);
 }

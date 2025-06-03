@@ -20,13 +20,18 @@ nsClientConnection::nsClientConnection(const int socket, const int id, nsClientC
 }
 
 nsClientConnection::~nsClientConnection() {
-    _thread.detach();
+    WaitThread();
 }
 
 void nsClientConnection::Disconnect() {
     Log::Info("Disconnecting client forced: %i", _id);
     Close();
+    WaitThread();
+}
+
+void nsClientConnection::WaitThread() {
     if (_thread.joinable()) {
+        Log::Info("Waiting for client thread: %i", _id);
         _thread.join();
     }
 }
