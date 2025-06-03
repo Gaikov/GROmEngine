@@ -25,9 +25,9 @@ struct alignas(1) nsPacket {
     unsigned char targetClient;
 };
 
-struct nsPackageId {
-    static constexpr unsigned short MESSAGE = 0;
-    static constexpr unsigned short CLIENT_ID = 1;
+struct nsPacketId {
+    static constexpr unsigned short CLIENT_ID = 0;
+    static constexpr unsigned short MESSAGE = 1;
 };
 
 struct nsMessagePacket : nsPacket {
