@@ -85,7 +85,7 @@ nsConsole::nsConsole() : m_text{},
 	m_bActive = false;
 	m_nLineUp = 0;
 
-	Clear();
+	ClearUnsafe();
 	Log::Shared()->AddPolicy(this);
 	g_cfg->RegCmd("cls", clear_f);
 }
@@ -133,6 +133,7 @@ void nsConsole::Draw()
 	RX_DrawLine( nsVec2( 0, h_con ), nsVec2( float(width), h_con ), cLine );
 	
 	//draw text
+	std::lock_guard lock(_logMutex);
 	int	line_count = int((h_con - CON_LINE_OFFS)  / con_line_step->Value());
 
 	const float *c = m_nLineUp ? nsColor::yellow : nsColor::white;
@@ -270,12 +271,14 @@ void nsConsole::OnRelease()
 //---------------------------------------------------------
 void nsConsole::LogPrint(LogLevel level, const char *str)
 {
+	std::lock_guard lock(_logMutex);
+
 	int	rmn = CON_TEXT_SIZE - (m_pPrint - m_text) - 1;
 	int	len = strlen( str );
 
-	if ( len >= rmn ) Clear();
+	if ( len >= rmn ) ClearUnsafe();
 
-	strcat( m_pPrint, str );	
+	strcat( m_pPrint, str );
 	m_pPrint += len;
 
 	if ( m_nLineUp )
@@ -291,10 +294,15 @@ void nsConsole::LogPrint(LogLevel level, const char *str)
 //---------------------------------------------------------
 // nsConsole::Clear:
 //---------------------------------------------------------
-void nsConsole::Clear()
+void nsConsole::ClearUnsafe()
 {
 	m_text[0] = 0;
 	m_pPrint = m_text;
+}
+
+void nsConsole::Clear() {
+	std::lock_guard lock(_logMutex);
+	ClearUnsafe();
 }
 
 //---------------------------------------------------------

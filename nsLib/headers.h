@@ -14,5 +14,7 @@
 #include <map>
 #include <list>
 #include <functional>
+#include <thread>
+#include <mutex>
 
 #endif

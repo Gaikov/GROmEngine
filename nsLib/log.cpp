@@ -29,7 +29,6 @@ void Log::Print(LogLevel level, const char *msg)
 		return;
 	}
 #endif
-
 	for (auto policy : _policies)
 	{
 		policy->LogPrint(level, msg);

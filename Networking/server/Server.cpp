@@ -12,8 +12,7 @@ nsServer::nsServer(int port) : _port(port) {
 }
 
 nsServer::~nsServer() {
-    Stop();
-    Log::Info("Server stopped!");
+    Log::Info("Server destroyed");
 }
 
 bool nsServer::Start() {
@@ -23,8 +22,12 @@ bool nsServer::Start() {
 
     _clientsThread = std::thread([this]() {
         while (_isRunning) {
-            OnAcceptClient(_socket.Accept());
+            auto socket = _socket.Accept();
+            if (socket >= 0) {
+                OnAcceptClient(socket);
+            }
         }
+        Log::Info("Server thread stopping");
     });
     Log::Info("Server started");
     _isRunning = true;
@@ -37,7 +40,24 @@ void nsServer::Stop() {
 
         _isRunning = false;
         _socket.Close();
-        _clientsThread.join();
+
+        if (_clientsThread.joinable()) {
+            _clientsThread.join();
+        }
+
+        std::vector<nsClientConnection *> connectedClients;
+        {
+            std::lock_guard lock(_clientsMutex);
+            for (auto c : _clients) {
+                connectedClients.push_back(c);
+            }
+        }
+
+        for (auto c : connectedClients) {
+            c->Disconnect();
+        }
+
+        Log::Info("Server stopped!");
     }
 }
 
@@ -64,6 +84,7 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
 }
 
 void nsServer::OnClientDisconnect(nsClientConnection *c) {
+    Log::Info("On Client disconnect: %i", c->GetId());
     std::lock_guard lock(_clientsMutex);
     auto it = std::find(_clients.begin(), _clients.end(), c);
     if (it == _clients.end()) {

@@ -6,6 +6,7 @@
 
 void LogStdOut::LogPrint(LogLevel level, const char *str)
 {
+	std::lock_guard lock(_mutex);
 	printf("%s", str);
     fflush(stdout);
 }
