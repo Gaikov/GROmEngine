@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Networking/client/ClientSocket.h"
+#include "Networking/common/PacketsHandlingManager.h"
 #include "Networking/common/PacketsPool.h"
 
 class nsClient {
@@ -22,6 +23,9 @@ public:
    void Connect(const char *ip, int port);
    void Disconnect();
 
+   void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
+   void ProcessPackets();
+
 private:
    nsClientSocket _socket;
    std::thread    _connectionThread;
@@ -30,6 +34,7 @@ private:
    nsPacketsPool  _packetsPool;
    std::mutex     _packetMutex;
    std::vector<nsPacketBuffer *> _receivedPackets;
+   nsPacketsHandlingManager _packetsHandling;
 
    void OnConnected();
    void OnPacketReceived(const nsPacket *packet);

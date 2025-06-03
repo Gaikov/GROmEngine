@@ -73,12 +73,12 @@ void nsServer::OnAcceptClient(int socket) {
     _clients.push_back(c);
 
     nsClientIdPacket p = {};
-    p.id = nsPackageId::CLIENT_ID;
+    p.id = nsPacketId::CLIENT_ID;
     p.clientId = c->GetId();
     p.size = sizeof(p);
 
     if (!c->Send(&p, p.size)) {
-        Log::Error("Failed to send hello to client", c->GetId());
+        Log::Error("Failed to send client id: ", c->GetId());
     }
 }
 

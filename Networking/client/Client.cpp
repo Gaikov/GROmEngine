@@ -24,6 +24,7 @@ nsClient::~nsClient() {
 void nsClient::Connect(const char *ip, int port) {
     if (_state == DISCONNECTED) {
         _connectionThread = std::thread([this, ip, port]() {
+            _state = CONNECTING;
             if (!_socket.Connect(ip, port)) {
                 _state = DISCONNECTED;
             } else {
@@ -42,6 +43,18 @@ void nsClient::Disconnect() {
     _state = DISCONNECTED;
     for (auto p : _receivedPackets) {
         _packetsPool.RecycleObject(p);
+    }
+    _receivedPackets.clear();
+}
+
+void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
+    _packetsHandling.SetHandler(packetId, handler);
+}
+
+void nsClient::ProcessPackets() {
+    std::lock_guard lock(_packetMutex);
+    for (auto p : _receivedPackets) {
+        _packetsHandling.HandlePacket(reinterpret_cast<nsPacket*>(p));
     }
     _receivedPackets.clear();
 }

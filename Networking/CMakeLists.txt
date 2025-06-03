@@ -21,6 +21,8 @@ set(sources
         client/Client.h
         common/PacketsPool.cpp
         common/PacketsPool.h
+        common/PacketsHandlingManager.cpp
+        common/PacketsHandlingManager.h
 )
 
 add_library(Networking STATIC ${sources})
