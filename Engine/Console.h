@@ -43,7 +43,7 @@ protected:
 	bool						m_bActive;
 
 	nsCycleList<nsString, 10>	m_hyst;
-
+	std::mutex					_logMutex;
 
 protected:
 	void			DrawCursor( float y );
@@ -73,6 +73,7 @@ protected:
 private:
 	void    LogPrint(LogLevel level, const char *str) override;
     static  void clear_f(int argc, const char *argv[]);
+	void	ClearUnsafe();
 };
 
 

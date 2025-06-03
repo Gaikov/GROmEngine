@@ -11,6 +11,9 @@ class LogStdOut : public ILogListener
 {
 public:
 	void LogPrint(LogLevel level, const char *str) override;
+
+private:
+	std::mutex _mutex;
 };
 
 

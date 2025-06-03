@@ -16,6 +16,7 @@ class nsServer : public nsClientConnectionContext {
 public:
     explicit nsServer(int port);
     ~nsServer() override;
+
     bool Start();
     void Stop();
 

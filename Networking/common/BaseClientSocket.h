@@ -13,7 +13,7 @@ public:
 
     bool ReceivePacket(nsPacket *packet) const;
     bool Receive(char* buffer, unsigned int maxSize) const;
-    void Close() const;
+    void Close();
     bool Send(const void *data, unsigned int size) const;
 
 protected:

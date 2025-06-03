@@ -23,6 +23,7 @@ public:
 
 private:
 	FILE *m_pLog = nullptr;
+	std::mutex _mutex;
 
 private:
 	void LogPrint(LogLevel level, const char *str) override;

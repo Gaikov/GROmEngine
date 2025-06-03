@@ -3,7 +3,7 @@
 //
 
 #include "Networking/server/ClientConnection.h"
-#include "Networking/Net.h"
+#include "nsLib/log.h"
 
 nsClientConnection::nsClientConnection(const int socket, const int id, nsClientConnectionContext *context)
     : _id(id) {
@@ -21,4 +21,12 @@ nsClientConnection::nsClientConnection(const int socket, const int id, nsClientC
 
 nsClientConnection::~nsClientConnection() {
     _thread.detach();
+}
+
+void nsClientConnection::Disconnect() {
+    Log::Info("Disconnecting client forced: %i", _id);
+    Close();
+    if (_thread.joinable()) {
+        _thread.join();
+    }
 }

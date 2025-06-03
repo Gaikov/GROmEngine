@@ -4,18 +4,11 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include "Networking/common/BaseClientSocket.h"
 
 
-class nsClientSocket {
+class nsClientSocket : public nsBaseClientSocket {
 public:
     nsClientSocket();
-    ~nsClientSocket();
-
     bool Connect(const char *ip, int port) const;
-    bool Send(const void *data, int size) const;
-    int Receive(char* buffer, int size) const;
-    void Close();
-
-private:
-    int _socket;
 };

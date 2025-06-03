@@ -21,6 +21,7 @@ class nsClientConnection : public nsBaseClientSocket {
 public:
     nsClientConnection(int socket, int id, nsClientConnectionContext *context);
     ~nsClientConnection() override;
+    void Disconnect();
     int GetId() const { return _id; }
 
 private:

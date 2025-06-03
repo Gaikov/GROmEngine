@@ -6,18 +6,15 @@
 #include "Networking/Net.h"
 #include "nsLib/log.h"
 
-nsClientSocket::nsClientSocket() : _socket(-1) {
+nsClientSocket::nsClientSocket() {
     _socket = socket(AF_INET, SOCK_STREAM, 0);
     if (_socket < 0) {
         NET_ERROR("client socket",);
     }
 }
 
-nsClientSocket::~nsClientSocket() {
-    Close();
-}
-
 bool nsClientSocket::Connect(const char *ip, int port) const {
+    Log::Info("Connecting to: %s:%i", ip, port);
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
@@ -34,25 +31,4 @@ bool nsClientSocket::Connect(const char *ip, int port) const {
     return true;
 }
 
-bool nsClientSocket::Send(const void *data, const int size) const {
-    int sent = send(_socket, static_cast<const char *>(data), size, 0);
-    if (sent != size) {
-        NET_ERROR("client send", false);
-        return false;
-    }
-    return true;
-}
 
-int nsClientSocket::Receive(char* buffer, const int size) const {
-    const auto numBytes = recv(_socket, buffer, size, 0);
-    NET_ERROR("client recv", -1);
-    return numBytes;
-}
-
-void nsClientSocket::Close() {
-    if (_socket >= 0) {
-        closesocket(_socket);
-        _socket = -1;
-        Log::Info("Client socked closed");
-    }
-}

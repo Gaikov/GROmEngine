@@ -7,6 +7,10 @@
 
 #define MAX_PACKET_SIZE 128
 
+struct nsPacketBuffer {
+    char buffer[MAX_PACKET_SIZE];
+};
+
 enum nsTargetType {
     ALL = 0,
     SERVER = 1,
