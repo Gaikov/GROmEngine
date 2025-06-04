@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "nsLib/headers.h"
 #include "Networking/Packet.h"
 
 class nsBaseClientSocket {
@@ -14,6 +15,15 @@ public:
     bool ReceivePacket(nsPacket *packet) const;
     bool Receive(char* buffer, unsigned int maxSize) const;
     void Close();
+    template<typename T>
+    bool SendPacket(T *packed) const {
+        nsPacket *p = packed;
+        p->id = T::ID;
+        p->size = sizeof(T);
+        assert(p->size < MAX_PACKET_SIZE);
+        return Send(p, p->size);
+    }
+
     bool Send(const void *data, unsigned int size) const;
 
 protected:

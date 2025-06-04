@@ -26,6 +26,15 @@ public:
    void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
    void ProcessPackets();
 
+   template<typename T>
+   bool SendPacket(T *packed) const {
+      if (_state != CONNECTED) {
+         Log::Warning("Client is not connected");
+         return false;
+      }
+      return _socket.SendPacket(packed);
+   }
+
 private:
    nsClientSocket _socket;
    std::thread    _connectionThread;

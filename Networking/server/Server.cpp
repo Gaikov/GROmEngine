@@ -80,10 +80,33 @@ void nsServer::OnAcceptClient(int socket) {
     if (!c->Send(&p, p.size)) {
         Log::Error("Failed to send client id: ", c->GetId());
     }
+
+    OnClientConnected(c);
 }
 
 void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
-    Log::Info("packet from client (%i): %i", from->GetId(), packet->id);
+    std::lock_guard lock(_clientsMutex);
+    if (packet->targetType == TARGET_ALL) {
+        for (auto c : _clients) {
+            c->Send(packet, packet->size);
+        }
+    } else if (packet->targetType == TARGET_OTHER_CLIENTS) {
+        for (auto c : _clients) {
+            if (c != from) {
+                c->Send(packet, packet->size);
+            }
+        }
+    } else if (packet->targetType == TARGET_CLIENT) {
+        for (auto c : _clients) {
+            if (c->GetId() == packet->targetId) {
+                c->Send(packet, packet->size);
+                return;
+            }
+        }
+        Log::Warning("Client not found: %i", packet->targetId);
+    } else {
+        Log::Info("packet from client: %i, packet: %i", from->GetId(), packet->id);
+    }
 }
 
 void nsServer::OnClientDisconnect(nsClientConnection *c) {
@@ -98,4 +121,5 @@ void nsServer::OnClientDisconnect(nsClientConnection *c) {
 
     Log::Info("Client disconnected: %i", c->GetId());
     _disconnectedClients.push_back(c);
+    OnClientDisconnected(c);
 }
