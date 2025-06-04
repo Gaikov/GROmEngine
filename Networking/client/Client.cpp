@@ -55,6 +55,7 @@ void nsClient::ProcessPackets() {
     std::lock_guard lock(_packetMutex);
     for (auto p : _receivedPackets) {
         _packetsHandling.HandlePacket(reinterpret_cast<nsPacket*>(p));
+        _packetsPool.RecycleObject(p);
     }
     _receivedPackets.clear();
 }
@@ -81,6 +82,6 @@ void nsClient::OnPacketReceived(const nsPacket *packet) {
     std::lock_guard lock(_packetMutex);
 
     auto buffer = _packetsPool.AllocateObject();
-    memcpy(buffer, packet, sizeof(nsPacketBuffer));
+    memcpy(buffer, packet, packet->size);
     _receivedPackets.push_back(buffer);
 }
