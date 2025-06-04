@@ -5,8 +5,6 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-
-#include "Networking/Net.h"
 #include "Networking/server/ClientConnection.h"
 
 #include "Networking/server/SocketServer.h"
@@ -19,6 +17,10 @@ public:
 
     bool Start();
     void Stop();
+
+protected:
+    virtual void OnClientConnected(nsClientConnection *c) {}
+    virtual void OnClientDisconnected(nsClientConnection *c) {}
 
 private:
     int             _port;

@@ -12,17 +12,18 @@ struct nsPacketBuffer {
 };
 
 enum nsTargetType {
-    ALL = 0,
-    SERVER = 1,
-    CLIENT = 2,
+    TARGET_ALL = 0,
+    TARGET_SERVER = 1,
+    TARGET_CLIENT = 2,
+    TARGET_OTHER_CLIENTS = 3,
 };
 
 struct alignas(1) nsPacket {
     unsigned short id;
     unsigned int size;
     unsigned short owner;       //server -1
-    unsigned char targetType;
-    unsigned char targetClient;
+    nsTargetType targetType;
+    unsigned char targetId;
 };
 
 struct nsPacketId {
@@ -31,9 +32,11 @@ struct nsPacketId {
 };
 
 struct nsMessagePacket : nsPacket {
+    static constexpr unsigned short ID = nsPacketId::MESSAGE;
     char message[96];
 };
 
 struct nsClientIdPacket : nsPacket {
+    static constexpr unsigned short ID = nsPacketId::CLIENT_ID;
     int clientId;
 };
