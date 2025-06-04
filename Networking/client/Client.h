@@ -20,6 +20,7 @@ public:
    nsClient();
    virtual ~nsClient();
 
+   State GetState() const { return _state; }
    void Connect(const char *ip, int port);
    void Disconnect();
 

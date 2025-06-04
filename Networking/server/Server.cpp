@@ -73,11 +73,9 @@ void nsServer::OnAcceptClient(int socket) {
     _clients.push_back(c);
 
     nsClientIdPacket p = {};
-    p.id = nsPacketId::CLIENT_ID;
     p.clientId = c->GetId();
-    p.size = sizeof(p);
 
-    if (!c->Send(&p, p.size)) {
+    if (!c->SendPacket(&p)) {
         Log::Error("Failed to send client id: ", c->GetId());
     }
 

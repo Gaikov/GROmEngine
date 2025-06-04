@@ -5,7 +5,6 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Networking/Net.h"
 #include "Networking/common/BaseClientSocket.h"
 
 class nsClientConnection;
