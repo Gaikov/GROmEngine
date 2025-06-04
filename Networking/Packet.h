@@ -7,7 +7,7 @@
 
 #define MAX_PACKET_SIZE 128
 
-struct nsPacketBuffer {
+struct alignas(1) nsPacketBuffer {
     char buffer[MAX_PACKET_SIZE];
 };
 
@@ -21,14 +21,14 @@ enum nsTargetType {
 struct alignas(1) nsPacket {
     unsigned short id;
     unsigned int size;
-    unsigned short owner;       //server -1
     nsTargetType targetType;
-    unsigned char targetId;
+    int targetId;
 };
 
 struct nsPacketId {
     static constexpr unsigned short CLIENT_ID = 0;
     static constexpr unsigned short MESSAGE = 1;
+    static constexpr unsigned short LAST_ID = 2;
 };
 
 struct nsMessagePacket : nsPacket {
