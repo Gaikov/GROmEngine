@@ -6,7 +6,6 @@
 #pragma once
 
 #include "Networking/server/ClientConnection.h"
-
 #include "Networking/server/SocketServer.h"
 #include "Networking/Packet.h"
 
