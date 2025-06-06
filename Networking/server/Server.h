@@ -16,10 +16,12 @@ public:
 
     bool Start();
     void Stop();
+    void BroadcastPacket(const nsPacket *packet);
 
 protected:
     virtual void OnClientConnected(nsClientConnection *c) {}
-    virtual void OnClientDisconnected(nsClientConnection *c) {}
+    virtual void OnClientDisconnected(const nsClientConnection *c) {}
+
 
 private:
     int             _port;
@@ -35,4 +37,5 @@ private:
     void OnAcceptClient(int socket);
     void ProcessPacket(nsClientConnection *from, nsPacket *packet) override;
     void OnClientDisconnect(nsClientConnection *c) override;
+    void PerformClientDisconnect(nsClientConnection *c);
 };
