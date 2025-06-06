@@ -69,7 +69,6 @@ void nsClient::OnConnected() {
         nsPacketBuffer  buffer = {};
         const auto    packet = reinterpret_cast<nsPacket*>(&buffer);
         while (_socket.ReceivePacket(packet)) {
-            Log::Info("client packet received: %i", packet->id);
             OnPacketReceived(packet);
         }
 
