@@ -23,9 +23,13 @@ nsClient::~nsClient() {
 
 void nsClient::Connect(const char *ip, int port) {
     if (_state == DISCONNECTED) {
-        _connectionThread = std::thread([this, ip, port]() {
+        _ip = ip;
+        if (!_socket.Open()) {
+            return;
+        }
+        _connectionThread = std::thread([this, port]() {
             _state = CONNECTING;
-            if (!_socket.Connect(ip, port)) {
+            if (!_socket.Connect(_ip.c_str(), port)) {
                 _state = DISCONNECTED;
             } else {
                 _state = CONNECTED;
@@ -38,9 +42,13 @@ void nsClient::Connect(const char *ip, int port) {
 }
 
 void nsClient::Disconnect() {
-    std::lock_guard lock(_packetMutex);
     _socket.Close();
+    if (_connectionThread.joinable()) {
+        _connectionThread.join();
+    }
     _state = DISCONNECTED;
+
+    std::lock_guard lock(_packetMutex);
     for (auto p : _receivedPackets) {
         _packetsPool.RecycleObject(p);
     }

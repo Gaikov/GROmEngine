@@ -45,6 +45,7 @@ private:
    std::mutex     _packetMutex;
    std::vector<nsPacketBuffer *> _receivedPackets;
    nsPacketsHandlingManager _packetsHandling;
+   std::string _ip;
 
    void OnConnected();
    void OnPacketReceived(const nsPacket *packet);

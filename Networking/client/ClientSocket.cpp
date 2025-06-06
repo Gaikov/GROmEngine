@@ -6,11 +6,12 @@
 #include "Networking/Net.h"
 #include "nsLib/log.h"
 
-nsClientSocket::nsClientSocket() {
+bool nsClientSocket::Open() {
     _socket = socket(AF_INET, SOCK_STREAM, 0);
     if (_socket < 0) {
-        NET_ERROR("client socket",);
+        NET_ERROR("client socket", false);
     }
+    return true;
 }
 
 bool nsClientSocket::Connect(const char *ip, int port) const {
