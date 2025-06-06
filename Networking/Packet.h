@@ -23,6 +23,13 @@ struct alignas(1) nsPacket {
     unsigned int size;
     nsTargetType targetType;
     int targetId;
+
+    template<typename TPacket>
+    static void Init(TPacket *p) {
+        auto *packet = reinterpret_cast<nsPacket*>(p);
+        packet->id = TPacket::ID;
+        packet->size = sizeof(TPacket);
+    }
 };
 
 struct nsPacketId {

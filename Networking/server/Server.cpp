@@ -12,7 +12,7 @@ nsServer::nsServer(int port) : _port(port) {
 }
 
 nsServer::~nsServer() {
-    for (const auto c : _disconnectedClients) {
+    for (const auto c: _disconnectedClients) {
         delete c;
     }
     Log::Info("Server destroyed");
@@ -48,19 +48,25 @@ void nsServer::Stop() {
             _clientsThread.join();
         }
 
-        std::vector<nsClientConnection *> connectedClients;
-        {
+        std::vector<nsClientConnection *> connectedClients; {
             std::lock_guard lock(_clientsMutex);
-            for (auto c : _clients) {
+            for (auto c: _clients) {
                 connectedClients.push_back(c);
             }
         }
 
-        for (auto c : connectedClients) {
+        for (auto c: connectedClients) {
             c->Disconnect();
         }
 
         Log::Info("Server stopped!");
+    }
+}
+
+void nsServer::BroadcastPacket(const nsPacket *packet) {
+    std::lock_guard lock(_clientsMutex);
+    for (auto c: _clients) {
+        c->Send(packet, packet->size);
     }
 }
 
@@ -85,17 +91,17 @@ void nsServer::OnAcceptClient(int socket) {
 void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
     std::lock_guard lock(_clientsMutex);
     if (packet->targetType == TARGET_ALL) {
-        for (auto c : _clients) {
+        for (auto c: _clients) {
             c->Send(packet, packet->size);
         }
     } else if (packet->targetType == TARGET_OTHER_CLIENTS) {
-        for (auto c : _clients) {
+        for (auto c: _clients) {
             if (c != from) {
                 c->Send(packet, packet->size);
             }
         }
     } else if (packet->targetType == TARGET_CLIENT) {
-        for (auto c : _clients) {
+        for (auto c: _clients) {
             if (c->GetId() == packet->targetId) {
                 c->Send(packet, packet->size);
                 return;
@@ -107,8 +113,9 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
     }
 }
 
-void nsServer::OnClientDisconnect(nsClientConnection *c) {
+void nsServer::PerformClientDisconnect(nsClientConnection *c) {
     Log::Info("On Client disconnect: %i", c->GetId());
+
     std::lock_guard lock(_clientsMutex);
     auto it = std::find(_clients.begin(), _clients.end(), c);
     if (it == _clients.end()) {
@@ -119,5 +126,9 @@ void nsServer::OnClientDisconnect(nsClientConnection *c) {
 
     Log::Info("Client disconnected: %i", c->GetId());
     _disconnectedClients.push_back(c);
+}
+
+void nsServer::OnClientDisconnect(nsClientConnection *c) {
+    PerformClientDisconnect(c);
     OnClientDisconnected(c);
 }
