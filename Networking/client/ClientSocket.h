@@ -9,6 +9,6 @@
 
 class nsClientSocket : public nsBaseClientSocket {
 public:
-    nsClientSocket();
+    bool Open();
     bool Connect(const char *ip, int port) const;
 };
