@@ -9,6 +9,12 @@
 #include <emscripten/html5.h>
 #include "nsLib/log.h"
 
+extern "C" {
+	void nsEngine_OnActivateApp(bool active) {
+		nsEngine::OnActivateApp(active);
+	}
+}
+
 EM_JS(int, GetCanvasWidth, (), {
 	return Module['canvas'].width;
 });
