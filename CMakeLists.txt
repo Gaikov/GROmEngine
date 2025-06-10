@@ -62,7 +62,9 @@ add_subdirectory(SoundBase)
 add_subdirectory(${SOUND_LIB})
 add_subdirectory(RasterGL)
 add_subdirectory(Engine)
-add_subdirectory(Networking)
+if (NOT NO_NETWORKING)
+    add_subdirectory(Networking)
+endif()
 
 if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_subdirectory(nsLib_unit)
