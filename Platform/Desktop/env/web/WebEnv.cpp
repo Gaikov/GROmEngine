@@ -27,6 +27,10 @@ EM_JS(void, ShowCursorExternal, (bool show), {
 	Module['canvas'].style.cursor = show ? 'default' : 'none';
 });
 
+EM_JS(float, GetPixelRatio, (), {
+	return window.devicePixelRatio || 1;
+});
+
 EM_JS(bool, IsMobileExternal, (), {
   const isPhone = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/ig.test(navigator.userAgent);
   const isTablet = /(ipad|tablet|playbook|silk)|(android(?!.*mobile))/ig.test(navigator.userAgent);
@@ -87,14 +91,15 @@ bool nsEnv::IsMobile() {
 }
 
 EM_BOOL touch_callback(int eventType, const EmscriptenTouchEvent *touchEvent, void *userData) {
+  	auto r = GetPixelRatio();
 	for (int i = 0; i < touchEvent->numTouches; i++) {
 		const EmscriptenTouchPoint *touch = &touchEvent->touches[i];
 		if (eventType == EMSCRIPTEN_EVENT_TOUCHSTART) {
-			nsEngine::OnPointerDown(touch->identifier, touch->targetX, touch->targetY);
+			nsEngine::OnPointerDown(touch->identifier, float(touch->targetX * r), float(touch->targetY * r));
 		} else if (eventType == EMSCRIPTEN_EVENT_TOUCHMOVE) {
-			nsEngine::OnPointerMove(touch->identifier, touch->targetX, touch->targetY);
+			nsEngine::OnPointerMove(touch->identifier, float(touch->targetX * r), float(touch->targetY * r));
 		} else {
-			nsEngine::OnPointerUp(touch->identifier, touch->targetX, touch->targetY);
+			nsEngine::OnPointerUp(touch->identifier, float(touch->targetX * r), float(touch->targetY * r));
 		}
 	}
 
