@@ -5,9 +5,11 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "nsLib/headers.h"
+
 #define MAX_PACKET_SIZE 128
 
-struct alignas(1) nsPacketBuffer {
+struct nsPacketBuffer {
     char buffer[MAX_PACKET_SIZE];
 };
 
@@ -18,11 +20,11 @@ enum nsTargetType {
     TARGET_OTHER_CLIENTS = 3,
 };
 
-struct alignas(1) nsPacket {
-    unsigned short id;
-    unsigned int size;
+struct alignas(4) nsPacket {
+    uint32_t id;
+    uint32_t size;
     nsTargetType targetType;
-    int targetId;
+    uint16_t targetId;
 
     template<typename TPacket>
     static void Init(TPacket *p) {
@@ -45,5 +47,5 @@ struct nsMessagePacket : nsPacket {
 
 struct nsClientIdPacket : nsPacket {
     static constexpr unsigned short ID = nsPacketId::CLIENT_ID;
-    int clientId;
+    uint16_t clientId;
 };
