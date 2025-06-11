@@ -201,6 +201,8 @@ set(src
         display/popup/DefaultPopup.h
         display/text/TextAreaBuilder.cpp
         display/text/TextAreaBuilder.h
+        timing/FixedUpdate.cpp
+        timing/FixedUpdate.h
 )
 
 include_directories(./)
