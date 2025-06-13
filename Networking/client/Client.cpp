@@ -4,8 +4,9 @@
 
 #include "Client.h"
 
-nsClient::nsClient() {
+nsClient::nsClient() : _clientId(-1) {
     _packetsPool.Reserve(10);
+    _receivedPackets.reserve(10);
     Log::Info("...client created");
 }
 

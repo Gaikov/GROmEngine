@@ -4,7 +4,7 @@
 #include "nsLib/StrTools.h"
 #include <cstdlib>
 
-static bool g_inLoop = true;
+static bool g_inLoop = false;
 static int g_loopAllocations = 0;
 
 void *operator new(size_t size)
