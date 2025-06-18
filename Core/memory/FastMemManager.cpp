@@ -34,6 +34,13 @@ int nsFastMemManager::GetPoolIndex(size_t size) {
     return poolIndex;
 }
 
+void nsFastMemManager::GetPoolInfo(int index, PoolInfo &info) const {
+    auto p = _pools[index];
+    info.debugName = p->GetName();
+    info.usedBlocks = p->GetUsedAmount();
+    info.totalBlocks = p->GetAllocatedAmount();
+}
+
 bool nsFastMemManager::OnInit() {
     if (!nsSubSystem::OnInit()) {
         return false;
