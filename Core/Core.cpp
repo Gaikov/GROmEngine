@@ -11,6 +11,7 @@
 #include "Name.h"
 #include "debug/LogFile.h"
 #include "debug/LogStdOut.h"
+#include "memory/FastMemManager.h"
 
 //---------------------------------------------------------
 // nsCore::Init: 
@@ -24,6 +25,10 @@ bool nsCore::Init()
 
 	Log::Info("OS Installed: %s", Sys_OSName().c_str());
 	Log::Info("CPU Speed: %.2f", Sys_CPUSpeed());
+
+	if (!nsFastMemManager::Init()) {
+		return false;
+	}
 
 	if (!g_pack.Init()) return false;
     if (!App_GetInfo()->Init()) {
@@ -46,6 +51,8 @@ void nsCore::Release()
 	g_pack.Release();
 
 	nsNamePool::Free();
+
+	nsFastMemManager::Release();
 
 	g_log.Close();
 	Log::Info("");

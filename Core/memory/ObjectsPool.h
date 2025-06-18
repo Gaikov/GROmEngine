@@ -59,6 +59,8 @@ public:
 
     int GetAvailableAmount() { return (int)_pool.size(); }
     int GetAllocatedAmount() { return (int)_allocated.size(); }
+    int GetUsedAmount() { return GetAllocatedAmount() - GetAvailableAmount(); }
+    const char* GetName() const { return _debugName.c_str(); }
 
     nsObjectsPool<TClass>& operator = (const nsObjectsPool<TClass> &other) = delete;
     nsObjectsPool(const nsObjectsPool<TClass> &other) = delete;

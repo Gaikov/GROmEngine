@@ -40,6 +40,10 @@ set(sources
         memory/MemoryPool.cpp
         memory/ObjectsPool.cpp
         memory/ObjectsPool.h
+        memory/FastMemManager.cpp
+        memory/FastMemManager.h
+        memory/FastAllocatedObject.cpp
+        memory/FastAllocatedObject.h
 )
 
 include_directories(
