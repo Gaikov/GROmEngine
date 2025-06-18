@@ -57,9 +57,9 @@ public:
         Log::Info("objects '%s' reserved: %i/%i", _debugName.c_str(), numObjects, (int)_allocated.size());
     }
 
-    int GetAvailableAmount() { return (int)_pool.size(); }
-    int GetAllocatedAmount() { return (int)_allocated.size(); }
-    int GetUsedAmount() { return GetAllocatedAmount() - GetAvailableAmount(); }
+    int GetAvailableAmount() const { return (int)_pool.size(); }
+    int GetAllocatedAmount() const { return (int)_allocated.size(); }
+    int GetUsedAmount() const { return GetAllocatedAmount() - GetAvailableAmount(); }
     const char* GetName() const { return _debugName.c_str(); }
 
     nsObjectsPool<TClass>& operator = (const nsObjectsPool<TClass> &other) = delete;
