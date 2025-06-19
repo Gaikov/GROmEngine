@@ -12,7 +12,7 @@ set(TESTS
         args/ArgsTest.cpp
         CryptTest.cpp
         undo/UndoTest.cpp
-        memory/FastMemPoolIndex.cpp)
+        memory/FastMem.cpp)
 
 add_executable(Core_unit ${TESTS})
 

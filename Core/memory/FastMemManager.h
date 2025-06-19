@@ -17,13 +17,20 @@ public:
     };
 
     void* Alloc(size_t size) const;
-    void Free(void* ptr, size_t size) const;
+    bool Free(void* ptr) const;
+    void Reserve(size_t size, int amount) const;
     static int GetPoolIndex(size_t size);
 
     [[nodiscard]] size_t GetPoolsAmount() const { return _pools.size(); }
-    void GetPoolInfo(int index, PoolInfo &info) const;
+    inline void GetPoolInfo(int index, PoolInfo &info) const;
 
 protected:
+    struct BlockHeader {
+        uint32_t id;
+        unsigned char poolIndex;
+        size_t size;
+    };
+
     bool OnInit() override;
     void OnRelease() override;
 

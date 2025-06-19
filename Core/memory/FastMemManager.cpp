@@ -5,27 +5,63 @@
 #include "FastMemManager.h"
 #include "Memory.h"
 
-void * nsFastMemManager::Alloc(const size_t size) const {
+#define BLOCK_ID 0xFF1234CC
+
+void * nsFastMemManager::Alloc(size_t size) const {
+    size += sizeof(BlockHeader);
+
     const auto poolIndex = GetPoolIndex(size);
+    char *block;
     if (poolIndex < 0) {
         Log::Warning("Allocating big size block: %i", size);
-        return my_malloc(size);
+        block = static_cast<char *>(my_malloc(size));
+    } else {
+        block = static_cast<char *>(_pools[poolIndex]->AllocateObject());
     }
 
-    return _pools[poolIndex]->AllocateObject();
+    auto header = reinterpret_cast<BlockHeader *>(block);
+    header->size = size;
+    header->poolIndex = poolIndex;
+    header->id = BLOCK_ID;
+
+    return block + sizeof(BlockHeader);
 }
 
-void nsFastMemManager::Free(void *ptr, const size_t size) const {
-    const auto poolIndex = GetPoolIndex(size);
-    if (poolIndex < 0) {
-        Log::Warning("Freeing big size block: %i", size);
-        my_free(ptr);
+bool nsFastMemManager::Free(void *ptr) const {
+    char *block = static_cast<char *>(ptr) - sizeof(BlockHeader);
+    const auto header = reinterpret_cast<BlockHeader *>(block);
+    if (header->id != BLOCK_ID) {
+        Log::Error("Invalid memory block!", ptr);
+        return false;
     }
-    _pools[poolIndex]->RecycleObject(ptr);
+
+    const auto poolIndex = GetPoolIndex(header->size);
+    if (header->poolIndex != poolIndex) {
+        Log::Error("Invalid memory block pool index!", ptr);
+        return false;
+    }
+
+    if (poolIndex < 0) {
+        Log::Warning("Freeing big size block: %i", header->size);
+        my_free(block);
+    } else {
+        _pools[poolIndex]->RecycleObject(block);
+    }
+    return true;
+}
+
+void nsFastMemManager::Reserve(const size_t size, const int amount) const {
+    auto poolIndex = GetPoolIndex(size);
+    if (poolIndex < 0) {
+        Log::Warning("Can't reserve big size block: %i", size);
+    } else {
+        _pools[poolIndex]->Reserve(amount);
+    }
 }
 
 int nsFastMemManager::GetPoolIndex(size_t size) {
-    int poolIndex = std::ceil(std::log2(size) - 4);
+
+    int poolIndex = ceil(log2(static_cast<float>(size)) - 4);
     if (poolIndex < 0) {
         poolIndex = 0;
     } else if (poolIndex > 5) {
