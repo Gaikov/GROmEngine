@@ -7,10 +7,14 @@
 #include "Engine/Platform.h"
 
 nsProfilerSample::nsProfilerSample(const char *message) : _message(message) {
-    _startTime = App_GetPlatform()->GetTime();
+    _startTime = GetTime();
 }
 
 nsProfilerSample::~nsProfilerSample() {
-    auto delta = App_GetPlatform()->GetTime() - _startTime;
-    Log::Debug("%s: %i", _message, delta);
+    const auto delta = GetTime() - _startTime;
+    Log::Info("%s: %i", _message, delta);
+}
+
+long long nsProfilerSample::GetTime() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }

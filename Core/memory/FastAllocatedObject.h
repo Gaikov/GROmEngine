@@ -8,15 +8,16 @@
 
 class nsFastAllocatedObject {
 public:
+    virtual ~nsFastAllocatedObject() = default;
+
     void* operator new(size_t size) {
         return nsFastMemManager::Shared()->Alloc(size);
     }
 
-    void operator delete(void* ptr, size_t size) {
-        nsFastMemManager::Shared()->Free(ptr, size);
+    void operator delete(void* ptr) {
+        nsFastMemManager::Shared()->Free(ptr);
     }
 
-    void operator delete(void*) = delete;
     void* operator new[](size_t) = delete;
     void operator delete[](void*) = delete;
 };

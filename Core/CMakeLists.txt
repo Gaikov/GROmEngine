@@ -44,6 +44,8 @@ set(sources
         memory/FastMemManager.h
         memory/FastAllocatedObject.cpp
         memory/FastAllocatedObject.h
+        memory/FastMemTest.cpp
+        memory/FastMemTest.h
 )
 
 include_directories(

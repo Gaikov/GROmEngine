@@ -9,9 +9,11 @@ class nsProfilerSample {
 public:
     explicit nsProfilerSample(const char *message);
     virtual ~nsProfilerSample();
+    static long long GetTime();
+
 private:
     const char *_message;
-    unsigned int _startTime;
+    long long _startTime;
 };
 
 #endif //_GROM_PROFILER_H
