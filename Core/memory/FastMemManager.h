@@ -22,7 +22,7 @@ public:
     static int GetPoolIndex(size_t size);
 
     [[nodiscard]] size_t GetPoolsAmount() const { return _pools.size(); }
-    inline void GetPoolInfo(int index, PoolInfo &info) const;
+    void GetPoolInfo(int index, PoolInfo &info) const;
 
 protected:
     struct BlockHeader {

@@ -19,6 +19,8 @@
 #include "input/SoftKeyboard.h"
 #include "display/VisualSceneRender2d.h"
 #include "EngineContext.h"
+#include "debug/DebugDrawManager.h"
+#include "debug/policies/FastMemDebugDraw.h"
 #include "renderer/particles/ParticlesManager.h"
 #include "renderer/font/FontsCache.h"
 #include "display/factory/VisualFactory2d.h"
@@ -78,6 +80,8 @@ bool nsEngine::Init()
     }
 
     nsVisualFactory2d::Init();
+	nsDebugDrawManager::Init();
+	nsDebugDrawManager::Shared()->AddPolicy(new nsFastMemDebugDraw());
 
 	if ( !app->Init() ) return false;
 
@@ -118,6 +122,7 @@ void nsEngine::Release(bool failed)
 	g_inp.Release();
 	App_GetGame()->Release();
 
+	nsDebugDrawManager::Release();
     nsVisualFactory2d::Release();
     nsParticlesManager::Release();
     nsEngineContext::Release();
@@ -234,6 +239,7 @@ void nsEngine::MainLoop()
         nsVisualSceneRender2d::DrawScene(root);
 
         g_renDev->LoadMatrix( nsMatrix::identity );
+		nsDebugDrawManager::Shared()->Draw();
 		nsConsole::Shared()->Draw();
 
 #ifdef DEBUG

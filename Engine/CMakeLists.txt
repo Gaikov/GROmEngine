@@ -203,6 +203,12 @@ set(src
         display/text/TextAreaBuilder.h
         timing/FixedUpdate.cpp
         timing/FixedUpdate.h
+        debug/DebugDrawManager.cpp
+        debug/DebugDrawManager.h
+        debug/DebugDrawPolicy.cpp
+        debug/DebugDrawPolicy.h
+        debug/policies/FastMemDebugDraw.cpp
+        debug/policies/FastMemDebugDraw.h
 )
 
 include_directories(./)
