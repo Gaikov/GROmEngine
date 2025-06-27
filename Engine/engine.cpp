@@ -24,6 +24,7 @@
 #include "renderer/particles/ParticlesManager.h"
 #include "renderer/font/FontsCache.h"
 #include "display/factory/VisualFactory2d.h"
+#include "display/pool/VisualsPoolDebugDraw.h"
 
 #define DEBUG_BUILD "Debug"
 
@@ -81,7 +82,9 @@ bool nsEngine::Init()
 
     nsVisualFactory2d::Init();
 	nsDebugDrawManager::Init();
-	nsDebugDrawManager::Shared()->AddPolicy(new nsFastMemDebugDraw());
+	auto ddm = nsDebugDrawManager::Shared();
+	ddm->AddPolicy(new nsFastMemDebugDraw());
+	ddm->AddPolicy(new nsVisualsPoolDebugDraw());
 
 	if ( !app->Init() ) return false;
 
