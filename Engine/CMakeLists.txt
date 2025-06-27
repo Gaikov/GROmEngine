@@ -214,6 +214,8 @@ set(src
         display/pool/LayoutsPool.h
         display/pool/VisualPool.cpp
         display/pool/VisualPool.h
+        display/pool/VisualsPoolDebugDraw.h
+        display/pool/VisualsPoolDebugDraw.cpp
 )
 
 include_directories(./)
