@@ -209,6 +209,11 @@ set(src
         debug/DebugDrawPolicy.h
         debug/policies/FastMemDebugDraw.cpp
         debug/policies/FastMemDebugDraw.h
+        display/pool/CachedVisual.h
+        display/pool/LayoutsPool.cpp
+        display/pool/LayoutsPool.h
+        display/pool/VisualPool.cpp
+        display/pool/VisualPool.h
 )
 
 include_directories(./)
