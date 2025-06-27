@@ -3,7 +3,13 @@
 //
 
 #include "ParticlesPool.h"
+
+#include "Core/Config.h"
+#include "Core/Var.h"
+#include "GameSources/effects/particles/ParticlesEffectHolder.h"
 #include "nsLib/log.h"
+
+static nsVar *ps_reserved;
 
 void nsParticlesPool::Reserve(int amount) {
     Log::Info("particles reserved amount: %i/%i", amount, amount + _capacity);
@@ -14,12 +20,19 @@ void nsParticlesPool::Reserve(int amount) {
         p->next = _head;
         _head = p;
     }
+
+    ps_reserved->SetValue(static_cast<float>(_capacity));
 }
 
 bool nsParticlesPool::OnInit() {
     nsSubSystem::OnInit();
 
-    Reserve(500);
+    ps_reserved = g_cfg->RegVar("ps_reserved", "500", GVF_SAVABLE);
+    if (ps_reserved->Value() < 500) {
+        ps_reserved->SetValue(500);
+    }
+
+    Reserve(static_cast<int>(ps_reserved->Value()));
     return true;
 }
 

@@ -14,6 +14,7 @@ public:
     typedef std::function<bool(nsVisualObject2d*)>  tChildCallback;
     bool interactiveChildren = true;
 
+    nsVisualContainer2d();
     void Destroy() override;
     virtual void DestroyChildren();
 

@@ -141,7 +141,7 @@ bool GLTexture::EnsureBitmapData() {
         return true;
     }
 
-    //Log::Info("...loading bitmap data: %s", _id.c_str());
+    Log::Debug("...loading bitmap data: %s", _id.c_str());
     _bmData = BitmapLoader::LoadFromFile(_id.c_str());
     return _bmData.get();
 }

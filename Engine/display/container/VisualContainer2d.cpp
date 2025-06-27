@@ -5,6 +5,10 @@
 #include "VisualContainer2d.h"
 #include "Engine/display/context/VisualMaskManager.h"
 
+nsVisualContainer2d::nsVisualContainer2d() {
+    _children.reserve(20);
+}
+
 void nsVisualContainer2d::Destroy() {
     DestroyChildren();
     nsVisualObject2d::Destroy();
