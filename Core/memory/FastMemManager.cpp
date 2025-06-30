@@ -82,7 +82,7 @@ bool nsFastMemManager::OnInit() {
         return false;
     }
 
-    for (int i = 16; i <= 512; i *= 2) {
+    for (int i = 16; i <= MAX_BLOCK_SIZE; i *= 2) {
         std::string name = "mem_pool_" + std::to_string(i);
         _pools.push_back(new nsMemoryPool(name.c_str(), i));
     }

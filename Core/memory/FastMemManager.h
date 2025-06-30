@@ -16,6 +16,10 @@ public:
         int totalBlocks;
     };
 
+    enum {
+        MAX_BLOCK_SIZE = 1024,
+    };
+
     void* Alloc(size_t size) const;
     bool Free(void* ptr) const;
     void Reserve(size_t size, int amount) const;
