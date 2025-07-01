@@ -321,7 +321,7 @@ ISound* nsOALDevice::SoundLoad( const char *fileName )
 	if ( !m_alc )
 	{
 		Log::Warning("Can't load: %s", fileName);
-		Log::Warning("Sound system is not initialized");sou
+		Log::Warning("Sound system is not initialized");
 		return nullptr;
 	}
 
