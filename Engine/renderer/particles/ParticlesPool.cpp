@@ -6,7 +6,6 @@
 
 #include "Core/Config.h"
 #include "Core/Var.h"
-#include "GameSources/effects/particles/ParticlesEffectHolder.h"
 #include "nsLib/log.h"
 
 static nsVar *ps_reserved;

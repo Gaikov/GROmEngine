@@ -14,7 +14,7 @@ nsServerSocket::~nsServerSocket() {
 
 void nsServerSocket::Close() {
     if (_socket >= 0) {
-        closesocket(_socket);
+        nsNet::CloseSocket(_socket);
         _socket = -1;
         Log::Info("Server socked closed");
     }
@@ -24,7 +24,7 @@ bool nsServerSocket::Listen(int port) {
     _socket = socket(AF_INET, SOCK_STREAM, 0);
     NET_ERROR("server socket", false)
 
-    char opt = 1;
+    int opt = 1;
     setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     NET_ERROR("server setsockopt", false)
 

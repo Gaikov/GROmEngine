@@ -3,7 +3,6 @@
 //
 
 #include "BaseClientSocket.h"
-#include "nsLib/log.h"
 #include "Networking/Net.h"
 
 nsBaseClientSocket::~nsBaseClientSocket() {
@@ -53,8 +52,7 @@ bool nsBaseClientSocket::Send(const void *data, unsigned int size) const {
 
 void nsBaseClientSocket::Close() {
     if (_socket >= 0) {
-        closesocket(_socket);
-        NET_ERROR("close client socket",);
+        nsNet::CloseSocket(_socket);
         _socket = -1;
     }
 }

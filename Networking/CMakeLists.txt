@@ -25,5 +25,17 @@ set(sources
         common/PacketsHandlingManager.h
 )
 
-add_library(Networking STATIC ${sources})
-target_link_libraries(Networking PRIVATE ws2_32)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(platform_src
+            NetWindows.cpp
+    )
+    set(net_libs ws2_32)
+else()
+    set(platform_src
+            NetPosix.cpp
+    )
+    set(net_libs "")
+endif()
+
+add_library(Networking STATIC ${sources} ${platform_src})
+target_link_libraries(Networking PRIVATE ${net_libs})
