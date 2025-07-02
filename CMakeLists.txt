@@ -48,7 +48,7 @@ include_directories(
         ThirdParty/OggVorbis/include
 )
 
-if (NOT WEB_ASM)
+if ((NOT WEB_ASM) AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux"))
     include_directories(
         ThirdParty/openal-soft/include
     )
