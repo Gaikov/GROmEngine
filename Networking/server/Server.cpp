@@ -23,6 +23,7 @@ bool nsServer::Start() {
         return false;
     }
 
+    _isRunning = true;
     _clientsThread = std::thread([this]() {
         while (_isRunning) {
             auto socket = _socket.Accept();
@@ -33,7 +34,6 @@ bool nsServer::Start() {
         Log::Info("Server thread stopping");
     });
     Log::Info("Server started");
-    _isRunning = true;
     return true;
 }
 

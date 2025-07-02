@@ -24,6 +24,7 @@ struct nsNet final {
     static int GetLastError();
     static const char* GetErrorMessage(int code);
     static bool CheckLastError(const char* message);
+    static void CloseSocket(int socket);
 };
 
 #define NET_ERROR(message, result) if (!nsNet::CheckLastError(message)) return result;
