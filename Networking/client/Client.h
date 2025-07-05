@@ -8,45 +8,46 @@
 #include "Networking/client/ClientSocket.h"
 #include "Networking/common/PacketsHandlingManager.h"
 #include "Networking/common/PacketsPool.h"
+#include "nsLib/models/Property.h"
 
 class nsClient {
 public:
-   enum State {
+   enum ConnectionState {
       DISCONNECTED,
       CONNECTING,
       CONNECTED,
    };
 
+   nsProperty<ConnectionState> State = DISCONNECTED;
+
    nsClient();
    virtual ~nsClient();
-
-   State GetState() const { return _state; }
    void Connect(const char *ip, int port);
    void Disconnect();
 
    void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
-   void ProcessPackets();
+   void Update();
 
    template<typename T>
    bool SendPacket(T *packed) const {
-      if (_state != CONNECTED) {
-         Log::Warning("Client is not connected");
-         return false;
+      if (State == CONNECTED && State == _commitState) {
+         return _socket.SendPacket(packed);
       }
-      return _socket.SendPacket(packed);
+
+      Log::Warning("Client is not connected");
+      return false;
    }
 
 private:
    nsClientSocket _socket;
    std::thread    _connectionThread;
    std::thread    _packetThread;
-   State          _state = DISCONNECTED;
+   ConnectionState _commitState = DISCONNECTED;
    nsPacketsPool  _packetsPool;
    std::mutex     _packetMutex;
    std::vector<nsPacketBuffer *> _receivedPackets;
    nsPacketsHandlingManager _packetsHandling;
    std::string    _ip;
-   uint16_t       _clientId;
 
    void OnConnected();
    void OnPacketReceived(const nsPacket *packet);

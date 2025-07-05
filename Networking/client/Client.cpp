@@ -4,7 +4,7 @@
 
 #include "Client.h"
 
-nsClient::nsClient() : _clientId(-1) {
+nsClient::nsClient() {
     _packetsPool.Reserve(10);
     _receivedPackets.reserve(10);
     Log::Info("...client created");
@@ -23,17 +23,17 @@ nsClient::~nsClient() {
 }
 
 void nsClient::Connect(const char *ip, int port) {
-    if (_state == DISCONNECTED) {
+    if (State == DISCONNECTED) {
         _ip = ip;
         if (!_socket.Open()) {
             return;
         }
         _connectionThread = std::thread([this, port]() {
-            _state = CONNECTING;
+            _commitState = CONNECTING;
             if (!_socket.Connect(_ip.c_str(), port)) {
-                _state = DISCONNECTED;
+                _commitState = DISCONNECTED;
             } else {
-                _state = CONNECTED;
+                _commitState = CONNECTED;
                 OnConnected();
             }
         });
@@ -47,7 +47,7 @@ void nsClient::Disconnect() {
     if (_connectionThread.joinable()) {
         _connectionThread.join();
     }
-    _state = DISCONNECTED;
+    State = _commitState = DISCONNECTED;
 
     std::lock_guard lock(_packetMutex);
     for (auto p : _receivedPackets) {
@@ -60,8 +60,10 @@ void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManag
     _packetsHandling.SetHandler(packetId, handler);
 }
 
-void nsClient::ProcessPackets() {
+void nsClient::Update() {
     std::lock_guard lock(_packetMutex);
+
+    State = _commitState;
     for (auto p : _receivedPackets) {
         _packetsHandling.HandlePacket(reinterpret_cast<nsPacket*>(p));
         _packetsPool.RecycleObject(p);
@@ -81,7 +83,7 @@ void nsClient::OnConnected() {
             OnPacketReceived(packet);
         }
 
-        _state = DISCONNECTED;
+        _commitState = DISCONNECTED;
         Log::Info("client disconnected");
     });
 }
