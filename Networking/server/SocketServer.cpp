@@ -25,7 +25,7 @@ bool nsServerSocket::Listen(int port) {
     NET_ERROR("server socket", false)
 
     int opt = 1;
-    setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));
     NET_ERROR("server setsockopt", false)
 
     sockaddr_in address{};
