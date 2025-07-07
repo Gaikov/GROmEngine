@@ -46,6 +46,10 @@ set(sources
         memory/FastAllocatedObject.h
         memory/FastMemTest.cpp
         memory/FastMemTest.h
+        serialization/BinaryState.cpp
+        serialization/BinaryState.h
+        serialization/BinaryVar.cpp
+        serialization/BinaryVar.h
 )
 
 include_directories(
