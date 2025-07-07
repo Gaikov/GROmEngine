@@ -2,6 +2,9 @@
 // Created by roman on 7/2/25.
 //
 
+#include "nsLib/log.h"
+#include "Net.h"
+
 struct WinsockError {
     int code;
     const char* name;
@@ -105,4 +108,9 @@ const char* nsNet::GetErrorMessage(int code) {
         }
     }
     return "Unknown error code.";
+}
+
+void nsNet::CloseSocket(int socket) {
+    closesocket(socket);
+    NET_ERROR("Error to close socket",)
 }
