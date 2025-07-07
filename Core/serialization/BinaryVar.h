@@ -7,7 +7,7 @@ public:
     virtual ~IBinaryVar() = default;
     [[nodiscard]] virtual size_t GetSize() const = 0;
     virtual void Serialize(void *buffer) = 0;
-    virtual void Deserialize(const void *buffer) = 0
+    virtual void Deserialize(const void *buffer) = 0;
 
 private:
     IBinaryVar *next = nullptr;
