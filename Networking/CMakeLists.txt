@@ -23,6 +23,8 @@ set(sources
         common/PacketsPool.h
         common/PacketsHandlingManager.cpp
         common/PacketsHandlingManager.h
+        serialization/BinaryState.cpp
+        serialization/BinaryVar.cpp
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

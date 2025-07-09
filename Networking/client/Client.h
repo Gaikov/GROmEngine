@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Networking/serialization/BinaryState.h"
 #include "Networking/client/ClientSocket.h"
 #include "Networking/common/PacketsHandlingManager.h"
 #include "Networking/common/PacketsPool.h"
@@ -31,10 +32,26 @@ public:
    void AddCommonPacketsHandler(const PacketHandler& handler);
    void Update();
 
-   template<typename T>
-   bool SendPacket(T *packed) const {
+   template<typename TPacket>
+   bool SendPacket(TPacket *packed) const {
       if (State == CONNECTED && State == _commitState) {
          return _socket.SendPacket(packed);
+      }
+
+      Log::Warning("Client is not connected");
+      return false;
+   }
+
+   template<typename TPacket>
+   bool SendState(TPacket *source, const nsBinaryState &state) {
+      if (State == CONNECTED && State == _commitState) {
+         nsPacketBuffer buff = {};
+         auto p = reinterpret_cast<TPacket*>(&buff);
+         *p = *source;
+         const auto packet = reinterpret_cast<nsPacket*>(&buff);
+         packet->id = TPacket::ID;
+         state.SerializePacket(p);
+         return _socket.Send(p, p->size);
       }
 
       Log::Warning("Client is not connected");
