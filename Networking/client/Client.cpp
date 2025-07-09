@@ -60,7 +60,7 @@ void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManag
     _packetsHandling.SetHandler(packetId, handler);
 }
 
-void nsClient::AddCommonPacketsHandler(const nsPacketsHandlingManager::HandlerCallback &handler) {
+void nsClient::AddCommonPacketsHandler(const PacketHandler &handler) {
     _commonHandlers.push_back(handler);
 }
 
@@ -70,13 +70,22 @@ void nsClient::Update() {
     State = _commitState;
     for (const auto p : _receivedPackets) {
         const auto packet = reinterpret_cast<nsPacket*>(p);
-        _packetsHandling.HandlePacket(packet);
-        for (auto &h : _commonHandlers) {
-            h(packet);
+        if (!HandlePacket(packet)) {
+            Log::Warning("net packet not handled: %i", packet->id);
         }
         _packetsPool.RecycleObject(p);
     }
     _receivedPackets.clear();
+}
+
+bool nsClient::HandlePacket(const nsPacket *packet) {
+    bool handled = _packetsHandling.HandlePacket(packet);
+    for (auto &h : _commonHandlers) {
+        if (h(packet)) {
+            handled = true;
+        }
+    }
+    return handled;
 }
 
 void nsClient::OnConnected() {

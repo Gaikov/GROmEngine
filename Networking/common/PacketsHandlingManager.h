@@ -14,7 +14,7 @@ public:
 
     void SetHandler(int packetId, const HandlerCallback &handler);
     void RemoveHandler(int packetId);
-    void HandlePacket(const nsPacket* packet);
+    bool HandlePacket(const nsPacket* packet);
 
 private:
     std::map<int, HandlerCallback> _handlers;
