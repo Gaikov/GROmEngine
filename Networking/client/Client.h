@@ -20,13 +20,15 @@ public:
 
    nsProperty<ConnectionState> State = DISCONNECTED;
 
+   typedef std::function<bool(const nsPacket*)>    PacketHandler;
+
    nsClient();
    virtual ~nsClient();
    void Connect(const char *ip, int port);
    void Disconnect();
 
    void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
-   void AddCommonPacketsHandler(const nsPacketsHandlingManager::HandlerCallback& handler);
+   void AddCommonPacketsHandler(const PacketHandler& handler);
    void Update();
 
    template<typename T>
@@ -48,9 +50,11 @@ private:
    std::mutex     _packetMutex;
    std::vector<nsPacketBuffer *> _receivedPackets;
    nsPacketsHandlingManager _packetsHandling;
-   std::vector<nsPacketsHandlingManager::HandlerCallback> _commonHandlers;
+   std::vector<PacketHandler> _commonHandlers;
    std::string    _ip;
 
    void OnConnected();
    void OnPacketReceived(const nsPacket *packet);
+   bool HandlePacket(const nsPacket *packet);
 };
+

@@ -13,11 +13,11 @@ void nsPacketsHandlingManager::RemoveHandler(int packetId) {
     _handlers.erase(packetId);
 }
 
-void nsPacketsHandlingManager::HandlePacket(const nsPacket *packet) {
+bool nsPacketsHandlingManager::HandlePacket(const nsPacket *packet) {
     const auto handler = _handlers.find(packet->id);
     if (handler != _handlers.end()) {
         handler->second(packet);
-    } else {
-        Log::Warning("No handler for packet %i", packet->id);
+        return true;
     }
+    return false;
 }
