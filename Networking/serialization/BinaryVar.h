@@ -18,14 +18,19 @@ class nsBinaryVar : public IBinaryVar {
 public:
     typedef std::function<void()> onChanged;
 
-    explicit nsBinaryVar(const TType &value) : _value(value) {}
+    nsBinaryVar(const TType &value) : _value(value) {}
 
     [[nodiscard]] size_t GetSize() const override {
-        return sizeof(_value);
+        return sizeof(TType);
     }
 
     void SetHandler(const onChanged& handler) {
         _handler = handler;
+    }
+
+    nsBinaryVar& operator = (const TType &value) {
+        SetValue(value);
+        return *this;
     }
 
     const TType& GetValue() {

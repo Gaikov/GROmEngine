@@ -3,7 +3,6 @@
 //
 
 #include "BinaryState.h"
-#include "memory/FastMemManager.h"
 
 void nsBinaryState::RegisterVar(IBinaryVar *var) {
    assert(var->next == nullptr);
