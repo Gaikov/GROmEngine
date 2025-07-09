@@ -26,6 +26,7 @@ public:
    void Disconnect();
 
    void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
+   void AddCommonPacketsHandler(const nsPacketsHandlingManager::HandlerCallback& handler);
    void Update();
 
    template<typename T>
@@ -47,6 +48,7 @@ private:
    std::mutex     _packetMutex;
    std::vector<nsPacketBuffer *> _receivedPackets;
    nsPacketsHandlingManager _packetsHandling;
+   std::vector<nsPacketsHandlingManager::HandlerCallback> _commonHandlers;
    std::string    _ip;
 
    void OnConnected();

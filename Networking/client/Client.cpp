@@ -60,12 +60,20 @@ void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManag
     _packetsHandling.SetHandler(packetId, handler);
 }
 
+void nsClient::AddCommonPacketsHandler(const nsPacketsHandlingManager::HandlerCallback &handler) {
+    _commonHandlers.push_back(handler);
+}
+
 void nsClient::Update() {
     std::lock_guard lock(_packetMutex);
 
     State = _commitState;
-    for (auto p : _receivedPackets) {
-        _packetsHandling.HandlePacket(reinterpret_cast<nsPacket*>(p));
+    for (const auto p : _receivedPackets) {
+        const auto packet = reinterpret_cast<nsPacket*>(p);
+        _packetsHandling.HandlePacket(packet);
+        for (auto &h : _commonHandlers) {
+            h(packet);
+        }
         _packetsPool.RecycleObject(p);
     }
     _receivedPackets.clear();
