@@ -11,12 +11,13 @@ class nsTestApp : public IAppInfo
 	{ return "test_app"; }
 
 	const char *GetDefCfgPath() override
-	{ return 0; }
+	{ return nullptr; }
 };
+
+static nsTestApp app;
 
 IAppInfo *App_GetInfo()
 {
-	static nsTestApp app;
 	return &app;
 }
 

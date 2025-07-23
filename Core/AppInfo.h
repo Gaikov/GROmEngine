@@ -3,17 +3,17 @@
 // file AppInfo.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_AppInfo_H_
-#define	_AppInfo_H_
+#pragma once
 
 #include "DataWriter.h"
+#include "nsLib/utils/NoCopyable.h"
 
 //---------------------------------------------------------
 // IAppInfo: ��������� ���������� ��� ���� (������) � ����������
 //---------------------------------------------------------
-struct IAppInfo
+class IAppInfo : public nsNoCopyable
 {
-	virtual ~IAppInfo() = default;
+public:
 	virtual bool            Init() { return true; }
 
 	virtual const char*		GetAppName() = 0;
@@ -33,6 +33,5 @@ struct IAppInfo
 	virtual IDataWriter*	GetCfgWriter() { return 0; }
 };
 
-IAppInfo*	App_GetInfo();	//������ ���� ����������� � ���������� (exe)
-
-#endif //_AppInfo_H_
+//the function should be implemented on app side
+IAppInfo*	App_GetInfo();
