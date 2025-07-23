@@ -3,14 +3,14 @@
 // file GameApp.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_GameApp_H_
-#define	_GameApp_H_
+#pragma once
 
 #include "UserInput.h"
+#include "nsLib/utils/NoCopyable.h"
 
-struct IGameApp
+class IGameApp : public nsNoCopyable
 {
-	virtual             ~IGameApp() = default;
+public:
 	virtual bool		InitDialog() = 0;
 	virtual bool		Init() = 0;	
 	virtual void		Release() = 0;
@@ -32,5 +32,3 @@ IGameApp*	App_GetGame();	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï
 
 bool		App_IsPaused();
 void		App_SetPause( bool pause );
-
-#endif //_GameApp_H_

@@ -52,6 +52,8 @@ set(sources
         math/collision/CollisionMath.h
         utils/AutoDestroy.cpp
         utils/AutoDestroy.h
+        utils/NoCopyable.h
+        utils/NoDynamic.h
 )
 
 add_library(nsLib STATIC ${sources})
