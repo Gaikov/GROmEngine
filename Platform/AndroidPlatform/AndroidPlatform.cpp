@@ -213,4 +213,8 @@ void AndroidPlatform::OpenUrl(const char *url) {
     Log::Warning("Failed to open url!");
 }
 
+const char *AndroidPlatform::GetDomainName() {
+    return "Android";
+}
+
 

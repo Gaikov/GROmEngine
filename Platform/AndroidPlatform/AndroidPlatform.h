@@ -80,6 +80,8 @@ public:
 
     void OpenUrl(const char *url) override;
 
+    const char *GetDomainName() override;
+
 
 private:
     AndroidPlatform();
