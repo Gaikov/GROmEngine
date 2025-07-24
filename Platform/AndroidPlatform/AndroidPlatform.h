@@ -76,7 +76,6 @@ public:
 
 
     ISoftInput *GetSoftInput() override;
-    void SetSoftInput(ISoftInput *si);
 
     void OpenUrl(const char *url) override;
 
