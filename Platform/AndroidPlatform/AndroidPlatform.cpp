@@ -10,6 +10,7 @@
 #include "Core/FileReader.h"
 #include "Core/FileWriter.h"
 #include "Engine/input/SoftInputEmpty.h"
+#include "Engine/input/soft/SoftInputKeyboard.h"
 
 static nsArgs g_args;
 static AndroidPlatform *g_platform = nullptr;
@@ -44,7 +45,7 @@ AndroidPlatform::AndroidPlatform() :
         _screenWidth(0),
         _screenHeight(0),
         _glContext(nullptr) {
-    _softInput = new SoftInputEmpty();
+    _softInput = new nsSoftInputKeyboard();
 }
 
 bool AndroidPlatform::Init() {
@@ -184,14 +185,6 @@ IDataReader *AndroidPlatform::InternalRead(const char *fileName) {
 
 ISoftInput *AndroidPlatform::GetSoftInput() {
     return _softInput;
-}
-
-void AndroidPlatform::SetSoftInput(ISoftInput *si) {
-    if (si) {
-        _softInput = si;
-    } else {
-        _softInput = new SoftInputEmpty();
-    }
 }
 
 void AndroidPlatform::OpenUrl(const char *url) {
