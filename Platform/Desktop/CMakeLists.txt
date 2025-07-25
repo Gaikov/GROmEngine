@@ -5,7 +5,7 @@ if (WEB_ASM)
     set(env-sources
             env/web/WebEnv.cpp
     )
-elseif (CMAKE_SYSTEM_NAME STREQUAL WIN32)
+elseif (CMAKE_SYSTEM_NAME STREQUAL Windows)
     find_package(glfw3 REQUIRED)
     set(env-sources
             env/desktop/DesktopEnv.cpp
