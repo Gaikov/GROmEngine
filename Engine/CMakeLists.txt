@@ -216,6 +216,7 @@ set(src
         display/pool/VisualPool.h
         display/pool/VisualsPoolDebugDraw.h
         display/pool/VisualsPoolDebugDraw.cpp
+        display/container/ChildRef.h
 )
 
 include_directories(./)
