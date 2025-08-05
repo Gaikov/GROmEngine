@@ -10,7 +10,7 @@
 #include "Engine/display/text/TextArea.h"
 #include "Engine/display/button/TextButton.h"
 #include "Engine/display/popup/PopupManager.h"
-#include "Engine/display/Sprite.h"
+#include "Engine/display/sprite/Sprite.h"
 #include "Engine/display/button/IconButton.h"
 #include "Engine/display/popup/MessagePopup.h"
 #include "nsLib/log.h"

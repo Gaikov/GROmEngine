@@ -4,7 +4,7 @@
 
 #include "PopupManager.h"
 
-#include "display/Sprite.h"
+#include "Engine/display/sprite/Sprite.h"
 #include "nsLib/log.h"
 
 class nsPopupOverlay final : public nsSprite, public IUserInput {

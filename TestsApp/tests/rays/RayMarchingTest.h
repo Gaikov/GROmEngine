@@ -9,7 +9,7 @@
 #include "Engine/display/container/VisualContainer2d.h"
 #include "RayBoxTest.h"
 #include "RayLightTest.h"
-#include "Engine/display/Sprite.h"
+#include "Engine/display/sprite/Sprite.h"
 
 class nsRayMarchingTest : public BaseFunctionalTest {
 public:
