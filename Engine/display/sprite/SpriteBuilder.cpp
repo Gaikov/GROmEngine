@@ -3,7 +3,7 @@
 //
 
 #include "SpriteBuilder.h"
-#include "display/Sprite.h"
+#include "Sprite.h"
 #include "RenManager.h"
 #include "Core/ParserUtils.h"
 
@@ -35,6 +35,14 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
 
     if (ps_var_begin(ss, "color")) {
         ps_var_4f(ss, sprite->desc.color);
+    }
+
+    if (ps_var_begin(ss, "tilesX")) {
+        sprite->desc.tex2.x = ps_var_f(ss);
+    }
+
+    if (ps_var_begin(ss, "tilesY")) {
+        sprite->desc.tex2.y = ps_var_f(ss);
     }
 
     auto state = dev->StateLoad(ParseString(ss, "renState"));

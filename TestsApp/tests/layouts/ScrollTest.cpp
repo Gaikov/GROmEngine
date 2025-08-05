@@ -7,7 +7,7 @@
 #include "Engine/display/VisualSceneRender2d.h"
 #include "Engine/display/layouts/VGroupLayout.h"
 #include "Engine/display/layouts/scroll/ScrollBar.h"
-#include "Engine/display/Sprite.h"
+#include "Engine/display/sprite/Sprite.h"
 
 bool nsScrollTest::Init() {
 /*    auto content = new nsVGroupLayout();

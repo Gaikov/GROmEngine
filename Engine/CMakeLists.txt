@@ -33,8 +33,8 @@ set(src
         display/layouts/GroupLayout.h
         display/anchors/LayoutAnchor.cpp
         display/anchors/LayoutAnchor.h
-        display/Sprite.cpp
-        display/Sprite.h
+        display/sprite/Sprite.cpp
+        display/sprite/Sprite.h
         display/layouts/VGroupLayout.cpp
         display/layouts/VGroupLayout.h
         display/align/Align.cpp

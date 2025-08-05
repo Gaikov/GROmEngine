@@ -7,7 +7,7 @@
 #include "Engine/KeyCodes.h"
 #include "nsLib/log.h"
 #include "display/layouts/HGroupLayout.h"
-#include "display/Sprite.h"
+#include "Engine/display/sprite/Sprite.h"
 
 #define l(ch) new nsLetterKeyButton(ch, this)
 #define k(keyCode, iconFile) new nsKeyCodeButton(keyCode, iconFile, this)

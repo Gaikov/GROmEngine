@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 #include "Engine/renderer/sprites/SpriteDesc.h"
 
 class nsSprite : public nsVisualMask {
