@@ -28,6 +28,19 @@ public:
         _handler = handler;
     }
 
+    void BindVariable(TType &var) {
+        SetHandler([this, &var] {
+            var = _value;
+        });
+        var = _value;
+    }
+
+    void TriggerForced() const {
+        if (_handler) {
+            _handler();
+        }
+    }
+
     nsBinaryVar& operator = (const TType &value) {
         SetValue(value);
         return *this;
@@ -40,9 +53,7 @@ public:
     void SetValue(const TType &value) {
         if (_value != value) {
             _value = value;
-            if (_handler) {
-                _handler();
-            }
+            TriggerForced();
         }
     }
 
