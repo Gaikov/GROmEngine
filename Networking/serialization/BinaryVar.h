@@ -19,6 +19,7 @@ public:
     typedef std::function<void()> onChanged;
 
     nsBinaryVar(const TType &value) : _value(value) {}
+    nsBinaryVar(const nsBinaryVar& other) = delete;
 
     [[nodiscard]] size_t GetSize() const override {
         return sizeof(TType);
@@ -44,6 +45,10 @@ public:
     nsBinaryVar& operator = (const TType &value) {
         SetValue(value);
         return *this;
+    }
+
+    operator const TType& () const {
+        return _value;
     }
 
     const TType& GetValue() {
