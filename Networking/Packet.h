@@ -42,7 +42,10 @@ struct nsPacketId {
 
 struct nsMessagePacket : nsPacket {
     static constexpr unsigned short ID = nsPacketId::MESSAGE;
-    char message[96];
+    enum {
+        MAX_MESSAGE_SIZE = 96,
+    };
+    char message[MAX_MESSAGE_SIZE + 1];
 };
 
 struct nsClientIdPacket : nsPacket {
