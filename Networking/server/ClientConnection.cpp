@@ -6,7 +6,7 @@
 #include "nsLib/log.h"
 
 nsClientConnection::nsClientConnection(const int socket, const int id, nsClientConnectionContext *context)
-    : _id(id) {
+    : _clientId(id) {
     _socket = socket;
 
     _thread = std::thread([this, context]() {
@@ -24,14 +24,14 @@ nsClientConnection::~nsClientConnection() {
 }
 
 void nsClientConnection::Disconnect() {
-    Log::Info("Disconnecting client forced: %i", _id);
+    Log::Info("Disconnecting client forced: %i", _clientId);
     Close();
     WaitThread();
 }
 
 void nsClientConnection::WaitThread() {
     if (_thread.joinable()) {
-        Log::Info("Waiting for client thread: %i", _id);
+        Log::Info("Waiting for client thread: %i", _clientId);
         _thread.join();
     }
 }

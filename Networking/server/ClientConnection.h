@@ -21,10 +21,10 @@ public:
     nsClientConnection(int socket, int id, nsClientConnectionContext *context);
     ~nsClientConnection() override;
     void Disconnect();
-    int GetId() const { return _id; }
+    [[nodiscard]] int32_t GetClientId() const { return _clientId; }
 
 private:
-    int         _id;
+    int32_t         _clientId;
 
     std::thread _thread;
 

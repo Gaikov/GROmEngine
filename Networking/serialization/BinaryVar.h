@@ -18,6 +18,8 @@ class nsBinaryVar : public IBinaryVar {
 public:
     typedef std::function<void()> onChanged;
 
+    bool localLogic = false;
+
     nsBinaryVar(const TType &value) : _value(value) {}
     nsBinaryVar(const nsBinaryVar& other) = delete;
 
@@ -68,8 +70,10 @@ public:
     }
 
     void Deserialize(const void *buffer) override {
-        auto *data = static_cast<const TType *>(buffer);
-        SetValue(*data);
+        if (!localLogic) {
+            auto *data = static_cast<const TType *>(buffer);
+            SetValue(*data);
+        }
     }
 
 private:

@@ -74,15 +74,15 @@ void nsServer::OnAcceptClient(int socket) {
     std::lock_guard lock(_clientsMutex);
 
     auto c = new nsClientConnection(socket, _clientLastId++, this);
-    Log::Info("Client id assigned: %i", c->GetId());
+    Log::Info("Client id assigned: %i", c->GetClientId());
 
     _clients.push_back(c);
 
     nsClientIdPacket p = {};
-    p.clientId = c->GetId();
+    p.clientId = c->GetClientId();
 
     if (!c->SendPacket(&p)) {
-        Log::Error("Failed to send client id: ", c->GetId());
+        Log::Error("Failed to send client id: ", c->GetClientId());
     }
 
     OnClientConnected(c);
@@ -102,19 +102,19 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
         }
     } else if (packet->targetType == TARGET_CLIENT) {
         for (auto c: _clients) {
-            if (c->GetId() == packet->targetId) {
+            if (c->GetClientId() == packet->targetId) {
                 c->Send(packet, packet->size);
                 return;
             }
         }
         Log::Warning("Client not found: %i", packet->targetId);
     } else {
-        Log::Info("packet from client: %i, packet: %i", from->GetId(), packet->id);
+        Log::Info("packet from client: %i, packet: %i", from->GetClientId(), packet->id);
     }
 }
 
 void nsServer::PerformClientDisconnect(nsClientConnection *c) {
-    Log::Info("On Client disconnect: %i", c->GetId());
+    Log::Info("On Client disconnect: %i", c->GetClientId());
 
     std::lock_guard lock(_clientsMutex);
     auto it = std::find(_clients.begin(), _clients.end(), c);
@@ -124,7 +124,7 @@ void nsServer::PerformClientDisconnect(nsClientConnection *c) {
     }
     _clients.erase(it);
 
-    Log::Info("Client disconnected: %i", c->GetId());
+    Log::Info("Client disconnected: %i", c->GetClientId());
     _disconnectedClients.push_back(c);
 }
 
