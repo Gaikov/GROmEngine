@@ -54,6 +54,8 @@ set(sources
         utils/AutoDestroy.h
         utils/NoCopyable.h
         utils/NoDynamic.h
+        math/Random.cpp
+        math/Random.h
 )
 
 add_library(nsLib STATIC ${sources})
