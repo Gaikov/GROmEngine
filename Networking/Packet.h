@@ -24,7 +24,7 @@ struct alignas(4) nsPacket {
     uint32_t id;
     uint32_t size;
     nsTargetType targetType;
-    uint16_t targetId;
+    int32_t targetId;
 
     template<typename TPacket>
     static void Init(TPacket *p) {
@@ -50,5 +50,5 @@ struct nsMessagePacket : nsPacket {
 
 struct nsClientIdPacket : nsPacket {
     static constexpr unsigned short ID = nsPacketId::CLIENT_ID;
-    uint16_t clientId;
+    int32_t clientId;
 };
