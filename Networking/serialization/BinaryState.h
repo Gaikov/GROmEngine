@@ -4,6 +4,8 @@
 
 class nsBinaryState final {
 public:
+    enum { MAX_VARS = 8 };
+
     void RegisterVar(IBinaryVar *var);
     [[nodiscard]] size_t GetBufferSize() const { return _bufferSize; }
     void Serialize(void *buffer) const;
@@ -31,6 +33,7 @@ public:
     }
 
 private:
-    IBinaryVar  *_vars = nullptr;
+    IBinaryVar *_vars[MAX_VARS] = {};
+    size_t      _varCount = 0;
     size_t      _bufferSize = 0;
 };
