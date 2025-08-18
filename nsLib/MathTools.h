@@ -1,6 +1,7 @@
 #pragma once
 
 #include "headers.h"
+#include "math/Random.h"
 
 #ifndef M_PI
 #define	M_PI 3.1415926535897932384626433832795f
@@ -151,7 +152,7 @@ float nsMath::Clamp11( float val )
 //-----------------------------------------------------
 float nsMath::RandAngle()
 {
-	return float(rand()) * 2.0f * float(M_PI) / float(RAND_MAX);
+	return nsRandom::Random() * static_cast<float>(M_2PI);
 }
 
 //-----------------------------------------------------
