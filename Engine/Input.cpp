@@ -198,13 +198,9 @@ void nsInput::Process()
 	bool	state;
 	bool	any_key = false;
 
-	Log::Info("======================= pressed");
 	for ( int i = 0; i < KEYBOARD_MAX_KEYS; i++ )
 	{
 		state = IsKeyPressed( i );
-		if (state) {
-			Log::Info("pressed: %s (%i)", m_inKeys[i].keyname, i);
-		}
 
 		if ( m_uiActive && state )
 		{
