@@ -5,7 +5,6 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "nsLib/headers.h"
 #include "ObjectsPool.h"
 
 class nsMemoryPool : public nsObjectsPool<void> {
