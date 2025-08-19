@@ -4,6 +4,8 @@
 // author Roman Gaikov 
 //--------------------------------------------------------------------------------------------------
 #include "engine.h"
+
+#include "display/particles/effects/ParticlesEffectHolder.h"
 #include "nsLib/matrix4.h"
 #include "Core/Core.h"
 #include "Core/Config.h"
@@ -82,6 +84,10 @@ bool nsEngine::Init()
     }
 
     nsVisualFactory2d::Init();
+	const auto vf = nsVisualFactory2d::Shared();
+	vf->BindClass<nsParticlesEffect>("ParticlesEffect");
+	vf->BindClass<nsParticlesEffectHolder>("ParticlesEffectHolder");
+
 	nsLayoutsPool::Init();
 	nsDebugDrawManager::Init();
 	auto ddm = nsDebugDrawManager::Shared();
@@ -264,7 +270,7 @@ void nsEngine::MainLoop()
 
 void nsEngine::OnKeyDown(int keyCode, bool repeat)
 {
-    //Log::Debug("key down: %i", keyCode);
+	//Log::Debug("key down: %i", keyCode);
     auto console = nsConsole::Shared();
     if (keyCode == NS_KEY_TILDE && console->IsEnabled()) {
         console->Toggle();
@@ -303,12 +309,12 @@ void nsEngine::OnPointerUp(int pointerId, int clientX, int clientY) {
 
 void nsEngine::OnKeyUp(int keyCode) {
     //Log::Debug("on key up: %i", keyCode);
-    auto ui = nsEngine::GetActiveInput();
+    auto ui = GetActiveInput();
     if (ui) ui->OnKeyUp(keyCode);
 }
 
 void nsEngine::OnCharDown(char ch) {
-    auto ui = nsEngine::GetActiveInput();
+    auto ui = GetActiveInput();
     if (ui) ui->OnChar(ch);
 }
 
