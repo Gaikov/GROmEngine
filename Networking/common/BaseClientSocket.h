@@ -17,10 +17,8 @@ public:
     void Close();
     template<typename T>
     bool SendPacket(T *packed) const {
-        nsPacket *p = packed;
-        p->id = T::ID;
-        p->size = sizeof(T);
-        assert(p->size < MAX_PACKET_SIZE);
+        const nsPacket *p = packed;
+        nsPacket::Init(packed);
         return Send(p, p->size);
     }
 

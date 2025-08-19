@@ -63,8 +63,7 @@ void nsServer::Stop() {
     }
 }
 
-void nsServer::BroadcastPacket(const nsPacket *packet) {
-    std::lock_guard lock(_clientsMutex);
+void nsServer::BroadcastPacket(const nsPacket *packet) const {
     for (auto c: _clients) {
         c->Send(packet, packet->size);
     }
@@ -116,7 +115,6 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
 void nsServer::PerformClientDisconnect(nsClientConnection *c) {
     Log::Info("On Client disconnect: %i", c->GetClientId());
 
-    std::lock_guard lock(_clientsMutex);
     auto it = std::find(_clients.begin(), _clients.end(), c);
     if (it == _clients.end()) {
         Log::Error("Client not found in list");
@@ -129,6 +127,7 @@ void nsServer::PerformClientDisconnect(nsClientConnection *c) {
 }
 
 void nsServer::OnClientDisconnect(nsClientConnection *c) {
+    std::lock_guard lock(_clientsMutex);
     PerformClientDisconnect(c);
     OnClientDisconnected(c);
 }

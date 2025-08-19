@@ -31,6 +31,7 @@ struct alignas(4) nsPacket {
         auto *packet = reinterpret_cast<nsPacket*>(p);
         packet->id = TPacket::ID;
         packet->size = sizeof(TPacket);
+        assert(p->size <= MAX_PACKET_SIZE);
     }
 };
 

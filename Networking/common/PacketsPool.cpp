@@ -7,6 +7,10 @@
 nsPacketsPool::nsPacketsPool() : nsObjectsPool("net-packets") {
 }
 
+nsPacketsPool::~nsPacketsPool() {
+    DestroyObjects();
+}
+
 nsPacketBuffer * nsPacketsPool::CreateObject() {
     return new nsPacketBuffer();
 }

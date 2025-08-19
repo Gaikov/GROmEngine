@@ -11,6 +11,7 @@
 class nsPacketsPool : public nsObjectsPool<nsPacketBuffer> {
 public:
     nsPacketsPool();
+    ~nsPacketsPool() override;
 
 protected:
     nsPacketBuffer * CreateObject() override;

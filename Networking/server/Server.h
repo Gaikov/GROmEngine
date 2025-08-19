@@ -16,12 +16,14 @@ public:
 
     bool Start();
     void Stop();
-    void BroadcastPacket(const nsPacket *packet);
+    void BroadcastPacket(const nsPacket *packet) const;
 
 protected:
+    std::mutex      _clientsMutex;
+    std::vector<nsClientConnection*> _clients;
+
     virtual void OnClientConnected(nsClientConnection *c) {}
     virtual void OnClientDisconnected(const nsClientConnection *c) {}
-
 
 private:
     int             _port;
@@ -29,11 +31,8 @@ private:
     std::thread     _clientsThread;
     bool            _isRunning = false;
     int             _clientLastId = 0;
-    std::mutex      _clientsMutex;
-    std::vector<nsClientConnection*> _clients;
     std::vector<nsClientConnection*> _disconnectedClients;
 
-private:
     void OnAcceptClient(int socket);
     void ProcessPacket(nsClientConnection *from, nsPacket *packet) override;
     void OnClientDisconnect(nsClientConnection *c) override;
