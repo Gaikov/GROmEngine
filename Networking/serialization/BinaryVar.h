@@ -44,6 +44,11 @@ public:
         }
     }
 
+    nsBinaryVar& operator = (const nsBinaryVar& other) {
+        SetValue(other._value);
+        return *this;
+    }
+
     nsBinaryVar& operator = (const TType &value) {
         SetValue(value);
         return *this;
