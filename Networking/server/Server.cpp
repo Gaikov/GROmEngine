@@ -89,6 +89,10 @@ void nsServer::OnAcceptClient(int socket) {
 
 void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
     std::lock_guard lock(_clientsMutex);
+    SendPacket(from, packet);
+}
+
+void nsServer::SendPacket(const nsClientConnection *from, const nsPacket *packet) const {
     if (packet->targetType == TARGET_ALL) {
         for (auto c: _clients) {
             c->Send(packet, packet->size);
