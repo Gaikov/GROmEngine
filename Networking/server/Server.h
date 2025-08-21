@@ -16,11 +16,13 @@ public:
 
     bool Start();
     void Stop();
-    void BroadcastPacket(const nsPacket *packet) const;
 
 protected:
     std::mutex      _clientsMutex;
     std::vector<nsClientConnection*> _clients;
+
+    void BroadcastPacket(const nsPacket *packet) const;
+    void SendPacket(const nsClientConnection *from, const nsPacket *packet) const;
 
     virtual void OnClientConnected(nsClientConnection *c) {}
     virtual void OnClientDisconnected(const nsClientConnection *c) {}

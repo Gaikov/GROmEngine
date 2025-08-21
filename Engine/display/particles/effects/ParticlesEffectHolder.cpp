@@ -11,6 +11,10 @@ nsParticlesEffectHolder::nsParticlesEffectHolder() {
     _inactive.reserve(50);
 }
 
+nsParticlesEffectHolder::~nsParticlesEffectHolder() {
+    RecycleAll();
+}
+
 nsParticlesEffect *nsParticlesEffectHolder::CreateEffect(const char *path) {
     const auto pool = nsLayoutsPool::Shared();
     if (const auto visual = pool->Create(path)) {
@@ -47,8 +51,8 @@ void nsParticlesEffectHolder::Loop() {
 }
 
 void nsParticlesEffectHolder::RecycleAll() {
-    RemoveChildren();
     for (auto p : _active) {
+        RemoveChild(p);
         nsLayoutsPool::Shared()->Recycle(p->GetLayoutPath(), p);
     }
     _active.clear();

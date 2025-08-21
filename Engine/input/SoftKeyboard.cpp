@@ -133,8 +133,8 @@ void nsSoftKeyboard::OnKeyDown(int keyCode) {
 void nsSoftKeyboard::UpdateScale(float screenWidth, float screenHeight) {
     float maxHeight = screenHeight / 2;
 
-    float sw = screenWidth / MAX_WIDTH;
-    float sh = maxHeight / MAX_HEIGHT;
+    float sw = screenWidth / float(MAX_WIDTH);
+    float sh = maxHeight / float(MAX_HEIGHT);
 
     SetScale(std::min(sw, sh));
 }

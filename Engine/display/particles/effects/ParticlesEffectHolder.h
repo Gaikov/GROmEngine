@@ -10,6 +10,8 @@
 class nsParticlesEffectHolder final : public nsVisualContainer2d  {
 public:
     nsParticlesEffectHolder();
+    ~nsParticlesEffectHolder() override;
+
     nsParticlesEffect* CreateEffect(const char *path);
 
     void Loop() override;
