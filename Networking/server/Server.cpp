@@ -95,26 +95,33 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
 
 void nsServer::SendPacket(const nsClientConnection *from, const nsPacket *packet) const {
     if (packet->targetType == TARGET_ALL) {
-        for (auto c: _clients) {
+        for (const auto c: _clients) {
             c->SendData(packet, packet->size);
         }
     } else if (packet->targetType == TARGET_OTHER_CLIENTS) {
-        for (auto c: _clients) {
+        for (const auto c: _clients) {
             if (c != from) {
                 c->SendData(packet, packet->size);
             }
         }
     } else if (packet->targetType == TARGET_CLIENT) {
-        for (auto c: _clients) {
-            if (c->GetClientId() == packet->targetId) {
-                c->SendData(packet, packet->size);
-                return;
-            }
+        const auto c = GetClient(packet->targetId);
+        if (c) {
+            c->SendData(packet, packet->size);
         }
-        Log::Warning("Client not found: %i", packet->targetId);
     } else {
         Log::Info("packet from client: %i, packet: %i", from->GetClientId(), packet->id);
     }
+}
+
+nsClientConnection * nsServer::GetClient(uint32_t clientId) const {
+    for (const auto c: _clients) {
+        if (c->GetClientId() == clientId) {
+            return c;
+        }
+    }
+    Log::Warning("Client not found: %i", clientId);
+    return nullptr;
 }
 
 void nsServer::PerformClientDisconnect(nsClientConnection *c) {
