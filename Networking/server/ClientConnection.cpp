@@ -15,6 +15,7 @@ nsClientConnection::nsClientConnection(const int socket, const int id, nsClientC
         while (ReceivePacket(packet)) {
             context->ProcessPacket(this, packet);
         }
+        _connected = false;
         context->OnClientDisconnect(this);
     });
 }
@@ -27,6 +28,14 @@ void nsClientConnection::Disconnect() {
     Log::Info("Disconnecting client forced: %i", _clientId);
     Close();
     WaitThread();
+}
+
+bool nsClientConnection::SendData(const void *data, unsigned int size) const {
+    if (!_connected) {
+        Log::Warning("Client already disconnected: %i", _clientId);
+        return false;
+    }
+    return Send(data, size);
 }
 
 void nsClientConnection::WaitThread() {

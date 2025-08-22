@@ -65,7 +65,7 @@ void nsServer::Stop() {
 
 void nsServer::BroadcastPacket(const nsPacket *packet) const {
     for (auto c: _clients) {
-        c->Send(packet, packet->size);
+        c->SendData(packet, packet->size);
     }
 }
 
@@ -79,8 +79,9 @@ void nsServer::OnAcceptClient(int socket) {
 
     nsClientIdPacket p = {};
     p.clientId = c->GetClientId();
+    nsPacket::Init(&p);
 
-    if (!c->SendPacket(&p)) {
+    if (!c->SendData(&p, p.size)) {
         Log::Error("Failed to send client id: ", c->GetClientId());
     }
 
@@ -95,18 +96,18 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
 void nsServer::SendPacket(const nsClientConnection *from, const nsPacket *packet) const {
     if (packet->targetType == TARGET_ALL) {
         for (auto c: _clients) {
-            c->Send(packet, packet->size);
+            c->SendData(packet, packet->size);
         }
     } else if (packet->targetType == TARGET_OTHER_CLIENTS) {
         for (auto c: _clients) {
             if (c != from) {
-                c->Send(packet, packet->size);
+                c->SendData(packet, packet->size);
             }
         }
     } else if (packet->targetType == TARGET_CLIENT) {
         for (auto c: _clients) {
             if (c->GetClientId() == packet->targetId) {
-                c->Send(packet, packet->size);
+                c->SendData(packet, packet->size);
                 return;
             }
         }
