@@ -2,11 +2,14 @@
 // Created by roman on 7/2/25.
 //
 
+#include <csignal>
+
 #include "Net.h"
 #include "nsLib/log.h"
 
 bool nsNet::Init() {
     Log::Info("...Network initialising");
+    signal(SIGPIPE, SIG_IGN);
     return true;
 }
 
