@@ -18,6 +18,7 @@ enum nsTargetType {
     TARGET_SERVER = 1,
     TARGET_CLIENT = 2,
     TARGET_OTHER_CLIENTS = 3,
+    TARGET_MASTER = 4,
 };
 
 struct alignas(4) nsPacket {
