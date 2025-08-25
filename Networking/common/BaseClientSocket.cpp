@@ -4,6 +4,7 @@
 
 #include "BaseClientSocket.h"
 #include "Networking/Net.h"
+#include "nsLib/log.h"
 
 nsBaseClientSocket::~nsBaseClientSocket() {
     Close();
@@ -14,6 +15,11 @@ bool nsBaseClientSocket::ReceivePacket(nsPacket *packet) const {
     auto headerSize = sizeof(nsPacket);
     const auto target = reinterpret_cast<char *>(packet);
     if (!Receive(target, headerSize)) {
+        return false;
+    }
+
+    if (packet->size > MAX_PACKET_SIZE) {
+        Log::Error("packet size is too big: %i", packet->size);
         return false;
     }
 

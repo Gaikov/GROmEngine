@@ -15,6 +15,7 @@ nsClientConnection::nsClientConnection(const int socket, const int id, nsClientC
         while (ReceivePacket(packet)) {
             context->ProcessPacket(this, packet);
         }
+        Close();
         _connected = false;
         context->OnClientDisconnect(this);
     });
