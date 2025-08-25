@@ -39,7 +39,9 @@ struct alignas(4) nsPacket {
 struct nsPacketId {
     static constexpr unsigned short CLIENT_ID = 0;
     static constexpr unsigned short MESSAGE = 1;
-    static constexpr unsigned short LAST_ID = 2;
+    static constexpr unsigned short PROTOCOL_VERSION = 2;
+
+    static constexpr unsigned short LAST_ID = 3;
 };
 
 struct nsMessagePacket : nsPacket {
@@ -53,4 +55,9 @@ struct nsMessagePacket : nsPacket {
 struct nsClientIdPacket : nsPacket {
     static constexpr unsigned short ID = nsPacketId::CLIENT_ID;
     int32_t clientId;
+};
+
+struct nsProtocolVersion : nsPacket {
+    static constexpr unsigned short ID = nsPacketId::PROTOCOL_VERSION;
+    uint32_t version;
 };

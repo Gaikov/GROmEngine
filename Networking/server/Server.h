@@ -27,6 +27,7 @@ protected:
     virtual void OnClientConnected(nsClientConnection *c) {}
     virtual void OnClientDisconnected(const nsClientConnection *c) {}
     nsClientConnection* GetClient(uint32_t clientId) const;
+    virtual uint32_t GetProtocolVersion() const = 0;
 
 private:
     int             _port;

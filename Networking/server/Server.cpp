@@ -77,12 +77,21 @@ void nsServer::OnAcceptClient(int socket) {
 
     _clients.push_back(c);
 
+    nsProtocolVersion version = {};
+    nsPacket::Init(&version);
+    version.version = GetProtocolVersion();
+    if (!c->SendData(&version, version.size)) {
+        Log::Error("Failed to send protocol version", c->GetClientId());
+        return;
+    }
+
     nsClientIdPacket p = {};
     p.clientId = c->GetClientId();
     nsPacket::Init(&p);
 
     if (!c->SendData(&p, p.size)) {
         Log::Error("Failed to send client id: ", c->GetClientId());
+        return;
     }
 
     OnClientConnected(c);
