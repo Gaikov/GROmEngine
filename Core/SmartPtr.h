@@ -1,35 +1,31 @@
-// Copyright (c) 2003-2007, Roman Gaikov. All rights reserved.
+// Copyright (c) 2003-2025, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
 // file SmartPtr.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_SmartPtr_H_
-#define	_SmartPtr_H_
+#pragma once
 
 template <class T>
-class nsSmartPtr
+class nsSmartPtr final
 {
 public:
-    nsSmartPtr() :
-            m_object(nullptr),
-            m_refCount(nullptr) {
-    }
+    nsSmartPtr() = default;
 
-    nsSmartPtr(T *obj) :
-            m_object(obj),
-            m_refCount(nullptr) {
-        if (obj)
-            m_refCount = new int(1);
+    nsSmartPtr(T *obj) {
+        if (obj) {
+	        _ref = new ObjectRef;
+        	_ref->_object = obj;
+        	_ref->_refCount = 1;
+        }
     }
 	  
 	nsSmartPtr( const nsSmartPtr<T> &other )
 	{
-		m_object = other.m_object;
-		m_refCount = other.m_refCount;
-		if ( m_refCount ) (*m_refCount)++;
+    	_ref = other._ref;
+    	IncRef();
 	}
 	  
-	virtual ~nsSmartPtr()
+	~nsSmartPtr()
 	{
 		DecRef();
 	}
@@ -39,46 +35,68 @@ public:
 		if ( this == &other ) return *this;
 		  
 		DecRef();
-		m_object = other.m_object;
-		m_refCount = other.m_refCount;
-		if ( m_refCount ) (*m_refCount)++;
-		  
+    	_ref = other._ref;
+    	IncRef();
+
 		return *this;
 	}
 
-    bool operator == (const nsSmartPtr<T> &other) {
-        return m_object == other.m_object;
+	// move constructor
+	nsSmartPtr(nsSmartPtr<T>&& other) noexcept {
+    	_ref = other._ref;
+    	other._ref = nullptr;
+    }
+
+	// move assignment
+	nsSmartPtr<T>& operator=(nsSmartPtr<T>&& other) noexcept {
+    	if (this == &other) return *this;
+    	DecRef();
+    	_ref = other._ref;
+    	other._ref = nullptr;
+    	return *this;
+    }
+
+    bool operator == (const nsSmartPtr<T> &other) const {
+        return other._ref == _ref;
+    }
+
+	bool operator != (const nsSmartPtr<T> &other) const {
+    	return other._ref != _ref;
     }
 	  
 	T* operator-> () const
 	{
-		return m_object;
+		return _ref ? _ref->_object : nullptr;
 	}
 	
 	operator T* () const
 	{
-		return m_object;
+		return _ref ? _ref->_object : nullptr;
 	}
 	  
 private:
-	T	*m_object;
-	int	*m_refCount;
-	
-private:
-	void	DecRef()
+	struct ObjectRef {
+		int	_refCount = 0;
+		T	*_object = nullptr;
+	};
+
+	ObjectRef *_ref = nullptr;
+
+	void DecRef()
 	{
-		if ( m_object )
-		{
-			(*m_refCount)--;
-			if ( (*m_refCount) <= 0 )
-			{
-				delete m_refCount;
-				delete m_object;
-				m_refCount = 0;
-				m_object = 0;
+		if ( _ref ) {
+			--_ref->_refCount;
+			if ( _ref->_refCount <= 0 ) {
+				delete _ref->_object;
+				delete _ref;
+				_ref = nullptr;
 			}
 		}
 	}
-};
 
-#endif //_SmartPtr_H_
+	void IncRef() {
+		if ( _ref ) {
+			++_ref->_refCount;
+		}
+	}
+};
