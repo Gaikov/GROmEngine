@@ -29,6 +29,10 @@ public:
     void DrawContent(const nsVisualContext2d &context) override;
     void ApplyWorldMatrix() override;
 
+protected:
+    void OnAddedToStage() override;
+    void OnRemovedFromStage() override;
+
 private:
     nsParticleSystem    _system;
 };

@@ -55,7 +55,13 @@ public:
 
     static void LeaksCheck();
 
+protected:
+    bool IsOnStage() const { return _onStage; }
+    virtual void OnAddedToStage();
+    virtual void OnRemovedFromStage();
+
 private:
+    bool _onStage = false;
     nsVisualContainer2d *_parent = nullptr;
     std::vector<nsVisualMask*> _masks;
 

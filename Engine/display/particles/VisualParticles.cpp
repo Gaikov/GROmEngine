@@ -5,6 +5,7 @@
 #include "VisualParticles.h"
 #include "TimeFormat.h"
 #include "display/container/VisualContainer2d.h"
+#include "nsLib/log.h"
 
 
 void nsVisualParticles::GetLocalBounds(nsRect &bounds) {
@@ -44,6 +45,15 @@ void nsVisualParticles::ApplyWorldMatrix() {
     } else {
         nsVisualObject2d::ApplyWorldMatrix();
     }
+}
+void nsVisualParticles::OnAddedToStage() {
+    nsVisualObject2d::OnAddedToStage();
+    ResetPosition();
+}
+
+void nsVisualParticles::OnRemovedFromStage() {
+    nsVisualObject2d::OnRemovedFromStage();
+    _system.RemoveAll();
 }
 
 void nsVisualParticles::ResetPosition() {
