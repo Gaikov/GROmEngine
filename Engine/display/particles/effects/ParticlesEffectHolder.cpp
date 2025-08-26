@@ -68,3 +68,8 @@ bool nsParticlesEffectHolder::HasActiveEffects() {
 
     return false;
 }
+
+void nsParticlesEffectHolder::OnRemovedFromStage() {
+    nsVisualContainer2d::OnRemovedFromStage();
+    RecycleAll();
+}

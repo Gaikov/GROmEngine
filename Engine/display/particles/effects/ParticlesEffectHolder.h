@@ -18,6 +18,9 @@ public:
     void RecycleAll();
     bool HasActiveEffects();
 
+protected:
+    void OnRemovedFromStage() override;
+
 private:
     std::vector<nsParticlesEffect*> _active;
     std::vector<nsParticlesEffect*> _inactive;
