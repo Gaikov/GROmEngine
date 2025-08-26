@@ -3,6 +3,7 @@
 //
 
 #include "ParticlesOverlay.h"
+#include "display/pool/LayoutsPool.h"
 
 bool nsParticlesOverlay::OnInit() {
     nsSubSystem::OnInit();
@@ -33,4 +34,22 @@ void nsParticlesOverlay::CreateBlast(const char *path, const nsVec2 &pos) {
     effect->origin.pos = pos;
     effect->Emit(false);
     effect->Blast();
+}
+
+void nsParticlesOverlay::CreateBlast(const uint32_t effectId, const nsVec2 &pos) {
+    const auto it =_effectsMap.find(effectId);
+    if (it != _effectsMap.end()) {
+        CreateBlast(it->second.c_str(), pos);
+    } else {
+        Log::Warning("Effect ID is not registered: %i", effectId);
+    }
+}
+
+void nsParticlesOverlay::RegisterEffect(const uint32_t effectId, const std::string &path, const int reserved) {
+    _effectsMap[effectId] = path;
+    nsLayoutsPool::Shared()->Reserve(path.c_str(), reserved);
+}
+
+void nsParticlesOverlay::RecycleAllEffects() {
+    _layer->RecycleAll();
 }
