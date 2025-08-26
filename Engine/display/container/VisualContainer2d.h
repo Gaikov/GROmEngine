@@ -48,6 +48,7 @@ public:
     }
 
     bool IterateRecursive(const tChildCallback &callback);
+    static nsVisualContainer2d* CreateStage();
 
 protected:
     bool OnPointerUp(float x, float y, int pointerId) override;
@@ -59,6 +60,9 @@ protected:
     void OnKeyDown(int key, bool rept) override;
     void OnChar(char ch) override;
     void OnMouseWheel(float delta) override;
+
+    void OnAddedToStage() override;
+    void OnRemovedFromStage() override;
 
 private:
     std::vector<nsVisualObject2d *> _children;

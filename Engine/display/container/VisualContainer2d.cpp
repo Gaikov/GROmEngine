@@ -33,6 +33,9 @@ void nsVisualContainer2d::AddChild(nsVisualObject2d *obj) {
     _children.push_back(obj);
     origin.AddChild(&obj->origin);
     obj->_parent = this;
+    if (IsOnStage()) {
+        obj->OnAddedToStage();
+    }
 }
 
 void nsVisualContainer2d::RemoveChild(nsVisualObject2d *obj) {
@@ -44,6 +47,9 @@ void nsVisualContainer2d::RemoveChild(nsVisualObject2d *obj) {
         if (_childOver == dynamic_cast<IUserInput*>(obj)) {
             _childOver = nullptr;
         }
+        if (IsOnStage()) {
+            obj->OnRemovedFromStage();
+        }
     }
 }
 
@@ -51,6 +57,9 @@ void nsVisualContainer2d::RemoveChildren() {
     for (auto child: _children) {
         child->_parent = nullptr;
         origin.RemoveChild(&child->origin);
+        if (IsOnStage()) {
+            child->OnRemovedFromStage();
+        }
     }
     _children.clear();
 }
@@ -157,6 +166,18 @@ void nsVisualContainer2d::OnChar(char ch) {
 void nsVisualContainer2d::OnMouseWheel(float delta) {
     ITER_INPUT_CHILDREN(input->OnMouseWheel(delta))
 }
+void nsVisualContainer2d::OnAddedToStage() {
+    nsVisualObject2d::OnAddedToStage();
+    for (const auto c : _children) {
+        c->OnAddedToStage();
+    }
+}
+void nsVisualContainer2d::OnRemovedFromStage() {
+    nsVisualObject2d::OnRemovedFromStage();
+    for (const auto c : _children) {
+        c->OnRemovedFromStage();
+    }
+}
 
 void nsVisualContainer2d::OnPointerCancel(int pointerId) {
     ITER_INPUT_CHILDREN(input->OnPointerCancel(pointerId))
@@ -212,5 +233,12 @@ bool nsVisualContainer2d::IterateRecursive(const tChildCallback &callback) {
         }
     }
     return true;
+}
+
+nsVisualContainer2d * nsVisualContainer2d::CreateStage() {
+    const auto stage = new nsVisualContainer2d();
+    stage->id = "stage";
+    stage->OnAddedToStage();
+    return stage;
 }
 

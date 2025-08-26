@@ -129,6 +129,16 @@ void nsVisualObject2d::LeaksCheck() {
 #endif
 }
 
+void nsVisualObject2d::OnAddedToStage() {
+    assert(!_onStage);
+    _onStage = true;
+}
+
+void nsVisualObject2d::OnRemovedFromStage() {
+    assert(_onStage);
+    _onStage = false;
+}
+
 void nsVisualObject2d::AddMask(nsVisualMask *mask) {
 #ifdef DEBUG
     auto it = std::find(_masks.begin(), _masks.end(),mask);
