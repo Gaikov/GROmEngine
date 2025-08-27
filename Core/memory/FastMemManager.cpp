@@ -37,7 +37,7 @@ bool nsFastMemManager::Free(void *ptr) const {
 
     const auto poolIndex = GetPoolIndex(header->size);
     if (header->poolIndex != poolIndex) {
-        Log::Error("Invalid memory block pool index!", ptr);
+        assert(!"Invalid memory block pool index!");
         return false;
     }
 
@@ -64,7 +64,7 @@ int nsFastMemManager::GetPoolIndex(size_t size) {
     int poolIndex = ceil(log2(static_cast<float>(size)) - 4);
     if (poolIndex < 0) {
         poolIndex = 0;
-    } else if (poolIndex > 5) {
+    } else if (poolIndex > 6) {
         poolIndex = -1;
     }
     return poolIndex;
