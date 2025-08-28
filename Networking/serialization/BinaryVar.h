@@ -58,7 +58,7 @@ public:
         return _value;
     }
 
-    const TType& GetValue() {
+    const TType& GetValue() const {
         return _value;
     }
 
