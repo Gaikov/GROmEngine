@@ -5,15 +5,15 @@
 #include "BinaryState.h"
 
 void nsBinaryState::RegisterVar(IBinaryVar *var) {
-   assert(_varCount < MAX_VARS);
-   _vars[_varCount++] = var;
+   assert(var->next == nullptr);
+   var->next = _vars;
+   _vars = var;
    _bufferSize += var->GetSize();
 }
 
 void nsBinaryState::Serialize(void *buffer) const {
    auto data = static_cast<int8_t *>(buffer);
-   for (int i = 0; i < _varCount; i++) {
-      const auto var = _vars[i];
+   for (auto var = _vars; var; var = var->next) {
       var->Serialize(data);
       data += var->GetSize();
    }
@@ -21,8 +21,7 @@ void nsBinaryState::Serialize(void *buffer) const {
 
 void nsBinaryState::Deserialize(const void *buffer) const {
    auto data = static_cast<const int8_t *>(buffer);
-   for (int i = 0; i < _varCount; i++) {
-      const auto var = _vars[i];
+   for (auto var = _vars; var; var = var->next) {
       var->Deserialize(data);
       data += var->GetSize();
    }
