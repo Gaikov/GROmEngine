@@ -46,6 +46,8 @@ set(sources
         memory/FastAllocatedObject.h
         memory/FastMemTest.cpp
         memory/FastMemTest.h
+        time/Time.cpp
+        time/Time.h
 )
 
 include_directories(
