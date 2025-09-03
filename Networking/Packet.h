@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Core/time/Time.h"
 #include "nsLib/headers.h"
 
 #define MAX_PACKET_SIZE 128
@@ -26,12 +27,14 @@ struct alignas(4) nsPacket {
     uint32_t size;
     nsTargetType targetType;
     int32_t targetId;
+    uint32_t senderTime;
 
     template<typename TPacket>
     static void Init(TPacket *p) {
         auto *packet = reinterpret_cast<nsPacket*>(p);
         packet->id = TPacket::ID;
         packet->size = sizeof(TPacket);
+        packet->senderTime = nsTime::GetTimeMS();
         assert(p->size <= MAX_PACKET_SIZE);
     }
 };

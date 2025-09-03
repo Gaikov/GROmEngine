@@ -10,6 +10,7 @@
 #include "Engine/input/SoftInputEmpty.h"
 #include "Engine/input/soft/SoftInputKeyboard.h"
 #include "Core/Config.h"
+#include "Core/time/Time.h"
 #include "env/Env.h"
 
 bool DesktopPlatform::Init() {
@@ -68,7 +69,7 @@ const char *DesktopPlatform::GetKeyName(int key) {
 }
 
 unsigned int DesktopPlatform::GetTime() {
-    return (unsigned int) (glfwGetTime() * 1000.0);
+    return nsTime::GetTimeMS();
 }
 
 void DesktopPlatform::Minimize() {
