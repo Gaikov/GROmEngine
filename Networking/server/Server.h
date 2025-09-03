@@ -22,7 +22,7 @@ protected:
     std::vector<nsClientConnection*> _clients;
 
     void BroadcastPacket(const nsPacket *packet) const;
-    virtual void SendPacket(const nsClientConnection *from, const nsPacket *packet) const;
+    virtual void SendPacket(const nsClientConnection *from, nsPacket *packet);
 
     virtual void OnClientConnected(nsClientConnection *c) {}
     virtual void OnClientDisconnected(const nsClientConnection *c) {}

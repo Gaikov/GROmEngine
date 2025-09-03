@@ -102,7 +102,7 @@ void nsServer::ProcessPacket(nsClientConnection *from, nsPacket *packet) {
     SendPacket(from, packet);
 }
 
-void nsServer::SendPacket(const nsClientConnection *from, const nsPacket *packet) const {
+void nsServer::SendPacket(const nsClientConnection *from, nsPacket *packet) {
     if (packet->targetType == TARGET_ALL) {
         for (const auto c: _clients) {
             c->SendData(packet, packet->size);
