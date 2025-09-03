@@ -9,19 +9,22 @@ nsOrthogonalFitView::nsOrthogonalFitView() : _matrix(1) {
 }
 
 void nsOrthogonalFitView::SetScreenSize(float width, float height) {
-    if (_viewWidth != width) {
+    if (_screenWidth != width) {
         _valid = false;
-        _viewWidth = width;
+        _screenWidth = width;
     }
 
-    if (_viewHeight != height) {
+    if (_screenHeight != height) {
         _valid = false;
-        _viewHeight = height;
+        _screenHeight = height;
+    }
+
+    if (!_valid) {
+        ComputeTargetViewport();
     }
 }
 
 void nsOrthogonalFitView::SetTargetSize(float width, float height) {
-
     if (_targetWidth != width) {
         _valid = false;
         _targetWidth = width;
@@ -31,13 +34,17 @@ void nsOrthogonalFitView::SetTargetSize(float width, float height) {
         _valid = false;
         _targetHeight = height;
     }
+
+    if (!_valid) {
+        ComputeTargetViewport();
+    }
 }
 
 const nsMatrix &nsOrthogonalFitView::GetViewMatrix() {
     if (!_valid) {
         _valid = true;
 
-        float aspectView = _viewWidth / _viewHeight;
+        float aspectView = _screenWidth / _screenHeight;
         float aspectTarget = _targetWidth / _targetHeight;
         nsMatrix scale(1);
         if (aspectView > aspectTarget) {
@@ -55,14 +62,14 @@ const nsMatrix &nsOrthogonalFitView::GetViewMatrix() {
 nsVec2 nsOrthogonalFitView::ScreenToTarget(float x, float y) {
     nsVec2 res;
 
-    y = _viewHeight - y;
+    y = _screenHeight - y;
 
-    float scaleX = _targetWidth / _viewWidth;
-    float scaleY = _targetHeight / _viewHeight;
+    float scaleX = _targetWidth / _screenWidth;
+    float scaleY = _targetHeight / _screenHeight;
     float scale = std::max(scaleX, scaleY);
 
-    float offsX = (_viewWidth * scale - _targetWidth) / 2;
-    float offsY = (_viewHeight * scale - _targetHeight) / 2;
+    float offsX = (_screenWidth * scale - _targetWidth) / 2;
+    float offsY = (_screenHeight * scale - _targetHeight) / 2;
 
     res.x = x * scale - offsX;
     res.y = y * scale - offsY;
@@ -70,3 +77,21 @@ nsVec2 nsOrthogonalFitView::ScreenToTarget(float x, float y) {
     return res;
 }
 
+
+void nsOrthogonalFitView::ComputeTargetViewport() {
+    const float aspectView = _screenWidth / _screenHeight;
+    const float aspectTarget = _targetWidth / _targetHeight;
+
+    nsVec2 exts;
+
+    if (aspectView > aspectTarget) {
+        exts.x = (_targetHeight * aspectView - _targetWidth) / 2;
+    } else {
+        exts.y = (_targetWidth / aspectView - _targetHeight) / 2;
+    }
+
+    _targetViewport.x = -exts.x;
+    _targetViewport.y = -exts.y;
+    _targetViewport.width = _targetWidth + exts.x * 2;
+    _targetViewport.height = _targetHeight + exts.y * 2;
+}
