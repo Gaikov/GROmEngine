@@ -22,12 +22,12 @@ enum nsTargetType {
     TARGET_MASTER = 4,
 };
 
-struct alignas(4) nsPacket {
+struct alignas(8) nsPacket {
     uint32_t id;
     uint32_t size;
     nsTargetType targetType;
     int32_t targetId;
-    uint32_t senderTime;
+    uint64_t senderTime;
 
     template<typename TPacket>
     static void Init(TPacket *p) {
@@ -36,6 +36,12 @@ struct alignas(4) nsPacket {
         packet->size = sizeof(TPacket);
         packet->senderTime = nsTime::GetTimeMS();
         assert(p->size <= MAX_PACKET_SIZE);
+    }
+
+    float GetDeltaTime() const {
+        const float dt = static_cast<float>(nsTime::GetTimeMS() - senderTime) / 1000.0f;
+        assert(dt >= 0.0f);
+        return dt;
     }
 };
 
