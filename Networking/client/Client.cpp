@@ -56,11 +56,15 @@ void nsClient::Disconnect() {
     _receivedPackets.clear();
 }
 
-void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
+void nsClient::SetPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
     _packetsHandling.SetHandler(packetId, handler);
 }
 
-void nsClient::AddCommonPacketsHandler(const PacketHandler &handler) {
+void nsClient::ClearPacketHandler(const int packetId) {
+    _packetsHandling.RemoveHandler(packetId);
+}
+
+void nsClient::SetCommonPacketsHandler(const PacketHandler &handler) {
     _commonHandlers.push_back(handler);
 }
 
