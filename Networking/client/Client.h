@@ -28,8 +28,9 @@ public:
    void Connect(const char *ip, int port);
    void Disconnect();
 
-   void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
-   void AddCommonPacketsHandler(const PacketHandler& handler);
+   void SetPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
+   void ClearPacketHandler(int packetId);
+   void SetCommonPacketsHandler(const PacketHandler& handler);
    void Update();
 
    template<typename TPacket>
