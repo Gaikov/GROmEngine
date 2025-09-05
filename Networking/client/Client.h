@@ -50,6 +50,7 @@ public:
          *p = *source;
          const auto packet = reinterpret_cast<nsPacket*>(&buff);
          packet->id = TPacket::ID;
+         packet->senderTime = nsTime::GetTimeMS();
          state.SerializePacket(p);
          return _socket.Send(p, p->size);
       }
