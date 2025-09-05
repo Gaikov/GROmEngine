@@ -12,6 +12,7 @@ class nsDebugDrawInfo {
 public:
     explicit nsDebugDrawInfo(const nsVec2 &startPos);
     void DrawLine(const char *text, const nsColor &c = nsColor::white);
+    void DrawLine(const nsVec2 &pos, const char *text, const nsColor &c = nsColor::white);
 
 private:
     nsVec2  _pos;
