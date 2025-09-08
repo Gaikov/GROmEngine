@@ -40,7 +40,7 @@ struct alignas(8) nsPacket {
 
     float GetDeltaTime() const {
         const auto currTime = nsTime::GetTimeMS();
-        assert (currTime > senderTime);
+        assert (currTime >= senderTime);
         return static_cast<float>(nsTime::GetTimeMS() - senderTime) / 1000.0f;
     }
 };
