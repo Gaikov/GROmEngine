@@ -3,6 +3,7 @@
 
 class IBinaryVar {
     friend class nsBinaryState;
+
 public:
     virtual ~IBinaryVar() = default;
     [[nodiscard]] virtual size_t GetSize() const = 0;
@@ -13,12 +14,10 @@ private:
     IBinaryVar *next = nullptr;
 };
 
-template <typename TType>
+template<typename TType>
 class nsBinaryVar : public IBinaryVar {
 public:
     typedef std::function<void()> onChanged;
-
-    bool localLogic = false;
 
     nsBinaryVar(const TType &value) : _value(value) {}
     nsBinaryVar(const nsBinaryVar& other) = delete;
@@ -44,21 +43,21 @@ public:
         }
     }
 
-    nsBinaryVar& operator = (const nsBinaryVar& other) {
+    nsBinaryVar &operator =(const nsBinaryVar &other) {
         SetValue(other._value);
         return *this;
     }
 
-    nsBinaryVar& operator = (const TType &value) {
+    nsBinaryVar &operator =(const TType &value) {
         SetValue(value);
         return *this;
     }
 
-    operator const TType& () const {
+    operator const TType &() const {
         return _value;
     }
 
-    const TType& GetValue() const {
+    const TType &GetValue() const {
         return _value;
     }
 
@@ -75,15 +74,11 @@ public:
     }
 
     void Deserialize(const void *buffer) override {
-        if (!localLogic) {
-            auto *data = static_cast<const TType *>(buffer);
-            SetValue(*data);
-        }
+        auto *data = static_cast<const TType *>(buffer);
+        SetValue(*data);
     }
 
 private:
     TType _value;
-    onChanged _handler;
+    onChanged _handler = nullptr;
 };
-
-
