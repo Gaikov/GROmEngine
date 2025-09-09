@@ -11,11 +11,12 @@
 class nsPacketsHandlingManager {
 public:
     typedef std::function<void(const nsPacket*)>    HandlerCallback;
+    typedef std::vector<HandlerCallback>            HandlersList;
 
-    void SetHandler(int packetId, const HandlerCallback &handler);
-    void RemoveHandler(int packetId);
+    void AddHandler(int packetId, const HandlerCallback &handler);
+    void ClearHandlers(int packetId);
     bool HandlePacket(const nsPacket* packet);
 
 private:
-    std::map<int, HandlerCallback> _handlers;
+    std::map<int, HandlersList> _handlers;
 };

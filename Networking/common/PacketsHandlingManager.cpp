@@ -5,18 +5,20 @@
 #include "PacketsHandlingManager.h"
 #include "nsLib/log.h"
 
-void nsPacketsHandlingManager::SetHandler(int packetId, const HandlerCallback &handler) {
-    _handlers[packetId] = handler;
+void nsPacketsHandlingManager::AddHandler(int packetId, const HandlerCallback &handler) {
+    _handlers[packetId].push_back(handler);
 }
 
-void nsPacketsHandlingManager::RemoveHandler(int packetId) {
+void nsPacketsHandlingManager::ClearHandlers(int packetId) {
     _handlers.erase(packetId);
 }
 
 bool nsPacketsHandlingManager::HandlePacket(const nsPacket *packet) {
     const auto handler = _handlers.find(packet->id);
     if (handler != _handlers.end()) {
-        handler->second(packet);
+        for (const auto &h : handler->second) {
+            h(packet);
+        }
         return true;
     }
     return false;
