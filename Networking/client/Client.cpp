@@ -56,7 +56,7 @@ void nsClient::Disconnect() {
     _receivedPackets.clear();
 }
 
-void nsClient::SetPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
+void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
     _packetsHandling.SetHandler(packetId, handler);
 }
 
