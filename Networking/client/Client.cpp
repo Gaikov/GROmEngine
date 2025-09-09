@@ -57,11 +57,11 @@ void nsClient::Disconnect() {
 }
 
 void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
-    _packetsHandling.SetHandler(packetId, handler);
+    _packetsHandling.AddHandler(packetId, handler);
 }
 
 void nsClient::ClearPacketHandler(const int packetId) {
-    _packetsHandling.RemoveHandler(packetId);
+    _packetsHandling.ClearHandlers(packetId);
 }
 
 void nsClient::SetCommonPacketsHandler(const PacketHandler &handler) {
