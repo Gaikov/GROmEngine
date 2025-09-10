@@ -21,8 +21,8 @@ class nsVisualObject2d {
 public:
     std::string id;
 
-    nsTransform2    origin;
-    bool            visible = true;
+    nsTransform2        origin;
+    nsProperty<bool>    visible = true;
 
     nsLayoutAnchor  xCenter, yCenter;
     nsLayoutAnchor  xMin, xMax, yMin, yMax;
