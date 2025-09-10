@@ -20,7 +20,9 @@ bool nsGroupLayoutBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, n
         return false;
     }
 
-    g->drawFrame = ParseFloat(ss, "drawFrame") > 0;
+    if (ps_var_begin(ss, "drawFrame")) {
+        g->drawFrame = ps_var_f(ss) > 0;
+    }
 
     auto width = ParseFloat(ss, "width");
     if (width > 0) {
@@ -32,11 +34,13 @@ bool nsGroupLayoutBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, n
         g->SetHeight(height);
     }
 
-    std::string boundsType = ParseStrP(ss, "boundsType", "");
-    if (boundsType == "children") {
-        g->boundsType = nsBaseLayout::CHILDREN;
-    } else if (boundsType == "mixed") {
-        g->boundsType = nsBaseLayout::MIXED;
+    if (ps_var_begin(ss, "boundsType")) {
+        const std::string boundsType = ps_var_str(ss);
+        if (boundsType == "children") {
+            g->boundsType = nsBaseLayout::CHILDREN;
+        } else if (boundsType == "mixed") {
+            g->boundsType = nsBaseLayout::MIXED;
+        }
     }
 
     return true;
