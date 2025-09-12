@@ -13,10 +13,10 @@ public:
     typedef std::function<void(const nsPacket*)>    HandlerCallback;
     typedef std::vector<HandlerCallback>            HandlersList;
 
-    void AddHandler(int packetId, const HandlerCallback &handler);
-    void ClearHandlers(int packetId);
+    void AddHandler(uint16_t packetId, const HandlerCallback &handler);
+    void ClearHandlers(uint16_t packetId);
     bool HandlePacket(const nsPacket* packet);
 
 private:
-    std::map<int, HandlersList> _handlers;
+    std::map<uint16_t, HandlersList> _handlers;
 };

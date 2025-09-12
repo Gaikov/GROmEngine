@@ -28,8 +28,8 @@ public:
    void Connect(const char *ip, int port);
    void Disconnect();
 
-   void AddPacketHandler(int packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
-   void ClearPacketHandler(int packetId);
+   void AddPacketHandler(uint16_t packetId, const nsPacketsHandlingManager::HandlerCallback& handler);
+   void ClearPacketHandler(uint16_t packetId);
    void SetCommonPacketsHandler(const PacketHandler& handler);
    void Update();
 

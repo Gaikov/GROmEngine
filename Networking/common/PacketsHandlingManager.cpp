@@ -5,11 +5,11 @@
 #include "PacketsHandlingManager.h"
 #include "nsLib/log.h"
 
-void nsPacketsHandlingManager::AddHandler(int packetId, const HandlerCallback &handler) {
+void nsPacketsHandlingManager::AddHandler(const uint16_t packetId, const HandlerCallback &handler) {
     _handlers[packetId].push_back(handler);
 }
 
-void nsPacketsHandlingManager::ClearHandlers(int packetId) {
+void nsPacketsHandlingManager::ClearHandlers(const uint16_t packetId) {
     _handlers.erase(packetId);
 }
 

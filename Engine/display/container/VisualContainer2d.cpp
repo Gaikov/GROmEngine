@@ -24,7 +24,7 @@ void nsVisualContainer2d::DestroyChildren() {
 }
 
 void nsVisualContainer2d::AddChild(nsVisualObject2d *obj) {
-    assert(obj != this);
+    assert(obj != this && obj);
 
     if (obj->_parent) {
         obj->_parent->RemoveChild(obj);
