@@ -56,11 +56,11 @@ void nsClient::Disconnect() {
     _receivedPackets.clear();
 }
 
-void nsClient::AddPacketHandler(const int packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
+void nsClient::AddPacketHandler(uint16_t packetId, const nsPacketsHandlingManager::HandlerCallback &handler) {
     _packetsHandling.AddHandler(packetId, handler);
 }
 
-void nsClient::ClearPacketHandler(const int packetId) {
+void nsClient::ClearPacketHandler(uint16_t packetId) {
     _packetsHandling.ClearHandlers(packetId);
 }
 

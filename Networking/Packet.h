@@ -23,8 +23,8 @@ enum nsTargetType {
 };
 
 struct alignas(8) nsPacket {
-    uint32_t id;
-    uint32_t size;
+    uint16_t id;
+    uint8_t size;
     nsTargetType targetType;
     int32_t targetId;
     uint64_t senderTime;
@@ -35,38 +35,40 @@ struct alignas(8) nsPacket {
         packet->id = TPacket::ID;
         packet->size = sizeof(TPacket);
         packet->senderTime = nsTime::GetTimeMS();
-        assert(p->size <= MAX_PACKET_SIZE);
+        assert(sizeof(TPacket) <= MAX_PACKET_SIZE);
     }
 
-    float GetDeltaTime() const {
+    [[nodiscard]] float GetDeltaTime() const {
         const auto currTime = nsTime::GetTimeMS();
         assert (currTime >= senderTime);
         return static_cast<float>(nsTime::GetTimeMS() - senderTime) / 1000.0f;
     }
 };
 
-struct nsPacketId {
-    static constexpr unsigned short CLIENT_ID = 0;
-    static constexpr unsigned short MESSAGE = 1;
-    static constexpr unsigned short PROTOCOL_VERSION = 2;
-
-    static constexpr unsigned short LAST_ID = 3;
+template<int PacketId>
+struct nsDefPacket : nsPacket {
+    static constexpr uint16_t ID = PacketId;
 };
 
-struct nsMessagePacket : nsPacket {
-    static constexpr unsigned short ID = nsPacketId::MESSAGE;
+struct nsPacketId {
+    static constexpr uint16_t CLIENT_ID = 0;
+    static constexpr uint16_t MESSAGE = 1;
+    static constexpr uint16_t PROTOCOL_VERSION = 2;
+
+    static constexpr uint16_t LAST_ID = 3;
+};
+
+struct nsMessagePacket : nsDefPacket<nsPacketId::MESSAGE> {
     enum {
         MAX_MESSAGE_SIZE = 96,
     };
     char message[MAX_MESSAGE_SIZE + 1];
 };
 
-struct nsClientIdPacket : nsPacket {
-    static constexpr unsigned short ID = nsPacketId::CLIENT_ID;
+struct nsClientIdPacket : nsDefPacket<nsPacketId::CLIENT_ID> {
     int32_t clientId;
 };
 
-struct nsProtocolVersion : nsPacket {
-    static constexpr unsigned short ID = nsPacketId::PROTOCOL_VERSION;
+struct nsProtocolVersion : nsDefPacket<nsPacketId::PROTOCOL_VERSION> {
     uint32_t version;
 };
