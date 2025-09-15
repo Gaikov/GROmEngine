@@ -8,11 +8,13 @@
 nsClientConnection::nsClientConnection(const int socket, const int id, nsClientConnectionContext *context)
     : _clientId(id) {
     _socket = socket;
+    _lastActiveTime = nsTime::GetTimeMS();
 
     _thread = std::thread([this, context]() {
         char buffer[MAX_PACKET_SIZE];
         const auto packet = reinterpret_cast<nsPacket *>(buffer);
         while (ReceivePacket(packet)) {
+            _lastActiveTime = nsTime::GetTimeMS();
             context->ProcessPacket(this, packet);
         }
         Close();
@@ -44,4 +46,5 @@ void nsClientConnection::WaitThread() {
         Log::Info("Waiting for client thread: %i", _clientId);
         _thread.join();
     }
+    Log::Info("Client thread exited: %i", _clientId);
 }
