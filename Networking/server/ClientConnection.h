@@ -24,10 +24,11 @@ public:
     [[nodiscard]] int32_t GetClientId() const { return _clientId; }
 
     bool SendData(const void *data, unsigned int size) const;
-
+    int64_t GetLastActiveTime() const { return _lastActiveTime; }
 
 private:
     int32_t         _clientId;
+    int64_t         _lastActiveTime;
 
     std::thread _thread;
     std::atomic<bool> _connected = true;
