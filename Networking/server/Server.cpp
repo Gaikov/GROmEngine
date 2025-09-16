@@ -9,6 +9,8 @@
 #include "nsLib/log.h"
 
 nsServer::nsServer(int port) : _port(port) {
+    _timeoutClients.reserve(20);
+    _disconnectedClients.reserve(20);
 }
 
 nsServer::~nsServer() {
@@ -131,6 +133,35 @@ nsClientConnection * nsServer::GetClient(uint32_t clientId) const {
     }
     Log::Warning("Client not found: %i", clientId);
     return nullptr;
+}
+
+void nsServer::DisconnectClientsWithTimout(const uint32_t timout) {
+    _timeoutClients.clear();
+    {
+        const auto currTime = nsTime::GetTimeMS();
+        std::lock_guard lock(_clientsMutex);
+        for (auto c : _clients) {
+            if (currTime - c->GetLastActiveTime() > timout) {
+                Log::Info("Client %i timeout, will be disconnected", c->GetClientId());
+                _timeoutClients.push_back(c);
+            }
+        }
+    }
+    for (const auto client : _timeoutClients) {
+        client->Disconnect();
+    }
+    _timeoutClients.clear();
+}
+
+void nsServer::ClearDisconnectedClients() {
+    if (_disconnectedClients.size()) {
+        Log::Info("Clearing disconnected clients: %i", _disconnectedClients.size());
+    }
+
+    for (const auto c : _disconnectedClients) {
+        delete c;
+    }
+    _disconnectedClients.clear();
 }
 
 void nsServer::PerformClientDisconnect(nsClientConnection *c) {
