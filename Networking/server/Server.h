@@ -28,6 +28,8 @@ protected:
     virtual void OnClientDisconnected(const nsClientConnection *c) {}
     nsClientConnection* GetClient(uint32_t clientId) const;
     virtual uint32_t GetProtocolVersion() const = 0;
+    void DisconnectClientsWithTimout(uint32_t timout);
+    void ClearDisconnectedClients();
 
 private:
     int             _port;
@@ -36,6 +38,7 @@ private:
     bool            _isRunning = false;
     int             _clientLastId = 0;
     std::vector<nsClientConnection*> _disconnectedClients;
+    std::vector<nsClientConnection*> _timeoutClients;
 
     void OnAcceptClient(int socket);
     void ProcessPacket(nsClientConnection *from, nsPacket *packet) override;
