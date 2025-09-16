@@ -4,6 +4,8 @@
 
 #include "Server.h"
 
+#include <iostream>
+
 #include "ClientConnection.h"
 #include "Networking/Packet.h"
 #include "nsLib/log.h"
@@ -37,6 +39,42 @@ bool nsServer::Start() {
     });
     Log::Info("Server started");
     return true;
+}
+
+void nsServer::Run(const int argc, char *argv[]) {
+    _running = true;
+
+    if (argc > 1 && strcmp(argv[1], "-daemon") == 0) {
+        Log::Info("Server started in daemon mode");
+
+        while (_running) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            DisconnectClientsWithTimout();
+            ClearDisconnectedClients();
+        }
+
+    } else {
+        Log::Info("Server started in interactive mode");
+
+        std::thread t([this]() {
+            while (_running) {
+                std::string command;
+                std::getline(std::cin, command);
+                if (command == "quit") {
+                    _running = false;
+                    break;
+                }
+            }
+        });
+
+        while (_running) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            DisconnectClientsWithTimout();
+            ClearDisconnectedClients();
+        }
+
+        t.join();
+    }
 }
 
 void nsServer::Stop() {
@@ -135,13 +173,13 @@ nsClientConnection * nsServer::GetClient(uint32_t clientId) const {
     return nullptr;
 }
 
-void nsServer::DisconnectClientsWithTimout(const uint32_t timout) {
+void nsServer::DisconnectClientsWithTimout() {
     _timeoutClients.clear();
     {
         const auto currTime = nsTime::GetTimeMS();
         std::lock_guard lock(_clientsMutex);
         for (auto c : _clients) {
-            if (currTime - c->GetLastActiveTime() > timout) {
+            if (currTime - c->GetLastActiveTime() > _clientTimout) {
                 Log::Info("Client %i timeout, will be disconnected", c->GetClientId());
                 _timeoutClients.push_back(c);
             }

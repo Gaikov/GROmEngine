@@ -15,11 +15,13 @@ public:
     ~nsServer() override;
 
     bool Start();
+    void Run(int argc, char *argv[]);
     void Stop();
 
 protected:
     std::mutex      _clientsMutex;
     std::vector<nsClientConnection*> _clients;
+    int32_t _clientTimout = 1000 * 30;
 
     void BroadcastPacket(const nsPacket *packet) const;
     virtual void SendPacket(const nsClientConnection *from, nsPacket *packet);
@@ -28,10 +30,10 @@ protected:
     virtual void OnClientDisconnected(const nsClientConnection *c) {}
     nsClientConnection* GetClient(uint32_t clientId) const;
     virtual uint32_t GetProtocolVersion() const = 0;
-    void DisconnectClientsWithTimout(uint32_t timout);
-    void ClearDisconnectedClients();
 
 private:
+
+    std::atomic<bool> _running = false;
     int             _port;
     nsServerSocket  _socket;
     std::thread     _clientsThread;
@@ -39,6 +41,9 @@ private:
     int             _clientLastId = 0;
     std::vector<nsClientConnection*> _disconnectedClients;
     std::vector<nsClientConnection*> _timeoutClients;
+
+    void DisconnectClientsWithTimout();
+    void ClearDisconnectedClients();
 
     void OnAcceptClient(int socket);
     void ProcessPacket(nsClientConnection *from, nsPacket *packet) override;
