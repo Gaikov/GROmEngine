@@ -18,38 +18,49 @@ static PFNGLDELETERENDERBUFFERSOESPROC     glDeleteRenderbuffersOES     = nullpt
 static PFNGLBINDRENDERBUFFEROESPROC        glBindRenderbufferOES        = nullptr;
 static PFNGLRENDERBUFFERSTORAGEOESPROC     glRenderbufferStorageOES     = nullptr;
 
-static bool g_hasFBOExt = false;
 #define FRAME_BUFFER_EXT_NAME "GL_OES_framebuffer_object"
+#define FRAME_BUFFER_EXT_NAME_DESK "GL_ARB_framebuffer_object"
+
+static Platform::ProcAddr GetProcAddr(const char *name) {
+    const auto p = App_GetPlatform();
+    std::string procName = name;
+    auto addr = p->GetProcAddr((procName + "OES").c_str());
+    if (!addr) {
+        procName = name;
+        addr = p->GetProcAddr(procName.c_str());
+    }
+
+    Log::Info("%s: %s", procName.c_str(), addr ? "OK" : "None");
+    return addr;
+}
 
 bool nsGLRenderTexture::InitGLExtensionsFBO() {
     Log::Info("Init GL extension: %s", FRAME_BUFFER_EXT_NAME);
     const std::string_view s = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
-    g_hasFBOExt = s.find(FRAME_BUFFER_EXT_NAME) != std::string_view::npos;
-    if (!g_hasFBOExt) {
+    bool hasExt = s.find(FRAME_BUFFER_EXT_NAME) != std::string_view::npos || s.find(FRAME_BUFFER_EXT_NAME_DESK) != std::string_view::npos;
+    if (!hasExt) {
         Log::Error("Can't find extension: %s", FRAME_BUFFER_EXT_NAME);
         return false;
     }
 
-    auto p = App_GetPlatform();
+    glGenFramebuffersOES         = (PFNGLGENFRAMEBUFFERSOESPROC)        GetProcAddr("glGenFramebuffers");
+    glDeleteFramebuffersOES      = (PFNGLDELETEFRAMEBUFFERSOESPROC)     GetProcAddr("glDeleteFramebuffers");
+    glBindFramebufferOES         = (PFNGLBINDFRAMEBUFFEROESPROC)        GetProcAddr("glBindFramebuffer");
+    glFramebufferTexture2DOES    = (PFNGLFRAMEBUFFERTEXTURE2DOESPROC)   GetProcAddr("glFramebufferTexture2D");
+    glFramebufferRenderbufferOES = (PFNGLFRAMEBUFFERRENDERBUFFEROESPROC)GetProcAddr("glFramebufferRenderbuffer");
+    glCheckFramebufferStatusOES  = (PFNGLCHECKFRAMEBUFFERSTATUSOESPROC) GetProcAddr("glCheckFramebufferStatus");
 
-    glGenFramebuffersOES         = (PFNGLGENFRAMEBUFFERSOESPROC)        p->GetProcAddr("glGenFramebuffersOES");
-    glDeleteFramebuffersOES      = (PFNGLDELETEFRAMEBUFFERSOESPROC)     p->GetProcAddr("glDeleteFramebuffersOES");
-    glBindFramebufferOES         = (PFNGLBINDFRAMEBUFFEROESPROC)        p->GetProcAddr("glBindFramebufferOES");
-    glFramebufferTexture2DOES    = (PFNGLFRAMEBUFFERTEXTURE2DOESPROC)   p->GetProcAddr("glFramebufferTexture2DOES");
-    glFramebufferRenderbufferOES = (PFNGLFRAMEBUFFERRENDERBUFFEROESPROC)p->GetProcAddr("glFramebufferRenderbufferOES");
-    glCheckFramebufferStatusOES  = (PFNGLCHECKFRAMEBUFFERSTATUSOESPROC) p->GetProcAddr("glCheckFramebufferStatusOES");
+    glGenRenderbuffersOES        = (PFNGLGENRENDERBUFFERSOESPROC)       GetProcAddr("glGenRenderbuffers");
+    glDeleteRenderbuffersOES     = (PFNGLDELETERENDERBUFFERSOESPROC)    GetProcAddr("glDeleteRenderbuffers");
+    glBindRenderbufferOES        = (PFNGLBINDRENDERBUFFEROESPROC)       GetProcAddr("glBindRenderbuffer");
+    glRenderbufferStorageOES     = (PFNGLRENDERBUFFERSTORAGEOESPROC)    GetProcAddr("glRenderbufferStorage");
 
-    glGenRenderbuffersOES        = (PFNGLGENRENDERBUFFERSOESPROC)       p->GetProcAddr("glGenRenderbuffersOES");
-    glDeleteRenderbuffersOES     = (PFNGLDELETERENDERBUFFERSOESPROC)    p->GetProcAddr("glDeleteRenderbuffersOES");
-    glBindRenderbufferOES        = (PFNGLBINDRENDERBUFFEROESPROC)       p->GetProcAddr("glBindRenderbufferOES");
-    glRenderbufferStorageOES     = (PFNGLRENDERBUFFERSTORAGEOESPROC)    p->GetProcAddr("glRenderbufferStorageOES");
-
-    g_hasFBOExt = glGenFramebuffersOES && glBindFramebufferOES && glGenRenderbuffersOES;
-    if (!g_hasFBOExt) {
+    hasExt = glGenFramebuffersOES && glBindFramebufferOES && glGenRenderbuffersOES;
+    if (!hasExt) {
         Log::Error("Can't init extension functions: %s", FRAME_BUFFER_EXT_NAME);
-        g_hasFBOExt = false;
+        hasExt = false;
     }
-    return g_hasFBOExt;
+    return hasExt;
 }
 
 void nsGLRenderTexture::Unbind() {
