@@ -61,8 +61,14 @@ nsBitmapData::tSP JPGDecoder::Decode(nsFile *file) {
 
             auto p = &pixel.r;
             pixel.a = 255;
-            for (int c = 0; c < cinfo.output_components; c++) {
-                p[c] = comps[c];
+            if (cinfo.output_components == 1) {
+                p[0] = comps[0];
+                p[1] = comps[0];
+                p[2] = comps[0];
+            } else {
+                for (int c = 0; c < cinfo.output_components; c++) {
+                    p[c] = comps[c];
+                }
             }
         }
     }
