@@ -24,7 +24,7 @@ public:
 
 private:
 	GLTexture();
-	virtual ~GLTexture();
+	~GLTexture() override;
 	bool CreateFromFile(const char *filePath);
     bool UploadToGPU();
     bool EnsureBitmapData();

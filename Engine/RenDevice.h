@@ -124,7 +124,11 @@ struct IVertexBuffer
 //---------------------------------------------------------
 struct ITexture
 {
+	virtual ~ITexture() = default;
 	virtual void GetSize( int &width, int &height ) = 0;
+};
+
+struct IRenderTexture : public ITexture {
 };
 
 //---------------------------------------------------------
@@ -159,6 +163,9 @@ struct IRenDevice
 	virtual void			TextureRelease( ITexture *texture ) = 0;
 	virtual void			TextureBind( ITexture *texture ) = 0;
 	virtual void			TextureTranform( const float *offs2, const float *scale2 ) = 0; //in
+
+	virtual IRenderTexture* RenderTextureCreate(int width, int height, texfmt_t = TF_RGBA) = 0;
+	virtual void			RenderTextureBind(IRenderTexture *rt) = 0;
 
 	//render state
 	virtual IRenState*		StateLoad( const char *fileName ) = 0;

@@ -489,6 +489,12 @@ void GLRenderDevice::InvalidateResources() {
     _textures.UnloadFromGPU();
 }
 
+IRenderTexture * GLRenderDevice::RenderTextureCreate(int width, int height, texfmt_t) {
+	return nullptr;
+}
+void GLRenderDevice::RenderTextureBind(IRenderTexture *rt) {
+}
+
 IStencilState *GLRenderDevice::StencilLoad(const char *fileName) {
     return _stencils.GetResource(fileName, 0);
 }
