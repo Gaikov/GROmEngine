@@ -8,18 +8,23 @@
 #include "GLCommon.h"
 
 class nsGLRenderTexture : public IRenderTexture {
+friend class nsGLRenderTexturesCache;
+
 public:
-    nsGLRenderTexture(int width, int height);
+    nsGLRenderTexture(int width, int height, texfmt_t fmt);
+    ~nsGLRenderTexture() override;
     bool BindTarget();
     bool BindTexture();
+    bool IsValid() const { return _fbo != 0; }
 
 private:
     GLuint _fbo = 0;
     GLuint _texture = 0;
     GLuint _zstencil = 0;
 
-    int _width = 0;
-    int _height = 0;
+    const int _width = 0;
+    const int _height = 0;
+    const texfmt_t _fmt;
 
     bool UploadToGPU();
     void UnloadFromGPU();
