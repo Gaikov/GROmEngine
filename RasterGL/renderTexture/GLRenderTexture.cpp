@@ -6,8 +6,13 @@
 #include "GLCommon.h"
 #include "GLUtils.h"
 
-nsGLRenderTexture::nsGLRenderTexture(const int width, const int height) : _width(width), _height(height) {
+nsGLRenderTexture::nsGLRenderTexture(const int width, const int height, const texfmt_t fmt)
+    : _width(width), _height(height), _fmt(fmt) {
     UploadToGPU();
+}
+
+nsGLRenderTexture::~nsGLRenderTexture() {
+    UnloadFromGPU();
 }
 
 bool nsGLRenderTexture::BindTarget() {
@@ -17,7 +22,7 @@ bool nsGLRenderTexture::BindTarget() {
     }
 
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, _fbo);
-    GL_CHECK_R("glBindFramebufferOES",false);
+    GL_CHECK_R("glBindFramebufferOES", false);
     glViewport(0, 0, _width, _height);
 
     return true;
@@ -30,7 +35,7 @@ bool nsGLRenderTexture::BindTexture() {
     }
 
     glBindTexture(GL_TEXTURE_2D, _texture);
-    GL_CHECK_R("glBindTexture",false);
+    GL_CHECK_R("glBindTexture", false);
 
     return true;
 }
@@ -41,7 +46,9 @@ bool nsGLRenderTexture::UploadToGPU() {
     // texture
     glGenTextures(1, &_texture);
     glBindTexture(GL_TEXTURE_2D, _texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+    const auto fmt = _fmt == TF_RGBA ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, fmt, _width, _height, 0, fmt, GL_UNSIGNED_BYTE, nullptr);
     GL_CHECK_R("glTexImage2D", false);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -62,7 +69,7 @@ bool nsGLRenderTexture::UploadToGPU() {
     glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, _zstencil);
 
     // check status
-    if(glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
+    if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
         Log::Error("Can't create Frame Buffer: %i %i", _width, _height);
         return false;
     }

@@ -22,9 +22,9 @@ public:
 	void DrawLine(float x1, float y1, float x2, float y2, dword color);
 
 private:
-    GLTexturesCache *_texturesCache;
-	GLVertexBuffer *_quadBuffer;
-	GLVertexBuffer *_lineBuffer;
+    GLTexturesCache *_texturesCache = nullptr;
+	GLVertexBuffer *_quadBuffer = nullptr;
+	GLVertexBuffer *_lineBuffer = nullptr;
 };
 
 

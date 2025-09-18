@@ -28,6 +28,8 @@ set(sources
         stencil/GLStencilManager.h
         renderTexture/GLRenderTexture.cpp
         renderTexture/GLRenderTexture.h
+        renderTexture/GLRenderTexturesCache.cpp
+        renderTexture/GLRenderTexturesCache.h
 )
 
 include_directories(

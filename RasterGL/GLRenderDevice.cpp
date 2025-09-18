@@ -88,26 +88,28 @@ void GLRenderDevice::CleanupOpenGL()
     _textures.BindTexture(nullptr);
 }
 
-void GLRenderDevice::Release()
-{
-	LogPrintf(PRN_ALL, "*****************************************\n");
-	LogPrintf(PRN_ALL, "+         releasing GL renderer         +\n");
-	LogPrintf(PRN_ALL, "*****************************************\n");
+void GLRenderDevice::Release() {
+	Log::Info("*****************************************");
+	Log::Info("+         releasing GL renderer         +");
+	Log::Info("*****************************************");
 
 	CleanupOpenGL();
 
 	delete _quadBuff;
 
-	LogPrintf(PRN_ALL, "...releasing shaders\n");
+	Log::Info("...releasing shaders");
 	_shaders.ReleaseAll();
 
-	LogPrintf(PRN_ALL, "...releasing textures\n");
+	Log::Info("...releasing textures");
 	_textures.ReleaseAll();
+
+	Log::Info("...releasing render textures");
+	_renderTextures.Release();
 
 	_debug.Release();
 
 	delete g_shared;
-    g_shared = nullptr;
+	g_shared = nullptr;
 }
 
 void GLRenderDevice::GetDisplayInfo(DisplayInfo &info)
@@ -487,12 +489,15 @@ void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 void GLRenderDevice::InvalidateResources() {
     _queryRestart = true;
     _textures.UnloadFromGPU();
+	_renderTextures.UnloadFromGPU();
 }
 
-IRenderTexture * GLRenderDevice::RenderTextureCreate(int width, int height, texfmt_t) {
-	return nullptr;
+IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {
+	return _renderTextures.Create(width, height, fmt);
 }
+
 void GLRenderDevice::RenderTextureBind(IRenderTexture *rt) {
+	_renderTextures.Bind(dynamic_cast<nsGLRenderTexture *>(rt));
 }
 
 IStencilState *GLRenderDevice::StencilLoad(const char *fileName) {

@@ -11,6 +11,7 @@
 #include "GLLightManager.h"
 #include "GLDisplayModes.h"
 #include "GLDebug.h"
+#include "renderTexture/GLRenderTexturesCache.h"
 #include "stencil/GLStencilManager.h"
 
 class GLVertexBuffer;
@@ -65,6 +66,7 @@ private:
 
 	GLDisplayModes   _modes;
 	GLTexturesCache  _textures;
+	nsGLRenderTexturesCache _renderTextures;
 	GLVertexBuffer   *_quadBuff;
 	GLShadersManager _shaders;
     nsGLStencilManager _stencils;
