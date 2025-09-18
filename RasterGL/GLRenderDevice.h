@@ -58,6 +58,9 @@ public:
 
     void InvalidateResources() override;
 
+	IRenderTexture * RenderTextureCreate(int width, int height, texfmt_t) override;
+	void RenderTextureBind(IRenderTexture *rt) override;
+
 private:
 
 	GLDisplayModes   _modes;

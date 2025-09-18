@@ -5,7 +5,10 @@
 #ifndef _GROM_GL_COMMON_H
 #define _GROM_GL_COMMON_H
 
+#define GL_GLEXT_PROTOTYPES
+
 #include <GLES/gl.h>
+#include <GLES/glext.h>
 #include "Core/headers.h"
 #include "nsLib/nsLib.h"
 #include "nsLib/log.h"

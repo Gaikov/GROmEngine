@@ -26,6 +26,8 @@ set(sources
         stencil/GLStencilState.h
         stencil/GLStencilManager.cpp
         stencil/GLStencilManager.h
+        renderTexture/GLRenderTexture.cpp
+        renderTexture/GLRenderTexture.h
 )
 
 include_directories(
