@@ -64,6 +64,7 @@ bool GLRenderDevice::Init(void *wnd)
 
 	_shaders.Init();
     _stencils.Init();
+	_renderTextures.Init();
 
 	return PrepareOpenGL();
 }

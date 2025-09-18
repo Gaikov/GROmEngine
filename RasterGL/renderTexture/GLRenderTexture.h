@@ -11,6 +11,9 @@ class nsGLRenderTexture : public IRenderTexture {
 friend class nsGLRenderTexturesCache;
 
 public:
+    static bool InitGLExtensionsFBO();
+    static void Unbind();
+
     nsGLRenderTexture(int width, int height, texfmt_t fmt);
     ~nsGLRenderTexture() override;
     bool BindTarget();

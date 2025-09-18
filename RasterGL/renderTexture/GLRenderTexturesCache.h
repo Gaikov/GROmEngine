@@ -8,6 +8,8 @@
 
 class nsGLRenderTexturesCache {
 public:
+    static bool Init();
+
     nsGLRenderTexture* Create(int width, int height, texfmt_t fmt);
     void Bind(nsGLRenderTexture *t);
     void Release();
