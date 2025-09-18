@@ -55,6 +55,8 @@ public:
 
     GLFWwindow* GetWindow() { return _wnd; }
 
+    ProcAddr GetProcAddr(const char *name) override;
+
     void SwapBuffers() override;
 
     IDataWriter *InternalWrite(const char *fileName) override;

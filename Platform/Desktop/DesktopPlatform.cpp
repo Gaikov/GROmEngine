@@ -187,6 +187,10 @@ bool DesktopPlatform::IsMobile() {
     return nsEnv::Shared()->IsMobile();
 }
 
+Platform::ProcAddr DesktopPlatform::GetProcAddr(const char *name) {
+    return glfwGetProcAddress(name);
+}
+
 void DesktopPlatform::SwapBuffers() {
     if (_wnd) {
         glfwSwapBuffers(_wnd);

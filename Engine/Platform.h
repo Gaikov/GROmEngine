@@ -18,6 +18,8 @@ public:
         int bits;
     };
 
+    typedef void (*ProcAddr)();
+
     typedef std::vector<DisplayMode>    tDisplayModesList;
     virtual ~Platform() = default;
 
@@ -59,6 +61,7 @@ public:
     virtual IDataReader* InternalRead(const char *fileName) = 0;
 
     //Renderer
+    virtual ProcAddr GetProcAddr(const char *name) = 0;
     virtual void SwapBuffers() = 0;
 };
 

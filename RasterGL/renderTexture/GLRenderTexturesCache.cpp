@@ -4,6 +4,10 @@
 
 #include "GLRenderTexturesCache.h"
 
+bool nsGLRenderTexturesCache::Init() {
+    return nsGLRenderTexture::InitGLExtensionsFBO();
+}
+
 nsGLRenderTexture * nsGLRenderTexturesCache::Create(const int width, const int height, const texfmt_t fmt) {
     const auto t = new nsGLRenderTexture(width, height, fmt);
     if (t->IsValid()) {
@@ -22,7 +26,7 @@ void nsGLRenderTexturesCache::Bind(nsGLRenderTexture *t) {
             _current->BindTarget();
         }
         else {
-            glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+            nsGLRenderTexture::Unbind();
         }
     }
 }

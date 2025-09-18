@@ -6,6 +6,56 @@
 #include "GLCommon.h"
 #include "GLUtils.h"
 
+static PFNGLGENFRAMEBUFFERSOESPROC         glGenFramebuffersOES         = nullptr;
+static PFNGLDELETEFRAMEBUFFERSOESPROC      glDeleteFramebuffersOES      = nullptr;
+static PFNGLBINDFRAMEBUFFEROESPROC         glBindFramebufferOES         = nullptr;
+static PFNGLFRAMEBUFFERTEXTURE2DOESPROC    glFramebufferTexture2DOES    = nullptr;
+static PFNGLFRAMEBUFFERRENDERBUFFEROESPROC glFramebufferRenderbufferOES = nullptr;
+static PFNGLCHECKFRAMEBUFFERSTATUSOESPROC  glCheckFramebufferStatusOES  = nullptr;
+
+static PFNGLGENRENDERBUFFERSOESPROC        glGenRenderbuffersOES        = nullptr;
+static PFNGLDELETERENDERBUFFERSOESPROC     glDeleteRenderbuffersOES     = nullptr;
+static PFNGLBINDRENDERBUFFEROESPROC        glBindRenderbufferOES        = nullptr;
+static PFNGLRENDERBUFFERSTORAGEOESPROC     glRenderbufferStorageOES     = nullptr;
+
+static bool g_hasFBOExt = false;
+#define FRAME_BUFFER_EXT_NAME "GL_OES_framebuffer_object"
+
+bool nsGLRenderTexture::InitGLExtensionsFBO() {
+    Log::Info("Init GL extension: %s", FRAME_BUFFER_EXT_NAME);
+    const std::string_view s = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
+    g_hasFBOExt = s.find(FRAME_BUFFER_EXT_NAME) != std::string_view::npos;
+    if (!g_hasFBOExt) {
+        Log::Error("Can't find extension: %s", FRAME_BUFFER_EXT_NAME);
+        return false;
+    }
+
+    auto p = App_GetPlatform();
+
+    glGenFramebuffersOES         = (PFNGLGENFRAMEBUFFERSOESPROC)        p->GetProcAddr("glGenFramebuffersOES");
+    glDeleteFramebuffersOES      = (PFNGLDELETEFRAMEBUFFERSOESPROC)     p->GetProcAddr("glDeleteFramebuffersOES");
+    glBindFramebufferOES         = (PFNGLBINDFRAMEBUFFEROESPROC)        p->GetProcAddr("glBindFramebufferOES");
+    glFramebufferTexture2DOES    = (PFNGLFRAMEBUFFERTEXTURE2DOESPROC)   p->GetProcAddr("glFramebufferTexture2DOES");
+    glFramebufferRenderbufferOES = (PFNGLFRAMEBUFFERRENDERBUFFEROESPROC)p->GetProcAddr("glFramebufferRenderbufferOES");
+    glCheckFramebufferStatusOES  = (PFNGLCHECKFRAMEBUFFERSTATUSOESPROC) p->GetProcAddr("glCheckFramebufferStatusOES");
+
+    glGenRenderbuffersOES        = (PFNGLGENRENDERBUFFERSOESPROC)       p->GetProcAddr("glGenRenderbuffersOES");
+    glDeleteRenderbuffersOES     = (PFNGLDELETERENDERBUFFERSOESPROC)    p->GetProcAddr("glDeleteRenderbuffersOES");
+    glBindRenderbufferOES        = (PFNGLBINDRENDERBUFFEROESPROC)       p->GetProcAddr("glBindRenderbufferOES");
+    glRenderbufferStorageOES     = (PFNGLRENDERBUFFERSTORAGEOESPROC)    p->GetProcAddr("glRenderbufferStorageOES");
+
+    g_hasFBOExt = glGenFramebuffersOES && glBindFramebufferOES && glGenRenderbuffersOES;
+    if (!g_hasFBOExt) {
+        Log::Error("Can't init extension functions: %s", FRAME_BUFFER_EXT_NAME);
+        g_hasFBOExt = false;
+    }
+    return g_hasFBOExt;
+}
+
+void nsGLRenderTexture::Unbind() {
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+}
+
 nsGLRenderTexture::nsGLRenderTexture(const int width, const int height, const texfmt_t fmt)
     : _width(width), _height(height), _fmt(fmt) {
     UploadToGPU();
