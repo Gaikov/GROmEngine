@@ -80,6 +80,8 @@ struct nsColor
 	}
 
 	static inline dword ToARGB( const float *c );
+	void FromRGBA(uint32_t c);
+	void CopyTo( float c[4]) const;
 
 	inline void Rand()
 	{

@@ -117,6 +117,32 @@ bool ParseColor( script_state_t *ss, const char *name, float c[4] )
 	return true;
 }
 
+bool    ParseColorExt(script_state_t *ss, const char *name, nsColor &c) {
+	if (ps_var_begin(ss, name)) {
+		if (const auto str = ps_var_str(ss)) {
+			std::string s = str;
+			if (s.size() == 6) {
+				s += "FF";
+			}
+
+			try {
+				const auto value = std::stoul(s, nullptr, 16);
+				c.FromRGBA(value);
+			} catch (...) {
+				return false;
+			}
+			return true;
+		}
+
+		float color[4];
+		if (ps_var_4f(ss, color)) {
+			c = color;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool ParseBool(script_state_t *ss, const char *name, bool defValue) {
     return ParseFloat(ss, name, defValue ? 1 : 0) > 0;
 }

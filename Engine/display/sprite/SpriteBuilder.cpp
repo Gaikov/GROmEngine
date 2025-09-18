@@ -33,9 +33,7 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
         ps_var_2f(ss, sprite->desc.size);
     }
 
-    if (ps_var_begin(ss, "color")) {
-        ps_var_4f(ss, sprite->desc.color);
-    }
+    ParseColorExt(ss, "color", sprite->desc.color);
 
     if (ps_var_begin(ss, "tilesX")) {
         sprite->desc.tex2.x = ps_var_f(ss);

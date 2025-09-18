@@ -7,6 +7,7 @@
 
 #include "nsLib/comm_types.h"
 #include "Core/Parser.h"
+#include "nsLib/color.h"
 #include "nsLib/StrTools.h"
 
 bool	ParseStr( script_state_t *ss, const char *name, char val[MAX_STR_LEN] );
@@ -15,6 +16,7 @@ const char*	ParseStrP( script_state_t *ss, const char *name, const char *def = n
 nsString ParseString(script_state_t *ss, const char *name, const char *def = nullptr);
 float	ParseFloat( script_state_t *ss, const char *name, float def = 0 );
 bool	ParseColor( script_state_t *ss, const char *name, float c[4] );
+bool    ParseColorExt(script_state_t *ss, const char *name, nsColor &c);
 bool	ParseFloat2( script_state_t *ss, const char *name, float val[2], float defVal[2] = nullptr );
 bool	ParseFloat3( script_state_t *ss, const char *name, float val[3] );
 bool	ParseFloat4( script_state_t *ss, const char *name, float val[4] );
