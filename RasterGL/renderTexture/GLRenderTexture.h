@@ -4,10 +4,11 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include "GLBaseTexture.h"
 #include "Engine/RenDevice.h"
 #include "GLCommon.h"
 
-class nsGLRenderTexture : public IRenderTexture {
+class nsGLRenderTexture : virtual public nsGLBaseTexture, virtual public IRenderTexture {
 friend class nsGLRenderTexturesCache;
 
 public:
@@ -17,7 +18,7 @@ public:
     nsGLRenderTexture(int width, int height, texfmt_t fmt);
     ~nsGLRenderTexture() override;
     bool BindTarget();
-    bool BindTexture();
+    bool Bind() override;
     bool IsValid() const { return _fbo != 0; }
 
 private:

@@ -9,6 +9,7 @@ class ResourcesCache
 {
 public:
 	ResourcesCache() = default;
+	virtual ~ResourcesCache() = default;
 	void ReleaseAll();
 	TResource* GetResource(const char *resourceName, TParam param);
 	void ReleaseResource(TResource *item, bool force = false);

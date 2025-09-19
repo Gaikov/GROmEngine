@@ -5,10 +5,16 @@
 #include "GLRenderTexturesCache.h"
 
 bool nsGLRenderTexturesCache::Init() {
-    return nsGLRenderTexture::InitGLExtensionsFBO();
+    _hasFeature = nsGLRenderTexture::InitGLExtensionsFBO();
+    return _hasFeature;
 }
 
 nsGLRenderTexture * nsGLRenderTexturesCache::Create(const int width, const int height, const texfmt_t fmt) {
+    if (!_hasFeature) {
+        Log::Warning("Render textures are not supported by the device");
+        return nullptr;
+    }
+
     const auto t = new nsGLRenderTexture(width, height, fmt);
     if (t->IsValid()) {
         _textures.push_back(t);

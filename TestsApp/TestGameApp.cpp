@@ -11,6 +11,7 @@
 #include "tests/QuadsTest.h"
 #include "tests/sprites/Sprite9GridTest.h"
 #include "tests/GlobalToLocalTest.h"
+#include "tests/RenderTextureTest.h"
 #include "tests/layouts/LayoutsTest.h"
 #include "tests/rays/RayMarchingTest.h"
 #include "tests/StencilMaskTest.h"
@@ -43,6 +44,7 @@ void TestGameApp::RegisterTests() {
     RegisterTest("scroll", new nsScrollTest());
     RegisterTest("parts", new nsParticlesTest());
     RegisterTest("collision", new nsCollisionTest());
+    RegisterTest("render_texture", new nsRenderTextureTest());
 
     Log::Info("info test message: %i", 1);
     Log::Warning("warning test message: %i", 2);

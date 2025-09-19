@@ -65,10 +65,14 @@ bool nsGLRenderTexture::InitGLExtensionsFBO() {
 
 void nsGLRenderTexture::Unbind() {
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    int w, h;
+    App_GetPlatform()->GetClientSize(w, h);
+    glViewport(0, 0, w, h);
 }
 
 nsGLRenderTexture::nsGLRenderTexture(const int width, const int height, const texfmt_t fmt)
     : _width(width), _height(height), _fmt(fmt) {
+    Log::Info("...creating render texture: %ix%i", _width, _height);
     UploadToGPU();
 }
 
@@ -89,10 +93,12 @@ bool nsGLRenderTexture::BindTarget() {
     return true;
 }
 
-bool nsGLRenderTexture::BindTexture() {
-    if (!_fbo || !UploadToGPU()) {
-        glBindTexture(GL_TEXTURE_2D, 0);
-        return false;
+bool nsGLRenderTexture::Bind() {
+    if (!_fbo) {
+        if (!UploadToGPU()) {
+            glBindTexture(GL_TEXTURE_2D, 0);
+            return false;
+        }
     }
 
     glBindTexture(GL_TEXTURE_2D, _texture);
@@ -134,6 +140,11 @@ bool nsGLRenderTexture::UploadToGPU() {
         Log::Error("Can't create Frame Buffer: %i %i", _width, _height);
         return false;
     }
+
+    glClearColor(1, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 
     return true;
 }

@@ -20,7 +20,7 @@ void GLTexturesCache::FreeResource(GLTexture *item)
 	GLTexture::Free(item);
 }
 
-bool GLTexturesCache::BindTexture(GLTexture *t)
+bool GLTexturesCache::BindTexture(nsGLBaseTexture *t)
 {
 	if (_current != t)
 	{
@@ -48,7 +48,7 @@ GLTexture *GLTexturesCache::CreateFromBitmapData(nsBitmapData::tSP &data)
 	return t;
 }
 
-void GLTexturesCache::UnloadFromGPU() {
+void GLTexturesCache::UnloadFromGPU() const {
     for (const auto& it : _cache) {
         auto t = it.second.item;
         t->UnloadFromGPU();

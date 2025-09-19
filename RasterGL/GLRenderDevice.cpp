@@ -158,7 +158,7 @@ void GLRenderDevice::TextureRelease(ITexture *texture)
 
 void GLRenderDevice::TextureBind(ITexture *texture)
 {
-	auto t = dynamic_cast<GLTexture *>(texture);
+	auto t = dynamic_cast<nsGLBaseTexture *>(texture);
 	if (_textures.BindTexture(t))
 	{
 		_shaders.ApplyTextureParams();
@@ -228,6 +228,7 @@ bool GLRenderDevice::BeginScene()
 	int w, h;
 	App_GetPlatform()->GetClientSize(w, h);
 	glViewport(0, 0, w, h);
+	glClearColor(0, 0, 0, 1);
 
 	return true;
 }
