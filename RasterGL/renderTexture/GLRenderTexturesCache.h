@@ -8,7 +8,7 @@
 
 class nsGLRenderTexturesCache {
 public:
-    static bool Init();
+    bool Init();
 
     nsGLRenderTexture* Create(int width, int height, texfmt_t fmt);
     void Bind(nsGLRenderTexture *t);
@@ -18,5 +18,6 @@ public:
 private:
     std::vector<nsGLRenderTexture*> _textures;
     nsGLRenderTexture *_current = nullptr;
+    bool _hasFeature = false;
 };
 

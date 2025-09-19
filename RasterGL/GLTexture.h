@@ -5,17 +5,18 @@
 #ifndef _GROM_GLTEXTURE_H
 #define _GROM_GLTEXTURE_H
 
+#include "GLBaseTexture.h"
 #include "GLCommon.h"
 
 //https://community.khronos.org/t/loading-texture-using-sdl/68644
 
-class GLTexture : public ITexture
+class GLTexture : public nsGLBaseTexture
 {
 public:
 	static GLTexture *Load(const char *filePath);
 	static void Free(GLTexture *t);
 	static GLTexture *Create(const char *id, nsBitmapData::tSP &data);
-	bool Bind();
+	bool Bind() override;
 	int GetWidth();
 	int GetHeight();
 	void GetSize(int &width, int &height) override;

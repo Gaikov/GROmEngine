@@ -32,6 +32,8 @@ set(SRC
         tests/SpriteTest.cpp
         tests/collision/CollisionTest.cpp
         tests/collision/CollisionTest.h
+        tests/RenderTextureTest.cpp
+        tests/RenderTextureTest.h
 )
 
 if (ANDROID)
