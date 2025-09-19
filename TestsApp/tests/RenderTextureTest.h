@@ -18,4 +18,6 @@ private:
     IRenderTexture *_rt = nullptr;
     nsSpriteDesc _back;
     nsSpriteDesc _sprite;
+    nsSpriteDesc _rtSprite;
+    IRenState *_state = nullptr;
 };
