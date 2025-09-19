@@ -45,6 +45,7 @@ texfmt_t;
 #define	CLR_ZBUFF	1u
 #define CLR_CBUFF	2u
 #define CLR_STENCIL 4u
+#define CLR_ALL		(CLR_ZBUFF|CLR_CBUFF|CLR_STENCIL)
 
 //DrawChar
 typedef struct

@@ -81,9 +81,11 @@ nsGLRenderTexture::~nsGLRenderTexture() {
 }
 
 bool nsGLRenderTexture::BindTarget() {
-    if (!_fbo || !UploadToGPU()) {
-        glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-        return false;
+    if (!_fbo) {
+        if (!UploadToGPU()) {
+            glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+            return false;
+        }
     }
 
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, _fbo);
@@ -140,9 +142,6 @@ bool nsGLRenderTexture::UploadToGPU() {
         Log::Error("Can't create Frame Buffer: %i %i", _width, _height);
         return false;
     }
-
-    glClearColor(1, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
 
