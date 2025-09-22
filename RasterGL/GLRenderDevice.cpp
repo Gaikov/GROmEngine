@@ -77,7 +77,7 @@ bool GLRenderDevice::PrepareOpenGL()
 	}
 
 	glDepthFunc(GL_LEQUAL);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0, 0, 0, 0);
 
 	return true;
 }
@@ -228,7 +228,6 @@ bool GLRenderDevice::BeginScene()
 	int w, h;
 	App_GetPlatform()->GetClientSize(w, h);
 	glViewport(0, 0, w, h);
-	glClearColor(0, 0, 0, 1);
 
 	return true;
 }

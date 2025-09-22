@@ -59,6 +59,10 @@ bool nsGLRenderTexture::InitGLExtensionsFBO() {
     if (!hasExt) {
         Log::Error("Can't init extension functions: %s", FRAME_BUFFER_EXT_NAME);
         hasExt = false;
+    } else {
+        GLint maxRbSize;
+        glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_OES, &maxRbSize);
+        Log::Info("Max render buffer size: %i", maxRbSize);
     }
     return hasExt;
 }
