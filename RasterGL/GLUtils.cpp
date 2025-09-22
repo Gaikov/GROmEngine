@@ -80,7 +80,7 @@ void GLUtils::SetState(GLenum state, bool enabled)
 
 }
 
-static std::map<std::string, GLenum> s_func = {
+static std::map<std::string_view, GLenum> s_func = {
         {"never", GL_NEVER},
         {"less", GL_LESS},
         {"equal", GL_EQUAL},
@@ -92,5 +92,5 @@ static std::map<std::string, GLenum> s_func = {
 };
 
 GLenum GLUtils::GetFunc(const char *name) {
-    return s_func.count(name) > 0 ? s_func[name] : GL_ALWAYS;
+    return s_func.contains(name) > 0 ? s_func[name] : GL_ALWAYS;
 }
