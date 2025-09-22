@@ -6,33 +6,8 @@
 #include "GLCommon.h"
 #include "GLUtils.h"
 
-static PFNGLGENFRAMEBUFFERSOESPROC         glGenFramebuffersOES         = nullptr;
-static PFNGLDELETEFRAMEBUFFERSOESPROC      glDeleteFramebuffersOES      = nullptr;
-static PFNGLBINDFRAMEBUFFEROESPROC         glBindFramebufferOES         = nullptr;
-static PFNGLFRAMEBUFFERTEXTURE2DOESPROC    glFramebufferTexture2DOES    = nullptr;
-static PFNGLFRAMEBUFFERRENDERBUFFEROESPROC glFramebufferRenderbufferOES = nullptr;
-static PFNGLCHECKFRAMEBUFFERSTATUSOESPROC  glCheckFramebufferStatusOES  = nullptr;
-
-static PFNGLGENRENDERBUFFERSOESPROC        glGenRenderbuffersOES        = nullptr;
-static PFNGLDELETERENDERBUFFERSOESPROC     glDeleteRenderbuffersOES     = nullptr;
-static PFNGLBINDRENDERBUFFEROESPROC        glBindRenderbufferOES        = nullptr;
-static PFNGLRENDERBUFFERSTORAGEOESPROC     glRenderbufferStorageOES     = nullptr;
-
-#define FRAME_BUFFER_EXT_NAME "GL_OES_framebuffer_object"
+#define FRAME_BUFFER_EXT_NAME "GL_framebuffer_object"
 #define FRAME_BUFFER_EXT_NAME_DESK "GL_ARB_framebuffer_object"
-
-static Platform::ProcAddr GetProcAddr(const char *name) {
-    const auto p = App_GetPlatform();
-    std::string procName = name;
-    auto addr = p->GetProcAddr((procName + "OES").c_str());
-    if (!addr) {
-        procName = name;
-        addr = p->GetProcAddr(procName.c_str());
-    }
-
-    Log::Info("%s: %s", procName.c_str(), addr ? "OK" : "None");
-    return addr;
-}
 
 bool nsGLRenderTexture::InitGLExtensionsFBO() {
     Log::Info("Init GL extension: %s", FRAME_BUFFER_EXT_NAME);
@@ -42,33 +17,16 @@ bool nsGLRenderTexture::InitGLExtensionsFBO() {
         Log::Error("Can't find extension: %s", FRAME_BUFFER_EXT_NAME);
         return false;
     }
-
-    glGenFramebuffersOES         = (PFNGLGENFRAMEBUFFERSOESPROC)        GetProcAddr("glGenFramebuffers");
-    glDeleteFramebuffersOES      = (PFNGLDELETEFRAMEBUFFERSOESPROC)     GetProcAddr("glDeleteFramebuffers");
-    glBindFramebufferOES         = (PFNGLBINDFRAMEBUFFEROESPROC)        GetProcAddr("glBindFramebuffer");
-    glFramebufferTexture2DOES    = (PFNGLFRAMEBUFFERTEXTURE2DOESPROC)   GetProcAddr("glFramebufferTexture2D");
-    glFramebufferRenderbufferOES = (PFNGLFRAMEBUFFERRENDERBUFFEROESPROC)GetProcAddr("glFramebufferRenderbuffer");
-    glCheckFramebufferStatusOES  = (PFNGLCHECKFRAMEBUFFERSTATUSOESPROC) GetProcAddr("glCheckFramebufferStatus");
-
-    glGenRenderbuffersOES        = (PFNGLGENRENDERBUFFERSOESPROC)       GetProcAddr("glGenRenderbuffers");
-    glDeleteRenderbuffersOES     = (PFNGLDELETERENDERBUFFERSOESPROC)    GetProcAddr("glDeleteRenderbuffers");
-    glBindRenderbufferOES        = (PFNGLBINDRENDERBUFFEROESPROC)       GetProcAddr("glBindRenderbuffer");
-    glRenderbufferStorageOES     = (PFNGLRENDERBUFFERSTORAGEOESPROC)    GetProcAddr("glRenderbufferStorage");
-
-    hasExt = glGenFramebuffersOES && glBindFramebufferOES && glGenRenderbuffersOES;
-    if (!hasExt) {
-        Log::Error("Can't init extension functions: %s", FRAME_BUFFER_EXT_NAME);
-        hasExt = false;
-    } else {
+    
         GLint maxRbSize;
-        glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_OES, &maxRbSize);
+        glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRbSize);
         Log::Info("Max render buffer size: %i", maxRbSize);
-    }
+
     return hasExt;
 }
 
 void nsGLRenderTexture::Unbind() {
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     int w, h;
     App_GetPlatform()->GetClientSize(w, h);
     glViewport(0, 0, w, h);
@@ -87,13 +45,13 @@ nsGLRenderTexture::~nsGLRenderTexture() {
 bool nsGLRenderTexture::BindTarget() {
     if (!_fbo) {
         if (!UploadToGPU()) {
-            glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             return false;
         }
     }
 
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, _fbo);
-    GL_CHECK_R("glBindFramebufferOES", false);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    GL_CHECK_R("glBindFramebuffer", false);
     glViewport(0, 0, _width, _height);
 
     return true;
@@ -127,27 +85,27 @@ bool nsGLRenderTexture::UploadToGPU() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // depth with stencil
-    glGenRenderbuffersOES(1, &_zstencil);
-    glBindRenderbufferOES(GL_RENDERBUFFER_OES, _zstencil);
-    glRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH24_STENCIL8_OES, _width, _height);
-    GL_CHECK_R("glRenderbufferStorageOES - GL_DEPTH24_STENCIL8_OES", false);
+    glGenRenderbuffers(1, &_zstencil);
+    glBindRenderbuffer(GL_RENDERBUFFER, _zstencil);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
+    GL_CHECK_R("glRenderbufferStorage - GL_DEPTH24_STENCIL8", false);
 
     // frame buffer object
-    glGenFramebuffersOES(1, &_fbo);
-    GL_CHECK_R("glGenFramebuffersOES", false);
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, _fbo);
+    glGenFramebuffers(1, &_fbo);
+    GL_CHECK_R("glGenFramebuffers", false);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
-    glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, _texture, 0);
-    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, _zstencil);
-    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, _zstencil);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _zstencil);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _zstencil);
 
     // check status
-    if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         Log::Error("Can't create Frame Buffer: %i %i", _width, _height);
         return false;
     }
 
-    glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return true;
 }
@@ -156,11 +114,11 @@ void nsGLRenderTexture::UnloadFromGPU() {
     if (_fbo) {
         Log::Info("Release render texture: %ix%i", _width, _height);
 
-        glDeleteFramebuffersOES(1, &_fbo);
+        glDeleteFramebuffers(1, &_fbo);
         _fbo = 0;
     }
     if (_zstencil) {
-        glDeleteRenderbuffersOES(1, &_zstencil);
+        glDeleteRenderbuffers(1, &_zstencil);
         _zstencil = 0;
     }
     if (_texture) {

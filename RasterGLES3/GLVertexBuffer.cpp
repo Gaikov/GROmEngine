@@ -7,6 +7,14 @@
 
 #include "GLVertexBuffer.h"
 #include "GLCommon.h"
+#include "GLUtils.h"
+
+// Attribute locations for GLES3 shaders:
+// 0 - position (vec3), 1 - normal (vec3), 2 - color (rgba8 normalized), 3 - texcoord (vec2)
+static constexpr GLuint ATTR_POS   = 0;
+static constexpr GLuint ATTR_NORM  = 1;
+static constexpr GLuint ATTR_COLOR = 2;
+static constexpr GLuint ATTR_TEX   = 3;
 
 GLVertexBuffer::GLVertexBuffer(GLTexturesCache *cache, uint numVertices, uint numIndexes, bool useColor) :
         _texturesCache(cache),
@@ -21,43 +29,106 @@ GLVertexBuffer::GLVertexBuffer(GLTexturesCache *cache, uint numVertices, uint nu
 	m_indexes = new unsigned short[m_numIndexes];
 	m_maxDrawIndexes = m_numIndexes;
 	m_maxDrawVertices = m_numVertices;
+
+	InitGLObjects();
 }
 
 GLVertexBuffer::~GLVertexBuffer()
 {
+	ReleaseGLObjects();
+
 	delete[] m_verts;
 	delete[] m_indexes;
 }
 
+void GLVertexBuffer::InitGLObjects()
+{
+	// VAO
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	// VBO
+	glGenBuffers(1, &_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbVertex_t) * m_numVertices, nullptr, GL_DYNAMIC_DRAW);
+
+	// EBO
+	glGenBuffers(1, &_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * m_numIndexes, nullptr, GL_DYNAMIC_DRAW);
+
+	// Setup vertex attributes layout (interleaved vbVertex_t)
+	// position: vec3 float at offset of nsVec3 v
+	glEnableVertexAttribArray(ATTR_POS);
+	glVertexAttribPointer(ATTR_POS, 3, GL_FLOAT, GL_FALSE, sizeof(vbVertex_t), reinterpret_cast<const void*>(offsetof(vbVertex_t, v)));
+
+	// normal: vec3 float at offset nsVec3 n
+	glEnableVertexAttribArray(ATTR_NORM);
+	glVertexAttribPointer(ATTR_NORM, 3, GL_FLOAT, GL_FALSE, sizeof(vbVertex_t), reinterpret_cast<const void*>(offsetof(vbVertex_t, n)));
+
+	// color: rgba8 normalized at offset dword c
+	glEnableVertexAttribArray(ATTR_COLOR);
+	glVertexAttribPointer(ATTR_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vbVertex_t), reinterpret_cast<const void*>(offsetof(vbVertex_t, c)));
+
+	// texcoord: vec2 float at offset float tu
+	glEnableVertexAttribArray(ATTR_TEX);
+	glVertexAttribPointer(ATTR_TEX, 2, GL_FLOAT, GL_FALSE, sizeof(vbVertex_t), reinterpret_cast<const void*>(offsetof(vbVertex_t, tu)));
+
+	// Unbind VAO to avoid accidental state changes
+	glBindVertexArray(0);
+}
+
+void GLVertexBuffer::ReleaseGLObjects()
+{
+	if (_ebo) {
+		glDeleteBuffers(1, &_ebo);
+		_ebo = 0;
+	}
+	if (_vbo) {
+		glDeleteBuffers(1, &_vbo);
+		_vbo = 0;
+	}
+	if (_vao) {
+		glDeleteVertexArrays(1, &_vao);
+		_vao = 0;
+	}
+}
+
 void GLVertexBuffer::Draw()
 {
-    glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, sizeof(vbVertex_t), m_verts);
+	// Upload current CPU-side data to GPU buffers
+	glBindVertexArray(_vao);
 
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glNormalPointer(GL_FLOAT, sizeof(vbVertex_t), &m_verts->n);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	const GLsizeiptr vertSize = static_cast<GLsizeiptr>(sizeof(vbVertex_t) * m_maxDrawVertices);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, m_verts);
 
-    if (_texturesCache->HasBoundTexture()) {
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(2, GL_FLOAT, sizeof(vbVertex_t), &m_verts->tu);
-    } else {
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+	const GLsizeiptr idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * m_maxDrawIndexes);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, idxSize, m_indexes);
 
-	if (m_useColor)
-	{
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(vbVertex_t), &m_verts->c);
-	} else
-	{
-		glDisableClientState(GL_COLOR_ARRAY);
+	// Enable/disable attributes depending on state
+	if (_texturesCache->HasBoundTexture()) {
+		glEnableVertexAttribArray(ATTR_TEX);
+	} else {
+		glDisableVertexAttribArray(ATTR_TEX);
+	}
+
+	if (m_useColor) {
+		glEnableVertexAttribArray(ATTR_COLOR);
+	} else {
+		glDisableVertexAttribArray(ATTR_COLOR);
 	}
 
 	GLenum modes[] = {GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_LINES};
 	auto mode = modes[_primitiveMode];
 
-	glDrawElements(mode, m_maxDrawIndexes, GL_UNSIGNED_SHORT, m_indexes);
+	glDrawElements(mode, static_cast<GLsizei>(m_maxDrawIndexes), GL_UNSIGNED_SHORT, nullptr);
+	GL_CHECK_R("glDrawElements",);
+
+	glBindVertexArray(0);
 }
+
 
 void GLVertexBuffer::SetTex(int vertexIndex, float tu, float tv)
 {

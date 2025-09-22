@@ -65,6 +65,9 @@ struct IRenState
 {
 	virtual bool IsAlphaTest() = 0;
 	virtual bool IsAlphaBlend() = 0;
+
+protected:
+	virtual ~IRenState() = default;
 };
 
 struct IStencilState

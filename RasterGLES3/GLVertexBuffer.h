@@ -47,6 +47,13 @@ private:
 
 	primitiveMode_t _primitiveMode;
 
+	unsigned int _vao = 0;
+	unsigned int _vbo = 0;
+	unsigned int _ebo = 0;
+
+	void InitGLObjects();
+	void ReleaseGLObjects();
+
 	uint m_maxDrawVertices;
 	uint m_maxDrawIndexes;
 };

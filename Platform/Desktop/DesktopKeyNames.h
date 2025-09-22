@@ -5,7 +5,7 @@
 #ifndef _GROM_PLATFORM_DESKTOPKEYNAMES_H
 #define _GROM_PLATFORM_DESKTOPKEYNAMES_H
 
-#include <GLFW/glfw3.h>
+#include "DesktopCommon.h"
 #include "nsLib/StrTools.h"
 
 class DesktopKeyNames {

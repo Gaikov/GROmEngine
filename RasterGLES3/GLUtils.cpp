@@ -26,14 +26,6 @@ static glError_t errors[] = {
 				GL_INVALID_OPERATION,
 				"The specified operation is not allowed in the current state."
 		},
-        /*{
-                GL_STACK_OVERFLOW,
-                "GL_STACK_OVERFLOW"
-        },
-        {
-                GL_STACK_UNDERFLOW,
-                "GL_STACK_UNDERFLOW"
-        },*/
 		{
 				GL_INVALID_FRAMEBUFFER_OPERATION,
 				"The command is trying to render to or read from the framebuffer while the currently bound framebuffer is not framebuffer complete (i.e. the return value from glCheckFramebufferStatus is not GL_FRAMEBUFFER_COMPLETE)."

@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include <GLES3/gl3.h>
+#include "glad/gles2.h"
 #include "Core/headers.h"
 #include "nsLib/nsLib.h"
 #include "nsLib/log.h"

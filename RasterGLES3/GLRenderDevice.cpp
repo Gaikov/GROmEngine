@@ -26,11 +26,25 @@ GLRenderDevice::GLRenderDevice() :
 {
 }
 
+static GLADapiproc getProcAddr(const char *name) {
+	return App_GetPlatform()->GetProcAddr(name);
+}
+
 bool GLRenderDevice::Init(void *wnd)
 {
 	LogPrintf(PRN_ALL, "*****************************************\n");
 	LogPrintf(PRN_ALL, "+       initializing GL renderer        +\n");
 	LogPrintf(PRN_ALL, "*****************************************\n");
+
+	if (!gladLoadGLES2(getProcAddr)) {
+		Sys_FatalError("Failed to initialize GLAD");
+		return false;
+	}
+
+	GLint stencilBits = 0;
+	glGetIntegerv(GL_STENCIL_BITS, &stencilBits);
+	Log::Info("stencil bits: %i", stencilBits);
+
 	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) {_queryRestart = true;});
 
 	if (!_modes.Init())
@@ -132,7 +146,7 @@ const rasterConfig_t *GLRenderDevice::GetCurrentConfig()
 
 void GLRenderDevice::SetColor(const float *c)
 {
-	glColor4f(c[0], c[1], c[2], c[3]);
+	//glColor4f(c[0], c[1], c[2], c[3]);
 }
 
 ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt)
@@ -167,13 +181,13 @@ void GLRenderDevice::TextureBind(ITexture *texture)
 
 void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2)
 {
-    glMatrixMode(GL_TEXTURE);
+    /*glMatrixMode(GL_TEXTURE);
     nsMatrix m;
     m.Identity();
     if (offs2) m.SetPos(offs2);
     if (scale2) m.Scale(scale2[0], scale2[1], 1);
     glLoadMatrixf(m);
-    glMatrixMode(GL_MODELVIEW);
+    glMatrixMode(GL_MODELVIEW);*/
 }
 
 IRenState *GLRenderDevice::StateLoad(const char *fileName)
@@ -240,9 +254,9 @@ void GLRenderDevice::EndScene()
 void GLRenderDevice::ApplyProjectionMatrix()
 {
 	nsMatrix projView = _viewMatrix * _projMatrix;
-	glMatrixMode(GL_PROJECTION);
+	/*glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(projView);
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_MODELVIEW);*/
 }
 
 void GLRenderDevice::LoadProjMatrix(const float *m)
@@ -259,12 +273,12 @@ void GLRenderDevice::LoadViewMartix(const float *m)
 
 void GLRenderDevice::LoadMatrix(const float *m)
 {
-	glLoadMatrixf(m);
+	//glLoadMatrixf(m);
 }
 
 void GLRenderDevice::MultMatrixLocal(const float *m)
 {
-	glMultMatrixf(m);
+	//glMultMatrixf(m);
 }
 
 void GLRenderDevice::DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height)

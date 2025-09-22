@@ -20,10 +20,9 @@ public:
 
 	void		ForceApply();
 	void		Apply( GLShader *prev );
-	void        ApplyTextureParams();
+	void        ApplyTextureParams() const;
 
 private:
-	GLenum		m_shadeMode;
 	bool		m_zEnable;
 	GLboolean	m_zWrite;
 
