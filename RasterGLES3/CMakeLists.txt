@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 3.10)
 project(RasterGL)
 
+message(STATUS "GLES 3.0:${CMAKE_SYSTEM_NAME}")
+
 if (WEB_ASM)
     message(STATUS "No gl linking for webasm")
 elseif (CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(OPENGL_LIBRARIES GL GLU)
-elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Android)
-    find_package(OpenGL REQUIRED)
-else()
+elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     set(OPENGL_LIBRARIES GLESv1_CM)
+else()
+    #find_library(GLESv2_LIB GLESv2)
+    #set(OPENGL_LIBRARIES GLESv2)
+    #message(STATUS "gles windows ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}")
+    find_package(OpenGL)
 endif()
 
 set(sources
@@ -30,6 +35,9 @@ set(sources
         renderTexture/GLRenderTexture.h
         renderTexture/GLRenderTexturesCache.cpp
         renderTexture/GLRenderTexturesCache.h
+        glad/gles2.c
+        glad/gles2.h
+        glad/khrplatform.h
 )
 
 include_directories(

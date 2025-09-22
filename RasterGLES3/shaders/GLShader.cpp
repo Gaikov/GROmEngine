@@ -19,7 +19,7 @@ struct renValueMap_t
 //---------------------------------------------------------
 // SetRenValue: 
 //---------------------------------------------------------
-static bool SetRenValue( const renValueMap_t *map, int count, const char *name, GLenum &value )
+static bool SetRenValue( const renValueMap_t *map, const int count, const char *name, GLenum &value )
 {
 	if ( !StrCheck( name ) ) return false;
 
@@ -31,18 +31,6 @@ static bool SetRenValue( const renValueMap_t *map, int count, const char *name, 
 		}
 	return false;	
 }
-
-//---------------------------------------------------------
-// gs_shadeMap: 
-//---------------------------------------------------------
-static const renValueMap_t	gs_shadeMap[] =
-{
-	{ "flat", GL_FLAT },
-	{ "gouraud", GL_SMOOTH},
-	{ "phong", GL_SMOOTH },
-};
-
-static const int gs_shadeCount = RENMAP_COUNT( gs_shadeMap );
 
 //---------------------------------------------------------
 // gs_blendMap: 
@@ -69,7 +57,6 @@ static const int gs_blendCount = RENMAP_COUNT( gs_blendMap );
 //---------------------------------------------------------
 GLShader::GLShader()
 {
-	m_shadeMode = GL_SMOOTH;
 	m_zEnable = true;
 	m_zWrite = GL_TRUE;
 	
@@ -108,13 +95,8 @@ bool GLShader::Reload()
 //---------------------------------------------------------
 void GLShader::ForceApply()
 {
-	glShadeModel(m_shadeMode);
-
 	GLUtils::SetState(GL_DEPTH_TEST, m_zEnable);
 	glDepthMask(m_zWrite);
-
-	GLUtils::SetState(GL_ALPHA_TEST, m_alphaTest);
-    glAlphaFunc(GL_LEQUAL, m_alphaRef);
 
 	GLUtils::SetState(GL_BLEND, m_alphaBlend);
     glBlendFunc(m_srcBlend, m_dstBlend);
@@ -137,19 +119,11 @@ void GLShader::Apply( GLShader *prev )
 		return;
 	}
 
-	if ( m_shadeMode != prev->m_shadeMode )
-		glShadeModel(m_shadeMode);
-	
 	if ( m_zEnable != prev->m_zEnable )
 		GLUtils::SetState(GL_DEPTH_TEST, m_zEnable);
 	if ( m_zWrite != prev->m_zWrite )
 		glDepthMask(m_zWrite);
 	
-	if ( m_alphaTest != prev->m_alphaTest )
-		GLUtils::SetState(GL_ALPHA_TEST, m_alphaTest);
-	if ( m_alphaRef != prev->m_alphaRef )
-		glAlphaFunc(GL_GEQUAL, m_alphaRef);
-
 	if ( m_alphaBlend != prev->m_alphaBlend )
 		GLUtils::SetState(GL_BLEND, m_alphaBlend);
 	if ( m_srcBlend != prev->m_srcBlend || m_dstBlend != prev->m_dstBlend )
@@ -171,8 +145,7 @@ void GLShader::Apply( GLShader *prev )
 //---------------------------------------------------------
 bool GLShader::Parse( script_state_t *ss )
 {
-	const char *str = ps_get_str( ss, "shade_mode", "gouraud" );
-	SetRenValue( gs_shadeMap, gs_shadeCount, str, m_shadeMode );
+	std::string str = ps_get_str( ss, "shade_mode", "gouraud" );
 
 	m_zEnable = ps_get_f( ss, "z_enable", 1 ) != 0;
 	m_zWrite = ps_get_f( ss, "z_write", 1 ) ? GL_TRUE : GL_FALSE;
@@ -183,10 +156,10 @@ bool GLShader::Parse( script_state_t *ss )
 	m_alphaRef /= 255;
 
 	str = ps_get_str( ss, "blend_src", "none" );
-	bool res = SetRenValue( gs_blendMap, gs_blendCount, str, m_srcBlend );
+	bool res = SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_srcBlend );
 	
 	str = ps_get_str( ss, "blend_dst", "none" );
-	res &= SetRenValue( gs_blendMap, gs_blendCount, str, m_dstBlend );
+	res &= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_dstBlend );
 	m_alphaBlend = res;
 
 	m_cullMode = ps_get_f( ss, "cull_mode", 1 ) != 0;
@@ -197,8 +170,7 @@ bool GLShader::Parse( script_state_t *ss )
 	return true;
 }
 
-void GLShader::ApplyTextureParams()
-{
+void GLShader::ApplyTextureParams() const {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordU);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordV);
     GL_CHECK_R("glTexParameteri",)

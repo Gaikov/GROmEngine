@@ -6,3 +6,7 @@
 ### Common
 - lighting
 - matricies
+
+### GLES 3
+- current color
+- texture matrix

@@ -23,6 +23,10 @@ bool DesktopPlatform::Init() {
     _useSoftInput->AddHandler(nsVar::NSVAR_CHANGED, _softInputChanged);
     UpdateSoftInput();
 
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
     if (!glfwInit()) {
         Sys_FatalError("Failed to init GLFW!\n");
         return false;
@@ -36,10 +40,6 @@ bool DesktopPlatform::Init() {
     glfwMakeContextCurrent(_wnd);
 
     _display = glfwGetPrimaryMonitor();
-
-    GLint stencilBits = 0;
-    glGetIntegerv(GL_STENCIL_BITS, &stencilBits);
-    Log::Info("stencil bits: %i", stencilBits);
 
     return true;
 }

@@ -5,7 +5,7 @@
 #ifndef _GROM_PLATFORM_DESKTOPKEYCODES_H
 #define _GROM_PLATFORM_DESKTOPKEYCODES_H
 
-#include <GLFW/glfw3.h>
+#include "DesktopCommon.h"
 
 #define NS_KEY_ENTER GLFW_KEY_ENTER
 #define NS_KEY_SPACE GLFW_KEY_SPACE
