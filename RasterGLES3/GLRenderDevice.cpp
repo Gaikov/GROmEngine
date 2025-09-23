@@ -181,15 +181,12 @@ void GLRenderDevice::TextureBind(ITexture *texture)
 	}
 }
 
-void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2)
-{
-    /*glMatrixMode(GL_TEXTURE);
+void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
     nsMatrix m;
     m.Identity();
     if (offs2) m.SetPos(offs2);
     if (scale2) m.Scale(scale2[0], scale2[1], 1);
-    glLoadMatrixf(m);
-    glMatrixMode(GL_MODELVIEW);*/
+	_defaultProgram.SetTextureMatrix(m);
 }
 
 IRenState *GLRenderDevice::StateLoad(const char *fileName)

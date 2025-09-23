@@ -17,12 +17,12 @@ public:
 
     static GLuint createShader(GLenum type, const char *source);
 
-    bool SetProjView(const float *projView) const;
-    bool SetModel(const float *model) const;
+    bool SetProjView(const float *matrix) const;
+    bool SetModel(const float *matrix) const;
+    bool SetTextureMatrix(const float *matrix) const;
     bool SetAlphaCutoff(float cutoff) const;
 
 private:
-
     std::string _vertexShader;
     std::string _fragmentShader;
     GLuint _program = 0;
@@ -31,6 +31,7 @@ private:
 
     GLint _projView = 0;
     GLint _model = 0;
+    GLint _texMat = 0;
     GLint _alphaCutoff = 0;
 
     bool GetUniformLocation(const char *name, GLint &u) const;
