@@ -28,15 +28,41 @@ bool nsGLProgram::Load() {
     glAttachShader(_program, _vs);
     glAttachShader(_program, _fs);
     glLinkProgram(_program);
-    GL_CHECK_R("glLinkProgram", false)
+    GL_CHECK_R("glLinkProgram", false);
 
-    _projView = glGetUniformLocation(_program, "uProjView");
-    GL_CHECK_R("glGetUniformLocation(uProjView)", false);
+    GLint linkOK = GL_FALSE;
+    glGetProgramiv(_program, GL_LINK_STATUS, &linkOK);
+    if (linkOK != GL_TRUE) {
+        GLint logLen = 0;
+        glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLen);
+        if (logLen > 1) {
+            std::string log(logLen, '\0');
+            GLsizei written = 0;
+            glGetProgramInfoLog(_program, logLen, &written, log.data());
+            Log::Error("Program link failed: %s", log.c_str());
+        } else {
+            Log::Error("Program link failed with no log.");
+        }
+        return false;
+    }
 
-    _model = glGetUniformLocation(_program, "uModel");
-    GL_CHECK_R("glGetUniformLocation(uModel)", false);
 
-    return true;
+    if (!GetUniformLocation("uProjView", _projView)) {
+        return false;
+    }
+
+    if (!GetUniformLocation("uModel", _model)) {
+        return false;
+    }
+
+    if (!GetUniformLocation("uAlphaCutoff", _alphaCutoff)) {
+        return false;
+    }
+
+    glUseProgram(_program);
+    GL_CHECK_R("glUseProgram", false);
+
+    return SetAlphaCutoff(0);
 }
 
 void nsGLProgram::Unload() {
@@ -79,20 +105,38 @@ GLuint nsGLProgram::createShader(const GLenum type, const char *filePath) {
     const GLuint shader = glCreateShader(type);
 
     glShaderSource(shader, 1, &source, nullptr);
-    glCompileShader(shader);
+    GL_CHECK_R("glShaderSource", 0);
 
+    glCompileShader(shader);
     g_pack.ReleaseFile(file);
 
     GL_CHECK_R("glCompileShader", 0);
     return shader;
 }
 
-void nsGLProgram::SetProjView(const float *projView) const {
+bool nsGLProgram::SetProjView(const float *projView) const {
     glUniformMatrix4fv(_projView, 1, GL_FALSE, projView);
-    GL_CHECK_R("glUniformMatrix4fv - SetProjView",);
+    GL_CHECK_R("glUniformMatrix4fv - SetProjView", false);
+    return true;
 }
 
-void nsGLProgram::SetModel(const float *model) const {
+bool nsGLProgram::SetModel(const float *model) const {
     glUniformMatrix4fv(_model, 1, GL_FALSE, model);
-    GL_CHECK_R("glUniformMatrix4fv - SetModel",);
+    GL_CHECK_R("glUniformMatrix4fv - SetModel", false);
+    return true;
+}
+
+bool nsGLProgram::SetAlphaCutoff(const float cutoff) const {
+    glUniform1f(_alphaCutoff, cutoff);
+    GL_CHECK_R("glUniform1f - SetAlphaCutoff", false);
+    return true;
+}
+
+bool nsGLProgram::GetUniformLocation(const char *name, GLint &u) const {
+    u = glGetUniformLocation(_program, name);
+    if (u == -1) {
+        Log::Error("Uniform location '%s'", name);
+        return false;
+    }
+    return true;
 }

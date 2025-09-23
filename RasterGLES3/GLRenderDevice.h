@@ -77,6 +77,7 @@ private:
 	bool             _queryRestart = false;
     GLDebug          _debug;
 	nsGLProgram		 _defaultProgram;
+	nsColor          _currentColor;
 
 private:
 	void ApplyProjectionMatrix();

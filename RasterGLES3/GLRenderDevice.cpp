@@ -148,7 +148,7 @@ const rasterConfig_t *GLRenderDevice::GetCurrentConfig()
 
 void GLRenderDevice::SetColor(const float *c)
 {
-	//glColor4f(c[0], c[1], c[2], c[3]);
+	_currentColor = c;
 }
 
 ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt)
@@ -362,7 +362,8 @@ void GLRenderDevice::VerticesRelease(IVertexBuffer *vb)
 
 void GLRenderDevice::VerticesDraw(IVertexBuffer *vb)
 {
-	auto glvb = dynamic_cast<GLVertexBuffer *>(vb);
+	const auto glvb = dynamic_cast<GLVertexBuffer *>(vb);
+	glvb->UseColor(_currentColor);
 	glvb->Draw();
 }
 
@@ -498,6 +499,7 @@ void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 		drawVerts[i] = v[i];
 	}
 
+	_quadBuff->UseColor(_currentColor);
 	_quadBuff->Draw();
 }
 

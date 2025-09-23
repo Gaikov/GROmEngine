@@ -212,6 +212,9 @@ struct IRenDevice
 	virtual void			LightEnable( int source, const nsVec3 &dir, const float c[4] ) = 0;
 	virtual void			LightDisable( int source ) = 0;
 	virtual void			SetLightAmbient( const float c[4] ) = 0;
+
+protected:
+	virtual ~IRenDevice() = default;
 };
 
 #endif //_RenDevice_H_
