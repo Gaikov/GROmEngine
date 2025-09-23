@@ -19,8 +19,9 @@ public:
 
     bool SetProjView(const float *matrix) const;
     bool SetModel(const float *matrix) const;
-    bool SetTextureMatrix(const float *matrix) const;
-    bool SetAlphaCutoff(float cutoff) const;
+    void SetTextureMatrix(const float *matrix) const;
+    void SetAlphaCutoff(float cutoff) const;
+    void SetHasTexture(bool hasTexture) const;
 
 private:
     std::string _vertexShader;
@@ -33,6 +34,7 @@ private:
     GLint _model = 0;
     GLint _texMat = 0;
     GLint _alphaCutoff = 0;
+    GLint _hasTexture = 0;
 
     bool GetUniformLocation(const char *name, GLint &u) const;
 };

@@ -15,6 +15,7 @@ public:
 	void Apply(GLShader *shader);
 
 	void ApplyTextureParams();
+	GLShader *GetCurrent() const { return _boundShader; }
 
 protected:
 	GLShader *AllocateResource(const char *id, int param) override;
