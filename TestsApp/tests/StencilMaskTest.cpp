@@ -77,6 +77,7 @@ bool nsStencilMaskTest::Init() {
 
 void nsStencilMaskTest::Release() {
     nsSoundDevice::Shared()->Device()->TrackPlay(nullptr);
+    _root.RemoveChildren();
 }
 
 void nsStencilMaskTest::Loop(float deltaTime) {

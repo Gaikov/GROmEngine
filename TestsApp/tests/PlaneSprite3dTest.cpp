@@ -26,5 +26,6 @@ void PlaneSprite3dTest::Draw()
 	BaseFunctional3dTest::Draw();
 	
 	g_renDev->TextureBind(_tex);
+	g_renDev->SetColor(nsColor::white);
 	g_renDev->DrawPlaneSprite(nsVec3(-0.5, 0, 0), nsVec3(0.5, 0, 0), 0.1, 5);
 }
