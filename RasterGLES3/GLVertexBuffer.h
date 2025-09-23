@@ -9,6 +9,7 @@
 #define VERTEXBUFFER_H_
 
 #include "GLCommon.h"
+#include "GLRenderDevice.h"
 #include "GLTexturesCache.h"
 
 class GLVertexBuffer : public IVertexBuffer
@@ -34,6 +35,7 @@ public:
 	void SetPos(int vertexIndex, float x, float y, float z);
 	void SetTex(int vertexIndex, float tu, float tv);
 	void SetIndex(int index, unsigned short vertexIndex);
+	void UseColor(const nsColor &color);
 
 private:
     GLTexturesCache *_texturesCache;
@@ -50,6 +52,7 @@ private:
 	unsigned int _vao = 0;
 	unsigned int _vbo = 0;
 	unsigned int _ebo = 0;
+	nsColor _color;
 
 	void InitGLObjects();
 	void ReleaseGLObjects();

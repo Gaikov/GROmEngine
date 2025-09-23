@@ -100,11 +100,11 @@ void GLVertexBuffer::Draw()
 	glBindVertexArray(_vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	const GLsizeiptr vertSize = static_cast<GLsizeiptr>(sizeof(vbVertex_t) * m_maxDrawVertices);
+	const auto vertSize = static_cast<GLsizeiptr>(sizeof(vbVertex_t) * m_maxDrawVertices);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, m_verts);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-	const GLsizeiptr idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * m_maxDrawIndexes);
+	const auto idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * m_maxDrawIndexes);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, idxSize, m_indexes);
 
 	// Enable/disable attributes depending on state
@@ -118,10 +118,11 @@ void GLVertexBuffer::Draw()
 		glEnableVertexAttribArray(ATTR_COLOR);
 	} else {
 		glDisableVertexAttribArray(ATTR_COLOR);
+		glVertexAttrib4fv(ATTR_COLOR, _color);
 	}
 
-	GLenum modes[] = {GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_LINES};
-	auto mode = modes[_primitiveMode];
+	constexpr GLenum modes[] = {GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_LINES};
+	const auto mode = modes[_primitiveMode];
 
 	glDrawElements(mode, static_cast<GLsizei>(m_maxDrawIndexes), GL_UNSIGNED_SHORT, nullptr);
 	GL_CHECK_R("glDrawElements",);
@@ -203,4 +204,8 @@ void GLVertexBuffer::SetPos(int vertexIndex, float x, float y, float z)
 void GLVertexBuffer::SetIndex(int index, unsigned short vertexIndex)
 {
 	m_indexes[index] = vertexIndex;
+}
+
+void GLVertexBuffer::UseColor(const nsColor &color) {
+	_color = color;
 }
