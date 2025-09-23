@@ -172,13 +172,12 @@ void GLRenderDevice::TextureRelease(ITexture *texture)
 	}
 }
 
-void GLRenderDevice::TextureBind(ITexture *texture)
-{
-	auto t = dynamic_cast<nsGLBaseTexture *>(texture);
-	if (_textures.BindTexture(t))
-	{
+void GLRenderDevice::TextureBind(ITexture *texture) {
+	const auto t = dynamic_cast<nsGLBaseTexture *>(texture);
+	if (_textures.BindTexture(t)) {
 		_shaders.ApplyTextureParams();
 	}
+	_defaultProgram.SetHasTexture(_textures.HasBoundTexture());
 }
 
 void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
@@ -204,6 +203,13 @@ void GLRenderDevice::StateApply(IRenState *state)
 {
 	auto shader = dynamic_cast<GLShader *>(state);
 	_shaders.Apply(shader);
+
+	auto s = _shaders.GetCurrent();
+	if (s->IsAlphaTest()) {
+		_defaultProgram.SetAlphaCutoff(s->GetAlphaCutoff());
+	} else {
+		_defaultProgram.SetAlphaCutoff(0);
+	}
 }
 
 void GLRenderDevice::ClearScene(uint flags)

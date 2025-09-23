@@ -166,12 +166,12 @@ void nsConsole::Draw()
 	DrawLine( str, vertPos, strlen( str ), nsColor::white );
 	DrawCursor( vertPos );
 
-    auto font = nsFontsCache::Shared()->SysFont();
+    const auto font = nsFontsCache::Shared()->SysFont();
 
 	//draw version
-	auto version = App_GetGame()->GetVersionInfo();
+	const auto version = App_GetGame()->GetVersionInfo();
 	nsVec2 size;
-	int length = strlen(version);
+	const int length = strlen(version);
 	font->GetSize(version, size, length);
 	size *= textScale;
 

@@ -12,15 +12,16 @@
 bool nsGLRenderTexture::InitGLExtensionsFBO() {
     Log::Info("Init GL extension: %s", FRAME_BUFFER_EXT_NAME);
     const std::string_view s = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
-    bool hasExt = s.find(FRAME_BUFFER_EXT_NAME) != std::string_view::npos || s.find(FRAME_BUFFER_EXT_NAME_DESK) != std::string_view::npos;
+    const bool hasExt = s.find(FRAME_BUFFER_EXT_NAME) != std::string_view::npos
+        || s.find(FRAME_BUFFER_EXT_NAME_DESK) != std::string_view::npos;
     if (!hasExt) {
         Log::Error("Can't find extension: %s", FRAME_BUFFER_EXT_NAME);
         return false;
     }
-    
-        GLint maxRbSize;
-        glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRbSize);
-        Log::Info("Max render buffer size: %i", maxRbSize);
+
+    GLint maxRbSize;
+    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRbSize);
+    Log::Info("Max render buffer size: %i", maxRbSize);
 
     return hasExt;
 }

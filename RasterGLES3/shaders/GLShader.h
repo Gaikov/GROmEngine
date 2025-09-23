@@ -22,6 +22,9 @@ public:
 	void		Apply( GLShader *prev );
 	void        ApplyTextureParams() const;
 
+	bool        IsAlphaTest() override { return m_alphaTest != 0; }
+	float		GetAlphaCutoff() const { return m_alphaRef; }
+
 private:
 	bool		m_zEnable;
 	GLboolean	m_zWrite;
@@ -40,7 +43,7 @@ private:
 
 private:
 	bool		Parse( script_state_t *ss );
-	bool        IsAlphaTest() override { return m_alphaTest != 0; }
+
 	bool	    IsAlphaBlend() override { return m_alphaBlend != 0; }
 };
 
