@@ -25,6 +25,8 @@ set(sources
         GLVertexBuffer.cpp
         shaders/GLShader.cpp
         shaders/GLShadersManager.cpp
+        shaders/GLProgram.cpp
+        shaders/GLProgram.h
         GLLightManager.cpp
         GLDisplayModes.cpp
         stencil/GLStencilState.cpp

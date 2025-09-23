@@ -12,6 +12,7 @@
 #include "GLDisplayModes.h"
 #include "GLDebug.h"
 #include "renderTexture/GLRenderTexturesCache.h"
+#include "shaders/GLProgram.h"
 #include "stencil/GLStencilManager.h"
 
 class GLVertexBuffer;
@@ -75,6 +76,7 @@ private:
 	nsMatrix         _viewMatrix;
 	bool             _queryRestart = false;
     GLDebug          _debug;
+	nsGLProgram		 _defaultProgram;
 
 private:
 	void ApplyProjectionMatrix();

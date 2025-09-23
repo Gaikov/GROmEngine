@@ -22,7 +22,8 @@ IRenDevice *GetRenDevice()
 GLRenderDevice::GLRenderDevice() :
 		_quadBuff(nullptr),
 		_projMatrix(1),
-		_viewMatrix(1)
+		_viewMatrix(1),
+		_defaultProgram("default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag")
 {
 }
 
@@ -83,24 +84,25 @@ bool GLRenderDevice::Init(void *wnd)
 	return PrepareOpenGL();
 }
 
-bool GLRenderDevice::PrepareOpenGL()
-{
-	if (!_modes.ApplyCurrentMode())
-	{
+bool GLRenderDevice::PrepareOpenGL() {
+	if (!_modes.ApplyCurrentMode()) {
+		return false;
+	}
+
+	if (!_defaultProgram.Bind()) {
 		return false;
 	}
 
 	glDepthFunc(GL_LEQUAL);
-    glClearColor(0, 0, 0, 0);
+	glClearColor(0, 0, 0, 0);
 
 	return true;
 }
 
-void GLRenderDevice::CleanupOpenGL()
-{
-	//TODO: destroy gl context
-    _shaders.Apply(nullptr);
-    _textures.BindTexture(nullptr);
+void GLRenderDevice::CleanupOpenGL() {
+	_shaders.Apply(nullptr);
+	_textures.BindTexture(nullptr);
+	_defaultProgram.Unload();
 }
 
 void GLRenderDevice::Release() {
@@ -254,9 +256,7 @@ void GLRenderDevice::EndScene()
 void GLRenderDevice::ApplyProjectionMatrix()
 {
 	nsMatrix projView = _viewMatrix * _projMatrix;
-	/*glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf(projView);
-	glMatrixMode(GL_MODELVIEW);*/
+	_defaultProgram.SetProjView(projView);
 }
 
 void GLRenderDevice::LoadProjMatrix(const float *m)
@@ -273,7 +273,7 @@ void GLRenderDevice::LoadViewMartix(const float *m)
 
 void GLRenderDevice::LoadMatrix(const float *m)
 {
-	//glLoadMatrixf(m);
+	_defaultProgram.SetModel(m);
 }
 
 void GLRenderDevice::MultMatrixLocal(const float *m)
