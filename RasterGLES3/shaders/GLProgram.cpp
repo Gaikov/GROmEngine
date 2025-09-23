@@ -55,6 +55,10 @@ bool nsGLProgram::Load() {
         return false;
     }
 
+    if (!GetUniformLocation("uTexMat", _texMat)) {
+        return false;
+    }
+
     if (!GetUniformLocation("uAlphaCutoff", _alphaCutoff)) {
         return false;
     }
@@ -62,7 +66,18 @@ bool nsGLProgram::Load() {
     glUseProgram(_program);
     GL_CHECK_R("glUseProgram", false);
 
-    return SetAlphaCutoff(0);
+    nsMatrix m;
+    m.Identity();
+
+    if (!SetTextureMatrix(m)) {
+        return false;
+    }
+
+    if (!SetAlphaCutoff(0)) {
+        return false;
+    }
+
+    return true;
 }
 
 void nsGLProgram::Unload() {
@@ -114,15 +129,21 @@ GLuint nsGLProgram::createShader(const GLenum type, const char *filePath) {
     return shader;
 }
 
-bool nsGLProgram::SetProjView(const float *projView) const {
-    glUniformMatrix4fv(_projView, 1, GL_FALSE, projView);
+bool nsGLProgram::SetProjView(const float *matrix) const {
+    glUniformMatrix4fv(_projView, 1, GL_FALSE, matrix);
     GL_CHECK_R("glUniformMatrix4fv - SetProjView", false);
     return true;
 }
 
-bool nsGLProgram::SetModel(const float *model) const {
-    glUniformMatrix4fv(_model, 1, GL_FALSE, model);
+bool nsGLProgram::SetModel(const float *matrix) const {
+    glUniformMatrix4fv(_model, 1, GL_FALSE, matrix);
     GL_CHECK_R("glUniformMatrix4fv - SetModel", false);
+    return true;
+}
+
+bool nsGLProgram::SetTextureMatrix(const float *matrix) const {
+    glUniformMatrix4fv(_texMat, 1, GL_FALSE,  matrix);
+    GL_CHECK_R("glUniformMatrix4fv - SetTextureMatrix", false);
     return true;
 }
 
