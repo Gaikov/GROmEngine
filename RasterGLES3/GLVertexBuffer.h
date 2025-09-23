@@ -1,22 +1,21 @@
 /*
  * GLVertexBuffer.h
  *
- *  Created on: 12.09.2011
+ *  Created on: 12.09.2025
  *      Author: roman
  */
 
-#ifndef VERTEXBUFFER_H_
-#define VERTEXBUFFER_H_
+#pragma once
 
 #include "GLCommon.h"
 #include "GLRenderDevice.h"
 #include "GLTexturesCache.h"
 
-class GLVertexBuffer : public IVertexBuffer
+class GLVertexBuffer final : public IVertexBuffer
 {
 public:
 	GLVertexBuffer(GLTexturesCache *cache, uint numVertices, uint numIndexes, bool useColor);
-	~GLVertexBuffer();
+	~GLVertexBuffer() override;
 
 	void SetValidVertices(uint count) override;
 	uint GetValidVertices() override;
@@ -36,6 +35,7 @@ public:
 	void SetTex(int vertexIndex, float tu, float tv);
 	void SetIndex(int index, unsigned short vertexIndex);
 	void UseColor(const nsColor &color);
+	void Invalidate();
 
 private:
     GLTexturesCache *_texturesCache;
@@ -60,5 +60,3 @@ private:
 	uint m_maxDrawVertices;
 	uint m_maxDrawIndexes;
 };
-
-#endif /* VERTEXBUFFER_H_ */

@@ -17,7 +17,6 @@ else()
 endif()
 
 set(sources
-        GLDebug.cpp
         GLRenderDevice.cpp
         GLTexture.cpp
         GLTexturesCache.cpp

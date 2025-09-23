@@ -57,9 +57,7 @@ bool GLRenderDevice::Init(void *wnd)
 	LogPrintf(PRN_ALL, "GL Renderer: %s\n", glGetString(GL_RENDERER));
 	LogPrintf(PRN_ALL, "GL Version: %s\n", glGetString(GL_VERSION));
 
-	_debug.Init(&_textures);
-
-	_quadBuff = new GLVertexBuffer(&_textures, 4, 6, false);
+	_quadBuff = dynamic_cast<GLVertexBuffer *>(VerticesCreate(4, 6, true, false));
 
 	// 3 |-------| 2
 	//   |      /|
@@ -112,8 +110,6 @@ void GLRenderDevice::Release() {
 
 	CleanupOpenGL();
 
-	delete _quadBuff;
-
 	Log::Info("...releasing shaders");
 	_shaders.ReleaseAll();
 
@@ -123,7 +119,11 @@ void GLRenderDevice::Release() {
 	Log::Info("...releasing render textures");
 	_renderTextures.Release();
 
-	_debug.Release();
+	Log::Info("...releasing vertex buffers: %i", _allocatedVBS.size());
+	for (const auto vb : _allocatedVBS) {
+		delete vb;
+	}
+	_allocatedVBS.clear();
 
 	delete g_shared;
 	g_shared = nullptr;
@@ -352,15 +352,21 @@ void GLRenderDevice::DrawCharScaled(float x, float y, rchar_t *ch, float sx, flo
 	DrawQuad(charVerts);
 }
 
-IVertexBuffer *GLRenderDevice::VerticesCreate(uint vertsCount, uint indexCount, bool dynamic, bool useColors)
-{
-	return new GLVertexBuffer(&_textures, vertsCount, indexCount, useColors);
+IVertexBuffer *GLRenderDevice::VerticesCreate(uint vertsCount, uint indexCount, bool dynamic, bool useColors) {
+	const auto vb = new GLVertexBuffer(&_textures, vertsCount, indexCount, useColors);
+	_allocatedVBS.push_back(vb);
+	return vb;
 }
 
 void GLRenderDevice::VerticesRelease(IVertexBuffer *vb)
 {
 	auto glvb = dynamic_cast<GLVertexBuffer *>(vb);
-	delete glvb;
+
+	const auto it = std::find(_allocatedVBS.begin(), _allocatedVBS.end(), vb);
+	if (it != _allocatedVBS.end()) {
+		_allocatedVBS.erase(it);
+		delete glvb;
+	}
 }
 
 void GLRenderDevice::VerticesDraw(IVertexBuffer *vb)
@@ -510,6 +516,9 @@ void GLRenderDevice::InvalidateResources() {
     _queryRestart = true;
     _textures.UnloadFromGPU();
 	_renderTextures.UnloadFromGPU();
+	for (const auto vb : _allocatedVBS) {
+		vb->Invalidate();
+	}
 }
 
 IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {
