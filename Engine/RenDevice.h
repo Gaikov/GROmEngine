@@ -121,6 +121,9 @@ struct IVertexBuffer
 	//������ � ���������
 	virtual word*		GetReadIndices() = 0;	//��� ������
 	virtual word*		GetWriteIndices() = 0;	//! ������ ��� ������
+
+protected:
+	virtual ~IVertexBuffer() = default;
 };
 
 //---------------------------------------------------------

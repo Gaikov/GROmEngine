@@ -10,7 +10,6 @@
 #include "shaders/GLShadersManager.h"
 #include "GLLightManager.h"
 #include "GLDisplayModes.h"
-#include "GLDebug.h"
 #include "renderTexture/GLRenderTexturesCache.h"
 #include "shaders/GLProgram.h"
 #include "stencil/GLStencilManager.h"
@@ -75,9 +74,9 @@ private:
 	nsMatrix         _projMatrix;
 	nsMatrix         _viewMatrix;
 	bool             _queryRestart = false;
-    GLDebug          _debug;
 	nsGLProgram		 _defaultProgram;
 	nsColor          _currentColor;
+	std::vector<GLVertexBuffer*> _allocatedVBS;
 
 private:
 	void ApplyProjectionMatrix();
