@@ -3,7 +3,7 @@
 #include "nsLib/log.h"
 #include "Core/Config.h"
 #include "GameApp.h"
-#include "Console.h"
+#include "console/Console.h"
 #include "Platform.h"
 
 nsInput		g_inp;

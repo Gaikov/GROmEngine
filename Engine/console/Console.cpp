@@ -26,7 +26,7 @@ static const nsVec2		textScale( 0.5f, 1.0f );
 static const nsColor	cLine( 0.5, 0.5, 1, 1 );
 
 #define	CON_LINE_OFFS	5
-
+#define MAX_CHUNK_SIZE (1024 * 1024)
 
 //---------------------------------------------------------
 // exec_f:
@@ -73,12 +73,15 @@ void exec_f( int argc, const char *argv[] )
 	g_pack.ReleaseFile( file );
 }
 
+#define MAX_CHUNK_SIZE (1024 * 1024)
+
 //---------------------------------------------------------
 // nsConsole::nsConsole:
 //---------------------------------------------------------
-nsConsole::nsConsole() : m_line(128),
+nsConsole::nsConsole() : _input(128),
                          _renState(nullptr),
-                         tex_offs{0, 0} {
+                         tex_offs{0, 0}, _buffer(MAX_CHUNK_SIZE) {
+	_lines.reserve(1024);
 	m_tex = nullptr;
 	m_bActive = false;
 	_scrollLines = 0;
@@ -154,7 +157,7 @@ void nsConsole::Draw() {
 	} //*/
 
 	//draw input line
-	const char *str = m_line.GetLine();
+	const char *str = _input.GetLine();
 	DrawLine(str, vertPos, nsColor::white);
 	DrawCursor(vertPos);
 
@@ -191,7 +194,7 @@ void nsConsole::DrawCursor( float y )
         auto font = nsFontsCache::Shared()->SysFont();
 		float	lineSize[2];
 		font->GetSize( "_", lineSize, 0 );
-		float	pos[2] = { textMargin + lineSize[0] * textScale.x * m_line.GetCursorPos(), y };
+		float	pos[2] = { textMargin + lineSize[0] * textScale.x * _input.GetCursorPos(), y };
 		font->Draw( "_", pos, textScale, nsColor::white, 0 );
 	}
 }
@@ -237,7 +240,11 @@ void nsConsole::LogPrint(LogLevel level, const char *str) {
 			end = str + strlen(str);
 		}
 
-		std::string_view text(str, end - str);
+		const int len = end - str;
+		char *text = _buffer.Allocate(len + 1);
+		strncpy(text, str, len);
+		text[len] = 0;
+
 		_lines.emplace_back(text, level);
 		if (_scrollLines) {
 			_scrollLines++;
@@ -313,7 +320,7 @@ void nsConsole::Activate(bool active)
 void nsConsole::OnChar(char ch)
 {
 	if ( iscntrl( ch ) || ch == '~' || ch == '`' ) return;
-	m_line.TypeChar( ch );
+	_input.TypeChar( ch );
 }
 
 //---------------------------------------------------------
@@ -324,25 +331,25 @@ void nsConsole::OnKeyDown( int key, bool rept )
 	switch ( key )
 	{
 	case NS_KEY_BACKSPACE:
-		m_line.KeyBackspace();
+		_input.KeyBackspace();
 		break;
 	case NS_KEY_DELETE:
-		m_line.KeyDelete();
+		_input.KeyDelete();
 		break;
 	case NS_KEY_LEFT:
-		m_line.KeyLeft();
+		_input.KeyLeft();
 		break;
 	case NS_KEY_RIGHT:
-		m_line.KeyRight();
+		_input.KeyRight();
 		break;
 	case NS_KEY_ESCAPE:
 		ClearLine();
 		break;
 	case NS_KEY_UP:
-		m_line.SetLine( m_hyst.GetPrev() );
+		_input.SetLine( m_hyst.GetPrev() );
 		break;
 	case NS_KEY_DOWN:
-		m_line.SetLine( m_hyst.GetCurr() );
+		_input.SetLine( m_hyst.GetCurr() );
 		break;
 	case NS_KEY_PAGE_UP:
 		_scrollLines ++;
@@ -356,22 +363,22 @@ void nsConsole::OnKeyDown( int key, bool rept )
 		break;
 	case NS_KEY_TAB:
 		{
-			if ( !strlen( m_line.GetLine() ) ) return;
-			const char	*str = g_cfg->CompleteLine( m_line.GetLine() );
-			if ( str ) m_line.SetLine( str );
+			if ( !strlen( _input.GetLine() ) ) return;
+			const char	*str = g_cfg->CompleteLine( _input.GetLine() );
+			if ( str ) _input.SetLine( str );
 		}
 		break;
 
 	case NS_KEY_ENTER:
 		{
-			size_t len = strlen( m_line.GetLine() );
+			size_t len = strlen( _input.GetLine() );
 			if ( len > 0 )
 			{
-				Log::Info( "> %s", m_line.GetLine() );
-				nsString line = m_line.GetLine();
+				Log::Info( "> %s", _input.GetLine() );
+				nsString line = _input.GetLine();
 				m_hyst.Add( line );
 
-				g_cfg->ExecLine( m_line.GetLine() );
+				g_cfg->ExecLine( _input.GetLine() );
 				
 				ClearLine();
 			}
@@ -390,7 +397,7 @@ void nsConsole::OnMouseWheel(float delta) {
 //---------------------------------------------------------
 void nsConsole::ClearLine()
 {
-	m_line.SetLine( "" );
+	_input.SetLine( "" );
 }
 
 void nsConsole::clear_f(int argc, const char **argv) {

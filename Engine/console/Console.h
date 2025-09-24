@@ -6,6 +6,7 @@
 #ifndef	_Console_H_
 #define	_Console_H_
 
+#include "TextBuffer.h"
 #include "nsLib/StrTools.h"
 #include "nsLib/CycleList.h"
 #include "nsLib/color.h"
@@ -27,23 +28,21 @@ public:
 	void			Clear();
 	void			Draw();
 
-
-
 protected:
 	class ConsoleLine {
 	public:
-		std::string	text;
+		char *text;
 		LogLevel	level;
 
-		ConsoleLine(const std::string_view &str, const LogLevel level) : text(str), level(level) {}
+		ConsoleLine(char *str, const LogLevel level) : text(str), level(level) {}
 
 		operator const char*() const {
-			return text.c_str();
+			return text;
 		}
 	};
 
 	std::vector<ConsoleLine>	_lines;
-	nsEditString	m_line;
+	nsEditString	_input;
 	int				_scrollLines;
 
 	ITexture		*m_tex;
@@ -55,6 +54,7 @@ protected:
 	nsCycleList<nsString, 10>	m_hyst;
 	std::mutex					_logMutex;
 	std::map<LogLevel, nsColor> _colors;
+	nsTextBuffer _buffer;
 
 protected:
 	void			DrawCursor( float y );
