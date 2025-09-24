@@ -27,14 +27,24 @@ public:
 	void			Clear();
 	void			Draw();
 
-protected:
-	enum { CON_TEXT_SIZE = 32768 };
+
 
 protected:
-	char			m_text[CON_TEXT_SIZE];
+	class ConsoleLine {
+	public:
+		std::string	text;
+		LogLevel	level;
+
+		ConsoleLine(const std::string_view &str, const LogLevel level) : text(str), level(level) {}
+
+		operator const char*() const {
+			return text.c_str();
+		}
+	};
+
+	std::vector<ConsoleLine>	_lines;
 	nsEditString	m_line;
-	int				m_nLineUp;
-	char			*m_pPrint;
+	int				_scrollLines;
 
 	ITexture		*m_tex;
 	IRenState		*_renState;
@@ -44,15 +54,14 @@ protected:
 
 	nsCycleList<nsString, 10>	m_hyst;
 	std::mutex					_logMutex;
+	std::map<LogLevel, nsColor> _colors;
 
 protected:
 	void			DrawCursor( float y );
 
-	char*			SkipLines( char *from, int count );
 	void			ClearLine();
 
-	char*			LineFromEnd( char *end );
-	void			DrawLine( const char *line, float y, int len, const nsColor &c );
+	void			DrawLine( const char *line, float y, const nsColor &c );
 
 	void	        OnKeyUp( int key ) override {}
 	void	        OnKeyDown( int key, bool rept ) override;

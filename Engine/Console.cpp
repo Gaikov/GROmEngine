@@ -76,14 +76,17 @@ void exec_f( int argc, const char *argv[] )
 //---------------------------------------------------------
 // nsConsole::nsConsole:
 //---------------------------------------------------------
-nsConsole::nsConsole() : m_text{},
-                         m_line(128),
-                         m_pPrint(nullptr),
+nsConsole::nsConsole() : m_line(128),
                          _renState(nullptr),
                          tex_offs{0, 0} {
 	m_tex = nullptr;
 	m_bActive = false;
-	m_nLineUp = 0;
+	_scrollLines = 0;
+
+	_colors[PRN_DEV] = nsColor(0.5, 0.5, 1, 1);
+	_colors[PRN_ALL] = nsColor(1, 1, 1, 1);
+	_colors[PRN_WARNING] = nsColor::yellow;
+	_colors[PRN_ERROR] = nsColor::red;
 
 	ClearUnsafe();
 	Log::Shared()->AddPolicy(this);
@@ -101,9 +104,8 @@ nsConsole::~nsConsole()
 //---------------------------------------------------------
 // nsConsole::DrawContent:
 //---------------------------------------------------------
-void nsConsole::Draw()
-{
-	if ( !m_bActive ) return;
+void nsConsole::Draw() {
+	if (!m_bActive) return;
 
 	const auto renDev = nsRenDevice::Shared()->Device();
 
@@ -111,62 +113,52 @@ void nsConsole::Draw()
 	tex_offs[1] = tex_offs[0];
 
 	auto [width, height] = nsAppUtils::GetClientSize();
-	float	h_con = float(height) / 2.0f;
+	float conHeight = float(height) / 2.0f;
 
-    nsSpriteDesc ds;
-    ds.pos = nsVec2(0, h_con);
-    ds.size = nsVec2((float) width, h_con);
-    ds.tex = m_tex;
-    ds.color = nsColor::gray;
-    if (m_tex) {
-        ds.tex1 = nsVec2(0, 0);
+	nsSpriteDesc ds;
+	ds.pos = nsVec2(0, conHeight);
+	ds.size = nsVec2((float) width, conHeight);
+	ds.tex = m_tex;
+	ds.color = nsColor::gray;
+	if (m_tex) {
+		ds.tex1 = nsVec2(0, 0);
 
-        int tw, th;
-        m_tex->GetSize(tw, th);
-        ds.tex2 = nsVec2(width / (float)tw, h_con / (float)th);
-    }
+		int tw, th;
+		m_tex->GetSize(tw, th);
+		ds.tex2 = nsVec2(width / (float) tw, conHeight / (float) th);
+	}
 	renDev->StateApply(_renState);
-    renDev->TextureTranform(tex_offs, nullptr);
-    RX_DrawSprite(ds);
-    renDev->TextureTranform(nullptr, nullptr);
+	renDev->TextureTranform(tex_offs, nullptr);
+	RX_DrawSprite(ds);
+	renDev->TextureTranform(nullptr, nullptr);
 
-	RX_DrawLine( nsVec2( 0, h_con ), nsVec2( float(width), h_con ), cLine );
-	
+	RX_DrawLine(nsVec2(0, conHeight), nsVec2(float(width), conHeight), cLine);
+
 	//draw text
 	std::lock_guard lock(_logMutex);
-	int	line_count = int((h_con - CON_LINE_OFFS)  / con_line_step->Value());
+	const auto numVisibleLines = static_cast<int>((conHeight - CON_LINE_OFFS) / con_line_step->Value());
 
-	const float *c = m_nLineUp ? nsColor::yellow : nsColor::white;
+	auto &c = _scrollLines ? nsColor(1, 1, 0.8f, 1) : nsColor::white;
 
-	char	*line = m_pPrint;
-	if ( *(line - 1) == '\n' ) line -= 2;
-	
-	line = SkipLines( line, m_nLineUp );
-	
-	float	vertPos = (float)h_con + 5.0f;
-	float	y = vertPos + con_line_step->Value();
-	for ( int i = 0; i < line_count; i++ )
-	{
-		char	*prev = line;
-		line = LineFromEnd( line );
-		if ( !line )
-		{
-			DrawLine( m_text, y, prev - m_text - 1, c );
-			break;
+	const float vertPos = conHeight + 5.0f;
+	float y = vertPos + con_line_step->Value();
+	for (int i = 0; i < numVisibleLines; i++) {
+		const auto lineIndex = static_cast<int>(_lines.size() - 1) - _scrollLines - i;
+		if (lineIndex >= 0) {
+			const auto &line = _lines[lineIndex];
+
+			DrawLine(line, y, c * _colors[line.level]);
+
+			y += con_line_step->Value();
 		}
-
-		DrawLine( line, y, prev - line + 1, c );
-		line -= 2;
-		
-		y += con_line_step->Value();
-	}//*/
+	} //*/
 
 	//draw input line
 	const char *str = m_line.GetLine();
-	DrawLine( str, vertPos, strlen( str ), nsColor::white );
-	DrawCursor( vertPos );
+	DrawLine(str, vertPos, nsColor::white);
+	DrawCursor(vertPos);
 
-    const auto font = nsFontsCache::Shared()->SysFont();
+	const auto font = nsFontsCache::Shared()->SysFont();
 
 	//draw version
 	const auto version = App_GetGame()->GetVersionInfo();
@@ -175,7 +167,7 @@ void nsConsole::Draw()
 	font->GetSize(version, size, length);
 	size *= textScale;
 
-	nsVec2 pos((float)width - size.x - textMargin, vertPos);
+	const nsVec2 pos(width - size.x - textMargin, vertPos);
 	font->Draw(version, pos, textScale, nsColor::white, length);
 }
 
@@ -205,39 +197,6 @@ void nsConsole::DrawCursor( float y )
 }
 
 //---------------------------------------------------------
-// nsConsole::SkipLines:
-//---------------------------------------------------------
-char* nsConsole::SkipLines( char *from, int count)
-{
-	for ( int i = 0; i < count; i++ )
-	{
-		from = LineFromEnd( from );
-		if ( !from ) return 0;
-
-		from -= 2;
-	}
-
-	return from;
-}
-
-//---------------------------------------------------------
-// nsConsole::LineFromEnd:
-//---------------------------------------------------------
-char* nsConsole::LineFromEnd(char *end)
-{
-	while ( end > m_text )
-	{
-		if ( *end == '\n' )
-		{
-			return end + 1;
-		}
-		end --;
-	}
-
-	return 0;
-}
-
-//---------------------------------------------------------
 // nsConsole::LoadRes:
 //---------------------------------------------------------
 bool nsConsole::OnInit()
@@ -259,35 +218,36 @@ bool nsConsole::OnInit()
 //---------------------------------------------------------
 // nsConsole::FreeRes:
 //---------------------------------------------------------
-void nsConsole::OnRelease()
-{
+void nsConsole::OnRelease() {
+	Log::Info("shutdown console");
+	g_renDev->TextureRelease(m_tex);
+
 	nsSubSystem::OnRelease();
-	Log::Info( "shutdown console" );
-	if ( m_tex ) g_renDev->TextureRelease( (ITexture*)m_tex );
 }
 
 //---------------------------------------------------------
 // nsConsole::print:
 //---------------------------------------------------------
-void nsConsole::LogPrint(LogLevel level, const char *str)
-{
+void nsConsole::LogPrint(LogLevel level, const char *str) {
 	std::lock_guard lock(_logMutex);
 
-	int	rmn = CON_TEXT_SIZE - (m_pPrint - m_text) - 1;
-	int	len = strlen( str );
-
-	if ( len >= rmn ) ClearUnsafe();
-
-	strcat( m_pPrint, str );
-	m_pPrint += len;
-
-	if ( m_nLineUp )
-	{
-		while ( *str )
-		{
-			if ( *str == '\n' ) m_nLineUp ++;
-			str ++;
+	while (*str) {
+		const char* end = strchr(str, '\n');
+		if (!end) {
+			end = str + strlen(str);
 		}
+
+		std::string_view text(str, end - str);
+		_lines.emplace_back(text, level);
+		if (_scrollLines) {
+			_scrollLines++;
+		}
+
+		if (!*end) {
+			break;
+		}
+
+		str = end + 1;
 	}
 }
 
@@ -296,8 +256,7 @@ void nsConsole::LogPrint(LogLevel level, const char *str)
 //---------------------------------------------------------
 void nsConsole::ClearUnsafe()
 {
-	m_text[0] = 0;
-	m_pPrint = m_text;
+	_lines.clear();
 }
 
 void nsConsole::Clear() {
@@ -308,14 +267,10 @@ void nsConsole::Clear() {
 //---------------------------------------------------------
 // nsConsole::DrawLine:
 //---------------------------------------------------------
-void nsConsole::DrawLine( const char *line, float y, int len, const nsColor &c )
-{
-	if ( len > 0 )
-	{
-        auto font = nsFontsCache::Shared()->SysFont();
-		float pos[2] = { textMargin, y };
-		font->Draw( line, pos, textScale, c, len );
-	}
+void nsConsole::DrawLine(const char *line, float y, const nsColor &c) {
+	const auto font = nsFontsCache::Shared()->SysFont();
+	float pos[2] = {textMargin, y};
+	font->Draw(line, pos, textScale, c);
 }
 
 //---------------------------------------------------------
@@ -390,14 +345,14 @@ void nsConsole::OnKeyDown( int key, bool rept )
 		m_line.SetLine( m_hyst.GetCurr() );
 		break;
 	case NS_KEY_PAGE_UP:
-		m_nLineUp ++;
+		_scrollLines ++;
 		break;
 	case NS_KEY_PAGE_DOWN:
-		m_nLineUp --;
-		if ( m_nLineUp < 0 ) m_nLineUp = 0;
+		_scrollLines --;
+		if ( _scrollLines < 0 ) _scrollLines = 0;
 		break;
 	case NS_KEY_END:
-		m_nLineUp = 0;
+		_scrollLines = 0;
 		break;
 	case NS_KEY_TAB:
 		{
@@ -426,8 +381,8 @@ void nsConsole::OnKeyDown( int key, bool rept )
 }
 
 void nsConsole::OnMouseWheel(float delta) {
-    m_nLineUp += (int)delta;
-    if ( m_nLineUp < 0 ) m_nLineUp = 0;
+    _scrollLines += (int)delta;
+    if ( _scrollLines < 0 ) _scrollLines = 0;
 }
 
 //---------------------------------------------------------

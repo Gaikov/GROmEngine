@@ -7,7 +7,7 @@
 #include "nsLib/StrTools.h"
 
 nsParticlesRoundRenderer::nsParticlesRoundRenderer() {
-    _buffer = new nsQuadsBuffer(nsRenDevice::Shared()->Device(), 1000, true);
+    _buffer = new nsQuadsBuffer(nsRenDevice::Shared()->Device(), 2000, true);
 }
 
 nsParticlesRoundRenderer::~nsParticlesRoundRenderer() {

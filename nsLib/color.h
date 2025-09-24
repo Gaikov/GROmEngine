@@ -59,7 +59,7 @@ struct nsColor
     {
     	return color;
     }
-	
+
 	inline nsColor& operator = ( const float c[4] )
 	{
 		if ( !c ) 
@@ -129,6 +129,12 @@ void nsColor::operator *= ( const nsColor &other )
 	g *= other.g;
 	b *= other.b;
 	a *= other.a;
+}
+
+inline nsColor operator * ( const nsColor &a, const nsColor &b ) {
+	nsColor res = a;
+	res *= b;
+	return res;
 }
 
 
