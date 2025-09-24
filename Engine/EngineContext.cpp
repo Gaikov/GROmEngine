@@ -6,7 +6,7 @@
 #include "Core/sys.h"
 #include "RenManager.h"
 #include "GameApp.h"
-#include "Console.h"
+#include "console/Console.h"
 #include "input/SoftKeyboard.h"
 
 bool nsEngineContext::OnInit() {

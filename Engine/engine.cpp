@@ -13,7 +13,7 @@
 #include "GameApp.h"
 #include "RenManager.h"
 #include "RenAux.h"
-#include "Console.h"
+#include "console/Console.h"
 #include "Input.h"
 #include "SndManager.h"
 #include "Anim.h"
