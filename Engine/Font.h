@@ -63,7 +63,7 @@ private:
     IRenDevice  *_device;
 	nsQuadsBuffer *_renBuffer;
 
-	void DrawCharScaled(float x, float y, const rchar_t *rch, float sx, float sy);
+	void DrawCharScaled(float x, float y, const rchar_t *rch, float sx, float sy, const nsColor &color) const;
 
     bool LoadGROmFont(const nsFilePath &filePath);
     bool LoadBitmapFont(const nsFilePath &filePath);

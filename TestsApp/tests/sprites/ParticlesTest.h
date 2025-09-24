@@ -20,7 +20,7 @@ public:
     bool OnPointerMove(float x, float y, int pointerId) override;
     void OnKeyDown(int key, bool rept) override;
 
-    static nsTextLabel* CreateLabel(const char *text, nsVisualContainer2d *container);
+    nsTextLabel* CreateLabel(const char *text, nsVisualContainer2d *container) const;
     bool OnPointerDown(float x, float y, int pointerId) override;
     bool OnPointerUp(float x, float y, int pointerId) override;
 

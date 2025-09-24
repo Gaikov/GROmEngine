@@ -322,36 +322,6 @@ void GLRenderDevice::DrawLinedSprite(float x1, float y1, float x2, float y2, flo
 	DrawQuad(spr);
 }
 
-void GLRenderDevice::DrawCharScaled(float x, float y, rchar_t *ch, float sx, float sy)
-{
-	if (!ch)
-	{
-		return;
-	}
-
-	float      size_x       = ch->size[0] * sx;
-	float      size_y       = ch->size[1] * sy;
-	float      posX         = x + ch->offs[0] * sx;
-	float      posY         = y + ch->offs[1] * sy;
-	nsVec3     zero;
-	dword      c            = 0xffffffff;
-	vbVertex_t charVerts[4] =
-			           {
-					           {nsVec3(posX, posY, 0),                   zero, c, ch->coord[0],
-							                                                                       ch->coord[1] +
-							                                                                       ch->tex_size[1]},
-					           {nsVec3(size_x + posX, posY, 0),          zero, c, ch->coord[0] +
-					                                                              ch->tex_size[0], ch->coord[1] +
-					                                                                               ch->tex_size[1]},
-					           {nsVec3(size_x + posX, size_y + posY, 0), zero, c, ch->coord[0] +
-					                                                              ch->tex_size[0], ch->coord[1]},
-					           {nsVec3(posX, size_y + posY,
-					                   0),                               zero, c, ch->coord[0],    ch->coord[1]}//*/
-			           };
-
-	DrawQuad(charVerts);
-}
-
 IVertexBuffer *GLRenderDevice::VerticesCreate(uint vertsCount, uint indexCount, bool dynamic, bool useColors) {
 	const auto vb = new GLVertexBuffer(&_textures, vertsCount, indexCount, useColors);
 	_allocatedVBS.push_back(vb);

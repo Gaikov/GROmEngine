@@ -274,14 +274,13 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 
 	_renBuffer->Clear();
 
-	g_renDev->SetColor(color );
 	g_renDev->TextureBind( _pages[0] );
 	auto	prev_tex = _pages[0];
 
 	if ( !len ) len = (int)strlen( str );
 
 	float	x = pos[0];
-	float	s05 = scale[0] * 0.5f;
+	const float	s05 = scale[0] * 0.5f;
 	while ( *str && len )
 	{
 		auto	chr = (unsigned char)*str;
@@ -304,7 +303,7 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 				{
 					outX = x + (fixedWidth - c->r.size[0]) * s05;
 				}
-				DrawCharScaled( outX, pos[1], &c->r, scale[0], scale[1] );
+				DrawCharScaled( outX, pos[1], &c->r, scale[0], scale[1], color);
 			}
 
             if (fixedWidth > 0) {
@@ -321,7 +320,7 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 	_renBuffer->Draw();
 }
 
-void nsFont::DrawCharScaled(const float x, const float y, const rchar_t *rch, const float sx, const float sy) {
+void nsFont::DrawCharScaled(const float x, const float y, const rchar_t *rch, const float sx, const float sy, const nsColor &color) const {
 	if (!rch) {
 		return;
 	}
@@ -332,7 +331,7 @@ void nsFont::DrawCharScaled(const float x, const float y, const rchar_t *rch, co
 	const nsVec2 uvStart = {rch->coord[0], rch->coord[1]};
 	const nsVec2 uvEnd = {rch->coord[0] + rch->tex_size[0], rch->coord[1] + rch->tex_size[1]};
 
-	_renBuffer->AddQuad(pos, {}, size, nsColor::white, uvStart, uvEnd);
+	_renBuffer->AddQuad(pos, {}, size, color, uvStart, uvEnd);
 }
 
 //-----------------------------------------------------
@@ -341,6 +340,8 @@ void nsFont::DrawCharScaled(const float x, const float y, const rchar_t *rch, co
 void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float c1[4], float scale2[2], const float c2[4], int len )
 {
 	if ( !str || _pages.empty() ) return;
+
+	_renBuffer->Clear();
 
 	g_renDev->TextureBind( _pages[0] );
 	void	*prev_tex = _pages[0];
@@ -359,6 +360,8 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 				{
 					g_renDev->TextureBind( c->tex );
 					prev_tex = c->tex;
+					_renBuffer->Draw();
+					_renBuffer->Clear();
 				}
 
 				float	cx = x + c->r.size[0] * scale[0] * 0.5f;
@@ -367,10 +370,8 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 				cx = cx - c->r.size[0] * scale2[0] * 0.5f;
 				cy = cy - c->r.size[1] * scale2[1] * 0.5f;
 
-				g_renDev->SetColor( c2 );
-				DrawCharScaled( cx, cy, &c->r, scale2[0], scale2[1] );
-				g_renDev->SetColor( c1 );
-				DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
+				DrawCharScaled( cx, cy, &c->r, scale2[0], scale2[1], c2 );
+				DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1], c1 );
 			}
 			x += c->xadvance * scale[0];
 		}
@@ -378,9 +379,8 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 		str++;
 		len--;
 	}
+	_renBuffer->Draw();
 }
-
-
 
 //------------------------------------
 // GetSize:
@@ -419,10 +419,10 @@ void nsFont::GetBounds( const char *str, nsRect &bounds) {
 void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const float c1[4], float lerp )
 {
 	if ( !str ) return;
+	_renBuffer->Clear();
 
 	nsColor	col = c1;
 
-	g_renDev->SetColor( col );
 	g_renDev->TextureBind( _pages[0] );
 	void *prev_tex = _pages[0];
 
@@ -440,18 +440,18 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 				{
 					g_renDev->TextureBind( c->tex );
 					prev_tex = c->tex;
+					_renBuffer->Draw();
+					_renBuffer->Clear();
 				}
 
 				if ( lerp >= 1 )
 				{
-					g_renDev->SetColor( c1 );
-					DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
+					DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1], c1 );
 				}
 				else if ( lerp > 0 )
 				{
 					col[3] = lerp;
-					g_renDev->SetColor( col );
-					DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
+					DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1], col );
 				}
 				lerp -= 1.0;
 			}
@@ -461,6 +461,7 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 
 		str++;
 	}
+	_renBuffer->Draw();
 }
 
 

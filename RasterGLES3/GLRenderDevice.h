@@ -41,7 +41,7 @@ public:
 	void LoadMatrix(const float *m) override;
 	void MultMatrixLocal(const float *m) override;
 	void DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height) override;
-	void DrawCharScaled(float x, float y, rchar_t *ch, float sx, float sy) override;
+
 	IVertexBuffer *VerticesCreate(uint vertsCount, uint indexCount, bool dynamic, bool useColors) override;
 	void VerticesRelease(IVertexBuffer *vb) override;
 	void VerticesDraw(IVertexBuffer *vb) override;

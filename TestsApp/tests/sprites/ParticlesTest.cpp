@@ -141,9 +141,10 @@ bool nsParticlesTest::OnPointerMove(float x, float y, int pointerId) {
     return true;
 }
 
-nsTextLabel *nsParticlesTest::CreateLabel(const char *text, nsVisualContainer2d *container) {
-    auto label = new nsTextLabel();
+nsTextLabel *nsParticlesTest::CreateLabel(const char *text, nsVisualContainer2d *container) const {
+    const auto label = new nsTextLabel();
     label->text = text;
+    label->renState = _device->StateLoad("default/rs/gui_clamp.txt");
     label->origin.scale = {0.5, 1};
     container->AddChild(label);
     return label;
