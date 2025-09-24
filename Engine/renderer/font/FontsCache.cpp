@@ -3,10 +3,12 @@
 //
 
 #include "FontsCache.h"
+
+#include "RenManager.h"
 #include "nsLib/log.h"
 
 nsFont *nsFontsCache::AllocateResource(const char *resourceName, int param) {
-    auto font = new nsFont();
+    const auto font = new nsFont(_renBuffer);
     if (!font->Load(resourceName)) {
         delete font;
         return nullptr;
@@ -24,6 +26,8 @@ bool nsFontsCache::OnInit() {
         return false;
     }
 
+    _renBuffer = new nsQuadsBuffer(nsRenDevice::Shared()->Device(), 10000, true);
+
     _sysFont = LoadFont("default/sysfont.txt");
     if (!_sysFont) {
         Log::Error("Can't load default font!");
@@ -34,6 +38,7 @@ bool nsFontsCache::OnInit() {
 
 void nsFontsCache::OnRelease() {
     ReleaseAll();
+    delete _renBuffer;
     nsSubSystem::OnRelease();
 }
 
