@@ -198,7 +198,6 @@ struct IRenDevice
 	//========= 2d graphics ==========
 	//pictures
 	virtual void			DrawLinedSprite( float x1, float y1, float x2, float y2, float width, float height ) = 0;
-	virtual void			DrawCharScaled( float x, float y, rchar_t *ch, float sx, float sy ) = 0;
 
 	//========= 3d graphics ==========
 	virtual IVertexBuffer*  VerticesCreate(uint vertsCount, uint indexCount, bool dynamic = false, bool useColors = false) = 0;
