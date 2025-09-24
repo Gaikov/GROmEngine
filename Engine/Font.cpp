@@ -11,7 +11,8 @@
 #include "nsLib/StrTools.h"
 #include "RenManager.h"
 
-nsFont::nsFont() {
+
+nsFont::nsFont(nsQuadsBuffer *renBuffer) : _renBuffer(renBuffer) {
     _device = nsRenDevice::Shared()->Device();
 }
 
@@ -20,7 +21,7 @@ nsFont::~nsFont() {
 }
 
 //---------------------------------------------------------
-// nsFont::Load: 
+// nsFont::Load:
 //---------------------------------------------------------
 bool nsFont::Load( const char *fileName )
 {
@@ -52,9 +53,9 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 		LogPrintf( PRN_ALL, "WARNING: can't parsing font!\n" );
 		return false;
 	}
-	
+
 	//-------------------------------------------
-	if ( ps_block_begin( ss, "textures" ) 
+	if ( ps_block_begin( ss, "textures" )
 		&& ps_var_begin( ss, "tex" ) )
 	{
 		do
@@ -66,19 +67,19 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 		while ( ps_var_next( ss ) );
 		ps_block_end( ss );
 	}
-	
+
 	if ( _pages.empty() )
 	{
 		LogPrintf( PRN_ALL, "WARNING: font textures not loaded!\n" );
 		return false;
 	}
-	
+
 	//-------------------------------------------
 	int	i = 0;
     _lineHeight = 0;
 	float	min_h = 0;
 	float	max_h = 0;
-	if ( ps_block_begin( ss, "chars_data" ) 
+	if ( ps_block_begin( ss, "chars_data" )
 		&& ps_block_begin( ss, "char" ) )
 	{
         bool	init_max = true;
@@ -88,7 +89,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 			int	code;
 			ps_var_begin( ss, "code" );
 			code = (int)ps_var_f( ss );
-			
+
 			int	tex_id;
 			ps_var_begin( ss, "tex_id" );
 			tex_id = (int)ps_var_f( ss );
@@ -97,26 +98,26 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 			if ( code >= 0 && code < MAX_CHARS && tex )
 			{
 				ch[code].tex = tex;
-				
+
 				ps_var_begin( ss, "coord" );
 				ps_var_2f( ss, ch[code].r.coord );
-				
+
 				ps_var_begin( ss, "size" );
 				ps_var_2f( ss, ch[code].r.size );
-				
+
 				ps_var_begin( ss, "offs" );
 				ps_var_2f( ss, ch[code].r.offs );
-				
+
 				int	w = 1, h = 1;
 				if ( ch[code].tex )
 					ch[code].tex->GetSize( w, h );
-				
+
 				ch[code].r.tex_size[0] = ch[code].r.size[0] / float(w);
 				ch[code].r.tex_size[1] = ch[code].r.size[1] / float(h);
 				ch[code].r.coord[0] /= float(w);
 				ch[code].r.coord[1] /= float(h);
                 ch[code].xadvance = ch[code].r.offs[0] + ch[code].r.size[0];
-				
+
 				if ( init_max )
 				{
 					min_h = ch[code].r.offs[1];
@@ -129,7 +130,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 					if ( max_h < ch[code].r.offs[1] + ch[code].r.size[1] )
 						max_h = ch[code].r.offs[1] + ch[code].r.size[1];
 				}
-				
+
 				i++;
 			}
 		}
@@ -139,7 +140,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 			s.r.offs[1] -= min_h;
         }
 	}
-	
+
 	if ( !i )
 	{
 		LogPrintf( PRN_ALL, "WARNING: no chars data present!\n" );
@@ -255,7 +256,7 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
 }
 
 //------------------------------------
-// Free: 
+// Free:
 //------------------------------------
 void nsFont::Free() {
     for (auto t: _pages) {
@@ -270,7 +271,9 @@ void nsFont::Free() {
 void nsFont::Draw(const char *str, float pos[], float scale[], const float color[4], int len, float fixedWidth, float letterSpace)
 {
 	if ( !str || _pages.empty() ) return;
-	
+
+	_renBuffer->Clear();
+
 	g_renDev->SetColor(color );
 	g_renDev->TextureBind( _pages[0] );
 	auto	prev_tex = _pages[0];
@@ -292,14 +295,16 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 				{
 					g_renDev->TextureBind( c->tex );
 					prev_tex = c->tex;
+					_renBuffer->Draw();
+					_renBuffer->Clear();
 				}
-				
+
 				float	outX = x;
 				if ( fixedWidth > 0 )
 				{
 					outX = x + (fixedWidth - c->r.size[0]) * s05;
 				}
-				g_renDev->DrawCharScaled( outX, pos[1], &c->r, scale[0], scale[1] );
+				DrawCharScaled( outX, pos[1], &c->r, scale[0], scale[1] );
 			}
 
             if (fixedWidth > 0) {
@@ -312,6 +317,22 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 		str++;
 		len--;
 	}
+
+	_renBuffer->Draw();
+}
+
+void nsFont::DrawCharScaled(const float x, const float y, const rchar_t *rch, const float sx, const float sy) {
+	if (!rch) {
+		return;
+	}
+
+	const nsVec2 size(rch->size[0] * sx, rch->size[1] * sy);
+	const nsVec2 pos(x + rch->offs[0] * sx, y + rch->offs[1] * sy);
+
+	const nsVec2 uvStart = {rch->coord[0], rch->coord[1]};
+	const nsVec2 uvEnd = {rch->coord[0] + rch->tex_size[0], rch->coord[1] + rch->tex_size[1]};
+
+	_renBuffer->AddQuad(pos, {}, size, nsColor::white, uvStart, uvEnd);
 }
 
 //-----------------------------------------------------
@@ -320,7 +341,7 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float c1[4], float scale2[2], const float c2[4], int len )
 {
 	if ( !str || _pages.empty() ) return;
-	
+
 	g_renDev->TextureBind( _pages[0] );
 	void	*prev_tex = _pages[0];
 
@@ -339,17 +360,17 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 					g_renDev->TextureBind( c->tex );
 					prev_tex = c->tex;
 				}
-				
+
 				float	cx = x + c->r.size[0] * scale[0] * 0.5f;
 				float	cy = pos[1] + c->r.size[1] * scale[1] * 0.5f;
 
 				cx = cx - c->r.size[0] * scale2[0] * 0.5f;
 				cy = cy - c->r.size[1] * scale2[1] * 0.5f;
-				
+
 				g_renDev->SetColor( c2 );
-				g_renDev->DrawCharScaled( cx, cy, &c->r, scale2[0], scale2[1] );
+				DrawCharScaled( cx, cy, &c->r, scale2[0], scale2[1] );
 				g_renDev->SetColor( c1 );
-				g_renDev->DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
+				DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
 			}
 			x += c->xadvance * scale[0];
 		}
@@ -362,7 +383,7 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 
 
 //------------------------------------
-// GetSize: 
+// GetSize:
 //------------------------------------
 void nsFont::GetSize( const char *str, float size[], int len )
 {
@@ -400,7 +421,7 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 	if ( !str ) return;
 
 	nsColor	col = c1;
-	
+
 	g_renDev->SetColor( col );
 	g_renDev->TextureBind( _pages[0] );
 	void *prev_tex = _pages[0];
@@ -424,27 +445,27 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 				if ( lerp >= 1 )
 				{
 					g_renDev->SetColor( c1 );
-					g_renDev->DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
+					DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
 				}
 				else if ( lerp > 0 )
 				{
 					col[3] = lerp;
 					g_renDev->SetColor( col );
-					g_renDev->DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
+					DrawCharScaled( x, pos[1], &c->r, scale[0], scale[1] );
 				}
 				lerp -= 1.0;
 			}
 
 			x += c->xadvance * scale[0];
 		}
-		
+
 		str++;
 	}
 }
 
 
 //------------------------------------
-// GetRChar: 
+// GetRChar:
 //------------------------------------
 rchar_t* nsFont::GetRChar( uchar c )
 {
@@ -457,7 +478,7 @@ const fchar_t * nsFont::GetSymbolInfo(uchar code) const {
 }
 
 //------------------------------------
-// GetCharDesc: 
+// GetCharDesc:
 //------------------------------------
 void nsFont::GetCharDesc( uchar c, char_desc_t &cd )
 {

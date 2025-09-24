@@ -9,6 +9,7 @@
 #include "Engine/RenDevice.h"
 #include "nsLib/math/Rect.h"
 #include "nsLib/FilePath.h"
+#include "renderer/QuadsBuffer.h"
 
 typedef struct
 {
@@ -41,8 +42,8 @@ private:
 	fchar_t		ch[MAX_CHARS] = {};
 
 private:
-    nsFont();
-    virtual     ~nsFont();
+    nsFont(nsQuadsBuffer *renBuffer);
+	~nsFont();
     bool		Load( const char *filename );
 	void		Free();
 
@@ -60,6 +61,9 @@ public:
 
 private:
     IRenDevice  *_device;
+	nsQuadsBuffer *_renBuffer;
+
+	void DrawCharScaled(float x, float y, const rchar_t *rch, float sx, float sy);
 
     bool LoadGROmFont(const nsFilePath &filePath);
     bool LoadBitmapFont(const nsFilePath &filePath);

@@ -13,12 +13,13 @@ class nsFontsCache final : public nsSubSystem<nsFontsCache>, protected Resources
 public:
     nsFont* LoadFont(const char *fileName);
 
-    inline nsFont* SysFont() {
+    nsFont* SysFont() const {
         return _sysFont;
     }
 
 protected:
-    nsFont  *_sysFont;
+    nsFont  *_sysFont = nullptr;
+    nsQuadsBuffer *_renBuffer = nullptr;
 
     void OnRelease() override;
     nsFont *AllocateResource(const char *resourceName, int param) override;

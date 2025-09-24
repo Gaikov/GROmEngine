@@ -4,13 +4,12 @@
 
 #include "QuadsBuffer.h"
 #include "RenDevice.h"
-#include "nsLib/log.h"
 
-nsQuadsBuffer::nsQuadsBuffer(IRenDevice *dev, uint maxQuads, bool useColors) :
-        _maxQuads(maxQuads),
-        _dev(dev) {
-    uint numVerts = maxQuads * 4;
-    uint numIndexes = maxQuads * 6;
+nsQuadsBuffer::nsQuadsBuffer(IRenDevice *dev, const uint maxQuads, const bool useColors) :
+        _dev(dev),
+        _maxQuads(maxQuads) {
+    const uint numVerts = maxQuads * 4;
+    const uint numIndexes = maxQuads * 6;
 
     _vb = dev->VerticesCreate(numVerts, numIndexes, true, useColors);
     _numQuads = 0;
@@ -22,7 +21,7 @@ bool nsQuadsBuffer::AddQuad(const nsVec2 &p,
                             const nsColor &c,
                             const nsVec2 &uvStart,
                             const nsVec2 &uvEnd,
-                            float angle) {
+                            const float angle) {
     if (_numQuads >= _maxQuads) {
         //Log::Warning("Can't add another quad: %i", _numQuads);
         return false;
