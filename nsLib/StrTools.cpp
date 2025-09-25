@@ -256,6 +256,11 @@ nsString operator + ( const nsString &s1, const char *s2 )
 	return res;
 }
 
+nsString & nsString::operator=(const std::string_view &str) {
+	CopyFrom(str.data(), str.size());
+	return *this;
+}
+
 bool nsString::operator == (const nsString &str) const
 {
 	return *this == (const char*)str;

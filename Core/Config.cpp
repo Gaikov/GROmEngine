@@ -186,39 +186,33 @@ void nsConfig::SaveConfig(const char *fileName, bool forceFile) {
 //---------------------------------------------------------
 const char* nsConfig::CompleteLine( const char* line )
 {
-	char	*outLine = nullptr;
-	int		len = strlen( line );
-	assert( len < nsString::MAX_SIZE );
+	Log::Info("Searching var/command: '%s'...", line);
+	char *outLine = nullptr;
+	const int len = strlen(line);
+	assert(len < nsString::MAX_SIZE);
 
-	//���� ���������� �� �����
-	auto	*var = FindVar( line );
-	if ( var ) return var->m_name;
+	const auto *var = FindVar(line);
+	if (var) return var->m_name;
 
-	//���� ������� �� �����
-	cmdDesc_t	*cmd = m_cmdHash.GetData( line );
-	if ( cmd ) return cmd->name;
+	cmdDesc_t *cmd = m_cmdHash.GetData(line);
+	if (cmd) return cmd->name;
 
-	int	refCount = 0;
-	//���� ������ �� �����, ������� ���������� � ������� �� �������
-	for ( var = m_varList; var; var = var->m_next )
-	{
-		if ( strncmp( var->m_name, line, len ) == 0 )
-		{
-			refCount ++;
+	int refCount = 0;
+	for (var = m_varList; var; var = var->m_next) {
+		if (strstr(var->m_name, line)) {
+			refCount++;
 			outLine = var->m_name;
-			LogPrintf( PRN_ALL, " %s\n", outLine );
+			LogPrintf(PRN_ALL, " %s\n", outLine);
 		}
 	}
-	
+
 	//������� ������� �� ������� � �������
 	m_cmdHash.FetchBegin();
-	while ( (cmd = m_cmdHash.FetchNext()) )
-	{
-		if ( strncmp( cmd->name, line, len ) == 0 )
-		{
-			refCount ++;
+	while ((cmd = m_cmdHash.FetchNext())) {
+		if (strstr(cmd->name, line)) {
+			refCount++;
 			outLine = cmd->name;
-			LogPrintf( PRN_ALL, " %s\n", outLine );
+			LogPrintf(PRN_ALL, " %s\n", outLine);
 		}
 	}
 	m_cmdHash.FetchEnd();
