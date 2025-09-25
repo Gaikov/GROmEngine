@@ -16,7 +16,8 @@ enum LogLevel
 
 struct ILogListener
 {
-	virtual void LogPrint(LogLevel level, const char *str) = 0; //TODO: add print level
+	virtual ~ILogListener() = default;
+	virtual void LogPrint(LogLevel level, const char *str) = 0;
 };
 
 void LogPrintf(LogLevel prnLevel, const char *fmt, ...);

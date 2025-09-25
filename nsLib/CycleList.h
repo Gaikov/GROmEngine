@@ -10,8 +10,7 @@ template <class T, int count>
 class nsCycleList
 {
 public:
-	nsCycleList()
-	{
+	nsCycleList() : m_min(0) {
 		m_count = count;
 		m_max = 0;
 		m_curr = 0;
