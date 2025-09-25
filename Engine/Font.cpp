@@ -468,22 +468,20 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 //------------------------------------
 // GetRChar:
 //------------------------------------
-rchar_t* nsFont::GetRChar( uchar c )
-{
-	if ( ch[c].tex ) return &ch[c].r;
+rchar_t *nsFont::GetRChar(const uchar c) {
+	if (ch[c].tex) return &ch[c].r;
 	return nullptr;
 }
 
-const fchar_t * nsFont::GetSymbolInfo(uchar code) const {
+const fchar_t *nsFont::GetSymbolInfo(const uchar code) const {
 	return &ch[code];
 }
 
 //------------------------------------
 // GetCharDesc:
 //------------------------------------
-void nsFont::GetCharDesc( uchar c, char_desc_t &cd )
-{
-	if ( !ch[c].tex ) return;
+void nsFont::GetCharDesc(uchar c, char_desc_t &cd) const {
+	if (!ch[c].tex) return;
 	cd.width = ch[c].r.size[0];
 	cd.height = ch[c].r.size[1];
 	cd.offs_x = ch[c].r.offs[0];

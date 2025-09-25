@@ -57,7 +57,7 @@ public:
     void        GetBounds( const char *str, nsRect &bounds);
 	rchar_t*	GetRChar( uchar ch );
 	const fchar_t*	GetSymbolInfo( uchar code ) const;
-	void		GetCharDesc( uchar ch, char_desc_t &cd );
+	void		GetCharDesc( uchar ch, char_desc_t &cd ) const;
 
 private:
     IRenDevice  *_device;

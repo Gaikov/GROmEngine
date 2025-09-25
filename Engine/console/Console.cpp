@@ -23,7 +23,7 @@ nsVar	*con_enable;
 
 static float			textMargin = 5.0f;
 static const nsVec2		textScale( 0.5f, 1.0f );
-static const nsColor	cLine( 0.5, 0.5, 1, 1 );
+static const nsColor	cLine( 1, .9f, 0, 1 );
 
 #define	CON_LINE_OFFS	5
 #define MAX_CHUNK_SIZE (1024 * 1024)
@@ -122,7 +122,6 @@ void nsConsole::Draw() {
 	ds.pos = nsVec2(0, conHeight);
 	ds.size = nsVec2((float) width, conHeight);
 	ds.tex = m_tex;
-	ds.color = nsColor::gray;
 	if (m_tex) {
 		ds.tex1 = nsVec2(0, 0);
 
