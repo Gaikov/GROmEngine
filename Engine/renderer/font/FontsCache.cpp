@@ -28,7 +28,7 @@ bool nsFontsCache::OnInit() {
 
     _renBuffer = new nsQuadsBuffer(nsRenDevice::Shared()->Device(), 10000, true);
 
-    _sysFont = LoadFont("default/sysfont.txt");
+    _sysFont = LoadFont("default/sys-font.fnt");
     if (!_sysFont) {
         Log::Error("Can't load default font!");
         return false;

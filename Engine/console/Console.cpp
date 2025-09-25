@@ -22,7 +22,7 @@ nsVar	*con_line_step;
 nsVar	*con_enable;
 
 static float			textMargin = 5.0f;
-static const nsVec2		textScale( 0.5f, 1.0f );
+static const nsVec2		textScale( 1, 1 );
 static const nsColor	cLine( 1, .9f, 0, 1 );
 
 #define	CON_LINE_OFFS	5
@@ -86,7 +86,7 @@ nsConsole::nsConsole() : _input(128),
 	m_bActive = false;
 	_scrollLines = 0;
 
-	_colors[PRN_DEV] = nsColor(0.5, 0.5, 1, 1);
+	_colors[PRN_DEV] = nsColor(0.5, 0.9, 1, 1);
 	_colors[PRN_ALL] = nsColor(1, 1, 1, 1);
 	_colors[PRN_WARNING] = nsColor::yellow;
 	_colors[PRN_ERROR] = nsColor::red;
@@ -157,7 +157,7 @@ void nsConsole::Draw() {
 
 	//draw input line
 	const char *str = _input.GetLine();
-	DrawLine(str, vertPos, nsColor::white);
+	DrawLine(str, vertPos, nsColor(0.5, 1, 0.5, 1));
 	DrawCursor(vertPos);
 
 	const auto font = nsFontsCache::Shared()->SysFont();
@@ -170,7 +170,7 @@ void nsConsole::Draw() {
 	size *= textScale;
 
 	const nsVec2 pos(width - size.x - textMargin, vertPos);
-	font->Draw(version, pos, textScale, nsColor::white, length);
+	font->Draw(version, pos, textScale, nsColor::yellow, length);
 }
 
 //---------------------------------------------------------
@@ -351,14 +351,17 @@ void nsConsole::OnKeyDown( int key, bool rept )
 		_input.SetLine( m_hyst.GetCurr() );
 		break;
 	case NS_KEY_PAGE_UP:
-		_scrollLines ++;
+		_scrollLines += 5;
 		break;
 	case NS_KEY_PAGE_DOWN:
-		_scrollLines --;
+		_scrollLines -= 5;
 		if ( _scrollLines < 0 ) _scrollLines = 0;
 		break;
+	case NS_KEY_HOME:
+		_input.KeyHome();
+		break;
 	case NS_KEY_END:
-		_scrollLines = 0;
+		_input.KeyEnd();
 		break;
 	case NS_KEY_TAB:
 		{
