@@ -50,6 +50,7 @@ void TestGameApp::RegisterTests() {
     Log::Warning("warning test message: %i", 2);
     Log::Error("error test message: %i", 3);
     Log::Debug("debug test message: %i", 4);
+    Log::Debug("Test\n\nMultilines\nin the console");
 }
 
 void TestGameApp::Release() {
