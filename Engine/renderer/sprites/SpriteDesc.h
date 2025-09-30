@@ -28,6 +28,8 @@ struct nsSpriteDesc
     nsSpriteDesc& ResetSize();
     nsSpriteDesc& ComputeCenter();
     void GetBounds(nsRect &rect) const;
+	void FlipY();
+	void FlipX();
 
     void Draw(IRenDevice *dev) const;
 
