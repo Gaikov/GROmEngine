@@ -43,3 +43,11 @@ void nsSpriteDesc::GetBounds(nsRect &rect) const {
     rect.width = size.x;
     rect.height = size.y;
 }
+
+void nsSpriteDesc::FlipY() {
+    std::swap(tex1.y, tex2.y);
+}
+
+void nsSpriteDesc::FlipX() {
+    std::swap(tex1.x, tex2.x);
+}
