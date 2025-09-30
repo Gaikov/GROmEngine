@@ -72,6 +72,17 @@ bool nsGLRenderTexture::Bind() {
     return true;
 }
 
+void nsGLRenderTexture::EnsureSize(const int width, const int height) {
+    if (_width == width && _height == height) {
+        return;
+    }
+    Log::Info("...resize render texture: %ix%i", width, height);
+    UnloadFromGPU();
+    _width = width;
+    _height = height;
+    UploadToGPU();
+}
+
 bool nsGLRenderTexture::UploadToGPU() {
     UnloadFromGPU();
 
@@ -113,7 +124,7 @@ bool nsGLRenderTexture::UploadToGPU() {
 
 void nsGLRenderTexture::UnloadFromGPU() {
     if (_fbo) {
-        Log::Info("Release render texture: %ix%i", _width, _height);
+        Log::Info("...release render texture: %ix%i", _width, _height);
 
         glDeleteFramebuffers(1, &_fbo);
         _fbo = 0;

@@ -129,13 +129,15 @@ protected:
 //---------------------------------------------------------
 // ITexture: 
 //---------------------------------------------------------
-struct ITexture
-{
+struct ITexture {
+	virtual void GetSize(int &width, int &height) = 0;
+
+protected:
 	virtual ~ITexture() = default;
-	virtual void GetSize( int &width, int &height ) = 0;
 };
 
 struct IRenderTexture : public ITexture {
+	virtual void EnsureSize(int width, int height) = 0;
 };
 
 //---------------------------------------------------------
