@@ -177,7 +177,7 @@ void nsConfig::SaveConfig(const char *fileName, bool forceFile) {
     for (nsVar *var = m_varList; var; var = var->m_next) {
         if ((var->m_flags & GVF_SAVABLE || gc_savevars->Bool())
             && !(var->m_flags & GVF_INTERNAL))
-            out->Printf("%s \"%s\"\n", var->m_name, var->String());
+            out->Printf("%s \"%s\"\n", var->GetName(), var->String());
     }
 }
 
@@ -187,21 +187,21 @@ void nsConfig::SaveConfig(const char *fileName, bool forceFile) {
 const char* nsConfig::CompleteLine( const char* line )
 {
 	Log::Info("Searching var/command: '%s'...", line);
-	char *outLine = nullptr;
+	const char *outLine = nullptr;
 	const int len = strlen(line);
 	assert(len < nsString::MAX_SIZE);
 
 	const auto *var = FindVar(line);
-	if (var) return var->m_name;
+	if (var) return var->GetName();
 
 	cmdDesc_t *cmd = m_cmdHash.GetData(line);
 	if (cmd) return cmd->name;
 
 	int refCount = 0;
 	for (var = m_varList; var; var = var->m_next) {
-		if (strstr(var->m_name, line)) {
+		if (strstr(var->GetName(), line)) {
 			refCount++;
-			outLine = var->m_name;
+			outLine = var->GetName();
 			LogPrintf(PRN_ALL, " %s\n", outLine);
 		}
 	}
@@ -285,14 +285,11 @@ nsVar* nsConfig::RegVar( const char* varName, const char* defValue, uint flags )
 	m_varList = var;
 	
 	if ( (flags & GVF_INTERNAL) ) return var;
-	
-	const char* str;
-	str = GetConfigValue( varName, GetDefaultConfig() );
+
+	const char *str = GetConfigValue(varName, GetDefaultConfig());
 	if ( str )
 	{
-		if ( var->m_defValue )
-			my_free( var->m_defValue );
-		var->m_defValue = my_strdup( str );
+		var->m_defValue = str;
 		var->SetDefault();
 	}
 	
@@ -309,7 +306,7 @@ nsVar* nsConfig::FindVar( const char* varName )
 {
 	for ( nsVar *var = m_varList; var; var = var->m_next )
 	{
-		if ( StrEqual( var->m_name, varName ) )
+		if ( StrEqual( var->GetName(), varName ) )
 			return var;
 	}
 	return nullptr;
@@ -347,7 +344,7 @@ bool nsConfig::ExecLine( const char* cmdLine )
 	{
 		if ( args.ArgCount() < 2 )
 		{
-			LogPrintf( PRN_ALL, "%s = %s (default: %s)\n", var->m_name, var->String(), var->m_defValue );
+			LogPrintf( PRN_ALL, "%s = %s (default: %s)\n", var->GetName(), var->String(), var->GetDefaultString() );
 		}
 		else if ( (var->m_flags & GVF_INTERNAL) || (var->m_flags & GVF_READONLY) )
 			LogPrintf( PRN_ALL, "WARNING: read only variable!\n" );

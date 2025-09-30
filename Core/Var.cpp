@@ -14,21 +14,10 @@ nsVar::nsVar( const char* name, const char* defValue, uint flags ) :
 	m_next( nullptr )
 {
 	assert( name != nullptr && defValue != nullptr );
-	m_name = my_strdup( name );
-	m_defValue = my_strdup( defValue );
-	m_currValue = my_strdup( defValue );
-	m_value = (float)atof( m_currValue );
+	m_name = name;
+	m_defValue = defValue;
 	m_flags = flags;
-}
-
-//-----------------------------------------------------
-//  nsVar::~nsVar:  
-//-----------------------------------------------------
-nsVar::~nsVar()
-{
-	if ( m_name ) my_free( m_name );
-	if ( m_defValue ) my_free( m_defValue );
-	if ( m_currValue ) my_free( m_currValue );
+	SetDefault();
 }
 
 //-----------------------------------------------------
@@ -52,9 +41,9 @@ void nsVar::SetString( const char* str )
     }
 
 	if ( !str ) str = "";
-	my_free( m_currValue );
-	m_currValue = my_strdup( str );
-	m_value = (float)atof( m_currValue );
+
+	m_currValue = str;
+	m_value = (float)atof( String() );
     Emmit(nsBaseEvent(NSVAR_CHANGED));
 }
 
@@ -63,7 +52,7 @@ void nsVar::SetString( const char* str )
 //-----------------------------------------------------
 float nsVar::GetDefaultValue()
 {
-	return (float)atof( m_defValue );
+	return (float)atof( m_defValue.c_str() );
 }
 
 //-----------------------------------------------------
@@ -71,7 +60,7 @@ float nsVar::GetDefaultValue()
 //-----------------------------------------------------
 const char* nsVar::GetDefaultString()
 {
-	return m_defValue;
+	return m_defValue.c_str();
 }
 
 //---------------------------------------------------------
@@ -79,5 +68,5 @@ const char* nsVar::GetDefaultString()
 //---------------------------------------------------------
 void nsVar::SetDefault()
 {
-	SetString( m_defValue );
+	SetString( m_defValue.c_str() );
 }
