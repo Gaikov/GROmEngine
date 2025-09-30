@@ -20,14 +20,15 @@ public:
     bool BindTarget();
     bool Bind() override;
     bool IsValid() const { return _fbo != 0; }
+    void EnsureSize(int width, int height) override;
 
 private:
     GLuint _fbo = 0;
     GLuint _texture = 0;
     GLuint _zstencil = 0;
 
-    const int _width = 0;
-    const int _height = 0;
+    int _width = 0;
+    int _height = 0;
     const texfmt_t _fmt;
 
     bool UploadToGPU();
