@@ -22,9 +22,8 @@ IRenDevice *GetRenDevice()
 GLRenderDevice::GLRenderDevice() :
 		_quadBuff(nullptr),
 		_projMatrix(1),
-		_viewMatrix(1),
-		_defaultProgram("default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag")
-{
+		_viewMatrix(1) {
+	_defaultProgram = new nsGLProgram( _glslCache, "default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag");
 }
 
 static GLADapiproc getProcAddr(const char *name) {
@@ -87,7 +86,7 @@ bool GLRenderDevice::PrepareOpenGL() {
 		return false;
 	}
 
-	if (!_defaultProgram.Bind()) {
+	if (!_defaultProgram->Bind()) {
 		return false;
 	}
 
@@ -100,7 +99,8 @@ bool GLRenderDevice::PrepareOpenGL() {
 void GLRenderDevice::CleanupOpenGL() {
 	_shaders.Apply(nullptr);
 	_textures.BindTexture(nullptr);
-	_defaultProgram.Unload();
+	_glslCache.Invalidate();
+	_defaultProgram->Unload();
 }
 
 void GLRenderDevice::Release() {
@@ -109,6 +109,11 @@ void GLRenderDevice::Release() {
 	Log::Info("*****************************************");
 
 	CleanupOpenGL();
+
+	Log::Info("...releasing glsl code");
+	delete _defaultProgram;
+	_defaultProgram = nullptr;
+	_glslCache.ReleaseAll();
 
 	Log::Info("...releasing shaders");
 	_shaders.ReleaseAll();
@@ -177,7 +182,7 @@ void GLRenderDevice::TextureBind(ITexture *texture) {
 	if (_textures.BindTexture(t)) {
 		_shaders.ApplyTextureParams();
 	}
-	_defaultProgram.SetHasTexture(_textures.HasBoundTexture());
+	_defaultProgram->SetHasTexture(_textures.HasBoundTexture());
 }
 
 void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
@@ -185,7 +190,7 @@ void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
     m.Identity();
     if (offs2) m.SetPos(offs2);
     if (scale2) m.Scale(scale2[0], scale2[1], 1);
-	_defaultProgram.SetTextureMatrix(m);
+	_defaultProgram->SetTextureMatrix(m);
 }
 
 IRenState *GLRenderDevice::StateLoad(const char *fileName)
@@ -206,9 +211,9 @@ void GLRenderDevice::StateApply(IRenState *state)
 
 	auto s = _shaders.GetCurrent();
 	if (s->IsAlphaTest()) {
-		_defaultProgram.SetAlphaCutoff(s->GetAlphaCutoff());
+		_defaultProgram->SetAlphaCutoff(s->GetAlphaCutoff());
 	} else {
-		_defaultProgram.SetAlphaCutoff(0);
+		_defaultProgram->SetAlphaCutoff(0);
 	}
 }
 
@@ -259,7 +264,7 @@ void GLRenderDevice::EndScene()
 void GLRenderDevice::ApplyProjectionMatrix()
 {
 	nsMatrix projView = _viewMatrix * _projMatrix;
-	_defaultProgram.SetProjView(projView);
+	_defaultProgram->SetProjView(projView);
 }
 
 void GLRenderDevice::LoadProjMatrix(const float *m)
@@ -276,7 +281,7 @@ void GLRenderDevice::LoadViewMartix(const float *m)
 
 void GLRenderDevice::LoadMatrix(const float *m)
 {
-	_defaultProgram.SetModel(m);
+	_defaultProgram->SetModel(m);
 }
 
 void GLRenderDevice::MultMatrixLocal(const float *m)
@@ -489,6 +494,8 @@ void GLRenderDevice::InvalidateResources() {
 	for (const auto vb : _allocatedVBS) {
 		vb->Invalidate();
 	}
+	_glslCache.Invalidate();
+	_defaultProgram->Unload();
 }
 
 IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {
