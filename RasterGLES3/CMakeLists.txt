@@ -16,30 +16,7 @@ else()
     find_package(OpenGL)
 endif()
 
-set(sources
-        GLRenderDevice.cpp
-        GLTexture.cpp
-        GLTexturesCache.cpp
-        GLUtils.cpp
-        GLVertexBuffer.cpp
-        shaders/GLShader.cpp
-        shaders/GLShadersManager.cpp
-        shaders/GLProgram.cpp
-        shaders/GLProgram.h
-        GLLightManager.cpp
-        GLDisplayModes.cpp
-        stencil/GLStencilState.cpp
-        stencil/GLStencilState.h
-        stencil/GLStencilManager.cpp
-        stencil/GLStencilManager.h
-        renderTexture/GLRenderTexture.cpp
-        renderTexture/GLRenderTexture.h
-        renderTexture/GLRenderTexturesCache.cpp
-        renderTexture/GLRenderTexturesCache.h
-        glad/gles2.c
-        glad/gles2.h
-        glad/khrplatform.h
-)
+file(GLOB_RECURSE sources "*.cpp" "*.c" "*.h")
 
 include_directories(
         ./

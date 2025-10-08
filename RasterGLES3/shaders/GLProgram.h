@@ -6,16 +6,15 @@
 #pragma once
 
 #include "GLCommon.h"
+#include "GLSLCache.h"
 
 class nsGLProgram final {
 public:
-    nsGLProgram(const char *vertexShader, const char *fragmentShader);
+    nsGLProgram(nsGLSLCache &cache, const char *vertexShader, const char *fragmentShader);
 
     bool Load();
     void Unload();
     [[nodiscard]] bool Bind();
-
-    static GLuint createShader(GLenum type, const char *source);
 
     bool SetProjView(const float *matrix) const;
     bool SetModel(const float *matrix) const;
@@ -27,14 +26,14 @@ private:
     std::string _vertexShader;
     std::string _fragmentShader;
     GLuint _program = 0;
-    GLuint _vs = 0;
-    GLuint _fs = 0;
 
     GLint _projView = 0;
     GLint _model = 0;
     GLint _texMat = 0;
     GLint _alphaCutoff = 0;
     GLint _hasTexture = 0;
+
+    nsGLSLCache &_codeCache;
 
     bool GetUniformLocation(const char *name, GLint &u) const;
 };

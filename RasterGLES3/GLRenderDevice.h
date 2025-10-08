@@ -12,6 +12,7 @@
 #include "GLDisplayModes.h"
 #include "renderTexture/GLRenderTexturesCache.h"
 #include "shaders/GLProgram.h"
+#include "shaders/GLSLCache.h"
 #include "stencil/GLStencilManager.h"
 
 class GLVertexBuffer;
@@ -74,9 +75,11 @@ private:
 	nsMatrix         _projMatrix;
 	nsMatrix         _viewMatrix;
 	bool             _queryRestart = false;
-	nsGLProgram		 _defaultProgram;
+
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
+	nsGLSLCache		 _glslCache;
+	nsGLProgram		 *_defaultProgram;
 
 private:
 	void ApplyProjectionMatrix();

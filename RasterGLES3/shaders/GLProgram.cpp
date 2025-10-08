@@ -7,26 +7,27 @@
 #include "GLUtils.h"
 #include "Core/Package.h"
 
-nsGLProgram::nsGLProgram(const char *vertexShader, const char *fragmentShader)
-    : _vertexShader(vertexShader), _fragmentShader(fragmentShader) {
+nsGLProgram::nsGLProgram(nsGLSLCache &cache, const char *vertexShader, const char *fragmentShader)
+    : _vertexShader(vertexShader), _fragmentShader(fragmentShader), _codeCache(cache) {
 }
 
 bool nsGLProgram::Load() {
-    _vs = createShader(GL_VERTEX_SHADER, _vertexShader.c_str());
-    if (!_vs) {
+
+    const auto vs = _codeCache.GetResource(_vertexShader.c_str(), 0);
+    if (!vs) {
         return false;
     }
 
-    _fs = createShader(GL_FRAGMENT_SHADER, _fragmentShader.c_str());
-    if (!_fs) {
+    const auto fs = _codeCache.GetResource(_fragmentShader.c_str(), 0);
+    if (!fs) {
         return false;
     }
 
     _program = glCreateProgram();
     GL_CHECK_R("glCreateProgram", false)
 
-    glAttachShader(_program, _vs);
-    glAttachShader(_program, _fs);
+    glAttachShader(_program, vs->GetShader());
+    glAttachShader(_program, fs->GetShader());
     glLinkProgram(_program);
     GL_CHECK_R("glLinkProgram", false);
 
@@ -84,16 +85,6 @@ void nsGLProgram::Unload() {
         glDeleteProgram(_program);
         _program = 0;
     }
-
-    if (_vs) {
-        glDeleteShader(_vs);
-        _vs = 0;
-    }
-
-    if (_fs) {
-        glDeleteShader(_fs);
-        _fs = 0;
-    }
 }
 
 bool nsGLProgram::Bind() {
@@ -106,26 +97,6 @@ bool nsGLProgram::Bind() {
     glUseProgram(_program);
     GL_CHECK_R("glUseProgram", false);
     return true;
-}
-
-GLuint nsGLProgram::createShader(const GLenum type, const char *filePath) {
-    Log::Info("...loading shader: %s", filePath);
-    const auto file = g_pack.LoadFile(filePath);
-    if (!file) {
-        return 0;
-    }
-
-    const auto source = reinterpret_cast<GLchar *>(file->GetData());
-    const GLuint shader = glCreateShader(type);
-
-    glShaderSource(shader, 1, &source, nullptr);
-    GL_CHECK_R("glShaderSource", 0);
-
-    glCompileShader(shader);
-    g_pack.ReleaseFile(file);
-
-    GL_CHECK_R("glCompileShader", 0);
-    return shader;
 }
 
 bool nsGLProgram::SetProjView(const float *matrix) const {
