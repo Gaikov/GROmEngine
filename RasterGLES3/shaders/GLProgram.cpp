@@ -7,11 +7,16 @@
 #include "GLUtils.h"
 #include "Core/Package.h"
 
-nsGLProgram::nsGLProgram(nsGLSLCache &cache, const char *vertexShader, const char *fragmentShader)
-    : _vertexShader(vertexShader), _fragmentShader(fragmentShader), _codeCache(cache) {
+nsGLProgram::nsGLProgram(nsGLSLCache &cache) : _codeCache(cache) {
+}
+
+void nsGLProgram::Init(const char *vertexShader, const char *fragmentShader) {
+    _vertexShader = vertexShader;
+    _fragmentShader = fragmentShader;
 }
 
 bool nsGLProgram::Load() {
+    assert(!_vertexShader.empty() && !_fragmentShader.empty());
 
     const auto vs = _codeCache.GetResource(_vertexShader.c_str(), 0);
     if (!vs) {

@@ -10,7 +10,8 @@
 
 class nsGLProgram final {
 public:
-    nsGLProgram(nsGLSLCache &cache, const char *vertexShader, const char *fragmentShader);
+    explicit nsGLProgram(nsGLSLCache &cache);
+    void Init(const char *vertexShader, const char *fragmentShader);
 
     bool Load();
     void Unload();

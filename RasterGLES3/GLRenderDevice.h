@@ -12,7 +12,7 @@
 #include "GLDisplayModes.h"
 #include "renderTexture/GLRenderTexturesCache.h"
 #include "shaders/GLProgram.h"
-#include "shaders/GLSLCache.h"
+#include "shaders/GLProgramsCache.h"
 #include "stencil/GLStencilManager.h"
 
 class GLVertexBuffer;
@@ -78,7 +78,8 @@ private:
 
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
-	nsGLSLCache		 _glslCache;
+
+	nsGLProgramsCache _programsCache;
 	nsGLProgram		 *_defaultProgram;
 
 private:
