@@ -23,7 +23,7 @@ GLRenderDevice::GLRenderDevice() :
 		_quadBuff(nullptr),
 		_projMatrix(1),
 		_viewMatrix(1) {
-	_defaultProgram = new nsGLProgram( _glslCache, "default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag");
+	_defaultProgram = _programsCache.GetProgram("default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag");
 }
 
 static GLADapiproc getProcAddr(const char *name) {
@@ -99,8 +99,6 @@ bool GLRenderDevice::PrepareOpenGL() {
 void GLRenderDevice::CleanupOpenGL() {
 	_shaders.Apply(nullptr);
 	_textures.BindTexture(nullptr);
-	_glslCache.Invalidate();
-	_defaultProgram->Unload();
 }
 
 void GLRenderDevice::Release() {
@@ -111,9 +109,7 @@ void GLRenderDevice::Release() {
 	CleanupOpenGL();
 
 	Log::Info("...releasing glsl code");
-	delete _defaultProgram;
-	_defaultProgram = nullptr;
-	_glslCache.ReleaseAll();
+	_programsCache.Release();
 
 	Log::Info("...releasing shaders");
 	_shaders.ReleaseAll();
@@ -494,8 +490,7 @@ void GLRenderDevice::InvalidateResources() {
 	for (const auto vb : _allocatedVBS) {
 		vb->Invalidate();
 	}
-	_glslCache.Invalidate();
-	_defaultProgram->Unload();
+	_programsCache.Invalidate();
 }
 
 IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {
