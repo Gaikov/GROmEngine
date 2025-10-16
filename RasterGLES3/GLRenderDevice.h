@@ -80,7 +80,7 @@ private:
 	std::vector<GLVertexBuffer*> _allocatedVBS;
 
 	nsGLProgramsCache _programsCache;
-	nsGLProgram		 *_defaultProgram;
+	nsGLProgram		 *_defaultProgram = nullptr;
 
 private:
 	void ApplyProjectionMatrix();

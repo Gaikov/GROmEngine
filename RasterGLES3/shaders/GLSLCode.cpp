@@ -83,8 +83,10 @@ void nsGLSLCode::Load() {
         std::string log(static_cast<size_t>(logLen), '\0');
         GLsizei written = 0;
         glGetShaderInfoLog(_shader, logLen, &written, log.data());
-        if (!log.empty())
-            Log::Info("Shader log [%s]: %s", resourceName, log.c_str());
+        if (!log.empty()) {
+            Log::Info("Shader log [%s]:", resourceName);
+            Log::Info(log.c_str());
+        }
     }
 
     if (compiled != GL_TRUE) {

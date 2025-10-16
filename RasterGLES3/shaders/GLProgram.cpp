@@ -16,15 +16,17 @@ void nsGLProgram::Init(const char *vertexShader, const char *fragmentShader) {
 }
 
 bool nsGLProgram::Load() {
+    Unload();
+
     assert(!_vertexShader.empty() && !_fragmentShader.empty());
 
     const auto vs = _codeCache.GetResource(_vertexShader.c_str(), 0);
-    if (!vs) {
+    if (!vs || !vs->GetShader()) {
         return false;
     }
 
     const auto fs = _codeCache.GetResource(_fragmentShader.c_str(), 0);
-    if (!fs) {
+    if (!fs || !fs->GetShader()) {
         return false;
     }
 

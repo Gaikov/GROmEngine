@@ -23,7 +23,6 @@ GLRenderDevice::GLRenderDevice() :
 		_quadBuff(nullptr),
 		_projMatrix(1),
 		_viewMatrix(1) {
-	_defaultProgram = _programsCache.GetProgram("default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag");
 }
 
 static GLADapiproc getProcAddr(const char *name) {
@@ -49,6 +48,12 @@ bool GLRenderDevice::Init(void *wnd)
 
 	if (!_modes.Init())
 	{
+		return false;
+	}
+
+	_defaultProgram = _programsCache.GetProgram("default/rs/gles3/vertex.vert", "default/rs/gles3/pixel.frag");
+	if (!_defaultProgram->Load()) {
+		Sys_FatalError("Failed to load default program");
 		return false;
 	}
 
