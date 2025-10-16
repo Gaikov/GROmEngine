@@ -195,7 +195,6 @@ struct IRenDevice
 
 	 //������ �� ���������� ��������, ���������� �� WORLD_MATRIX (OBJECT_MATRIX)
 	virtual void			LoadMatrix( const float m[16] ) = 0;
-	virtual void			MultMatrixLocal( const float m[16] ) = 0;
 
 	//========= 2d graphics ==========
 	//pictures

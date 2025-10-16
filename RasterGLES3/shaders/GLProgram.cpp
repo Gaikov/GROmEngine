@@ -106,16 +106,14 @@ bool nsGLProgram::Bind() {
     return true;
 }
 
-bool nsGLProgram::SetProjView(const float *matrix) const {
+void nsGLProgram::SetProjView(const float *matrix) const {
     glUniformMatrix4fv(_projView, 1, GL_FALSE, matrix);
-    GL_CHECK_R("glUniformMatrix4fv - SetProjView", false);
-    return true;
+    GL_CHECK_R("glUniformMatrix4fv - SetProjView",);
 }
 
-bool nsGLProgram::SetModel(const float *matrix) const {
+void nsGLProgram::SetModel(const float *matrix) const {
     glUniformMatrix4fv(_model, 1, GL_FALSE, matrix);
-    GL_CHECK_R("glUniformMatrix4fv - SetModel", false);
-    return true;
+    GL_CHECK_R("glUniformMatrix4fv - SetModel",);
 }
 
 void nsGLProgram::SetTextureMatrix(const float *matrix) const {
