@@ -1,9 +1,9 @@
-//
-// Created by Roman on 10/07/2019.
-//
-
-#ifndef TEST_GLRENDERDEVICE_H
-#define TEST_GLRENDERDEVICE_H
+// Copyright (c) 2003-2019, Roman Gaikov. All rights reserved.
+//--------------------------------------------------------------------------------------------------
+// file GLRenderDevice.h
+// author Roman Gaikov
+//--------------------------------------------------------------------------------------------------
+#pragma once
 
 #include "GLCommon.h"
 #include "GLTexturesCache.h"
@@ -11,7 +11,6 @@
 #include "GLLightManager.h"
 #include "GLDisplayModes.h"
 #include "renderTexture/GLRenderTexturesCache.h"
-#include "shaders/GLProgram.h"
 #include "shaders/GLProgramsCache.h"
 #include "stencil/GLStencilManager.h"
 
@@ -40,7 +39,6 @@ public:
 	void LoadProjMatrix(const float *m) override;
 	void LoadViewMartix(const float *m) override;
 	void LoadMatrix(const float *m) override;
-	void MultMatrixLocal(const float *m) override;
 	void DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height) override;
 
 	IVertexBuffer *VerticesCreate(uint vertsCount, uint indexCount, bool dynamic, bool useColors) override;
@@ -69,6 +67,7 @@ private:
 	GLTexturesCache  _textures;
 	nsGLRenderTexturesCache _renderTextures;
 	GLVertexBuffer   *_quadBuff;
+	nsGLProgramsCache _programs;
 	GLShadersManager _shaders;
     nsGLStencilManager _stencils;
 	GLLightManager   _light;
@@ -79,15 +78,11 @@ private:
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
 
-	nsGLProgramsCache _programsCache;
-	nsGLProgram		 *_defaultProgram = nullptr;
-
 private:
 	void ApplyProjectionMatrix();
 	void DrawQuad(vbVertex_t v[4]);
 	bool PrepareOpenGL();
 	void CleanupOpenGL();
-
 };
 
-#endif //TEST_GLRENDERDEVICE_H
+

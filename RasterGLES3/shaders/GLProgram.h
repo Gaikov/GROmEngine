@@ -15,10 +15,10 @@ public:
 
     bool Load();
     void Unload();
-    [[nodiscard]] bool Bind();
+    bool Bind();
 
-    bool SetProjView(const float *matrix) const;
-    bool SetModel(const float *matrix) const;
+    void SetProjView(const float *matrix) const;
+    void SetModel(const float *matrix) const;
     void SetTextureMatrix(const float *matrix) const;
     void SetAlphaCutoff(float cutoff) const;
     void SetHasTexture(bool hasTexture) const;

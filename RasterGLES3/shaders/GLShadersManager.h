@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "GLCommon.h"
+
 #include "nsLib/factory/ResourcesCache.h"
 #include "GLShader.h"
 
