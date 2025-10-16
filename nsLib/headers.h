@@ -17,5 +17,6 @@
 #include <thread>
 #include <mutex>
 #include <cstdint>
+#include <string_view>
 
 #endif
