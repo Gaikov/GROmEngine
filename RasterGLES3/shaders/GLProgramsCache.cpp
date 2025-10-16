@@ -4,6 +4,10 @@
 
 #include "GLProgramsCache.h"
 
+nsGLProgramsCache::nsGLProgramsCache() {
+    _textureMatrix.Identity();
+}
+
 nsGLProgram * nsGLProgramsCache::GetProgram(const char *vertexShaderPath, const char *fragmentShaderPath) {
     std::string path = vertexShaderPath;
     path += "+";
@@ -33,27 +37,37 @@ void nsGLProgramsCache::Bind(nsGLProgram *program, bool force) {
     if (force || _currentProgram != program) {
         _currentProgram = program;
         _currentProgram->Bind();
+        _currentProgram->SetHasTexture(_textureBound);
+        _currentProgram->SetTextureMatrix(_textureMatrix);
+        _currentProgram->SetAlphaCutoff(_alphaCutoff);
+        _currentProgram->SetProjView(_projView);
+        _currentProgram->SetModel(_model);
     }
 }
 
-void nsGLProgramsCache::SetTextureBound(const bool hasBound) const {
-    _currentProgram->SetHasTexture(hasBound);
+void nsGLProgramsCache::SetTextureBound(const bool hasBound) {
+    _textureBound = hasBound;
+    _currentProgram->SetHasTexture(_textureBound);
 }
 
-void nsGLProgramsCache::SetTextureMatrix(const nsMatrix &m) const {
-    _currentProgram->SetTextureMatrix(m);
+void nsGLProgramsCache::SetTextureMatrix(const nsMatrix &m) {
+    _textureMatrix = m;
+    _currentProgram->SetTextureMatrix(_textureMatrix);
 }
 
-void nsGLProgramsCache::SetAlphaCutoff(const float alphaRef) const {
-    _currentProgram->SetAlphaCutoff(alphaRef);
+void nsGLProgramsCache::SetAlphaCutoff(const float alphaRef) {
+    _alphaCutoff = alphaRef;
+    _currentProgram->SetAlphaCutoff(_alphaCutoff);
 }
 
-void nsGLProgramsCache::SetProjView(const float *m) const {
-    _currentProgram->SetProjView(m);
+void nsGLProgramsCache::SetProjViewMatrix(const float *m) {
+    _projView = m;
+    _currentProgram->SetProjView(_projView);
 }
 
-void nsGLProgramsCache::SetModel(const float *m) const {
-    _currentProgram->SetModel(m);
+void nsGLProgramsCache::SetModelMatrix(const float *m) {
+    _model = m;
+    _currentProgram->SetModel(_model);
 }
 
 void nsGLProgramsCache::Release() {

@@ -78,12 +78,6 @@ bool nsGLProgram::Load() {
     glUseProgram(_program);
     GL_CHECK_R("glUseProgram", false);
 
-    nsMatrix m;
-    m.Identity();
-
-    SetTextureMatrix(m);
-    SetAlphaCutoff(0);
-
     return true;
 }
 
