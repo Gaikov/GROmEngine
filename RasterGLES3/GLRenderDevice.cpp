@@ -264,7 +264,7 @@ void GLRenderDevice::EndScene()
 void GLRenderDevice::ApplyProjectionMatrix()
 {
 	nsMatrix projView = _viewMatrix * _projMatrix;
-	_programs.SetProjView(projView);
+	_programs.SetProjViewMatrix(projView);
 }
 
 void GLRenderDevice::LoadProjMatrix(const float *m)
@@ -281,7 +281,7 @@ void GLRenderDevice::LoadViewMartix(const float *m)
 
 void GLRenderDevice::LoadMatrix(const float *m)
 {
-	_programs.SetModel(m);
+	_programs.SetModelMatrix(m);
 }
 
 void GLRenderDevice::DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height)
