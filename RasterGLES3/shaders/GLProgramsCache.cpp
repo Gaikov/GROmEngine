@@ -9,6 +9,13 @@ nsGLProgramsCache::nsGLProgramsCache() {
 }
 
 nsGLProgram * nsGLProgramsCache::GetProgram(const char *vertexShaderPath, const char *fragmentShaderPath) {
+    if (!vertexShaderPath) {
+        vertexShaderPath = DEFAULT_VERTEX_SHADER;
+    }
+    if (!fragmentShaderPath) {
+        fragmentShaderPath = DEFAULT_FRAGMENT_SHADER;
+    }
+
     std::string path = vertexShaderPath;
     path += "+";
     path += fragmentShaderPath;
@@ -19,6 +26,7 @@ nsGLProgram * nsGLProgramsCache::GetProgram(const char *vertexShaderPath, const 
     Log::Info("...creating GLSL program: %s", path.c_str());
     const auto program = new nsGLProgram(_codeCache);
     program->Init(vertexShaderPath, fragmentShaderPath);
+    _cache[path] = program;
     return program;
 }
 
