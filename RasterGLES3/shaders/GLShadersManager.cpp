@@ -28,30 +28,45 @@ void GLShadersManager::FreeResource(GLShader *item)
 
 bool GLShadersManager::Init()
 {
+	if (!programs.Init()) {
+		return false;
+	}
 	Apply(&_defaultShader);
 	return true;
 }
 
-void GLShadersManager::Apply(GLShader *shader)
+void GLShadersManager::Release() {
+	Log::Info("...releasing shaders");
+	ReleaseAll();
+
+	programs.Release();
+}
+
+void GLShadersManager::Apply(GLShader *s)
 {
-	if (!shader)
+	if (!s)
 	{
-		shader = &_defaultShader;
+		s = &_defaultShader;
 	}
 
 	if (_boundShader)
 	{
-		shader->Apply(_boundShader);
+		s->Apply(_boundShader);
 	}
 	else
 	{
-		shader->ForceApply();
+		s->ForceApply();
 	}
-	_boundShader = shader;
+	_boundShader = s;
+
+	if (s->IsAlphaTest()) {
+		programs.SetAlphaCutoff(s->GetAlphaCutoff());
+	} else {
+		programs.SetAlphaCutoff(0);
+	}
 }
 
-void GLShadersManager::ApplyTextureParams()
-{
+void GLShadersManager::ApplyTextureParams() const {
 	_boundShader->ApplyTextureParams();
 }
 

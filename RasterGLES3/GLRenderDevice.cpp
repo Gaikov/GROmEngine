@@ -51,10 +51,6 @@ bool GLRenderDevice::Init(void *wnd)
 		return false;
 	}
 
-	if (!_programs.Init()) {
-		return false;
-	}
-
 	LogPrintf(PRN_ALL, "GL Vendor: %s\n", glGetString(GL_VENDOR));
 	LogPrintf(PRN_ALL, "GL Renderer: %s\n", glGetString(GL_RENDERER));
 	LogPrintf(PRN_ALL, "GL Version: %s\n", glGetString(GL_VERSION));
@@ -89,7 +85,7 @@ bool GLRenderDevice::PrepareOpenGL() {
 		return false;
 	}
 
-	_programs.Bind(nullptr, true);
+	_shaders.programs.Bind(nullptr, true);
 
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0, 0, 0, 0);
@@ -100,7 +96,7 @@ bool GLRenderDevice::PrepareOpenGL() {
 void GLRenderDevice::CleanupOpenGL() {
 	_shaders.Apply(nullptr);
 	_textures.BindTexture(nullptr);
-	_programs.Bind(nullptr, true);
+	_shaders.programs.Bind(nullptr, true);
 }
 
 void GLRenderDevice::Release() {
@@ -110,11 +106,7 @@ void GLRenderDevice::Release() {
 
 	CleanupOpenGL();
 
-	Log::Info("...releasing glsl code");
-	_programs.Release();
-
-	Log::Info("...releasing shaders");
-	_shaders.ReleaseAll();
+	_shaders.Release();
 
 	Log::Info("...releasing textures");
 	_textures.ReleaseAll();
@@ -180,7 +172,7 @@ void GLRenderDevice::TextureBind(ITexture *texture) {
 	if (_textures.BindTexture(t)) {
 		_shaders.ApplyTextureParams();
 	}
-	_programs.SetTextureBound(_textures.HasBoundTexture());
+	_shaders.programs.SetTextureBound(_textures.HasBoundTexture());
 }
 
 void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
@@ -188,7 +180,7 @@ void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
     m.Identity();
     if (offs2) m.SetPos(offs2);
     if (scale2) m.Scale(scale2[0], scale2[1], 1);
-	_programs.SetTextureMatrix(m);
+	_shaders.programs.SetTextureMatrix(m);
 }
 
 IRenState *GLRenderDevice::StateLoad(const char *fileName)
@@ -206,15 +198,6 @@ void GLRenderDevice::StateApply(IRenState *state)
 {
 	auto shader = dynamic_cast<GLShader *>(state);
 	_shaders.Apply(shader);
-
-
-	//TODO: make inside a shader
-	auto s = _shaders.GetCurrent();
-	if (s->IsAlphaTest()) {
-		_programs.SetAlphaCutoff(s->GetAlphaCutoff());
-	} else {
-		_programs.SetAlphaCutoff(0);
-	}
 }
 
 void GLRenderDevice::ClearScene(uint flags)
@@ -264,7 +247,7 @@ void GLRenderDevice::EndScene()
 void GLRenderDevice::ApplyProjectionMatrix()
 {
 	nsMatrix projView = _viewMatrix * _projMatrix;
-	_programs.SetProjViewMatrix(projView);
+	_shaders.programs.SetProjViewMatrix(projView);
 }
 
 void GLRenderDevice::LoadProjMatrix(const float *m)
@@ -281,7 +264,7 @@ void GLRenderDevice::LoadViewMartix(const float *m)
 
 void GLRenderDevice::LoadMatrix(const float *m)
 {
-	_programs.SetModelMatrix(m);
+	_shaders.programs.SetModelMatrix(m);
 }
 
 void GLRenderDevice::DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height)
@@ -489,7 +472,7 @@ void GLRenderDevice::InvalidateResources() {
 	for (const auto vb : _allocatedVBS) {
 		vb->Invalidate();
 	}
-	_programs.Invalidate();
+	_shaders.programs.Invalidate();
 }
 
 IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {

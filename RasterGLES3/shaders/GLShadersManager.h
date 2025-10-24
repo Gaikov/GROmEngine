@@ -4,18 +4,21 @@
 
 #pragma once
 
+#include "GLProgramsCache.h"
 #include "nsLib/factory/ResourcesCache.h"
 #include "GLShader.h"
 
 class GLShadersManager : public ResourcesCache<GLShader, int>
 {
 public:
+	nsGLProgramsCache programs;
+
 	GLShadersManager();
 	bool Init();
-	void Apply(GLShader *shader);
+	void Release();
+	void Apply(GLShader *s);
 
-	void ApplyTextureParams();
-	GLShader *GetCurrent() const { return _boundShader; }
+	void ApplyTextureParams() const;
 
 protected:
 	GLShader *AllocateResource(const char *id, int param) override;
