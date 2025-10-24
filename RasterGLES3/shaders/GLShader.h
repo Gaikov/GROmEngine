@@ -7,6 +7,7 @@
 #define	_RenState_H_
 
 #include "GLCommon.h"
+#include "GLProgramsCache.h"
 #include "Core/Parser.h"
 
 class GLShader : public IRenState
@@ -15,7 +16,7 @@ public:
 	nsString	m_fileName;
 
 public:
-	GLShader();
+	GLShader(nsGLProgramsCache &programs);
 	bool		Reload();
 
 	void		ForceApply();
@@ -40,6 +41,9 @@ private:
 
 	GLint		m_texCoordU;
 	GLint		m_texCoordV;
+
+	nsGLProgram	*_program = nullptr;
+	nsGLProgramsCache &_programs;
 
 private:
 	bool		Parse( script_state_t *ss );

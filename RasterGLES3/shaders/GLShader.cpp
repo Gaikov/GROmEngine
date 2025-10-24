@@ -55,7 +55,7 @@ static const int gs_blendCount = RENMAP_COUNT( gs_blendMap );
 //---------------------------------------------------------
 // nsRenState::nsRenState: 
 //---------------------------------------------------------
-GLShader::GLShader()
+GLShader::GLShader(nsGLProgramsCache &programs) : _programs(programs)
 {
 	m_zEnable = true;
 	m_zWrite = GL_TRUE;
@@ -95,6 +95,8 @@ bool GLShader::Reload()
 //---------------------------------------------------------
 void GLShader::ForceApply()
 {
+	_programs.Bind(_program, false);
+
 	GLUtils::SetState(GL_DEPTH_TEST, m_zEnable);
 	glDepthMask(m_zWrite);
 
@@ -118,6 +120,8 @@ void GLShader::Apply( GLShader *prev )
 		ForceApply();
 		return;
 	}
+
+	_programs.Bind(_program, false);
 
 	if ( m_zEnable != prev->m_zEnable )
 		GLUtils::SetState(GL_DEPTH_TEST, m_zEnable);
@@ -145,7 +149,14 @@ void GLShader::Apply( GLShader *prev )
 //---------------------------------------------------------
 bool GLShader::Parse( script_state_t *ss )
 {
-	std::string str = ps_get_str( ss, "shade_mode", "gouraud" );
+	const std::string vs = ps_get_str( ss, "vs", nsGLProgramsCache::DEFAULT_VERTEX_SHADER);
+	const std::string fs = ps_get_str( ss, "fs", nsGLProgramsCache::DEFAULT_FRAGMENT_SHADER);
+	_program = _programs.GetProgram(vs.c_str(), fs.c_str());
+	if (!_program) {
+		return false;
+	}
+
+	std::string str;
 
 	m_zEnable = ps_get_f( ss, "z_enable", 1 ) != 0;
 	m_zWrite = ps_get_f( ss, "z_write", 1 ) ? GL_TRUE : GL_FALSE;
