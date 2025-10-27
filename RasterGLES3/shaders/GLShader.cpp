@@ -130,8 +130,15 @@ void GLShader::Apply( GLShader *prev )
 	
 	if ( m_alphaBlend != prev->m_alphaBlend )
 		GLUtils::SetState(GL_BLEND, m_alphaBlend);
-	if ( m_srcBlend != prev->m_srcBlend || m_dstBlend != prev->m_dstBlend )
-		glBlendFunc(m_srcBlend, m_dstBlend);
+	if ( m_srcBlend != prev->m_srcBlend
+		|| m_dstBlend != prev->m_dstBlend
+		|| m_srcAlphaBlend != prev->m_srcAlphaBlend
+		|| m_dstAlphaBlend != prev->m_dstAlphaBlend) {
+
+		glBlendFuncSeparate(m_srcBlend, m_dstBlend,
+			m_srcAlphaBlend, m_dstAlphaBlend);
+
+	}
 
 	if ( m_cullMode != prev->m_cullMode )
 		GLUtils::SetState(GL_CULL_FACE, m_cullMode);
@@ -170,7 +177,14 @@ bool GLShader::Parse( script_state_t *ss )
 	bool res = SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_srcBlend );
 	
 	str = ps_get_str( ss, "blend_dst", "none" );
-	res &= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_dstBlend );
+	res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_dstBlend );
+
+	str = ps_get_str( ss, "blend_src_alpha", "none" );
+	res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_srcAlphaBlend );
+
+	str = ps_get_str( ss, "blend_dst_alpha", "none" );
+	res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_dstAlphaBlend );
+
 	m_alphaBlend = res;
 
 	m_cullMode = ps_get_f( ss, "cull_mode", 1 ) != 0;
