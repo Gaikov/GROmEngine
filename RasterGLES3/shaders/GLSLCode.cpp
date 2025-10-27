@@ -54,7 +54,7 @@ void nsGLSLCode::Load() {
     Log::Info("...loading GLSL: %s", resourceName);
     const auto file = g_pack.LoadFile(resourceName);
     if (!file) {
-        Log::Error("Failed to load shader file: %s", resourceName);
+        Sys_FatalError("Failed to load shader file: %s", resourceName);
         return;
     }
 

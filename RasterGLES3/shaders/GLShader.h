@@ -37,6 +37,9 @@ private:
 	GLenum		m_srcBlend;
 	GLenum		m_dstBlend;
 
+	GLenum		m_srcAlphaBlend = GL_ONE;
+	GLenum		m_dstAlphaBlend = GL_ONE;
+
 	bool		m_cullMode;
 
 	GLint		m_texCoordU;
