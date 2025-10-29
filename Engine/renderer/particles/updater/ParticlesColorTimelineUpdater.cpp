@@ -5,7 +5,7 @@
 #include "ParticlesColorTimelineUpdater.h"
 
 bool nsParticlesColorTimelineUpdater::ParseFrame(script_state_t *ss, nsColor &frame) {
-    ParseFloat4(ss, "color", frame);
+    ParseColorExt(ss, "color", frame);
     return true;
 }
 

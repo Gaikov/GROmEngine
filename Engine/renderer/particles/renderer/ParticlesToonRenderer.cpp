@@ -16,8 +16,8 @@ bool nsParticlesToonRenderer::Parse(script_state_t *ss) {
     _front = dev->TextureLoad(ParseString(ss, "frontTexture"));
     _back = dev->TextureLoad(ParseString(ss, "backTexture"));
     _state = dev->StateLoad(ParseString(ss, "renState"));
-    ParseColor(ss, "borderColor", _borderColor);
-    ParseColor(ss, "color", _color);
+    ParseColorExt(ss, "borderColor", _borderColor);
+    ParseColorExt(ss, "color", _color);
     _borderSize = ParseFloat(ss, "borderSize");
 
     return true;
