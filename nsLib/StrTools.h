@@ -25,6 +25,12 @@ const char*	StrNumber( int num, int digitCount );
 */
 char*		StrToken( const char *strToken, const char *strDelimit, int &resLength );
 
+class nsStr final {
+public:
+	static const char* GetBrightColor(const char *str);
+};
+
+
 //---------------------------------------------------------
 // nsString:
 //---------------------------------------------------------
