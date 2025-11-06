@@ -118,6 +118,30 @@ char *StrToken( const char *strToken, const char *strDelimit, int &resLength )
 	return (char*)strToken;
 }
 
+const char * nsStr::GetBrightColor(const char *str) {
+	static char color[9];
+	uint32_t hash = 0;
+
+	const char* p = str;
+	while (*p) {
+		hash = *p + ((hash << 5) - hash);
+		p++;
+	}
+
+	for (int i = 0; i < 3; i++) {
+		const uint8_t component = 0x80 + ((hash >> (i * 8)) & 0x7F);
+
+		const uint8_t high = component >> 4;
+		const uint8_t low = component & 0x0F;
+
+		color[i*2] = high < 10 ? '0' + high : 'a' + (high - 10);
+		color[1 + i*2] = low < 10 ? '0' + low : 'a' + (low - 10);
+	}
+
+	color[7] = '\0';
+	return strcat(color, "ff");
+}
+
 //---------------------------------------------------------
 // StrLineCount:
 //---------------------------------------------------------

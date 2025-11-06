@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "DefaultVisualBuilder2d.h"
 #include "VisualCreationContext.h"
 #include "VisualBuilder2d.h"
 #include "nsLib/SubSystem.h"
@@ -43,4 +44,5 @@ public:
 private:
     std::map<std::string, nsVisualBuilder2d::sp_t>  _builders;
     std::map<std::string, std::function<nsVisualObject2d*()>> _bindings;
+    nsDefaultVisualBuilder2d _defaultBuilder;
 };

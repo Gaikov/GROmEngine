@@ -50,23 +50,25 @@ void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_
 
 nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
     auto builder = GetBuilder(ps_block_name(ss));
-    if (builder) {
-        auto object = builder->Create(ss, this);
-        if (object) {
-            if (builder->Parse(ss, object, this)) {
-                if (auto custom = dynamic_cast<nsCustomVisual*>(object)) {
-                    if (!custom->ParseCustomProps(ss)) {
-                        object->Destroy();
-                        object = nullptr;
-                    }
-                }
-
-                return object;
-            } else {
-                object->Destroy();
-            }
-        }
+    if (!builder) {
+        builder = &_defaultBuilder;
     }
+
+    if (auto object = builder->Create(ss, this)) {
+        if (builder->Parse(ss, object, this)) {
+            if (const auto custom = dynamic_cast<nsCustomVisual *>(object)) {
+                if (!custom->ParseCustomProps(ss)) {
+                    object->Destroy();
+                    object = nullptr;
+                }
+            }
+
+            return object;
+        }
+
+        object->Destroy();
+    }
+
     return nullptr;
 }
 
@@ -107,5 +109,3 @@ nsVisualObject2d *nsVisualFactory2d::CreateByID(const char *bindingId) {
     }
     return nullptr;
 }
-
-
