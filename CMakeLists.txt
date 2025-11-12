@@ -46,6 +46,7 @@ include_directories(
         ./
         Platform
         ThirdParty/OggVorbis/include
+        ThirdParty
 )
 
 if ((NOT WEB_ASM) AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux"))
@@ -73,6 +74,7 @@ if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_dependencies(Core_unit Core)
     add_subdirectory(Tools)
     add_subdirectory(TestsApp)
+    add_subdirectory(ThirdParty/imgui)
 
     add_dependencies(functional_tests Engine)
 endif()
