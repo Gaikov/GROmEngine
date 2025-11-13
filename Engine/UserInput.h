@@ -31,7 +31,7 @@ struct IKeyboardInput {
 };
 
 struct IUserInput : public IPointersInput, public IKeyboardInput {
-    virtual void OnMouseWheel(float delta) = 0;
+    virtual bool OnMouseWheel(float delta) = 0;
 };
 
 #endif //_UserInput_H_

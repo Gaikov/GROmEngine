@@ -31,7 +31,7 @@ public:
 
 	void OnChar(char ch) override;
 
-	void OnMouseWheel(float delta) override;
+    bool OnMouseWheel(float delta) override;
 
 protected:
     IRenDevice* const _device;

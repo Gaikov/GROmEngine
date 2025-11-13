@@ -101,9 +101,10 @@ void nsCollisionTest::OnKeyDown(int key, bool rept) {
         _rectColliding = !_rectColliding;
     }
 }
-void nsCollisionTest::OnMouseWheel(float delta) {
+bool nsCollisionTest::OnMouseWheel(float delta) {
     BaseFunctionalTest::OnMouseWheel(delta);
     _angle += nsMath::ToRad(delta * 10.0f);
     _userRect->origin.angle = _angle;
+    return true;
 }
 

@@ -163,8 +163,9 @@ void nsVisualContainer2d::OnChar(char ch) {
     ITER_INPUT_CHILDREN(input->OnChar(ch))
 }
 
-void nsVisualContainer2d::OnMouseWheel(float delta) {
-    ITER_INPUT_CHILDREN(input->OnMouseWheel(delta))
+bool nsVisualContainer2d::OnMouseWheel(float delta) {
+    ITER_INPUT_CHILDREN(if (input->OnMouseWheel(delta)) return true);
+    return false;
 }
 void nsVisualContainer2d::OnAddedToStage() {
     nsVisualObject2d::OnAddedToStage();

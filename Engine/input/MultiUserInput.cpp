@@ -52,10 +52,13 @@ bool nsMultiUserInput::OnPointerMove(float x, float y, int pointerId) {
     return false;
 }
 
-void nsMultiUserInput::OnMouseWheel(float delta) {
+bool nsMultiUserInput::OnMouseWheel(float delta) {
     for (auto ui : GetInteractiveItems()) {
-        ui->OnMouseWheel(delta);
+        if (ui->OnMouseWheel(delta)) {
+            return true;
+        }
     }
+    return false;
 }
 
 nsVec2 nsMultiUserInput::ScreenToTarget(float x, float y) const {
