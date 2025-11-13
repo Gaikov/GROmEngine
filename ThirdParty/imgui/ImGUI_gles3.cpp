@@ -7,6 +7,8 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
+ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
+
 bool nsImGUI_gles3::Init(void *window) {
     // Инициализируем ImGui
     IMGUI_CHECKVERSION();
@@ -66,7 +68,7 @@ void nsImGUI_gles3::OnPointerCancel(int pointerId) {
 
 void nsImGUI_gles3::OnKeyUp(int key) {
     ImGuiIO& io = ImGui::GetIO();
-    io.AddKeyEvent(ImGuiKey(key), false);
+    io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(key, 0), false);
 }
 
 void nsImGUI_gles3::OnKeyDown(int key, bool rept) {
@@ -75,7 +77,7 @@ void nsImGUI_gles3::OnKeyDown(int key, bool rept) {
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    io.AddKeyEvent(ImGuiKey(key), true);
+    io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(key, 0), true);
 
     /*
     io.AddKeyEvent(ImGuiKey_ModCtrl, (mods & GLFW_MOD_CONTROL) != 0);

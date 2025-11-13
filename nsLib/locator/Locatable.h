@@ -7,5 +7,6 @@
 
 class nsLocatable {
 public:
+    virtual ~nsLocatable() = default;
     virtual void OnCreated() = 0;
 };
