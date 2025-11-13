@@ -37,7 +37,9 @@ public:
     void OnKeyUp(int key) override {}
     void OnKeyDown(int key, bool rept) override {}
     void OnChar(char ch) override {}
-    void OnMouseWheel(float delta) override {}
+    bool OnMouseWheel(float delta) override {
+        return true;
+    }
 };
 
 nsPopupManager::nsPopupManager() {

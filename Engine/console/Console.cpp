@@ -389,9 +389,10 @@ void nsConsole::OnKeyDown( int key, bool rept )
 	}
 }
 
-void nsConsole::OnMouseWheel(float delta) {
+bool nsConsole::OnMouseWheel(float delta) {
     _scrollLines += (int)delta;
     if ( _scrollLines < 0 ) _scrollLines = 0;
+	return true;
 }
 
 //---------------------------------------------------------

@@ -69,7 +69,7 @@ protected:
 	void            OnRelease() override;
 
 public:
-    void OnMouseWheel(float delta) override;
+	bool OnMouseWheel(float delta) override;
 
 protected:
     void	OnChar( char ch ) override ;

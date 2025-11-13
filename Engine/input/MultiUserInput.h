@@ -41,7 +41,7 @@ protected:
 
     void OnPointerCancel(int pointerId) override;
 
-    void OnMouseWheel(float delta) override;
+    bool OnMouseWheel(float delta) override;
 
     nsVec2 ScreenToTarget(float x, float y) const;
 };

@@ -92,7 +92,8 @@ void nsImGUI_gles3::OnChar(char ch) {
     io.AddInputCharacter(ch);
 }
 
-void nsImGUI_gles3::OnMouseWheel(float delta) {
+bool nsImGUI_gles3::OnMouseWheel(float delta) {
     ImGuiIO& io = ImGui::GetIO();
     io.AddMouseWheelEvent(0, delta);
+    return io.WantCaptureMouse;
 }

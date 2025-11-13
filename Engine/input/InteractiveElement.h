@@ -48,7 +48,7 @@ protected:
 
     void OnPointerCancel(int pointerId) override;
 
-    void OnMouseWheel(float delta) override;
+    bool OnMouseWheel(float delta) override;
 
 private:
     bool _pointerDown = false;

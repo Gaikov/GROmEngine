@@ -56,11 +56,12 @@ void BaseFunctionalTest::OnChar(char ch) {
     }
 }
 
-void BaseFunctionalTest::OnMouseWheel(float delta) {
+bool BaseFunctionalTest::OnMouseWheel(float delta) {
     auto input = GetInput();
     if (input) {
-        input->OnMouseWheel(delta);
+        return input->OnMouseWheel(delta);
     }
+    return false;
 }
 
 IUserInput *BaseFunctionalTest::GetInput() {

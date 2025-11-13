@@ -80,8 +80,8 @@ bool nsInteractiveElement::OnPointerMove(float x, float y, int pointerId) {
     return false;
 }
 
-void nsInteractiveElement::OnMouseWheel(float delta) {
-
+bool nsInteractiveElement::OnMouseWheel(float delta) {
+    return false;
 }
 
 bool nsInteractiveElement::IsPointerOver() const {
