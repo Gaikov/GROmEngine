@@ -10,6 +10,10 @@
 
 class nsClassMapping {
 public:
+    ~nsClassMapping() {
+        delete _instance;
+    }
+
     template<class TClass> nsClassMapping& To() {
         assert(!_instance);
         _factoryFunc = []() -> nsLocatable* {
