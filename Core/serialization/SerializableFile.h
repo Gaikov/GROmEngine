@@ -10,6 +10,6 @@ class nsSerializableFile : public nsSerializableGroup {
 public:
     explicit nsSerializableFile(const char *name);
 
-    bool Load(const char *fileName);
-    bool Save(const char *fileName);
+    virtual bool Load(const char *fileName);
+    virtual bool Save(const char *fileName);
 };
