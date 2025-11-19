@@ -8,10 +8,10 @@
 #include "Core/ScriptSaver.h"
 #include "Core/Parser.h"
 #include "nsLib/StrTools.h"
+#include "nsLib/utils/NoCopyable.h"
 
-class nsSerializable {
+class nsSerializable : public nsNoCopyable {
 public:
-    virtual ~nsSerializable() = default;
     explicit nsSerializable(const char *name);
     [[nodiscard]] const char *GetName() const { return _name.c_str(); }
     virtual void ResetDefault() = 0;

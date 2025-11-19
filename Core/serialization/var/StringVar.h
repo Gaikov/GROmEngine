@@ -17,6 +17,10 @@ public:
         return *this;
     }
 
+    bool operator==(const char *value) const {
+        return GetValue() == value;
+    }
+
     bool Serialize(nsScriptSaver &ss) override;
     bool Deserialize(script_state_t *ss) override;
 };
