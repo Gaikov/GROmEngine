@@ -10,9 +10,12 @@ void nsUndoService::Push(nsUndoRedoOperation *op) {
     op->Init();
     ClearUnDone();
 }
+bool nsUndoService::HasUndo() const {
+    return !_doneList.empty();
+}
 
 void nsUndoService::Undo() {
-    if (!_doneList.empty()) {
+    if (HasUndo()) {
         auto last = _doneList[_doneList.size() - 1];
         _doneList.pop_back();
         _unDoneList.push_back(last);
@@ -20,8 +23,12 @@ void nsUndoService::Undo() {
     }
 }
 
+bool nsUndoService::HasRedo() const {
+    return !_unDoneList.empty();
+}
+
 void nsUndoService::Redo() {
-    if (!_unDoneList.empty()) {
+    if (HasRedo()) {
         auto last = _unDoneList[_unDoneList.size() - 1];
         _unDoneList.pop_back();
         _doneList.push_back(last);

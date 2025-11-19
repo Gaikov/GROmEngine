@@ -15,7 +15,9 @@ protected:
 
 public:
     void Push(nsUndoRedoOperation *op);
+    [[nodiscard]] bool HasUndo() const;
     void Undo();
+    [[nodiscard]] bool HasRedo() const;
     void Redo();
     void Clear();
 
