@@ -10,60 +10,55 @@
 //---------------------------------------------------------
 // nsScriptSaver::nsScriptSaver: 
 //---------------------------------------------------------
-nsScriptSaver::nsScriptSaver( const char *fileName ) :
-	m_file( 0 ),
-	m_tabCount( 0 )
-{
-	if ( !StrCheck( fileName ) ) return;
-	m_file = fopen( fileName, "w" );
-	if ( !m_file )
-		LogPrintf( PRN_ALL, "WARNING: can't create '%s'\n", fileName );
+nsScriptSaver::nsScriptSaver(const char *fileName) : m_file(nullptr),
+                                                     m_tabCount(0) {
+    if (!StrCheck(fileName)) return;
+    m_file = fopen(fileName, "w");
+    if (!m_file)
+        LogPrintf(PRN_ALL, "WARNING: can't create '%s'\n", fileName);
 }
 
 //---------------------------------------------------------
-// nsScriptSaver::~nsScriptSaver: 
+// nsScriptSaver::~nsScriptSaver:
 //---------------------------------------------------------
-nsScriptSaver::~nsScriptSaver()
-{
-	if ( m_file )
-		fclose( m_file );
+nsScriptSaver::~nsScriptSaver() {
+    if (m_file)
+        fclose(m_file);
 }
 
 //---------------------------------------------------------
-// nsScriptSaver::Printf: 
+// nsScriptSaver::Printf:
 //---------------------------------------------------------
-void nsScriptSaver::Printf( const char *fmt, ... )
-{
-	char	msg[MAX_OUT_LEN];
+void nsScriptSaver::Printf(const char *fmt, ...) {
+    char msg[MAX_OUT_LEN];
 
-	va_list	list;
-	va_start( list, fmt );
-	vsprintf( msg, fmt, list );
-	va_end( list );
+    va_list list;
+    va_start(list, fmt);
+    vsprintf(msg, fmt, list);
+    va_end(list);
 
-	if ( m_file )
-		fprintf( m_file, "%s%s\n", StrTabs( m_tabCount ), msg );
+    if (m_file)
+        fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), msg);
 }
 
 //---------------------------------------------------------
-// nsScriptSaver::BlockBegin: 
+// nsScriptSaver::BlockBegin:
 //---------------------------------------------------------
-void nsScriptSaver::BlockBegin( const char *name )
-{
-	if ( !StrCheck( name ) ) return;
-	
-	Printf( name );
-	Printf( "{" );
-	m_tabCount ++;
+bool nsScriptSaver::BlockBegin(const char *name) {
+    if (!StrCheck(name)) return false;
+
+    Printf("$%s", name);
+    Printf("{");
+    m_tabCount++;
+    return true;
 }
 
 //---------------------------------------------------------
-// nsScriptSaver::BlockEnd: 
+// nsScriptSaver::BlockEnd:
 //---------------------------------------------------------
-void nsScriptSaver::BlockEnd()
-{
-	m_tabCount --;
-	Printf( "}\n" );
+void nsScriptSaver::BlockEnd() {
+    m_tabCount--;
+    Printf("}\n");
 }
 
 bool nsScriptSaver::IsValid() {

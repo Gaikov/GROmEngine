@@ -20,7 +20,7 @@ public:
     bool            IsValid();
 
 	void        	Printf( const char *fmt, ... );
-	void			BlockBegin( const char *name );
+	bool			BlockBegin(const char *name);
 	void			BlockEnd();
 
 private:
