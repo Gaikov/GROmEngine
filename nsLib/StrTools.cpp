@@ -285,6 +285,11 @@ nsString & nsString::operator=(const std::string_view &str) {
 	return *this;
 }
 
+nsString & nsString::operator=(const std::string &str) {
+	CopyFrom(str.data(), str.size());
+	return *this;
+}
+
 bool nsString::operator == (const nsString &str) const
 {
 	return *this == (const char*)str;
