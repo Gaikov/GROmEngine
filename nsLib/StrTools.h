@@ -46,7 +46,8 @@ public:
 
 	inline operator const char* () const;
 	inline nsString& operator = ( const char* str );
-	inline nsString& operator = ( const std::string_view &str );
+	nsString& operator = ( const std::string_view &str );
+	nsString& operator = ( const std::string &str );
 	inline bool operator == ( const char* str ) const;
 	bool operator == (const nsString &str) const;
 	inline bool operator != ( const char* str );
