@@ -7,11 +7,11 @@
 
 #include "UndoRedoOperation.h"
 
-template<typename TVar>
+template<typename TVar, typename TValue>
 class nsUndoVarChange : public nsUndoRedoOperation {
 
 public:
-    explicit nsUndoVarChange(TVar &var, TVar newValue) : _var(var), _newValue(newValue) {
+    explicit nsUndoVarChange(TVar &var, TValue newValue) : _var(var), _newValue(newValue) {
     }
 
     void Init() override {
@@ -29,6 +29,6 @@ public:
 
 private:
     TVar&   _var;
-    TVar    _prevValue;
-    TVar    _newValue;
+    TValue    _prevValue;
+    TValue    _newValue;
 };
