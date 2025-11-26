@@ -23,6 +23,7 @@ public:
 
     void UnloadFromGPU();
 	const char* GetPath() const { return _id.c_str();}
+	uint64_t GetId() override;
 
 private:
 	GLTexture();

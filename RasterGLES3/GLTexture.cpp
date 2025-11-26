@@ -55,6 +55,11 @@ bool GLTexture::CreateFromFile(const char *filePath)
 	return true;
 }
 
+uint64_t GLTexture::GetId() {
+    UploadToGPU();
+    return _glTexture;
+}
+
 bool GLTexture::UploadToGPU() {
     if (!EnsureBitmapData()) {
         return false;
