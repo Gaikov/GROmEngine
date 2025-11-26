@@ -25,6 +25,7 @@ public:
 	const rasterConfig_t *GetCurrentConfig() override;
 	void SetColor(const float *c) override;
 	ITexture *TextureLoad(const char *filename, bool mipmap, texfmt_t fmt) override;
+	const char * TextureGetPath(ITexture *t) override;
 	ITexture *TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap) override;
 	void TextureRelease(ITexture *texture) override;
 	void TextureBind(ITexture *texture) override;

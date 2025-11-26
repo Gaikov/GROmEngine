@@ -22,6 +22,7 @@ public:
 	void GetSize(int &width, int &height) override;
 
     void UnloadFromGPU();
+	const char* GetPath() const { return _id.c_str();}
 
 private:
 	GLTexture();
