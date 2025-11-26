@@ -151,6 +151,13 @@ ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_
 	return _textures.GetResource(filename, 0);
 }
 
+const char * GLRenderDevice::TextureGetPath(ITexture *t) {
+	if (const auto tex = dynamic_cast<const GLTexture *>(t)) {
+		return tex->GetPath();
+	}
+	return nullptr;
+}
+
 ITexture *GLRenderDevice::TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap)
 {
 	auto bmData = nsBitmapData::Create(width, height);

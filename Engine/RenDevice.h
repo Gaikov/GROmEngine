@@ -168,6 +168,7 @@ struct IRenDevice
 
 	//textures
 	virtual ITexture*		TextureLoad( const char *filename, bool mipmap = true, texfmt_t fmt = TF_RGBA ) = 0;
+	virtual const char*		TextureGetPath(ITexture *t) = 0;
 	virtual ITexture*		TextureGenerate( int width, int height, const void *data, texfmt_t fmt, bool mipmap ) = 0;
 	virtual void			TextureRelease( ITexture *texture ) = 0;
 	virtual void			TextureBind( ITexture *texture ) = 0;
