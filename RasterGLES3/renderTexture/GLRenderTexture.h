@@ -21,6 +21,7 @@ public:
     bool Bind() override;
     bool IsValid() const { return _fbo != 0; }
     void EnsureSize(int width, int height) override;
+    uint64_t GetId() override { return _texture; }
 
 private:
     GLuint _fbo = 0;

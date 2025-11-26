@@ -131,6 +131,7 @@ protected:
 //---------------------------------------------------------
 struct ITexture {
 	virtual void GetSize(int &width, int &height) = 0;
+	virtual uint64_t GetId() = 0;
 
 protected:
 	virtual ~ITexture() = default;
