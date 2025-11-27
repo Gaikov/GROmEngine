@@ -17,6 +17,11 @@ public:
         return *this;
     }
 
+    nsStringVar& operator = (const std::string &value) {
+        SetValue(value);
+        return *this;
+    }
+
     bool operator==(const char *value) const {
         return GetValue() == value;
     }

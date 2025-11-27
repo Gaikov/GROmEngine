@@ -10,8 +10,8 @@ nsVisualAnchor::nsVisualAnchor() {
 }
 
 void nsVisualAnchor::GetLocalBounds(nsRect &bounds) {
-    auto size2 = size / 2;
-    bounds = {size2, size2, size, size};
+    const auto size2 = size / 2;
+    bounds = {-size2, -size2, size, size};
 }
 
 void nsVisualAnchor::Loop() {
