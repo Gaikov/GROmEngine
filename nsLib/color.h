@@ -13,6 +13,7 @@ struct nsColor
 	static const nsColor green;
 	static const nsColor blue;
 	static const nsColor yellow;
+	static const nsColor magenta;
 	static const nsColor gray;
 	static const nsColor darkGray;
 
