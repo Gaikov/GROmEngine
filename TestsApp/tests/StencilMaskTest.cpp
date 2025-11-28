@@ -105,8 +105,8 @@ void nsStencilMaskTest::Draw() {
     nsVisualSceneRender2d::DrawScene(&_root);
 }
 
-void nsStencilMaskTest::OnKeyDown(int key, bool rept) {
-    BaseFunctionalTest::OnKeyDown(key, rept);
+void nsStencilMaskTest::OnKeyDown(int key, bool rept, int mods) {
+    BaseFunctionalTest::OnKeyDown(key, rept, mods);
     if (!rept && key == NS_KEY_SPACE) {
         _states[_currentState]();
         _currentState = (_currentState + 1) % (int)_states.size();

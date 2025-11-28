@@ -151,12 +151,12 @@ bool nsVisualContainer2d::OnPointerMove(float x, float y, int pointerId) {
     return false;
 }
 
-void nsVisualContainer2d::OnKeyUp(int key) {
-    ITER_INPUT_CHILDREN(input->OnKeyUp(key))
+void nsVisualContainer2d::OnKeyUp(int key, int mods) {
+    ITER_INPUT_CHILDREN(input->OnKeyUp(key,mods))
 }
 
-void nsVisualContainer2d::OnKeyDown(int key, bool rept) {
-    ITER_INPUT_CHILDREN(input->OnKeyDown(key, rept))
+void nsVisualContainer2d::OnKeyDown(int key, bool rept, int mods) {
+    ITER_INPUT_CHILDREN(input->OnKeyDown(key, rept,mods))
 }
 
 void nsVisualContainer2d::OnChar(char ch) {

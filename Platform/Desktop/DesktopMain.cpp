@@ -59,15 +59,15 @@ int main(int argc, char *argv[]) {
         });
 
         glfwSetKeyCallback(wnd,
-                           [](GLFWwindow *window, int key, int scancode, int action, int mods) -> void {
+                           [](GLFWwindow *window, const int key, int scancode, const int action, const int mods) -> void {
                                if (action == GLFW_PRESS) {
                                    //Log::Info("key: %i, scan: %i", key, scancode);
-                                   nsEngine::OnKeyDown(key, false);
+                                   nsEngine::OnKeyDown(key, false, mods);
                                }
                                if (action == GLFW_REPEAT) {
-                                   nsEngine::OnKeyDown(key, true);
+                                   nsEngine::OnKeyDown(key, true, mods);
                                } else if (action == GLFW_RELEASE) {
-                                   nsEngine::OnKeyUp(key);
+                                   nsEngine::OnKeyUp(key, mods);
                                }
                            });
 

@@ -268,7 +268,7 @@ void nsEngine::MainLoop()
 	nsMemory::EndLoop();
 }
 
-void nsEngine::OnKeyDown(int keyCode, bool repeat)
+void nsEngine::OnKeyDown(int keyCode, bool repeat, int mods)
 {
 	//Log::Debug("key down: %i", keyCode);
     auto console = nsConsole::Shared();
@@ -277,9 +277,15 @@ void nsEngine::OnKeyDown(int keyCode, bool repeat)
     } else {
         auto ui = GetActiveInput();
         if (ui) {
-            ui->OnKeyDown(keyCode, repeat);
+            ui->OnKeyDown(keyCode, repeat, mods);
         }
     }
+}
+
+void nsEngine::OnKeyUp(int keyCode, int mods) {
+	//Log::Debug("on key up: %i", keyCode);
+	auto ui = GetActiveInput();
+	if (ui) ui->OnKeyUp(keyCode, mods);
 }
 
 IUserInput *nsEngine::GetActiveInput() {
@@ -307,11 +313,7 @@ void nsEngine::OnPointerUp(int pointerId, int clientX, int clientY) {
     }
 }
 
-void nsEngine::OnKeyUp(int keyCode) {
-    //Log::Debug("on key up: %i", keyCode);
-    auto ui = GetActiveInput();
-    if (ui) ui->OnKeyUp(keyCode);
-}
+
 
 void nsEngine::OnCharDown(char ch) {
     auto ui = GetActiveInput();

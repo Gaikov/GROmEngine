@@ -23,9 +23,9 @@ struct IPointersInput {
 };
 
 struct IKeyboardInput {
-    virtual void OnKeyUp(int key) = 0;
+    virtual void OnKeyUp(int key, int mods) = 0;
 
-    virtual void OnKeyDown(int key, bool rept) = 0;
+    virtual void OnKeyDown(int key, bool rept, int mods) = 0;
 
     virtual void OnChar(char ch) = 0;
 };

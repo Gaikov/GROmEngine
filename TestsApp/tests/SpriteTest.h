@@ -32,5 +32,5 @@ private:
     nsSprite9SliceDesc _slice9;
 
 	void DrawSprite(ITexture *t, const nsColor &c = nsColor::white);
-	void OnKeyDown(int key, bool rept) override;
+	void OnKeyDown(int key, bool rept, int mods) override;
 };

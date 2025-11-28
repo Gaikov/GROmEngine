@@ -96,8 +96,8 @@ void SpriteTest::DrawSprite(ITexture *t, const nsColor &c)
     s.Draw(_device);
 }
 
-void SpriteTest::OnKeyDown(const int key, const bool rept) {
-	BaseFunctionalTest::OnKeyDown(key, rept);
+void SpriteTest::OnKeyDown(const int key, const bool rept, int mods) {
+	BaseFunctionalTest::OnKeyDown(key, rept, mods);
 
 	if (key == NS_KEY_SPACE) {
 		_update = !_update;

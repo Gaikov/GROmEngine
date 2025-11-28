@@ -125,8 +125,8 @@ void nsSoftKeyboard::OnKeyDown(int keyCode) {
     }
 
     if (_handler) {
-        _handler->OnKeyDown(keyCode, false);
-        _handler->OnKeyUp(keyCode);
+        _handler->OnKeyDown(keyCode, false, 0);
+        _handler->OnKeyUp(keyCode, 0);
     }
 }
 

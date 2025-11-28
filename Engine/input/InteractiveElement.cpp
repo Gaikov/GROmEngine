@@ -8,11 +8,11 @@ nsInteractiveElement::nsInteractiveElement() {
     _policies.push_back(this);
 }
 
-void nsInteractiveElement::OnKeyUp(int key) {
+void nsInteractiveElement::OnKeyUp(int key, int mods) {
 
 }
 
-void nsInteractiveElement::OnKeyDown(int key, bool rept) {
+void nsInteractiveElement::OnKeyDown(int key, bool rept, int mods) {
 
 }
 

@@ -60,12 +60,12 @@ IUserInput *nsEngineContext::GetActiveInput() {
     return &_input;
 }
 
-void nsEngineContext::OnKeyUp(int key) {
-    GetActiveInput()->OnKeyUp(key);
+void nsEngineContext::OnKeyUp(int key, int mods) {
+    GetActiveInput()->OnKeyUp(key, mods);
 }
 
-void nsEngineContext::OnKeyDown(int key, bool rept) {
-    GetActiveInput()->OnKeyDown(key, rept);
+void nsEngineContext::OnKeyDown(int key, bool rept, int mods) {
+    GetActiveInput()->OnKeyDown(key, rept, mods);
 }
 
 void nsEngineContext::OnChar(char ch) {

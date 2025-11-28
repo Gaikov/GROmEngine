@@ -95,8 +95,8 @@ bool nsCollisionTest::OnPointerMove(float x, float y, int pointerId) {
 
     return true;
 }
-void nsCollisionTest::OnKeyDown(int key, bool rept) {
-    BaseFunctionalTest::OnKeyDown(key, rept);
+void nsCollisionTest::OnKeyDown(int key, bool rept, int mods) {
+    BaseFunctionalTest::OnKeyDown(key, rept, mods);
     if (key == NS_KEY_SPACE) {
         _rectColliding = !_rectColliding;
     }
