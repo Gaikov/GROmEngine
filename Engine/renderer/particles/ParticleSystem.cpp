@@ -27,6 +27,21 @@ void nsParticleSystem::Reset(bool spawn) {
     spawnEnabled = spawn;
 }
 
+void nsParticleSystem::GetBounds(nsRect &rect) const {
+    if (_active) {
+        nsVec2 min, max;
+        min = max = _active->pos;
+        for (auto p = _active; p; p = p->next) {
+            min = nsVec2::Min(min, p->pos);
+            max = nsVec2::Max(max, p->pos);
+        }
+        rect = {min.x, min.y, max.x - min.x, max.y - min.y};
+    } else {
+        constexpr float size = 20;
+        rect = {-size/2, -size/2, size, size};
+    }
+}
+
 int nsParticleSystem::Update(float deltaTime) {
     if (!behaviour) {
         return 0;

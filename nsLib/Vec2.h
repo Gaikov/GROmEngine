@@ -44,8 +44,10 @@ public:
     inline void         Random(float length);
     inline nsVec2       Rotate(float angle) const;
     inline float        GetAngle() const;
+	static nsVec2		Min(const nsVec2 &v1, const nsVec2 &v2);
+	static nsVec2		Max(const nsVec2 &v1, const nsVec2 &v2);
 
-    inline static nsVec2 FromAngle(float angle);
+	inline static nsVec2 FromAngle(float angle);
 };
 
 //---------------------------------------------------------
