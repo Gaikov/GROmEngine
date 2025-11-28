@@ -5,11 +5,10 @@
 #include "VisualParticles.h"
 #include "TimeFormat.h"
 #include "display/container/VisualContainer2d.h"
-#include "nsLib/log.h"
-
 
 void nsVisualParticles::GetLocalBounds(nsRect &bounds) {
-    bounds = {0, 0, 1, 1};
+    constexpr auto size = 30.0f;
+    bounds = {-size / 2, -size / 2, size, size};
     //TODO: calculate bounds
 }
 

@@ -9,6 +9,7 @@
 #include "Particle.h"
 #include "ParticlesBehaviour.h"
 #include "ParticlesPool.h"
+#include "nsLib/math/Rect.h"
 
 class nsParticleSystem final {
 public:
@@ -32,6 +33,7 @@ public:
 
     void RemoveAll();
     void Reset(bool spawn);
+    void GetBounds(nsRect &rect) const;
 
 private:
     nsVec2  _prevPos;
