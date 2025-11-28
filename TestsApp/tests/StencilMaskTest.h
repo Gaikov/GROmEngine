@@ -16,7 +16,7 @@ public:
     void Release() override;
     void Loop(float deltaTime) override;
     void Draw() override;
-    void OnKeyDown(int key, bool rept) override;
+    void OnKeyDown(int key, bool rept, int mods) override;
 
 private:
     nsSprite    _mask;

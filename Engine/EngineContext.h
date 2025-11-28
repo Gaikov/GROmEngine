@@ -24,8 +24,8 @@ protected:
     void OnRelease() override;
 
 private:
-    void OnKeyUp(int key) override;
-    void OnKeyDown(int key, bool rept) override;
+    void OnKeyUp(int key, int mods) override;
+    void OnKeyDown(int key, bool rept, int mods) override;
     void OnChar(char ch) override;
 
 private:

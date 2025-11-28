@@ -4,8 +4,11 @@
 
 #include "ImGUI_gles3.h"
 
+#include <GLFW/glfw3.h>
+
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "nsLib/log.h"
 
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
@@ -66,12 +69,17 @@ bool nsImGUI_gles3::OnPointerMove(float x, float y, int pointerId) {
 void nsImGUI_gles3::OnPointerCancel(int pointerId) {
 }
 
-void nsImGUI_gles3::OnKeyUp(int key) {
+void nsImGUI_gles3::OnKeyUp(const int key, const int mods) {
     ImGuiIO& io = ImGui::GetIO();
     io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(key, 0), false);
+
+    io.AddKeyEvent(ImGuiMod_Ctrl,(mods & GLFW_MOD_CONTROL) != 0);
+    io.AddKeyEvent(ImGuiMod_Shift,(mods & GLFW_MOD_SHIFT) != 0);
+    io.AddKeyEvent(ImGuiMod_Alt,(mods & GLFW_MOD_ALT) != 0);
+    io.AddKeyEvent(ImGuiMod_Super,(mods & GLFW_MOD_SUPER) != 0);
 }
 
-void nsImGUI_gles3::OnKeyDown(int key, bool rept) {
+void nsImGUI_gles3::OnKeyDown(const int key, const bool rept, const int mods) {
     if (rept) {
         return;
     }
@@ -79,12 +87,10 @@ void nsImGUI_gles3::OnKeyDown(int key, bool rept) {
     ImGuiIO& io = ImGui::GetIO();
     io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(key, 0), true);
 
-    /*
-    io.AddKeyEvent(ImGuiKey_ModCtrl, (mods & GLFW_MOD_CONTROL) != 0);
-    io.AddKeyEvent(ImGuiKey_ModShift, (mods & GLFW_MOD_SHIFT) != 0);
-    io.AddKeyEvent(ImGuiKey_ModAlt, (mods & GLFW_MOD_ALT) != 0);
-    io.AddKeyEvent(ImGuiKey_ModSuper, (mods & GLFW_MOD_SUPER) != 0);
-*/
+    io.AddKeyEvent(ImGuiMod_Ctrl,(mods & GLFW_MOD_CONTROL) != 0);
+    io.AddKeyEvent(ImGuiMod_Shift,(mods & GLFW_MOD_SHIFT) != 0);
+    io.AddKeyEvent(ImGuiMod_Alt,(mods & GLFW_MOD_ALT) != 0);
+    io.AddKeyEvent(ImGuiMod_Super,(mods & GLFW_MOD_SUPER) != 0);
 }
 
 void nsImGUI_gles3::OnChar(char ch) {

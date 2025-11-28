@@ -63,8 +63,8 @@ protected:
 
 	void			DrawLine( const char *line, float y, const nsColor &c );
 
-	void	        OnKeyUp( int key ) override {}
-	void	        OnKeyDown( int key, bool rept ) override;
+	void	        OnKeyUp(int key, int mods) override {}
+	void	        OnKeyDown(int key, bool rept, int mods) override;
 	bool            OnInit() override;
 	void            OnRelease() override;
 

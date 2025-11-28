@@ -16,8 +16,8 @@ struct nsEngine
 	static void MainLoop();
 
     static IUserInput* GetActiveInput();
-    static void OnKeyDown(int keyCode, bool repeat);
-    static void OnKeyUp(int keyCode);
+    static void OnKeyDown(int keyCode, bool repeat, int mods);
+    static void OnKeyUp(int keyCode, int mods);
     static void OnCharDown(char ch);
 
     static void OnPointerMove(int pointerId, int clientX, int clientY);

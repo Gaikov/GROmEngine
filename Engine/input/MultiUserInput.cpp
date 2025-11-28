@@ -4,15 +4,15 @@
 
 #include "MultiUserInput.h"
 
-void nsMultiUserInput::OnKeyUp(int key) {
+void nsMultiUserInput::OnKeyUp(int key, int mods) {
     for (auto ui : GetInteractiveItems()) {
-        ui->OnKeyUp(key);
+        ui->OnKeyUp(key, mods);
     }
 }
 
-void nsMultiUserInput::OnKeyDown(int key, bool rept) {
+void nsMultiUserInput::OnKeyDown(int key, bool rept, int mods) {
     for (auto ui : GetInteractiveItems()) {
-        ui->OnKeyDown(key, rept);
+        ui->OnKeyDown(key, rept, mods);
     }
 }
 

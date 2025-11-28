@@ -20,7 +20,7 @@ public:
     void Draw() override;
 
     bool OnPointerMove(float x, float y, int pointerId) override;
-    void OnKeyDown(int key, bool rept) override;
+    void OnKeyDown(int key, bool rept, int mods) override;
     bool OnMouseWheel(float delta) override;
 
 private:

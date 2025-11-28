@@ -325,7 +325,7 @@ void nsConsole::OnChar(char ch)
 //---------------------------------------------------------
 // nsConsole::OnKeyDown:
 //---------------------------------------------------------
-void nsConsole::OnKeyDown( int key, bool rept )
+void nsConsole::OnKeyDown(int key, bool rept, int mods)
 {
 	switch ( key )
 	{

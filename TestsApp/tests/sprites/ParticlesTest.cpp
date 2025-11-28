@@ -150,8 +150,8 @@ nsTextLabel *nsParticlesTest::CreateLabel(const char *text, nsVisualContainer2d 
     return label;
 }
 
-void nsParticlesTest::OnKeyDown(int key, bool rept) {
-    BaseFunctionalTest::OnKeyDown(key, rept);
+void nsParticlesTest::OnKeyDown(int key, bool rept, int mods) {
+    BaseFunctionalTest::OnKeyDown(key, rept, mods);
     Log::Info("key down: %i", key);
     if (!rept) {
         if (key == NS_KEY_SPACE) {

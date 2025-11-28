@@ -18,7 +18,7 @@ public:
     void Draw() override;
 
     bool OnPointerMove(float x, float y, int pointerId) override;
-    void OnKeyDown(int key, bool rept) override;
+    void OnKeyDown(int key, bool rept, int mods) override;
 
     nsTextLabel* CreateLabel(const char *text, nsVisualContainer2d *container) const;
     bool OnPointerDown(float x, float y, int pointerId) override;

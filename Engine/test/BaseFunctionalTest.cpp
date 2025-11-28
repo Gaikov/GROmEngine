@@ -35,17 +35,17 @@ bool BaseFunctionalTest::OnPointerMove(float x, float y, int pointerId) {
     return false;
 }
 
-void BaseFunctionalTest::OnKeyUp(int key) {
+void BaseFunctionalTest::OnKeyUp(int key, int mods) {
     auto input = GetInput();
     if (input) {
-        input->OnKeyUp(key);
+        input->OnKeyUp(key, mods);
     }
 }
 
-void BaseFunctionalTest::OnKeyDown(int key, bool rept) {
+void BaseFunctionalTest::OnKeyDown(int key, bool rept, int mods) {
     auto input = GetInput();
     if (input) {
-        input->OnKeyDown(key, rept);
+        input->OnKeyDown(key, rept, mods);
     }
 }
 
