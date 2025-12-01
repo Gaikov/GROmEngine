@@ -21,7 +21,7 @@ bool nsRayMarchingTest::Init() {
     CreateLight(t, 500, nsColor(0, 1, 0, 0.8));
 
     _floor = new nsSprite();
-    _floor->renState = dev->StateLoad("default/rs/lm.txt");
+    _floor->renState = dev->StateLoad("default/rs/lm.ggrs");
     _floor->desc.tex = dev->TextureLoad("tests/background.jpg");
     _root.AddChild(_floor);
 
