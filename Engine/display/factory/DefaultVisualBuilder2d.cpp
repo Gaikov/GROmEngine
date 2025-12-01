@@ -22,7 +22,7 @@ bool nsDefaultVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, ns
     const auto container = Cast<nsVisualContainer2d>(o);
 
     const auto dev = nsRenDevice::Shared()->Device();
-    const auto rs = dev->StateLoad("default/rs/gui.txt");
+    const auto rs = dev->StateLoad("default/rs/gui.ggrs");
 
     const auto s = new nsSprite();
     s->desc.size = { 100, 100 };

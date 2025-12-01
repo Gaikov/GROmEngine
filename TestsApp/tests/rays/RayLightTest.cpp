@@ -105,7 +105,7 @@ void nsRayLightTest::EnsureBuffer() {
         _vb->SetValidIndices(numIndexes);
         _vb->SetValidVertices(numVerts);
 
-        _rs = _device->StateLoad("default/rs/gui_add.txt");
+        _rs = _device->StateLoad("default/rs/gui_add.ggrs");
     }
 }
 

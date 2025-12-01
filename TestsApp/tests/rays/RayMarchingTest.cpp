@@ -109,7 +109,7 @@ void nsRayMarchingTest::CreateLight(ITexture *tex, float radius, nsColor color) 
     auto lamp = new nsSprite();
     lamp->desc.color = nsColor(color, 1);
     lamp->desc.tex = dev->TextureLoad("default/gizmos/lamp.png");
-    lamp->renState = dev->StateLoad("default/rs/gui.txt");
+    lamp->renState = dev->StateLoad("default/rs/gui.ggrs");
     lamp->desc.ResetSize().ComputeCenter();
     _lamps.push_back(lamp);
     _lampsLayer->AddChild(lamp);

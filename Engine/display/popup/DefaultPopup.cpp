@@ -11,6 +11,7 @@ nsDefaultPopup::nsDefaultPopup() {
     _caption->origin.scale = {0.5, 1};
     _caption->xCenter.SetNumber(0);
     _caption->yMax.SetNumber(pad);
+    _caption->renState = _device->StateLoad("default/rs/gui.ggrs");
     _captionHeight = _caption->GetHeight() + pad * 2;
 
     auto cb = _captionBack = new nsSprite();

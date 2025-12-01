@@ -21,6 +21,7 @@ nsTextLabel *nsLayoutsTest::CreateLabel(const char *text, nsVisualContainer2d *c
     label->drawFrame = true;
     label->text = text;
     label->origin.scale = nsVec2(0.5, 1);
+    label->renState = _device->StateLoad("default/rs/gui.ggrs");
     container->AddChild(label);
     return label;
 }
@@ -157,6 +158,7 @@ void nsLayoutsTest::CreateHGroupLayout() {
     text->SetLineSpace(15);
     text->hAlign = nsAlign::CENTER;
     text->origin.scale = {0.5, 1};
+    text->renState = _device->StateLoad("default/rs/gui.ggrs");
     text->SetText("Hello!\nFucking TikTok\nFrom GROm!");
     text->yCenter.Set(nsLayoutAnchor::NUMBER, 0);
     group->AddChild(text);
@@ -164,7 +166,7 @@ void nsLayoutsTest::CreateHGroupLayout() {
 
 bool nsLayoutsTest::Init() {
     //_root.origin.scale = nsVec2(2, 2);
-    auto guiState = _device->StateLoad("default/rs/gui.txt");
+    auto guiState = _device->StateLoad("default/rs/gui.ggrs");
     auto back = new nsSprite();
     back->renState = guiState;
     back->desc.size = { 100, 100 };

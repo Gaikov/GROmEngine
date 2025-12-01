@@ -12,7 +12,7 @@ bool Sprite3dTest::Init()
 	}
 
 	_tex = _device->TextureLoad("tests/mask.png");
-    _state = _device->StateLoad("default/rs/alpha_blend.txt");
+    _state = _device->StateLoad("default/rs/alpha_blend.ggrs");
 
 	return true;
 }

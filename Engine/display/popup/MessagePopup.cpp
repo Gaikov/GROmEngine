@@ -16,6 +16,7 @@ nsVisualObject2d *nsMessagePopup::CreateContent() {
     _message->hAlign = nsAlign::CENTER;
     _message->xCenter.SetNumber(0);
     _message->origin.scale = {0.5, 1};
+    _message->renState = _device->StateLoad("default/rs/gui.ggrs");
     group->AddChild(_message);
 
     auto buttons = new nsHGroupLayout();
