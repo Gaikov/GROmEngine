@@ -12,7 +12,7 @@
 
 bool nsRenderTextureTest::Init() {
 
-    _state = _device->StateLoad("default/rs/gui_clamp.txt");
+    _state = _device->StateLoad("default/rs/gui_clamp.ggrs");
 
     _rt = _device->RenderTextureCreate(BUFFER_WIDTH, BUFFER_HEIGHT);
     _rtSprite.tex = _rt;

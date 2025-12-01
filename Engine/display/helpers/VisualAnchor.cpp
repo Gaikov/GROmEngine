@@ -6,7 +6,7 @@
 #include "RenAux.h"
 
 nsVisualAnchor::nsVisualAnchor() {
-    renState = _device->StateLoad("default/rs/gui.txt");
+    renState = _device->StateLoad("default/rs/gui.ggrs");
 }
 
 void nsVisualAnchor::GetLocalBounds(nsRect &bounds) {

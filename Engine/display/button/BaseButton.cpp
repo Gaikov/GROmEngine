@@ -9,7 +9,7 @@
 #include "nsLib/log.h"
 
 nsBaseButton::nsBaseButton() {
-    renState = _device->StateLoad("default/rs/gui_clamp.txt");
+    renState = _device->StateLoad("default/rs/gui_clamp.ggrs");
 }
 
 void nsBaseButton::SetClickHandler(const handler_t &handler) {
