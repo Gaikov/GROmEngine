@@ -9,7 +9,7 @@
 
 class nsVGroupLayoutBuilder : public nsGroupLayoutBuilder {
 public:
-    static constexpr auto NAME = "vgroup";
+    static constexpr auto NAME = nsVisualType::VGROUP;
 
     nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;

@@ -6,6 +6,7 @@
 #include "nsLib/StrTools.h"
 #include "nsLib/Vec2.h"
 #include "Engine/display/VisualObject2d.h"
+#include "Engine/display/VisualType.h"
 
 class nsTextButton : public nsBaseButton {
 public:
@@ -18,6 +19,7 @@ public:
     nsVec2      labelScale = nsVec2(0.5, 1);
 
     nsTextButton();
+    const char * GetType() override { return nsVisualType::TEXT_BUTTON; }
 
 protected:
     void GetContentSize(nsVec2 &size) override;

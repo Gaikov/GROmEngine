@@ -12,6 +12,7 @@ public:
     nsProperty<nsAlign::Type>   horizontalAlign;
 
     nsHGroupLayout();
+    const char * GetType() override { return nsVisualType::HGROUP; }
 
 protected:
     void ComputeChildSize(nsVisualObject2d *child) override;

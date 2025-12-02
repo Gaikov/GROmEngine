@@ -5,11 +5,12 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/factory/VisualBuilder2d.h"
+#include "Engine/display/VisualType.h"
+#include "Engine/display/factory/VisualBuilder2d.h"
 
 class nsSpriteBuilder : public nsVisualBuilder2d {
 public:
-    static constexpr auto NAME = "sprite";
+    static constexpr auto NAME = nsVisualType::SPRITE;
     
     nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;

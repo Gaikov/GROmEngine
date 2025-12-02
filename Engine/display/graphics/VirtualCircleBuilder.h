@@ -5,11 +5,12 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/factory/VisualBuilder2d.h"
+#include "Engine/display/VisualType.h"
+#include "Engine/display/factory/VisualBuilder2d.h"
 
 class nsVirtualCircleBuilder : public nsVisualBuilder2d {
 public:
-    static constexpr auto NAME = "circle";
+    static constexpr auto NAME = nsVisualType::CIRCLE;
 
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
     nsVisualObject2d *CreateDefault() override;

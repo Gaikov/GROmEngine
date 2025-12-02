@@ -9,6 +9,7 @@
 #include "Engine/input/InteractiveElement.h"
 #include "Engine/renderer/sprites/SpriteDesc.h"
 #include "BaseButton.h"
+#include "Engine/display/VisualType.h"
 #include "Engine/display/align/Align.h"
 
 class nsImageButton : public nsVisualObject2d, public nsInteractiveElement {
@@ -23,6 +24,8 @@ public:
     nsFont      *font = nullptr;
     nsVec2      labelPos;
     nsColor     textColor;
+
+    const char * GetType() override { return nsVisualType::IMAGE_BUTTON; }
 
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;

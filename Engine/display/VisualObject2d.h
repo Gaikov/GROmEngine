@@ -30,6 +30,7 @@ public:
 
 public:
     nsVisualObject2d();
+    virtual const char* GetType() = 0;
     virtual ~nsVisualObject2d();
     virtual void Destroy();
 

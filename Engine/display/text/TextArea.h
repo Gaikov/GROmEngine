@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Engine/display/VisualObject2d.h"
+#include "Engine/display/VisualType.h"
 #include "Engine/display/align/Align.h"
 #include "nsLib/color.h"
 
@@ -17,6 +18,7 @@ public:
     IRenState       *renState = nullptr;
 
     nsTextArea();
+    const char * GetType() override { return nsVisualType::TEXT_AREA; }
     void SetLineSpace(float space);
     float GetLineSpace() const { return _lineSpace; }
     void SetFont(nsFont *font);

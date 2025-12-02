@@ -7,6 +7,7 @@
 
 #include "Engine/display/VisualObject2d.h"
 #include "Engine/Font.h"
+#include "Engine/display/VisualType.h"
 #include "nsLib/color.h"
 #include "Engine/display/align/Align.h"
 
@@ -23,6 +24,7 @@ public:
     void SetInt(int value);
 
     nsTextLabel();
+    const char * GetType() override { return nsVisualType::LABEL; }
     void Loop() override;
 
     void GetLocalBounds(nsRect &bounds) override;

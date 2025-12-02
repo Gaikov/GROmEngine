@@ -15,6 +15,8 @@ public:
 
     nsVGroupLayout();
 
+    const char * GetType() override { return nsVisualType::VGROUP; }
+
 protected:
     void ComputeChildSize(nsVisualObject2d *child) override;
 

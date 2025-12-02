@@ -16,6 +16,7 @@ public:
 
     nsRayLightTest(ITexture *tex, float radius);
 
+    const char* GetType() override { return "RayLightTest"; }
     void CastShadows(const std::vector<nsRayBoxTest*> &objects);
 
     void GetLocalBounds(nsRect &bounds) override;

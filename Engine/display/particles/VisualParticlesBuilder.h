@@ -5,11 +5,12 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/factory/VisualBuilder2d.h"
+#include "Engine/display/VisualType.h"
+#include "Engine/display/factory/VisualBuilder2d.h"
 
 class nsVisualParticlesBuilder : public nsVisualBuilder2d {
 public:
-    static constexpr auto NAME = "particles";
+    static constexpr auto NAME = nsVisualType::PARTICLES;
 
     nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;

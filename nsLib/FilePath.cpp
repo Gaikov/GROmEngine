@@ -255,4 +255,12 @@ nsString nsFilePath::GetNameOnly() const {
     return "";
 }
 
+nsString nsFilePath::GetName() const {
+	const auto lastSlash = strrchr(_path, '/');
+	if (lastSlash) {
+		return lastSlash + 1;
+	}
+	return "";
+}
+
 

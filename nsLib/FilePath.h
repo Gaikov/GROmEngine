@@ -21,6 +21,7 @@ public:
 	nsString GetExtension() const;
 	nsString GetPathWithoutExt() const;
     nsString GetNameOnly() const;
+	nsString GetName() const;
 
 	bool Listing(tList &result) const;
     bool ListingRecursive(tList &result) const;

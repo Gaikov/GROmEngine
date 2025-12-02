@@ -5,11 +5,12 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/factory/VisualBuilder2d.h"
+#include "Engine/display/VisualType.h"
+#include "Engine/display/factory/VisualBuilder2d.h"
 
 class nsTextLabelBuilder : public nsVisualBuilder2d {
 public:
-    static constexpr auto NAME = "label";
+    static constexpr auto NAME = nsVisualType::LABEL;
 
     nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;

@@ -16,6 +16,7 @@ public:
     nsRayBoxTest(float width, float height);
 
 
+    const char* GetType() override { return "RayBoxTest"; }
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
 

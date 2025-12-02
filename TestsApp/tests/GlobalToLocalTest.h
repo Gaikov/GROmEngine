@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Engine/display/VisualType.h"
 #include "Engine/test/BaseFunctionalTest.h"
 #include "Engine/display/container/VisualContainer2d.h"
 
@@ -15,6 +16,7 @@ public:
     void GetLocalBounds(nsRect &bounds) override;
     void DrawContent(const nsVisualContext2d &context) override;
     void Loop() override;
+    const char * GetType() override { return nsVisualType::RECTANGLE; }
 
 private:
     float _width = 200;

@@ -6,9 +6,11 @@
 #pragma once
 
 #include "BaseLayout.h"
+#include "Engine/display/VisualType.h"
 
 class nsGroupLayout : public nsBaseLayout {
 protected:
+    const char * GetType() override { return nsVisualType::GROUP; }
     void ComputeChildSize(nsVisualObject2d *child) override;
     void ComputeChildPlacement(nsVisualObject2d *child) override;
     void ComputeChildXPlacement(nsVisualObject2d *child, const nsRect &bounds) const;
