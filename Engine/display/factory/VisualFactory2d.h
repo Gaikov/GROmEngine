@@ -8,6 +8,7 @@
 #include "DefaultVisualBuilder2d.h"
 #include "VisualCreationContext.h"
 #include "VisualBuilder2d.h"
+#include "Core/ScriptSaver.h"
 #include "nsLib/SubSystem.h"
 #include "nsLib/log.h"
 
@@ -17,6 +18,8 @@ public:
 
     nsVisualObject2d *Create(script_state_t *ss) override;
     nsVisualObject2d *Create(const char *filePath) override;
+
+    bool Serialize(const char *filePath, nsVisualObject2d *object);
 
     nsVisualBuilder2d* GetBuilder(const char *name) override;
 

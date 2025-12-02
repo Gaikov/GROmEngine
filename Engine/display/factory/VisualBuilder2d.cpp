@@ -42,6 +42,37 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
     return true;
 }
 
+bool nsVisualBuilder2d::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
+    if (!o->id.empty()) {
+        saver.Printf("$id \"%s\"", o->id.c_str());
+    }
+
+    SaveAnchor(saver, "xMin", o->xMin);
+    SaveAnchor(saver, "yMin", o->yMin);
+    SaveAnchor(saver, "xMax", o->xMax);
+    SaveAnchor(saver, "yMax", o->yMax);
+    SaveAnchor(saver, "xCenter", o->xCenter);
+    SaveAnchor(saver, "yCenter", o->yCenter);
+
+    saver.PrintVar("x", "%f", o->origin.pos->x);
+    saver.PrintVar("y", "%f", o->origin.pos->y);
+    saver.PrintVar("sx", "%f", o->origin.scale->x);
+    saver.PrintVar("sy", "%f", o->origin.scale->y);
+    saver.PrintVar("angle", "%f", nsMath::ToDeg(o->origin.angle));
+    saver.PrintVar("visible", "%i", o->visible ? 1 : 0);
+
+    return true;
+}
+
+bool nsVisualBuilder2d::Serialize(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
+    bool res = false;
+    if (saver.BlockBegin(o->GetType())) {
+        res = SerializeProps(saver, o, context);
+        saver.BlockEnd();
+    }
+    return res;
+}
+
 void nsVisualBuilder2d::ParseAnchor(script_state_t *ss, const char *name, nsLayoutAnchor &anchor) {
     float val[2];
     if (ParseFloat2(ss, name, val)) {
@@ -49,5 +80,12 @@ void nsVisualBuilder2d::ParseAnchor(script_state_t *ss, const char *name, nsLayo
         anchor.type = val[1] > 0 ? nsLayoutAnchor::PERCENT : nsLayoutAnchor::NUMBER;
     }
 }
+
+void nsVisualBuilder2d::SaveAnchor(nsScriptSaver &saver, const char *name, const nsLayoutAnchor &anchor) {
+    if (anchor.IsUsed()) {
+        saver.Printf("$%s %f %i", name, static_cast<float>(anchor.value), anchor.type == nsLayoutAnchor::PERCENT ? 1 : 0);
+    }
+}
+
 
 

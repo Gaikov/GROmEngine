@@ -20,6 +20,8 @@ public:
     bool            IsValid();
 
 	void        	Printf( const char *fmt, ... );
+	void			Print(const char *line) const;
+	void			PrintVar(const char *name, const char *fmt, ...) const;
 	bool			BlockBegin(const char *name);
 	void			BlockEnd();
 

@@ -41,6 +41,23 @@ void nsScriptSaver::Printf(const char *fmt, ...) {
         fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), msg);
 }
 
+void nsScriptSaver::Print(const char *line) const {
+    if (m_file)
+        fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), line);
+}
+
+void nsScriptSaver::PrintVar(const char *name, const char *fmt, ...) const {
+    char msg[MAX_OUT_LEN];
+
+    va_list list;
+    va_start(list, fmt);
+    vsprintf(msg, fmt, list);
+    va_end(list);
+
+    if (m_file)
+        fprintf(m_file, "%s$%s %s\n", StrTabs(m_tabCount), name, msg);
+}
+
 //---------------------------------------------------------
 // nsScriptSaver::BlockBegin:
 //---------------------------------------------------------
