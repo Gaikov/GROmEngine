@@ -83,6 +83,21 @@ nsVisualObject2d *nsVisualFactory2d::Create(const char *filePath) {
     return nullptr;
 }
 
+bool nsVisualFactory2d::Serialize(const char *filePath, nsVisualObject2d *object) {
+    Log::Info("serializing layout: %s", filePath);
+    nsScriptSaver ss(filePath);
+    if (!ss.IsValid()) {
+        return false;
+    }
+
+    if (const auto builder = GetBuilder(object->GetType())) {
+        builder->Serialize(ss, object, this);
+        return true;
+    }
+
+    return false;
+}
+
 nsVisualBuilder2d *nsVisualFactory2d::GetBuilder(const char *name) {
     if (!StrCheck(name)) {
         Log::Warning("Invalid layout builder name!");

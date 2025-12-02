@@ -59,3 +59,34 @@ bool nsVisualContainerBuilder::Parse(script_state_t *ss, nsVisualObject2d *objec
 
     return true;
 }
+bool nsVisualContainerBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
+        return false;
+    }
+
+    const auto container = Cast<nsVisualContainer2d>(o);
+    if (!container) {
+        return false;
+    }
+
+    auto &children = container->GetChildren();
+    if (children.empty()) {
+        return true;
+    }
+
+    if (saver.BlockBegin("children")) {
+        bool res = true;
+        for (const auto child : children) {
+            if (const auto builder = context->GetBuilder(child->GetType())) {
+                res &= builder->Serialize(saver, child, context);
+            } else {
+                res = false;
+            }
+        }
+
+        saver.BlockEnd();
+        return res;
+    }
+
+    return false;
+}
