@@ -5,11 +5,12 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/factory/VisualBuilder2d.h"
+#include "Engine/display/VisualType.h"
+#include "Engine/display/factory/VisualBuilder2d.h"
 
 class nsVisualRectBuilder : public nsVisualBuilder2d {
 public:
-    static constexpr auto NAME = "rectangle";
+    static constexpr auto NAME = nsVisualType::RECTANGLE;
 
     nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;

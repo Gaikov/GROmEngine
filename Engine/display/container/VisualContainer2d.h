@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-
+#include "Engine/display/VisualType.h"
 #include "Engine/input/InteractiveElement.h"
 #include "Engine/display/VisualObject2d.h"
 
@@ -15,7 +15,9 @@ public:
     bool interactiveChildren = true;
 
     nsVisualContainer2d();
+    const char * GetType() override { return nsVisualType::CONTAINER; }
     void Destroy() override;
+
     virtual void DestroyChildren();
 
     nsVisualObject2d *GetChildById(const char *id);

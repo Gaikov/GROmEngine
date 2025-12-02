@@ -5,12 +5,13 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/factory/VisualBuilder2d.h"
+#include "Engine/display/VisualType.h"
+#include "Engine/display/factory/VisualBuilder2d.h"
 #include "renderer/sprites/SpriteDesc.h"
 
 class nsImageButtonBuilder : public nsVisualBuilder2d {
 public:
-    static constexpr auto NAME = "imageButton";
+    static constexpr auto NAME = nsVisualType::IMAGE_BUTTON;
 
     nsVisualObject2d *CreateDefault() override;
 

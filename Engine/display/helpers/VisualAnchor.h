@@ -5,7 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
+#include "Engine/display/VisualType.h"
 #include "nsLib/color.h"
 
 class nsVisualAnchor : public nsVisualObject2d {
@@ -16,6 +17,7 @@ public:
     nsColor color = nsColor::red;
     IRenState *renState = nullptr;
 
+    const char * GetType() override { return nsVisualType::ANCHOR; }
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
     void DrawContent(const nsVisualContext2d &context) override;

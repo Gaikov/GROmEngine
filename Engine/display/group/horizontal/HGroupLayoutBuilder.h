@@ -9,7 +9,7 @@
 
 class nsHGroupLayoutBuilder : public nsGroupLayoutBuilder {
 public:
-    static constexpr auto NAME = "hgroup";
+    static constexpr auto NAME = nsVisualType::HGROUP;
 
     nsVisualObject2d *CreateDefault() override;
     bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;

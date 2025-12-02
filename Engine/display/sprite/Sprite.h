@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Engine/display/VisualObject2d.h"
+#include "Engine/display/VisualType.h"
 #include "Engine/renderer/sprites/SpriteDesc.h"
 
 class nsSprite : public nsVisualMask {
@@ -15,6 +16,7 @@ public:
     bool            drawFrame = false;
 
     nsSprite();
+    const char * GetType() override { return nsVisualType::SPRITE; }
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;
 

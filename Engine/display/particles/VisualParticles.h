@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Engine/display/VisualType.h"
 #include "Engine/display/VisualObject2d.h"
 #include "Engine/renderer/particles/ParticleSystem.h"
 
@@ -22,6 +23,7 @@ public:
         return _system;
     }
 
+    const char * GetType() override { return nsVisualType::PARTICLES; }
 
     void ResetPosition();
     void GetLocalBounds(nsRect &bounds) override;

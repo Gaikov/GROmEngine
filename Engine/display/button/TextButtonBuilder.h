@@ -6,10 +6,11 @@
 #pragma once
 
 #include "BaseButtonBuilder.h"
+#include "Engine/display/VisualType.h"
 
 class nsTextButtonBuilder : public nsBaseButtonBuilder {
 public:
-    static constexpr auto NAME = "textButton";
+    static constexpr auto NAME = nsVisualType::TEXT_BUTTON;
 
     nsVisualObject2d *CreateDefault() override;
 

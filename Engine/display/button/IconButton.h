@@ -4,6 +4,7 @@
 
 #pragma once
 #include "BaseButton.h"
+#include "Engine/display/VisualType.h"
 #include "Engine/renderer/sprites/SpriteDesc.h"
 
 class nsIconButton : public nsBaseButton {
@@ -14,6 +15,7 @@ public:
 
     ~nsIconButton() override;
     void SetTexture(const char* fileName);
+    const char * GetType() override { return nsVisualType::ICON_BUTTON; }
 
 protected:
     ITexture    *_texture = nullptr;
