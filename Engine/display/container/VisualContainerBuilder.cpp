@@ -59,6 +59,7 @@ bool nsVisualContainerBuilder::Parse(script_state_t *ss, nsVisualObject2d *objec
 
     return true;
 }
+
 bool nsVisualContainerBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
     if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
         return false;
@@ -70,6 +71,9 @@ bool nsVisualContainerBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObje
     }
 
     auto &children = container->GetChildren();
+
+    saver.VarBool("interactiveChildren", container->interactiveChildren, true);
+
     if (children.empty()) {
         return true;
     }

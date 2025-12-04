@@ -54,12 +54,12 @@ bool nsVisualBuilder2d::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o
     SaveAnchor(saver, "xCenter", o->xCenter);
     SaveAnchor(saver, "yCenter", o->yCenter);
 
-    saver.PrintVar("x", "%f", o->origin.pos->x);
-    saver.PrintVar("y", "%f", o->origin.pos->y);
-    saver.PrintVar("sx", "%f", o->origin.scale->x);
-    saver.PrintVar("sy", "%f", o->origin.scale->y);
-    saver.PrintVar("angle", "%f", nsMath::ToDeg(o->origin.angle));
-    saver.PrintVar("visible", "%i", o->visible ? 1 : 0);
+    saver.VarFloat("x", o->origin.pos->x, 0);
+    saver.VarFloat("y", o->origin.pos->y, 0);
+    saver.VarFloat("sx", o->origin.scale->x, 1);
+    saver.VarFloat("sy", o->origin.scale->y, 1);
+    saver.VarFloat("angle",  nsMath::ToDeg(o->origin.angle), 0);
+    saver.VarBool("visible", o->visible, true);
 
     return true;
 }
