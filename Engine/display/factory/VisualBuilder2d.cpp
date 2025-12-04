@@ -73,12 +73,14 @@ bool nsVisualBuilder2d::Serialize(nsScriptSaver &saver, nsVisualObject2d *o, nsV
     return res;
 }
 
-void nsVisualBuilder2d::ParseAnchor(script_state_t *ss, const char *name, nsLayoutAnchor &anchor) {
+bool nsVisualBuilder2d::ParseAnchor(script_state_t *ss, const char *name, nsLayoutAnchor &anchor) {
     float val[2];
     if (ParseFloat2(ss, name, val)) {
         anchor.value = val[0];
         anchor.type = val[1] > 0 ? nsLayoutAnchor::PERCENT : nsLayoutAnchor::NUMBER;
+        return true;
     }
+    return false;
 }
 
 void nsVisualBuilder2d::SaveAnchor(nsScriptSaver &saver, const char *name, const nsLayoutAnchor &anchor) {

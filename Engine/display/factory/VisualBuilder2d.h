@@ -32,7 +32,7 @@ public:
         return res;
     }
 
-    static void ParseAnchor(script_state_t *ss, const char *name, nsLayoutAnchor &anchor);
+    static bool ParseAnchor(script_state_t *ss, const char *name, nsLayoutAnchor &anchor);
     static void SaveAnchor(nsScriptSaver &saver, const char *name, const nsLayoutAnchor &anchor);
 
 protected:
