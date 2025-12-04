@@ -58,6 +58,36 @@ void nsScriptSaver::PrintVar(const char *name, const char *fmt, ...) const {
         fprintf(m_file, "%s$%s %s\n", StrTabs(m_tabCount), name, msg);
 }
 
+void nsScriptSaver::VarBool(const char *name, bool value, bool defValue) const {
+    if (value != defValue) {
+        PrintVar(name, "%d", value ? 1 : 0);
+    }
+}
+
+void nsScriptSaver::VarFloat(const char *name, float value, float defValue) const {
+    if (value != defValue) {
+        PrintVar(name, "%f", value);
+    }
+}
+
+void nsScriptSaver::VarFloat2(const char *name, const float value[2], const float defValue[2]) const {
+    if (value[0] != defValue[0] || value[1] != defValue[1]) {
+        PrintVar(name, "%f %f", value[0], value[1]);
+    }
+}
+
+void nsScriptSaver::VarFloat3(const char *name, const float value[3], const float defValue[3]) const {
+    if (value[0] != defValue[0] || value[1] != defValue[1] || value[2] != defValue[2]) {
+        PrintVar(name, "%f %f %f", value[0], value[1], value[2]);
+    }
+}
+
+void nsScriptSaver::VarFloat4(const char *name, const float value[4], const float defValue[4]) const {
+    if (value[0] != defValue[0] || value[1] != defValue[1] || value[2] != defValue[2] || value[3] != defValue[3]) {
+        PrintVar(name, "%f %f %f %f", value[0], value[1], value[2], value[3]);
+    }
+}
+
 //---------------------------------------------------------
 // nsScriptSaver::BlockBegin:
 //---------------------------------------------------------
