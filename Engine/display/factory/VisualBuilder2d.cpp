@@ -44,7 +44,7 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
 
 bool nsVisualBuilder2d::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
     if (!o->id.empty()) {
-        saver.Printf("$id \"%s\"", o->id.c_str());
+        saver.VarString("id", o->id.c_str());
     }
 
     SaveAnchor(saver, "xMin", o->xMin);

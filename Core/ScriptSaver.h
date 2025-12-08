@@ -28,6 +28,7 @@ public:
 	void			VarFloat2(const char *name, const float value[2], const float defValue[2]) const;
 	void			VarFloat3(const char *name, const float value[3], const float defValue[3]) const;
 	void			VarFloat4(const char *name, const float value[4], const float defValue[4]) const;
+	void			VarString(const char *name, const char *value) const;
 
 	bool			BlockBegin(const char *name);
 	void			BlockEnd();

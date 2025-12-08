@@ -88,6 +88,10 @@ void nsScriptSaver::VarFloat4(const char *name, const float value[4], const floa
     }
 }
 
+void nsScriptSaver::VarString(const char *name, const char *value) const {
+    PrintVar(name, "\"%s\"", value);
+}
+
 //---------------------------------------------------------
 // nsScriptSaver::BlockBegin:
 //---------------------------------------------------------
