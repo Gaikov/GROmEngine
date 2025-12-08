@@ -17,6 +17,7 @@ class nsVisualMask;
 
 class nsVisualObject2d {
     friend class nsVisualContainer2d;
+    friend class nsVisualRef;
 
 public:
     std::string id;

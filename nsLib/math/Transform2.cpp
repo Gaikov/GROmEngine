@@ -74,6 +74,12 @@ void nsTransform2::RemoveChild(nsTransform2 *child) {
     }
 }
 
+void nsTransform2::Reset() {
+    pos = nsVec2(0, 0);
+    scale = nsVec2(1, 1);
+    angle = 0;
+}
+
 void nsTransform2::InvalidateWorld() {
     _worldValid = false;
     _invWorldValid = false;
