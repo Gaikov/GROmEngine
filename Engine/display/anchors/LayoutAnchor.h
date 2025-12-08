@@ -20,6 +20,9 @@ public:
 
     void Set(nsAnchorType anchorType, float anchorValue);
     void SetNumber(float n);
+    bool operator == (const nsLayoutAnchor &other) const {
+        return type == other.type && value == other.value;
+    }
 
 public:
     nsLayoutAnchor();
