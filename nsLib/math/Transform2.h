@@ -26,6 +26,7 @@ public:
     void AddChild(nsTransform2 *child);
     void RemoveChild(nsTransform2 *child);
     nsTransform2* GetParent() const { return _parent; }
+    void Reset();
 
 private:
     nsFastList<nsTransform2>    _children;
