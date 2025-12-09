@@ -119,6 +119,10 @@ bool nsFilePath::Listing(nsFilePath::tList &result) const
 
 nsFilePath nsFilePath::ResolvePath(const char *relative) const
 {
+	if (_path.IsEmpty()) {
+		return nsFilePath(relative);
+	}
+
 	nsString path = _path;
 	if (path[path.Length() - 1] != '/')
 	{

@@ -12,8 +12,16 @@ class nsVisualBuilder2d;
 
 class nsVisualCreationContext2d {
 public:
+    nsVisualCreationContext2d();
+    virtual ~nsVisualCreationContext2d() = default;
+
+    //project/game folder (relative to application or absolute)
+    nsFilePath assetsPath;
+
     virtual nsVisualObject2d *Create(script_state_t *ss) = 0;
     virtual nsVisualObject2d *Create(const char *filePath) = 0;
     virtual nsVisualBuilder2d* GetBuilder(const char *name) = 0;
     virtual nsVisualObject2d* CreateByID(const char *bindingId) = 0;
+
+    nsFilePath ParseAssetPath(script_state_t *ss, const char *name) const;
 };
