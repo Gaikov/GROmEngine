@@ -8,7 +8,6 @@
 #include "DefaultVisualBuilder2d.h"
 #include "VisualCreationContext.h"
 #include "VisualBuilder2d.h"
-#include "Core/ScriptSaver.h"
 #include "nsLib/SubSystem.h"
 #include "nsLib/log.h"
 
