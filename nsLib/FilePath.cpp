@@ -4,8 +4,10 @@
 
 #include "FilePath.h"
 #include <sys/stat.h>
-#include <errno.h>
+#include <filesystem>
 #include <dirent.h>
+
+namespace fs = std::filesystem;
 
 nsFilePath::nsFilePath(const char *path) :
 		_path(path)
@@ -120,7 +122,7 @@ bool nsFilePath::Listing(nsFilePath::tList &result) const
 nsFilePath nsFilePath::ResolvePath(const char *relative) const
 {
 	if (_path.IsEmpty()) {
-		return nsFilePath(relative);
+		return {relative};
 	}
 
 	nsString path = _path;
@@ -129,7 +131,15 @@ nsFilePath nsFilePath::ResolvePath(const char *relative) const
 		path += "/";
 	}
 	path += relative;
-	return nsFilePath(path);
+	return {path};
+}
+
+nsString nsFilePath::GetRelativePath(const nsFilePath &path) const {
+	const fs::path base = static_cast<const char *>(_path);
+	const fs::path target = static_cast<const char *>(path._path);
+	nsString res = fs::relative( target, base).string().c_str();
+	Normalize(res);
+	return res;
 }
 
 bool nsFilePath::FolderListing(const char *folderPath, std::vector<nsString> &result)
@@ -160,11 +170,11 @@ nsFilePath nsFilePath::GetParent() const
 	auto     slash  = (char *) strrchr(parent, '/');
 	if (!slash)
 	{
-		return nsFilePath("");
+		return "";
 	}
 
 	*slash = 0;
-	return nsFilePath(parent);
+	return parent.AsChar();
 }
 
 bool nsFilePath::CreateFolders() const

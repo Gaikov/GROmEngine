@@ -17,7 +17,7 @@ public:
 	static bool Exists(const char *path);
 
 public:
-	explicit nsFilePath(const char *path);
+	nsFilePath(const char *path);
 	nsString GetExtension() const;
 	nsString GetPathWithoutExt() const;
     nsString GetNameOnly() const;
@@ -26,6 +26,7 @@ public:
 	bool Listing(tList &result) const;
     bool ListingRecursive(tList &result) const;
 	nsFilePath ResolvePath(const char *relative) const;
+	nsString GetRelativePath(const nsFilePath &path) const;
 	bool CheckExtension(const char *ext) const;
 	bool IsFolder() const;
 	bool IsExists() const;
