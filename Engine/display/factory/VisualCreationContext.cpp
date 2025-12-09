@@ -15,3 +15,11 @@ nsFilePath nsVisualCreationContext2d::ParseAssetPath(script_state_t *ss, const c
     }
     return nsFilePath(path);
 }
+
+void nsVisualCreationContext2d::SaveAssetPath(const nsScriptSaver &saver, const char *name, const nsFilePath &path) const {
+    saver.VarString(name, assetsPath.GetRelativePath(path));
+}
+
+nsString nsVisualCreationContext2d::RelativeAssetPath(const nsFilePath &path) const {
+    return assetsPath.GetRelativePath(path);
+}
