@@ -17,6 +17,7 @@ public:
 
 public:
 	GLShader(nsGLProgramsCache &programs);
+	const char* GetPath() const { return m_fileName; }
 	bool		Reload();
 
 	void		ForceApply();

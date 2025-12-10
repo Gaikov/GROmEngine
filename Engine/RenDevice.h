@@ -179,6 +179,7 @@ struct IRenDevice
 	virtual void			RenderTextureBind(IRenderTexture *rt) = 0;
 
 	//render state
+	virtual const char*		StateGetPath(IRenState *state) = 0;
 	virtual IRenState*		StateLoad( const char *fileName ) = 0;
 	virtual void			StateRelease( IRenState *state ) = 0;
 	virtual void			StateApply( IRenState *state ) = 0;

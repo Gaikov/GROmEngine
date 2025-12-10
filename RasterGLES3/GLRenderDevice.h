@@ -31,6 +31,7 @@ public:
 	void TextureBind(ITexture *texture) override;
 	void TextureTranform(const float *offs2, const float *scale2) override;
 	IRenState *StateLoad(const char *fileName) override;
+	const char* StateGetPath(IRenState *state) override;
 	void StateRelease(IRenState *state) override;
 	void StateApply(IRenState *state) override;
 	void ClearScene(uint flags) override;

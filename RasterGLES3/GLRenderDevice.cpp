@@ -195,6 +195,13 @@ IRenState *GLRenderDevice::StateLoad(const char *fileName)
 	return _shaders.GetResource(fileName, 0);
 }
 
+const char * GLRenderDevice::StateGetPath(IRenState *state) {
+	if (const auto shader = dynamic_cast<const GLShader *>(state)) {
+		return shader->GetPath();
+	}
+	return nullptr;
+}
+
 void GLRenderDevice::StateRelease(IRenState *state)
 {
 	auto shader = dynamic_cast<GLShader *>(state);
