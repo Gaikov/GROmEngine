@@ -17,13 +17,11 @@ bool nsTextLabelBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
         return false;
     }
 
-    auto label = dynamic_cast<nsTextLabel*>(object);
-    auto font = nsFontsCache::Shared()->LoadFont(ParseString(ss, "font"));
-    if (font) {
+    const auto label = dynamic_cast<nsTextLabel*>(object);
+    if (const auto font = nsFontsCache::Shared()->LoadFont(context->ParseAssetPath(ss, "font"))) {
         label->font = font;
     }
-    auto state = nsRenDevice::Shared()->Device()->StateLoad(ParseString(ss, "renState"));
-    if (state) {
+    if (const auto state = nsRenDevice::Shared()->Device()->StateLoad(context->ParseAssetPath(ss, "renState"))) {
         label->renState = state;
     }
 
@@ -39,3 +37,26 @@ bool nsTextLabelBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
     return true;
 }
 
+bool nsTextLabelBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
+        return false;
+    }
+
+    const auto label = Cast<nsTextLabel>(o);
+    if (label->font) {
+        context->SaveAssetPath(saver, "font", label->font->GetPath());
+    }
+
+    if (label->renState) {
+        const auto path = nsRenDevice::Shared()->Device()->StateGetPath(label->renState);
+        context->SaveAssetPath(saver, "renState", path);
+    }
+
+    saver.VarString("text", label->text);
+    saver.VarFloat4("color", label->color, nsColor::white);
+    saver.VarBool("drawFrame", label->drawFrame, false);
+    nsAlign::Save(saver, "hAlign", label->hAlign, nsAlign::BEGIN);
+    saver.VarFloat("letterSpace", label->letterSpace, 0.0f);
+
+    return true;
+}
