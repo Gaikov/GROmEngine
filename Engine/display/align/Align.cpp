@@ -15,7 +15,7 @@ float nsAlign::Compute(const Type value, const float contentSize, const float ar
     return areaSize - contentSize;
 }
 
-nsAlign::Type nsAlign::Parse(script_state_t *ss, const char *name, Type defValue) {
+nsAlign::Type nsAlign::Parse(script_state_t *ss, const char *name, const Type defValue) {
     auto value = ParseStrP(ss, name);
     if (!value) {
         return defValue;
@@ -28,4 +28,16 @@ nsAlign::Type nsAlign::Parse(script_state_t *ss, const char *name, Type defValue
     }
 
     return BEGIN;
+}
+
+void nsAlign::Save(const nsScriptSaver &saver, const char *name, const Type value, const Type defValue) {
+    if (value != defValue) {
+        std::string_view str = "begin";
+        if (value == END) {
+            str = "end";
+        } else if (value == CENTER) {
+            str = "center";
+        }
+        saver.VarString(name, str.data());
+    }
 }
