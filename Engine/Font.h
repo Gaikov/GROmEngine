@@ -42,13 +42,15 @@ private:
 	fchar_t		ch[MAX_CHARS] = {};
 
 private:
-    nsFont(nsQuadsBuffer *renBuffer);
+    explicit nsFont(nsQuadsBuffer *renBuffer);
 	~nsFont();
     bool		Load( const char *filename );
 	void		Free();
 
 public:
+	const char* GetPath() const { return m_fileName; }
     float       GetLineHeight() const { return _lineHeight; }
+	size_t		GetPageCount() const { return _pages.size(); }
     ITexture*   GetPage(int index) { return _pages[index]; }
     void		Draw(const char *str, float pos[2], float scale[2], const float color[4], int len = 0, float fixedWidth = 0, float letterSpace = 0 );
 	void		DrawFX( const char *str, float pos[2], float scale[2], const float c[4], float scale2[2], const float c2[2], int len );
