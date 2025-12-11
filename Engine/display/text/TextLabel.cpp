@@ -9,6 +9,8 @@
 
 nsTextLabel::nsTextLabel() {
     font = nsFontsCache::Shared()->SysFont();
+    text = "Label";
+    renState = _device->StateLoad("default/rs/gui.ggrs");
 }
 
 void nsTextLabel::GetLocalBounds(nsRect &bounds) {
