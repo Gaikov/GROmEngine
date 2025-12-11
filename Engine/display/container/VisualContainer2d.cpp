@@ -38,6 +38,25 @@ void nsVisualContainer2d::AddChild(nsVisualObject2d *obj) {
     }
 }
 
+void nsVisualContainer2d::AddChildAt(nsVisualObject2d *obj, int index) {
+    assert(obj != this && obj);
+
+    if (obj->_parent) {
+        obj->_parent->RemoveChild(obj);
+    }
+
+    _children.insert(_children.begin() + index, obj);
+    origin.AddChild(&obj->origin);
+    obj->_parent = this;
+    if (IsOnStage()) {
+        obj->OnAddedToStage();
+    }
+}
+
+int nsVisualContainer2d::GetChildIndex(nsVisualObject2d *obj) {
+    return std::distance(_children.begin(), std::find(_children.begin(), _children.end(), obj));
+}
+
 void nsVisualContainer2d::RemoveChild(nsVisualObject2d *obj) {
     auto it = std::find(_children.begin(), _children.end(), obj);
     if (it != _children.end()) {
