@@ -23,6 +23,7 @@ public:
     nsString GetNameOnly() const;
 	nsString GetName() const;
 
+	bool IsEmpty() const { return _path.IsEmpty(); }
 	bool Listing(tList &result) const;
     bool ListingRecursive(tList &result) const;
 	nsFilePath ResolvePath(const char *relative) const;
