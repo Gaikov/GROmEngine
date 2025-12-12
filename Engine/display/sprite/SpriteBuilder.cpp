@@ -16,13 +16,15 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
         return false;
     }
 
-    auto sprite = dynamic_cast<nsSprite *>(object);
-    auto dev = nsRenDevice::Shared()->Device();
+    const auto sprite = dynamic_cast<nsSprite *>(object);
+    const auto dev = nsRenDevice::Shared()->Device();
 
-    auto tex = dev->TextureLoad(ParseString(ss, "texture"), false);
-    if (tex) {
-        sprite->desc.tex = tex;
-        sprite->desc.ResetSize();
+    auto assetPath = context->ParseAssetPath(ss, "texture");
+    if (!assetPath.IsEmpty()) {
+        if (const auto tex = dev->TextureLoad(assetPath, false)) {
+            sprite->desc.tex = tex;
+            sprite->desc.ResetSize();
+        }
     }
 
     if (ps_var_begin(ss, "pivot")) {
@@ -35,6 +37,10 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
 
     ParseColorExt(ss, "color", sprite->desc.color);
 
+    if (ps_var_begin(ss, "tex1")) {
+        ps_var_2f(ss, sprite->desc.tex1);
+    }
+
     if (ps_var_begin(ss, "tilesX")) {
         sprite->desc.tex2.x = ps_var_f(ss);
     }
@@ -43,12 +49,46 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
         sprite->desc.tex2.y = ps_var_f(ss);
     }
 
-    auto state = dev->StateLoad(ParseString(ss, "renState"));
-    if (state) {
-        sprite->renState = state;
+    assetPath = context->ParseAssetPath(ss, "renState");
+    if (!assetPath.IsEmpty()) {
+        if (const auto state = dev->StateLoad(ParseString(ss, "renState"))) {
+            sprite->renState = state;
+        }
     }
 
     return true;
 }
+bool nsSpriteBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
+        return false;
+    }
 
+    const auto sprite = Cast<nsSprite>(o);
+    if (!sprite) {
+        return false;
+    }
 
+    auto &desc = sprite->desc;
+
+    const auto dev = nsRenDevice::Shared()->Device();
+    if (desc.tex) {
+        context->SaveAssetPath(saver, "texture", dev->TextureGetPath(desc.tex));
+    }
+
+    saver.VarFloat2("pivot", desc.center, nsVec2());
+    saver.VarFloat2("size", desc.size, nsVec2());
+    saver.VarFloat4("color", desc.color, nsColor());
+
+    if (desc.tex1 != nsVec2()) {
+        saver.VarFloat2("tex1", desc.tex1, nsVec2());
+    }
+
+    saver.VarFloat("tilesX", desc.tex2.x, 1.0f);
+    saver.VarFloat("tilesY", desc.tex2.y, 1.0f);
+
+    if (sprite->renState) {
+        context->SaveAssetPath(saver, "renState", dev->StateGetPath(sprite->renState));
+    }
+
+    return true;
+}
