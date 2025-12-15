@@ -189,5 +189,9 @@ bool nsArgs::HasArg(const char *value) const
 	return false;
 }
 
+void nsArgs::Clear() {
+	Free();
+}
+
 
 

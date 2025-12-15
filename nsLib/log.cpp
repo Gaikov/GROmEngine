@@ -21,6 +21,15 @@ void Log::RemovePolicy(ILogListener *policy)
 	}
 }
 
+void Log::OnRelease() {
+	for (const auto policy : _policies) {
+		delete policy;
+	}
+	_policies.clear();
+
+	nsSubSystem::OnRelease();
+}
+
 void Log::Print(LogLevel level, const char *msg)
 {
 #ifdef NDEBUG

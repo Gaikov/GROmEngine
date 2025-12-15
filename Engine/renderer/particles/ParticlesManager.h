@@ -22,8 +22,6 @@ public:
         return GetResourceName(particles);
     }
 
-    void ReloadParticles();
-
 protected:
     bool OnInit() override;
     void OnRelease() override;
@@ -31,8 +29,6 @@ protected:
     nsParticlesBehaviour *AllocateResource(const char *resourceName, int param) override;
     void FreeResource(nsParticlesBehaviour *item) override;
     bool LoadBehaviour(const char *fileName, nsParticlesBehaviour *behaviour);
-
-    static void ReloadParticles_f(int argc, const char *argv[]);
 
 private:
     nsParticlesSpawnerFactory   _spawnerFactory;

@@ -37,6 +37,9 @@ public:
 	void AddPolicy(ILogListener *policy);
 	void RemovePolicy(ILogListener *policy);
 
+protected:
+	void OnRelease() override;
+
 private:
 	std::list<ILogListener *>	_policies;
 

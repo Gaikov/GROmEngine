@@ -19,6 +19,7 @@ public:
 	void				FromArgs( int argc, const char* argv[] );
 	void				FromLine( const char *line );
 	bool                HasArg(const char *value) const;
+	void                Clear();
 
 private:
 	int					m_argCount;
