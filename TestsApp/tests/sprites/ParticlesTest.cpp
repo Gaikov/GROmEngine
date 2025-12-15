@@ -17,15 +17,15 @@
 bool nsParticlesTest::Init() {
 
     auto m = nsParticlesManager::Shared();
-    _behaviours.push_back(m->LoadParticles("tests/particles/circle.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/hline.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/triangle.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/cross.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/point.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/fire.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/blast.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/sparkle.txt"));
-    _behaviours.push_back(m->LoadParticles("tests/particles/color.txt"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/circle.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/hline.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/triangle.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/cross.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/point.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/fire.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/blast.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/sparkle.ggps"));
+    _behaviours.push_back(m->LoadParticles("tests/particles/color.ggps"));
 
     _currentBehaviour = static_cast<int>(_behaviours.size() - 1);
     _system.behaviour = _behaviours[_currentBehaviour];
