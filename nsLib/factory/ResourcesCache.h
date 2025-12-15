@@ -13,6 +13,7 @@ public:
 	void ReleaseAll();
 	TResource* GetResource(const char *resourceName, TParam param);
 	void ReleaseResource(TResource *item, bool force = false);
+	const char* GetResourceName(TResource *item);
 
 protected:
 	virtual TResource* AllocateResource(const char *resourceName, TParam param) = 0;
@@ -69,7 +70,7 @@ TItem* ResourcesCache<TItem, TParam>::GetResource(const char *resourceName, TPar
 template<class TItem, class TParam>
 void ResourcesCache<TItem, TParam>::ReleaseResource(TItem *item, bool force)
 {
-	for (auto it : _cache)
+	for (auto &it : _cache)
 	{
 		Entry &entry = it.second;
 		if (entry.item == item)
@@ -85,10 +86,22 @@ void ResourcesCache<TItem, TParam>::ReleaseResource(TItem *item, bool force)
 	}
 }
 
+template<class TResource, class TParam>
+const char * ResourcesCache<TResource, TParam>::GetResourceName(TResource *item) {
+	for (auto &it : _cache)
+	{
+		if (it.second.item == item)
+		{
+			return it.first.c_str();
+		}
+	}
+	return nullptr;
+}
+
 template<class TItem, class TParam>
 void ResourcesCache<TItem, TParam>::ReleaseAll()
 {
-	for (auto it : _cache)
+	for (auto &it : _cache)
 	{
 		Entry &entry = it.second;
 		FreeResource(entry.item);

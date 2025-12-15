@@ -16,19 +16,21 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
         return false;
     }
 
-    auto p = dynamic_cast<nsVisualParticles*>(o);
+    const auto p = Cast<nsVisualParticles>(o);
     if (!p) {
-        Log::Warning("Invalid nsVisualParticles object!");
         return false;
     }
 
     auto &system = p->GetSystem();
-    auto b = nsParticlesManager::Shared()->LoadParticles(ParseString(ss, "source"));
-    if (b) {
-        system.behaviour = b;
+    const auto path = context->ParseAssetPath(ss, "source");
+    if (!path.IsEmpty()) {
+        auto b = nsParticlesManager::Shared()->LoadParticles(path);
+        if (b) {
+            system.behaviour = b;
+        }
     }
 
-    system.spawnEnabled = ParseFloat(ss, "spawn", system.spawnEnabled) != 0.0f;
+    system.spawnEnabled = ParseBool(ss, "spawn", system.spawnEnabled);
 
     if (ps_var_begin(ss, "space")) {
         const auto space = ps_var_str(ss);
@@ -39,6 +41,30 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
         } else {
             p->space = nsVisualParticles::LOCAL;
         }
+    }
+
+    return true;
+}
+
+bool nsVisualParticlesBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o,
+    nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
+        return false;
+    }
+
+    const auto p = Cast<nsVisualParticles>(o);
+    const auto &system = p->GetSystem();
+    if (system.behaviour) {
+        const nsFilePath path = nsParticlesManager::Shared()->GetParticlesPath(system.behaviour);
+        context->SaveAssetPath(saver, "source", path);
+    }
+
+    saver.VarBool("spawn", system.spawnEnabled, true);
+
+    if (p->space == nsVisualParticles::GLOBAL) {
+        saver.VarString("space", "global");
+    } else if (p->space == nsVisualParticles::PARENT) {
+        saver.VarString("space", "parent");
     }
 
     return true;
