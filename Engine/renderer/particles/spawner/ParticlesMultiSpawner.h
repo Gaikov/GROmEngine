@@ -9,7 +9,7 @@
 
 class nsParticlesMultiSpawner : public nsParticlesSpawner {
 public:
-    static constexpr const char *NAME = "spawners";
+    static constexpr auto NAME = "spawners";
 
     void Add(const nsParticlesSpawner::sp_t &spawner);
     void Spawn(nsParticle *p, float angle) override;
