@@ -17,7 +17,9 @@ public:
         PARENT
     };
 
-    Space space = LOCAL;
+    nsProperty<Space> space = LOCAL;
+
+    nsVisualParticles();
 
     nsParticleSystem& GetSystem() {
         return _system;

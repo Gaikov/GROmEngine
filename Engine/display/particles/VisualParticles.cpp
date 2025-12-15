@@ -6,6 +6,13 @@
 #include "TimeFormat.h"
 #include "display/container/VisualContainer2d.h"
 
+nsVisualParticles::nsVisualParticles() {
+    space.AddHandler(nsPropChangedName::CHANGED, [&](const nsBaseEvent*) {
+        _system.RemoveAll();
+        ResetPosition();
+    });
+}
+
 void nsVisualParticles::GetLocalBounds(nsRect &bounds) {
     constexpr auto size = 30.0f;
     bounds = {-size / 2, -size / 2, size, size};
@@ -62,7 +69,10 @@ void nsVisualParticles::ResetPosition() {
         auto up = origin.GetWorld().TransformVector({0, 1});
         _system.SetRotation(up.GetAngle());
     } else if (space == PARENT) {
-        _system.MoveTo(origin.pos);
-        _system.RotateTo(origin.angle);
+        _system.SetPosition(origin.pos);
+        _system.SetRotation(origin.angle);
+    } else {
+        _system.SetPosition({0, 0});
+        _system.SetRotation(0);
     }
 }
