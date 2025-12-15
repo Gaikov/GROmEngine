@@ -167,7 +167,7 @@ bool nsFilePath::FolderListing(const char *folderPath, std::vector<nsString> &re
 nsFilePath nsFilePath::GetParent() const
 {
 	nsString parent = _path;
-	auto     slash  = (char *) strrchr(parent, '/');
+	const auto     slash  = strrchr(parent, '/');
 	if (!slash)
 	{
 		return "";
