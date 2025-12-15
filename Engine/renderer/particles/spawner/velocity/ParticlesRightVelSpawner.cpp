@@ -15,8 +15,7 @@ void nsParticlesRightVelSpawner::Spawn(nsParticle *p, float angle) {
         }
     }
     vel *= speed;
-    vel.Rotate(angle);
-    p->vel = vel;
+    p->vel = vel.Rotate(angle);
 }
 
 bool nsParticlesRightVelSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContext *context) {

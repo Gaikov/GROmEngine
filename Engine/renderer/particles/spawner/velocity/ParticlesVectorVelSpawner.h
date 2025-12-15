@@ -12,9 +12,13 @@ public:
     static constexpr const char *NAME = "vectorVel";
 
     nsVec2  direction = {1, 0};
-    float   minSpeed;
-    float   maxSpeed;
-    bool    randomDirection;
+    float   minSpeed = 0;
+    float   maxSpeed = 100;
+    bool    randomDirection = false;
+
+    nsParticlesVectorVelSpawner() {
+        _name = "Vector Velocity";
+    }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;

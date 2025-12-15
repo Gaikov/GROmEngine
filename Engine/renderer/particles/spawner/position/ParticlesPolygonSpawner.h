@@ -11,6 +11,10 @@ class nsParticlesPolygonSpawner : public nsParticlesEdgesSpawner {
 public:
     static constexpr const char *NAME = "polygon";
 
+    nsParticlesPolygonSpawner() {
+        _name = "Polygon Position";
+    }
+
     void AddPoint(const nsVec2 &p);
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
 

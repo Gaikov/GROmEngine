@@ -15,6 +15,10 @@ public:
     float maxSpeed = 0;
     bool randomDirection = false;
 
+    nsParticlesRightVelSpawner() {
+        _name = "Twisting Velocity";
+    }
+
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
 };

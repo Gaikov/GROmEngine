@@ -11,8 +11,12 @@ class nsParticlesAngleSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "angle";
 
-    float minAngle;
-    float maxAngle;
+    float minAngle = 0;
+    float maxAngle = 0;
+
+    nsParticlesAngleSpawner() {
+        _name = "Random Angle";
+    }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;

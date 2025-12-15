@@ -19,4 +19,9 @@ public:
     virtual void Spawn(nsParticle *p, float angle) = 0;
 
     virtual bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) = 0;
+
+    const char *GetName() const { return _name; }
+
+protected:
+    const char *_name = "";
 };

@@ -11,6 +11,10 @@ class nsParticlesMultiDirectionSpawner : public nsParticlesSpawner {
 public:
     static constexpr auto NAME = "multiDirections";
 
+    nsParticlesMultiDirectionSpawner() {
+        _name = "Multi Directions";
+    }
+
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
 

@@ -11,9 +11,13 @@ class nsParticlesRadialVelSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "radialVel";
 
-    float minSpeed;
-    float maxSpeed;
-    bool  randomDirection;
+    float minSpeed = 0;
+    float maxSpeed = 100;
+    bool  randomDirection = false;
+
+    nsParticlesRadialVelSpawner() {
+        _name = "Radial Velocity";
+    }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
