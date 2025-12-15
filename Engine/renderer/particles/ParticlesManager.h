@@ -18,6 +18,10 @@ public:
         return GetResource(fileName, 0);
     }
 
+    const char* GetParticlesPath(nsParticlesBehaviour* particles) {
+        return GetResourceName(particles);
+    }
+
     void ReloadParticles();
 
 protected:
