@@ -75,11 +75,11 @@ void ResourcesCache<TItem, TParam>::ReleaseResource(TItem *item, bool force)
 		Entry &entry = it.second;
 		if (entry.item == item)
 		{
-			entry.refCount --;
+			--entry.refCount;
 			if (entry.refCount <= 0 || force)
 			{
-				_cache.erase(it.first);
 				FreeResource(entry.item);
+				_cache.erase(it.first);
 				return;
 			}
 		}
