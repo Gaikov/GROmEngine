@@ -15,6 +15,10 @@ public:
     float   minRadius = 0;
     bool    onEdge = false;
 
+    nsParticlesCircleSpawner() {
+        _name = "Circle Position";
+    }
+
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
 

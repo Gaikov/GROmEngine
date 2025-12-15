@@ -14,6 +14,10 @@ public:
     float minLifeTime = 0.1;
     float maxLifeTime = 0.2;
 
+    nsParticlesLifeSpawner() {
+        _name = "Random Life Time";
+    }
+
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
 

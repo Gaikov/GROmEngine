@@ -14,6 +14,10 @@ public:
     float minSize = 10;
     float maxSize = 100;
 
+    nsParticlesSizeSpawner() {
+        _name = "Random Size";
+    };
+
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
 
