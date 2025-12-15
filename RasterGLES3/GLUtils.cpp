@@ -4,6 +4,7 @@
 
 #include "GLUtils.h"
 #include "GLCommon.h"
+#include "nsLib/structs/StructDef.h"
 
 struct glError_t
 {
@@ -70,17 +71,17 @@ void GLUtils::SetState(GLenum state, bool enabled)
 
 }
 
-static std::map<std::string_view, GLenum> s_func = {
-        {"never", GL_NEVER},
-        {"less", GL_LESS},
-        {"equal", GL_EQUAL},
-        {"lequal", GL_LEQUAL},
-        {"greater", GL_GREATER},
-        {"notequal", GL_NOTEQUAL},
-        {"gequal", GL_GEQUAL},
-        {"always", GL_ALWAYS}
-};
+DEFINE_STATIC_MAP(nsGLFunc, GLenum, {
+		{"always", GL_ALWAYS},
+		{"never", GL_NEVER},
+		{"less", GL_LESS},
+		{"equal", GL_EQUAL},
+		{"lequal", GL_LEQUAL},
+		{"greater", GL_GREATER},
+		{"notequal", GL_NOTEQUAL},
+		{"gequal", GL_GEQUAL}
+});
 
 GLenum GLUtils::GetFunc(const char *name) {
-    return s_func.contains(name) > 0 ? s_func[name] : GL_ALWAYS;
+    return nsGLFunc::Get(name);
 }

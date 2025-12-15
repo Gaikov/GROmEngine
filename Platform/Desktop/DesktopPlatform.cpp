@@ -16,11 +16,10 @@
 bool DesktopPlatform::Init() {
     Log::Info("##### Init Desktop #####");
 
-    _softInputChanged = [this](const nsBaseEvent*) -> void {
-        UpdateSoftInput();
-    };
     _useSoftInput = g_cfg->RegVar("si_force_soft", "0", GVF_SAVABLE);
-    _useSoftInput->AddHandler(nsVar::NSVAR_CHANGED, _softInputChanged);
+    _useSoftInput->AddHandler(nsVar::NSVAR_CHANGED, [this](const nsBaseEvent*) -> void {
+        UpdateSoftInput();
+    });
     UpdateSoftInput();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);

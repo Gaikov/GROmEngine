@@ -86,5 +86,6 @@ int main(int argc, char *argv[]) {
         nsEnv::Shared()->MainLoop();
     }
 
+    g_args.Clear();
     return 0;
 }

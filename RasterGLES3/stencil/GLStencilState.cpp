@@ -6,19 +6,21 @@
 #include "Core/ParseFile.h"
 #include "Core/ParserUtils.h"
 #include "GLUtils.h"
+#include "nsLib/structs/StructDef.h"
 
-static std::map<std::string, GLenum> s_ops = {
-        {"keep",    GL_KEEP},
-        {"zero",    GL_ZERO},
-        {"replace", GL_REPLACE},
-        {"incr",    GL_INCR},
-        {"decr",    GL_DECR},
-        {"invert",  GL_INVERT}
-};
+
+DEFINE_STATIC_MAP(nsStencilOps, GLenum, {
+                  {"keep", GL_KEEP},
+                  {"zero", GL_ZERO},
+                  {"replace", GL_REPLACE},
+                  {"incr", GL_INCR},
+                  {"decr", GL_DECR},
+                  {"invert", GL_INVERT}
+                  });
 
 static GLenum GetStencilOp(script_state_t *ss, const char *name) {
-    std::string str = ParseStrP(ss, name, "keep");
-    return s_ops.count(str) > 0 ? s_ops[str] : GL_KEEP;
+    const std::string str = ParseStrP(ss, name, "keep");
+    return nsStencilOps::Get(str.c_str());
 }
 
 nsGLStencilState::~nsGLStencilState() {

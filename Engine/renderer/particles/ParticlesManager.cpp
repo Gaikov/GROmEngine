@@ -52,10 +52,8 @@ void nsParticlesManager::FreeResource(nsParticlesBehaviour *item) {
 bool nsParticlesManager::OnInit() {
     Log::Info("### Initialize particles cache ###");
     nsSubSystem::OnInit();
-
     nsParticlesPool::Init();
 
-    g_cfg->RegCmd("particles_reload", ReloadParticles_f);
     return true;
 }
 
@@ -68,13 +66,5 @@ void nsParticlesManager::OnRelease() {
     nsSubSystem::OnRelease();
 }
 
-void nsParticlesManager::ReloadParticles_f(int argc, const char **argv) {
-    Shared()->ReloadParticles();
-}
 
-void nsParticlesManager::ReloadParticles() {
-    for (const auto& r : _cache) {
-        LoadBehaviour(r.first.c_str(), r.second.item);
-    }
-}
 

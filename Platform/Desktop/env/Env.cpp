@@ -17,6 +17,8 @@ bool nsEnv::Create() {
 }
 
 void nsEnv::Destroy() {
+    mouseButtons.clear();
+    mouseButtons.shrink_to_fit();
     delete _shared;
     _shared = nullptr;
 }

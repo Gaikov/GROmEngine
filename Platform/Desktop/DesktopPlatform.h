@@ -76,7 +76,6 @@ private:
     GLFWmonitor *_display = nullptr;
     ISoftInput::sp_t _softInput;
     nsVar   *_useSoftInput = nullptr;
-    nsEventDispatcher::tEventHandler _softInputChanged;
 
     void UpdateSoftInput();
 };
