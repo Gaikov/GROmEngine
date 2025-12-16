@@ -84,7 +84,7 @@ int nsParticleSystem::Update(float deltaTime) {
             auto frameTime = deltaTime + _timeRest;
             auto perSecond = (float) behaviour->amountPerSecond;
             auto amount = int(frameTime * perSecond);
-            auto amountDeltaTime = float(amount) / perSecond;
+            auto amountDeltaTime = perSecond > 0 ? float(amount) / perSecond : 0;
             _timeRest = frameTime - amountDeltaTime;
 
             nsVec2 pos;
