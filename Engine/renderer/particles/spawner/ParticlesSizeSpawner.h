@@ -10,12 +10,13 @@
 class nsParticlesSizeSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "size";
+    static constexpr auto TITLE = "Random Size";
 
     float minSize = 10;
     float maxSize = 100;
 
     nsParticlesSizeSpawner() {
-        _name = "Random Size";
+        _name = TITLE;
     };
 
     void Spawn(nsParticle *p, float angle) override;

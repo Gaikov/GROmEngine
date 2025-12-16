@@ -10,6 +10,7 @@
 class nsParticlesVectorVelSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "vectorVel";
+    static constexpr auto TITLE = "Vector Velocity";
 
     nsVec2  direction = {1, 0};
     float   minSpeed = 0;
@@ -17,7 +18,7 @@ public:
     bool    randomDirection = false;
 
     nsParticlesVectorVelSpawner() {
-        _name = "Vector Velocity";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;

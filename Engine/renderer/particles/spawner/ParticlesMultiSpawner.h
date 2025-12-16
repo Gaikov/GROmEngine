@@ -10,9 +10,10 @@
 class nsParticlesMultiSpawner : public nsParticlesSpawner {
 public:
     static constexpr auto NAME = "spawners";
+    static constexpr auto TITLE = "Multi Spawners";
 
     nsParticlesMultiSpawner() {
-        _name = "Multi Spawners";
+        _name = TITLE;
     }
 
     void Add(const nsParticlesSpawner::sp_t &spawner);
