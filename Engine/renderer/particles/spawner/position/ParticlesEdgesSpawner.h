@@ -10,9 +10,10 @@
 class nsParticlesEdgesSpawner : public nsParticlesSpawner {
 public:
     static constexpr auto NAME = "edges";
+    static constexpr auto TITLE = "Edges Position";
 
     nsParticlesEdgesSpawner() {
-        _name = "Edges Position";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;

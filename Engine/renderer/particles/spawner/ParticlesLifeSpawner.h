@@ -10,12 +10,13 @@
 class nsParticlesLifeSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "life";
+    static constexpr auto TITLE = "Random Life Time";
 
     float minLifeTime = 0.1;
     float maxLifeTime = 0.2;
 
     nsParticlesLifeSpawner() {
-        _name = "Random Life Time";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;

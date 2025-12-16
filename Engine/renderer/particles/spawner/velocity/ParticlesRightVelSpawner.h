@@ -10,13 +10,14 @@
 class nsParticlesRightVelSpawner : public nsParticlesSpawner {
 public:
     static constexpr auto NAME = "rightVel";
+    static constexpr auto TITLE = "Twisting Velocity";
 
     float minSpeed = 0;
     float maxSpeed = 0;
     bool randomDirection = false;
 
     nsParticlesRightVelSpawner() {
-        _name = "Twisting Velocity";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;

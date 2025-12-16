@@ -10,12 +10,13 @@
 class nsParticlesAngleSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "angle";
+    static constexpr auto TITLE = "Random Angle";
 
     float minAngle = 0;
     float maxAngle = 0;
 
     nsParticlesAngleSpawner() {
-        _name = "Random Angle";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;

@@ -10,11 +10,12 @@
 class nsParticlesColorSpawner : public nsParticlesSpawner {
 public:
     static constexpr auto NAME = "color";
+    static constexpr auto TITLE = "Random Color";
 
     nsColor color1, color2;
 
     nsParticlesColorSpawner() {
-        _name = "Random Color";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;

@@ -10,9 +10,10 @@
 class nsParticlesPolygonSpawner : public nsParticlesEdgesSpawner {
 public:
     static constexpr const char *NAME = "polygon";
+    static constexpr auto TITLE = "Polygon Position";
 
     nsParticlesPolygonSpawner() {
-        _name = "Polygon Position";
+        _name = TITLE;
     }
 
     void AddPoint(const nsVec2 &p);

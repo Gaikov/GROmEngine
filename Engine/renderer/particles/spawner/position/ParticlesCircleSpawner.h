@@ -10,13 +10,14 @@
 class nsParticlesCircleSpawner : public nsParticlesSpawner {
 public:
     static constexpr const char *NAME = "circle";
+    static constexpr auto TITLE = "Circle Position";
 
     float   radius = 0;
     float   minRadius = 0;
     bool    onEdge = false;
 
     nsParticlesCircleSpawner() {
-        _name = "Circle Position";
+        _name = TITLE;
     }
 
     void Spawn(nsParticle *p, float angle) override;
