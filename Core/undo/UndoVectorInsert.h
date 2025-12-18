@@ -4,33 +4,29 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include <assert.h>
+#include <vector>
 
-#include "nsLib/headers.h"
 #include "UndoRedoOperation.h"
 
 template<typename TItem>
 class nsUndoVectorInsert : public nsUndoRedoOperation {
 public:
-    nsUndoVectorInsert(std::vector<TItem> &list, int index, TItem item) :
-            _list(list), _index(index), _item(item) {}
+    nsUndoVectorInsert(std::vector<TItem> &list, const int index, TItem &item) :
+            _list(list), _index(index), _item(item) {
+        assert(index < static_cast<int>(_list.size()));
+    }
 
     void Init() override {
         Redo();
     }
 
     void Redo() override {
-        _list.emplace_back();
-        for (int i = _list.size() - 1; i > _index; i--) {
-            _list[i] = _list[i - 1];
-        }
-        _list[_index] = _item;
+        _list.insert(_list.begin() + _index, _item);
     }
 
     void Undo() override {
-        for (int i = _index; i < _list.size() - 1; i++) {
-            _list[i] = _list[i + 1];
-        }
-        _list.pop_back();
+        _list.erase(_list.begin() + _index);
     }
 
 private:
