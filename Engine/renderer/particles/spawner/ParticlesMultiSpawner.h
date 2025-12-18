@@ -16,10 +16,8 @@ public:
         _name = TITLE;
     }
 
-    void Add(const nsParticlesSpawner::sp_t &spawner);
+    std::vector<nsParticlesSpawner::sp_t>   list;
+
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
-
-private:
-    std::vector<nsParticlesSpawner::sp_t>   _list;
 };
