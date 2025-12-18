@@ -93,14 +93,7 @@ bool nsFilePath::Remove() const
 
 bool nsFilePath::MakeFolder(const char *name)
 {
-	int result;
-#ifdef _WIN32_WINNT
-	result = mkdir(name);
-#else
-	result = mkdir(name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	//result = mkdir(name, 0x755);
-#endif
-	return result == 0;
+	return std::filesystem::create_directories(name);
 }
 
 bool nsFilePath::Listing(nsFilePath::tList &result) const
@@ -192,7 +185,7 @@ bool nsFilePath::CreateFolders() const
 		if (slash) *slash = 0;
 		if (!Exists(str))
 		{
-			if (!nsFilePath::MakeFolder(str))
+			if (!MakeFolder(str))
 			{
 				return false;
 			}
