@@ -11,21 +11,19 @@ void nsParticlesPolygonSpawner::UpdateFrame() {
     if (_frame.size() > 1) {
         _length = 0;
         for (auto i = 0; i < _frame.size(); i++) {
-            auto &e1 = _frame[i];
-            auto &e2 = _frame[(i + 1) % _frame.size()];
+            const auto &e1 = _frame[i];
+            const auto &e2 = _frame[(i + 1) % _frame.size()];
 
-            e1.dir = e2.pos - e1.pos;
-            e1.length = e1.dir.Length();
-            e1.dir /= e1.length;
-
-            _length += e1.length;
+            e1->pos2 = e2->pos1;
+            _length += e1->Length();
         }
     }
 }
 
 void nsParticlesPolygonSpawner::AddPoint(const nsVec2 &p) {
-    Edge e = {p};
-    _frame.push_back(e);
+    Edge::sp_t edge = new Edge();
+    edge->pos1 = p;
+    _frame.push_back(edge);
     UpdateFrame();
 }
 
@@ -35,7 +33,9 @@ bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCont
         do {
             nsVec2 point;
             if (ps_var_2f(ss, point)) {
-                _frame.push_back({point});
+                Edge::sp_t edge = new Edge();
+                edge->pos1 = point;
+                _frame.push_back(edge);
             }
         } while (ps_var_next(ss));
     }
@@ -45,7 +45,9 @@ bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCont
             float angle[2];
             if (ps_var_2f(ss, angle)) {
                 auto p = nsVec2::FromAngle(nsMath::ToRad(angle[0])) * angle[1];
-                _frame.push_back({p});
+                Edge::sp_t edge = new Edge();
+                edge->pos1 = p;
+                _frame.push_back(edge);
             }
         } while (ps_var_next(ss));
     }
