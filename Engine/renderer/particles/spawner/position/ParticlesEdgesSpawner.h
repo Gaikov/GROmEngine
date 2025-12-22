@@ -17,6 +17,7 @@ public:
         friend class nsParticlesEdgesSpawner;
     public:
         typedef nsSmartPtr<Edge> sp_t;
+        typedef std::function<void()> ChangeCallback;
 
         Edge();
 
@@ -31,7 +32,6 @@ public:
         nsVec2  dir;
         float   length = 0;
     };
-
 
     nsParticlesEdgesSpawner() {
         _name = TITLE;

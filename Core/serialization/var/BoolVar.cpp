@@ -7,11 +7,11 @@
 #include "ParserUtils.h"
 
 bool nsBoolVar::Serialize(nsScriptSaver &ss) {
-    ss.Printf("$%s %i", GetName(), GetValue());
+    ss.VarValue("%i", GetValue());
     return true;
 }
 
 bool nsBoolVar::Deserialize(script_state_t *ss) {
-    SetValue(ParseBool(ss, GetName(), GetValue()));
+    SetValue(ps_var_f(ss) != 0);
     return true;
 }

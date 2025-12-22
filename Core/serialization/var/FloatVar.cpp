@@ -6,11 +6,11 @@
 #include "ParserUtils.h"
 
 bool nsFloatVar::Serialize(nsScriptSaver &ss) {
-    ss.Printf("$%s %f", GetName(), GetValue());
+    ss.VarValue("%f", GetValue());
     return true;
 }
 
 bool nsFloatVar::Deserialize(script_state_t *ss) {
-    SetValue(ParseFloat(ss, GetName(), GetValue()));
+    SetValue(ps_var_f(ss));
     return true;
 }

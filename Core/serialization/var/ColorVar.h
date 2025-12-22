@@ -10,8 +10,8 @@
 class nsColorVar : public  nsSerializableVar<nsColor> {
 
 public:
-    nsColorVar(const char *name, const nsColor &defValue)
-        : nsSerializableVar(name, defValue) {
+    nsColorVar(const nsColor &defValue)
+        : nsSerializableVar(defValue) {
     }
     bool Serialize(nsScriptSaver &ss) override;
     bool Deserialize(script_state_t *ss) override;

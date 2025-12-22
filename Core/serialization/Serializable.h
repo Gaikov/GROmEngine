@@ -7,17 +7,11 @@
 
 #include "Core/ScriptSaver.h"
 #include "Core/Parser.h"
-#include "nsLib/StrTools.h"
 #include "nsLib/utils/NoCopyable.h"
 
 class nsSerializable : public nsNoCopyable {
 public:
-    explicit nsSerializable(const char *name);
-    [[nodiscard]] const char *GetName() const { return _name.c_str(); }
     virtual void ResetDefault() = 0;
     virtual bool Serialize(nsScriptSaver &ss) = 0;
     virtual bool Deserialize(script_state_t *ss) = 0;
-
-private:
-    std::string _name;
 };

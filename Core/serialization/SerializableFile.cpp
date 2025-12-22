@@ -7,9 +7,6 @@
 #include "ParseFile.h"
 #include "nsLib/log.h"
 
-nsSerializableFile::nsSerializableFile(const char *name) : nsSerializableGroup(name) {
-}
-
 bool nsSerializableFile::Load(const char *fileName) {
     Log::Info("Loading model: %s", fileName);
     ResetDefault();
