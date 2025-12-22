@@ -1,19 +1,15 @@
 // Copyright (c) 2003-2025, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file SerializableGroup.h
+// file SerializeUtils.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
 #include "Serializable.h"
+#include "Core/ScriptSaver.h"
 
-class nsSerializableGroup : public nsSerializable {
+class nsSerializeUtils final {
 public:
-    void AddItem(const char *name, nsSerializable *item);
-    bool Serialize(nsScriptSaver &ss) override;
-    bool Deserialize(script_state_t *ss) override;
-    void ResetDefault() override;
+    static bool SerializeVar(nsScriptSaver &ss, const char *name, nsSerializable *var);
+    static bool DeserializeVar(script_state_t *ss, const char *name, nsSerializable *var);
 
-
-private:
-    std::map<std::string, nsSerializable *> _items;
 };

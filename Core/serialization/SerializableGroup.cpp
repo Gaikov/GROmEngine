@@ -4,6 +4,7 @@
 
 #include "SerializableGroup.h"
 
+#include "SerializeUtils.h"
 #include "nsLib/log.h"
 
 
@@ -14,18 +15,9 @@ void nsSerializableGroup::AddItem(const char *name, nsSerializable *item) {
 
 bool nsSerializableGroup::Serialize(nsScriptSaver &ss) {
     for (const auto &item: _items) {
-        bool res = true;
-        const auto var = item.second;
-        if (dynamic_cast<nsSerializableGroup *>(var)) {
-            if (ss.BlockBegin(item.first.c_str())) {
-                res = var->Serialize(ss);
-                ss.BlockEnd();
-            }
-        } else {
-            ss.VarName(item.first.c_str());
-            res = var->Serialize(ss);
+        if (!nsSerializeUtils::SerializeVar(ss, item.first.c_str(), item.second)) {
+            return false;
         }
-        if (!res) return false;
     }
     return true;
 }
@@ -33,18 +25,9 @@ bool nsSerializableGroup::Serialize(nsScriptSaver &ss) {
 bool nsSerializableGroup::Deserialize(script_state_t *ss) {
     for (const auto &item: _items) {
         const auto var = item.second;
-        bool res = true;
-        if (dynamic_cast<nsSerializableGroup *>(var)) {
-            if (ps_block_begin(ss, item.first.c_str())) {
-                res = var->Deserialize(ss);
-                ps_block_end(ss);
-            }
-        } else {
-            if (ps_var_begin(ss, item.first.c_str())) {
-                res = var->Deserialize(ss);
-            }
+        if (!nsSerializeUtils::DeserializeVar(ss, item.first.c_str(), var)) {
+            return false;
         }
-        if (!res) return false;
     }
     return false;
 }
