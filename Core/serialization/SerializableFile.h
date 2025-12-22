@@ -8,8 +8,6 @@
 
 class nsSerializableFile : public nsSerializableGroup {
 public:
-    explicit nsSerializableFile(const char *name);
-
     virtual bool Load(const char *fileName);
     virtual bool Save(const char *fileName);
 };

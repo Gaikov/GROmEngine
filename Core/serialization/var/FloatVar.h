@@ -8,8 +8,8 @@
 
 class nsFloatVar : public nsSerializableVar<float> {
 public:
-    nsFloatVar(const char *name, float defValue)
-        : nsSerializableVar<float>(name, defValue) {
+    nsFloatVar(const float defValue)
+        : nsSerializableVar(defValue) {
     }
 
     nsFloatVar& operator = (const float value) {

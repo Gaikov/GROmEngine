@@ -10,8 +10,8 @@
 template<typename TVar>
 class nsSerializableVar : public nsProperty<TVar>, public nsSerializable {
 public:
-    explicit nsSerializableVar(const char *name, TVar defValue)
-        : nsProperty<TVar>(defValue), nsSerializable(name) {
+    explicit nsSerializableVar(TVar defValue)
+        : nsProperty<TVar>(defValue) {
     }
 
     void ResetDefault() override {

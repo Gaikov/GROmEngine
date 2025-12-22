@@ -8,12 +8,11 @@
 
 class nsSerializableGroup : public nsSerializable {
 public:
-    explicit nsSerializableGroup(const char *name);
-    void AddItem(nsSerializable *item) { _items.push_back(item); }
+    void AddItem(const char *name, nsSerializable *item);
     bool Serialize(nsScriptSaver &ss) override;
     bool Deserialize(script_state_t *ss) override;
     void ResetDefault() override;
 
 private:
-    std::vector<nsSerializable *> _items;
+    std::map<std::string, nsSerializable *> _items;
 };

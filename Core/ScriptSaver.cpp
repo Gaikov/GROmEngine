@@ -58,6 +58,25 @@ void nsScriptSaver::PrintVar(const char *name, const char *fmt, ...) const {
         fprintf(m_file, "%s$%s %s\n", StrTabs(m_tabCount), name, msg);
 }
 
+void nsScriptSaver::VarName(const char *name) const {
+    if (m_file) {
+        fprintf(m_file, "%s$%s ", StrTabs(m_tabCount), name);
+    }
+}
+
+void nsScriptSaver::VarValue(const char *fmt, ...) const {
+    if (m_file) {
+        char msg[MAX_OUT_LEN];
+
+        va_list list;
+        va_start(list, fmt);
+        vsprintf(msg, fmt, list);
+        va_end(list);
+
+        fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), msg);
+    }
+}
+
 void nsScriptSaver::VarBool(const char *name, bool value, bool defValue) const {
     if (value != defValue) {
         PrintVar(name, "%d", value ? 1 : 0);

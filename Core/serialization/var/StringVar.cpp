@@ -6,11 +6,13 @@
 #include "ParserUtils.h"
 
 bool nsStringVar::Serialize(nsScriptSaver &ss) {
-    ss.Printf("$%s \"%s\"", GetName(), GetValue().c_str());
+    ss.VarValue("\"%s\"",GetValue().c_str());
     return true;
 }
 
 bool nsStringVar::Deserialize(script_state_t *ss) {
-    SetValue(ParseStrP(ss, GetName(), GetValue().c_str()));
+    if (const auto value = ps_var_str(ss)) {
+        SetValue(value);
+    }
     return true;
 }

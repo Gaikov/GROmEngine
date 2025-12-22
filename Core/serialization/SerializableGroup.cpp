@@ -4,33 +4,53 @@
 
 #include "SerializableGroup.h"
 
-nsSerializableGroup::nsSerializableGroup(const char *name) : nsSerializable(name) {
+#include "nsLib/log.h"
+
+
+void nsSerializableGroup::AddItem(const char *name, nsSerializable *item) {
+    assert(!_items.contains(name));
+    _items[name] = item;
 }
 
 bool nsSerializableGroup::Serialize(nsScriptSaver &ss) {
-    if (ss.BlockBegin(GetName())) {
-        for (const auto item : _items) {
-            item->Serialize(ss);
+    for (const auto &item: _items) {
+        bool res = true;
+        const auto var = item.second;
+        if (dynamic_cast<nsSerializableGroup *>(var)) {
+            if (ss.BlockBegin(item.first.c_str())) {
+                res = var->Serialize(ss);
+                ss.BlockEnd();
+            }
+        } else {
+            ss.VarName(item.first.c_str());
+            res = var->Serialize(ss);
         }
-        ss.BlockEnd();
-        return true;
+        if (!res) return false;
     }
-    return false;
+    return true;
 }
 
 bool nsSerializableGroup::Deserialize(script_state_t *ss) {
-    if (ps_block_begin(ss, GetName())) {
-        for (const auto item : _items) {
-            item->Deserialize(ss);
+    for (const auto &item: _items) {
+        const auto var = item.second;
+        bool res = true;
+        if (dynamic_cast<nsSerializableGroup *>(var)) {
+            if (ps_block_begin(ss, item.first.c_str())) {
+                res = var->Deserialize(ss);
+                ps_block_end(ss);
+            }
+        } else {
+            if (ps_var_begin(ss, item.first.c_str())) {
+                res = var->Deserialize(ss);
+            }
         }
-        ps_block_end(ss);
-        return true;
+        if (!res) return false;
     }
     return false;
 }
 
 void nsSerializableGroup::ResetDefault() {
-    for (const auto item : _items) {
-        item->ResetDefault();
+    for (const auto &item: _items) {
+        item.second->ResetDefault();
     }
 }

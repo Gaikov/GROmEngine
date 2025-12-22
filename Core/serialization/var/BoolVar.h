@@ -8,8 +8,8 @@
 
 class nsBoolVar : public nsSerializableVar<bool> {
 public:
-    nsBoolVar(const char *name, const bool defValue)
-        : nsSerializableVar(name, defValue) {
+    nsBoolVar(const bool defValue)
+        : nsSerializableVar(defValue) {
     }
 
     nsBoolVar& operator = (const bool value) {

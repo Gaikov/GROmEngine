@@ -4,5 +4,3 @@
 
 #include "Serializable.h"
 
-nsSerializable::nsSerializable(const char *name) : _name(name) {
-}

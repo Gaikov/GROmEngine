@@ -8,8 +8,12 @@
 
 class nsStringVar : public nsSerializableVar<std::string> {
 public:
-    nsStringVar(const char *name, const std::string &defValue)
-        : nsSerializableVar(name, defValue) {
+    nsStringVar(const std::string &defValue)
+        : nsSerializableVar(defValue) {
+    }
+
+    nsStringVar(const char *defValue)
+        : nsSerializableVar(defValue) {
     }
 
     nsStringVar& operator = (const char *value) {
