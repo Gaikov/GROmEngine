@@ -250,11 +250,9 @@ bool nsFilePath::ListingRecursive(nsFilePath::tList &result) const {
 }
 
 nsString nsFilePath::GetNameOnly() const {
-    auto lastSlash = strrchr(_path, '/');
-    if (lastSlash) {
+	if (const auto lastSlash = strrchr(_path, '/')) {
         nsString name = lastSlash + 1;
-        auto dot = strchr(name.AsChar(), '.');
-        if (dot) {
+        if (const auto dot = strchr(name.AsChar(), '.')) {
             *dot = 0;
         }
         return name;
@@ -263,8 +261,7 @@ nsString nsFilePath::GetNameOnly() const {
 }
 
 nsString nsFilePath::GetName() const {
-	const auto lastSlash = strrchr(_path, '/');
-	if (lastSlash) {
+	if (const auto lastSlash = strrchr(_path, '/')) {
 		return lastSlash + 1;
 	}
 	return "";
