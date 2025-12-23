@@ -39,10 +39,12 @@ bool nsBaseArrayVar::Deserialize(script_state_t *ss) {
         ps_var_begin(ss, serializationName.c_str());
     }
 
+    bool res = true;
     do {
         std::shared_ptr<nsSerializable> item(CreateItem());
 
         if (!item->Deserialize(ss)) {
+            res = false;
             break;
         }
         Add(item);
@@ -58,7 +60,7 @@ bool nsBaseArrayVar::Deserialize(script_state_t *ss) {
         ps_block_end(ss);
     }
 
-    return true;
+    return res;
 }
 
 void nsBaseArrayVar::ResetDefault() {
