@@ -4,7 +4,6 @@
 
 #include "VisualParticlesBuilder.h"
 #include "VisualParticles.h"
-#include "renderer/particles/ParticlesManager.h"
 #include "Core/ParserUtils.h"
 
 nsVisualObject2d *nsVisualParticlesBuilder::CreateDefault() {
@@ -54,7 +53,7 @@ bool nsVisualParticlesBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObje
     const auto p = Cast<nsVisualParticles>(o);
     const auto &system = p->GetSystem();
     if (system.behaviour) {
-        const nsFilePath path = nsParticlesManager::Shared()->GetParticlesPath(system.behaviour);
+        const nsFilePath path = context->particlesLoader->GetParticlesPath(system.behaviour);
         context->SaveAssetPath(saver, "source", path);
     }
 

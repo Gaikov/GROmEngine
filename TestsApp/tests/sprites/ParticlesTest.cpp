@@ -12,7 +12,7 @@
 #include "Engine/TimeFormat.h"
 #include "Engine/utils/AppUtils.h"
 #include "Engine/KeyCodes.h"
-#include "Engine/renderer/particles/ParticlesManager.h"
+#include "Engine/renderer/particles/factory/ParticlesManager.h"
 
 bool nsParticlesTest::Init() {
 
