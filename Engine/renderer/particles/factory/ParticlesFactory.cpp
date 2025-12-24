@@ -2,10 +2,12 @@
 // Created by Roman on 12/24/2025.
 //
 
+
 #include "ParticlesFactory.h"
 
 #include "Core/ParseFile.h"
 #include "Core/ParserUtils.h"
+#include "renderer/particles/ParticlesBehaviour.h"
 
 nsParticlesBehaviour * nsParticlesFactory::LoadBehaviour(const char *path) {
     if (!StrCheck(path)) {

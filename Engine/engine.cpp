@@ -23,7 +23,7 @@
 #include "EngineContext.h"
 #include "debug/DebugDrawManager.h"
 #include "debug/policies/FastMemDebugDraw.h"
-#include "renderer/particles/ParticlesManager.h"
+#include "renderer/particles/factory/ParticlesManager.h"
 #include "renderer/font/FontsCache.h"
 #include "display/factory/VisualFactory2d.h"
 #include "display/pool/LayoutsPool.h"

@@ -10,4 +10,6 @@ class nsParticlesLoader {
 public:
     virtual ~nsParticlesLoader() = default;
     virtual nsParticlesBehaviour* LoadParticles(const char *fileName) = 0;
+	virtual const char* GetParticlesPath(nsParticlesBehaviour* particles) = 0;
+
 };

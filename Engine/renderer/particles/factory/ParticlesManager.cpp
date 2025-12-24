@@ -4,7 +4,7 @@
 
 #include "ParticlesManager.h"
 #include "Core/Config.h"
-#include "ParticlesPool.h"
+#include "renderer/particles/ParticlesPool.h"
 
 nsParticlesBehaviour *nsParticlesManager::AllocateResource(const char *resourceName, int param) {
     return  _factory.LoadBehaviour(resourceName);

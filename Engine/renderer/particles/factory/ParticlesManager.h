@@ -7,9 +7,8 @@
 
 #include "nsLib/SubSystem.h"
 #include "nsLib/factory/ResourcesCache.h"
-#include "ParticlesBehaviour.h"
 #include "ParticlesFactory.h"
-#include "factory/ParticlesLoader.h"
+#include "ParticlesLoader.h"
 
 class nsParticlesManager : public nsSubSystem<nsParticlesManager>, public ResourcesCache<nsParticlesBehaviour, int>, public nsParticlesLoader {
 public:
@@ -17,7 +16,7 @@ public:
         return GetResource(fileName, 0);
     }
 
-    const char* GetParticlesPath(nsParticlesBehaviour* particles) {
+    const char* GetParticlesPath(nsParticlesBehaviour* particles) override {
         return GetResourceName(particles);
     }
 
