@@ -46,6 +46,10 @@ public:
 	operator const char *() const
 	{ return _path; };
 
+	bool operator==(const nsFilePath &other) const {
+        return _path == other._path;
+    }
+
 private:
 	nsString _path;
 };
