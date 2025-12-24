@@ -1,0 +1,20 @@
+// Copyright (c) 2003-2025, Roman Gaikov. All rights reserved.
+//--------------------------------------------------------------------------------------------------
+// file ParticlesFactory.h
+// author Roman Gaikov
+//--------------------------------------------------------------------------------------------------
+#pragma once
+#include "Engine/renderer/particles/ParticlesBehaviour.h"
+#include "Engine/renderer/particles/renderer/ParticlesRendererFactory.h"
+#include "Engine/renderer/particles/spawner/factory/ParticlesSpawnerFactory.h"
+#include "Engine/renderer/particles/updater/factory/ParticlesUpdaterFactory.h"
+
+class nsParticlesFactory final {
+public:
+    nsParticlesBehaviour* LoadBehaviour(const char* path);
+
+private:
+    nsParticlesSpawnerFactory   _spawnerFactory;
+    nsParticlesRendererFactory  _rendererFactory;
+    nsParticlesUpdaterFactory   _updaterFactory;
+};
