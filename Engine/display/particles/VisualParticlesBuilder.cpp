@@ -24,8 +24,7 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
     auto &system = p->GetSystem();
     const auto path = context->ParseAssetPath(ss, "source");
     if (!path.IsEmpty()) {
-        auto b = nsParticlesManager::Shared()->LoadParticles(path);
-        if (b) {
+        if (const auto b = context->particlesLoader->LoadParticles(path)) {
             system.behaviour = b;
         }
     }

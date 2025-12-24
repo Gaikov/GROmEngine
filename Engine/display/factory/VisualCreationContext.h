@@ -8,6 +8,7 @@
 #include "Core/Parser.h"
 #include "Core/ScriptSaver.h"
 #include "Engine/display/VisualObject2d.h"
+#include "Engine/renderer/particles/factory/ParticlesLoader.h"
 
 class nsVisualBuilder2d;
 
@@ -18,6 +19,7 @@ public:
 
     //project/game folder (relative to application or absolute)
     nsFilePath assetsPath;
+    nsParticlesLoader *particlesLoader = nullptr;
 
     virtual nsVisualObject2d *Create(script_state_t *ss) = 0;
     virtual nsVisualObject2d *Create(const char *filePath) = 0;

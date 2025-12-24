@@ -85,6 +85,7 @@ bool nsEngine::Init()
 
     nsVisualFactory2d::Init();
 	const auto vf = nsVisualFactory2d::Shared();
+	vf->particlesLoader = nsParticlesManager::Shared();
 	vf->BindClass<nsParticlesEffect>("ParticlesEffect");
 	vf->BindClass<nsParticlesEffectHolder>("ParticlesEffectHolder");
 
