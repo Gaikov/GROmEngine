@@ -49,7 +49,12 @@ void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_
 }
 
 nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
-    auto builder = GetBuilder(ps_block_name(ss));
+    const auto blockName = ps_block_name(ss);
+    if (!blockName) {
+        return nullptr;
+    }
+
+    auto builder = GetBuilder(blockName);
     if (!builder) {
         builder = &_defaultBuilder;
     }
