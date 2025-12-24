@@ -37,3 +37,14 @@ nsParticlesBehaviour * nsParticlesFactory::LoadBehaviour(const char *path) {
 
     return behaviour;
 }
+
+bool nsParticlesFactory::SaveBehaviour(const nsParticlesBehaviour *behaviour, const char *path) {
+    if (!StrCheck(path)) {
+        Log::Warning("Invalid particles file path!");
+        return false;
+    }
+    Log::Info("...saving particles behaviour: %s", path);
+
+
+    return true;
+}

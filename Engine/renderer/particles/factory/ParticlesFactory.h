@@ -12,6 +12,7 @@
 class nsParticlesFactory final {
 public:
     nsParticlesBehaviour* LoadBehaviour(const char* path);
+    bool SaveBehaviour(const nsParticlesBehaviour* behaviour, const char* path);
 
 private:
     nsParticlesSpawnerFactory   _spawnerFactory;
