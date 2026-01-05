@@ -5,10 +5,13 @@
 #include "ParticlesVelToAngleUpdater.h"
 
 void nsParticlesVelToAngleUpdater::Update(nsParticle *p, float deltaTime) {
-    nsVec2  vel = p->vel;
+    const nsVec2  vel = p->vel;
     p->angle = vel.GetAngle();
 }
 
 bool nsParticlesVelToAngleUpdater::Parse(script_state_t *ss, nsParticlesUpdaterContext *context) {
     return true;
+}
+
+void nsParticlesVelToAngleUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
 }

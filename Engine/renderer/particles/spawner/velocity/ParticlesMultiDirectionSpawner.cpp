@@ -41,3 +41,15 @@ bool nsParticlesMultiDirectionSpawner::Parse(script_state_t *ss, nsParticlesSpaw
 
     return true;
 }
+
+void nsParticlesMultiDirectionSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    for (const auto &dir: _directions) {
+        if (ss->BlockBegin("direction")) {
+            ss->VarFloat("minAngle", nsMath::ToDeg(dir.minAngle), 0);
+            ss->VarFloat("maxAngle", nsMath::ToDeg(dir.maxAngle), 0);
+            ss->VarFloat("minSpeed", dir.minSpeed, 0);
+            ss->VarFloat("maxSpeed", dir.maxSpeed, 0);
+            ss->BlockEnd();
+        }
+    }
+}

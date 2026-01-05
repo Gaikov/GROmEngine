@@ -28,3 +28,11 @@ bool nsParticlesCompositeUpdater::Parse(script_state_t *ss, nsParticlesUpdaterCo
     return true;
 }
 
+void nsParticlesCompositeUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
+    for (auto &u: _list) {
+        if (ss->BlockBegin(GetName())) {
+            context->Save(ss, u);
+            ss->BlockEnd();
+        }
+    }
+}

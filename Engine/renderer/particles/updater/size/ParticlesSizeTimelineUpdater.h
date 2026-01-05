@@ -11,7 +11,12 @@ class nsParticlesSizeTimelineUpdater : public nsParticlesTimelineUpdater<float> 
 public:
     static constexpr auto NAME = "sizeTimeline";
 
+    nsParticlesSizeTimelineUpdater() {
+        _name = NAME;
+    };
+
 protected:
     bool ParseFrame(script_state_t *ss, float &frame) override;
     void LerpFrame(nsParticle *p, const float &f1, const float &f2, float t) override;
+    void SaveFrame(nsScriptSaver *ss, float &frame) override;
 };

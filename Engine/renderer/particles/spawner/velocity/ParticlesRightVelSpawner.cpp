@@ -25,3 +25,9 @@ bool nsParticlesRightVelSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCon
 
     return true;
 }
+
+void nsParticlesRightVelSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat("minSpeed", minSpeed, 0);
+    ss->VarFloat("maxSpeed", maxSpeed, 0);
+    ss->VarBool("randomDirection", randomDirection, false);
+}

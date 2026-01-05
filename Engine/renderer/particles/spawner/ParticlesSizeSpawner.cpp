@@ -11,7 +11,7 @@ void nsParticlesSizeSpawner::Spawn(nsParticle *p, float angle) {
 }
 
 nsParticlesSizeSpawner *nsParticlesSizeSpawner::Init(float minSize, float maxSize) {
-    auto s = new nsParticlesSizeSpawner();
+    const auto s = new nsParticlesSizeSpawner();
     s->minSize = minSize;
     s->maxSize = maxSize;
     return s;
@@ -21,4 +21,9 @@ bool nsParticlesSizeSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContext
     minSize = ParseFloat(ss, "minSize");
     maxSize = ParseFloat(ss, "maxSize");
     return true;
+}
+
+void nsParticlesSizeSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat("minSize", minSize, 0);
+    ss->VarFloat("maxSize", maxSize, 0);
 }

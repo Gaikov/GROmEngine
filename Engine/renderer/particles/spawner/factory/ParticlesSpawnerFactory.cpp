@@ -51,4 +51,11 @@ nsParticlesSpawner *nsParticlesSpawnerFactory::ParseList(script_state_t *ss) {
     return nullptr;
 }
 
+void nsParticlesSpawnerFactory::Save(nsScriptSaver *ss, nsParticlesSpawner *spawner) {
+    if (ss->BlockBegin(spawner->GetName())) {
+        spawner->Save(ss, this);
+        ss->BlockEnd();
+    }
+}
+
 

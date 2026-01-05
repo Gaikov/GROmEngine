@@ -11,3 +11,6 @@ void nsParticlesVelocityApplyUpdater::Update(nsParticle *p, float deltaTime) {
 bool nsParticlesVelocityApplyUpdater::Parse(script_state_t *ss, nsParticlesUpdaterContext *context) {
     return true;
 }
+
+void nsParticlesVelocityApplyUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
+}

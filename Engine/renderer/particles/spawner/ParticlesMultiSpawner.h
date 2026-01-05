@@ -13,11 +13,13 @@ public:
     static constexpr auto TITLE = "Multi Spawners";
 
     nsParticlesMultiSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     }
 
     std::vector<nsParticlesSpawner::sp_t>   list;
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 };

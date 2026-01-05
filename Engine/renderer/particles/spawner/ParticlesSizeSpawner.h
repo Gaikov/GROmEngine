@@ -16,11 +16,13 @@ public:
     float maxSize = 100;
 
     nsParticlesSizeSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     };
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
     static nsParticlesSizeSpawner* Init(float minSize, float maxSize);
 };

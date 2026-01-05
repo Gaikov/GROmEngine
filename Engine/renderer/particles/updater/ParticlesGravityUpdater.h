@@ -13,8 +13,13 @@ public:
 
     nsVec2  gravity;
 
+    nsParticlesGravityUpdater() {
+        _name = NAME;
+    };
+
     bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) override;
     void Update(nsParticle *p, float deltaTime) override;
+    void Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) override;
 
     static nsParticlesGravityUpdater* Init(const nsVec2 &gravity);
 };

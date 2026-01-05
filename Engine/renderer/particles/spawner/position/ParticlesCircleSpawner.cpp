@@ -35,3 +35,11 @@ bool nsParticlesCircleSpawner::Parse(script_state_t *ss, nsParticlesSpawnerConte
     }
     return true;
 }
+
+void nsParticlesCircleSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat("radius", radius, 0);
+    ss->VarBool("onEdge", onEdge, false);
+    if (onEdge) {
+        ss->VarFloat("minRadius", minRadius, 0);
+    }
+}

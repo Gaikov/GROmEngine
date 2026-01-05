@@ -13,8 +13,13 @@ public:
 
     float scale = 2;
 
+    nsParticlesSizeUpdater() {
+        _name = NAME;
+    };
+
     void Update(nsParticle *p, float deltaTime) override;
     bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) override;
 
     static nsParticlesSizeUpdater* Init(float scale);
 };

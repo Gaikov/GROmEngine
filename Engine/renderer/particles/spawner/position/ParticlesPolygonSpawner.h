@@ -13,11 +13,13 @@ public:
     static constexpr auto TITLE = "Polygon Position";
 
     nsParticlesPolygonSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     }
 
     void AddPoint(const nsVec2 &p);
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
 protected:
     void UpdateFrame();

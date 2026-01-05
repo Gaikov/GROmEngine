@@ -34,11 +34,13 @@ public:
     };
 
     nsParticlesEdgesSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
 protected:
 

@@ -82,6 +82,11 @@ void nsScriptSaver::VarBool(const char *name, bool value, bool defValue) const {
         PrintVar(name, "%d", value ? 1 : 0);
     }
 }
+void nsScriptSaver::VarInt(const char *name, int value, int defValue) const {
+    if (value != defValue) {
+        PrintVar(name, "%d", value);
+    }
+}
 
 void nsScriptSaver::VarFloat(const char *name, float value, float defValue) const {
     if (value != defValue) {

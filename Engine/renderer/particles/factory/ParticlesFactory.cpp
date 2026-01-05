@@ -7,6 +7,7 @@
 
 #include "Core/ParseFile.h"
 #include "Core/ParserUtils.h"
+#include "Core/ScriptSaver.h"
 #include "renderer/particles/ParticlesBehaviour.h"
 
 nsParticlesBehaviour * nsParticlesFactory::LoadBehaviour(const char *path) {
@@ -45,6 +46,16 @@ bool nsParticlesFactory::SaveBehaviour(const nsParticlesBehaviour *behaviour, co
     }
     Log::Info("...saving particles behaviour: %s", path);
 
+    nsScriptSaver ss(path);
+    if (ss.IsValid()) {
+        ss.VarInt("amountPerSecond", behaviour->amountPerSecond, 100);
+        ss.VarFloat("spawnTime", behaviour->spawnTime, 0);
 
-    return true;
+        _spawnerFactory.Save(&ss, behaviour->spawner);
+        _updaterFactory.Save(&ss, behaviour->updater);
+
+        return true;
+    }
+
+    return false;
 }

@@ -22,3 +22,8 @@ bool nsParticlesLifeSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContext
     maxLifeTime = ParseFloat(ss, "maxTime");
     return true;
 }
+
+void nsParticlesLifeSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat("minTime", minLifeTime, 0.1);
+    ss->VarFloat("maxTime", maxLifeTime, 0.2);
+}

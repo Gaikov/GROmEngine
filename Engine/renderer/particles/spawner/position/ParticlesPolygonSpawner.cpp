@@ -60,3 +60,9 @@ bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCont
     UpdateFrame();
     return true;
 }
+
+void nsParticlesPolygonSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    for (const auto &e: _frame) {
+        ss->VarFloat2("point", e->pos1.GetValue(), nsVec2());
+    }
+}

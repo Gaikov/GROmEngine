@@ -59,9 +59,21 @@ public:
         return true;
     }
 
+    void Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) override {
+        for (auto &f : _timeline) {
+            if (ss->BlockBegin("frame")) {
+                ss->VarFloat("time", f.time, -1);
+                SaveFrame(ss, f.data);
+                ss->BlockEnd();
+            }
+        }
+    }
+
 protected:
     virtual bool ParseFrame(script_state_t *ss, TFrameData &frame) = 0;
+    virtual void SaveFrame(nsScriptSaver *ss, TFrameData &frame) = 0;
     virtual void LerpFrame(nsParticle *p, const TFrameData &f1, const TFrameData &f2, float t) = 0;
+
 
 private:
     struct Frame {

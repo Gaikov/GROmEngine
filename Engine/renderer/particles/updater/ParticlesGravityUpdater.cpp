@@ -9,8 +9,12 @@ void nsParticlesGravityUpdater::Update(nsParticle *p, float deltaTime) {
     p->vel += gravity * deltaTime;
 }
 
+void nsParticlesGravityUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
+    ss->VarFloat2("velocity", gravity, nsVec2());
+}
+
 nsParticlesGravityUpdater *nsParticlesGravityUpdater::Init(const nsVec2 &gravity) {
-    auto u = new nsParticlesGravityUpdater();
+    const auto u = new nsParticlesGravityUpdater();
     u->gravity = gravity;
     return u;
 }

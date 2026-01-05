@@ -5,14 +5,20 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "renderer/particles/updater/ParticlesUpdater.h"
+#include "Engine/renderer/particles/updater/ParticlesUpdater.h"
 
 class nsParticlesVelDampUpdater : public nsParticlesUpdater {
 public:
     static constexpr auto NAME = "velDamp";
 
+    float value = 1;
+
+    nsParticlesVelDampUpdater() {
+        _name = NAME;
+    };
+
     void Update(nsParticle *p, float deltaTime) override;
     bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) override;
-private:
-    float _value = 1;
+    void Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) override;
+
 };

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "renderer/particles/spawner/ParticlesSpawner.h"
+#include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 
 class nsParticlesRightVelSpawner : public nsParticlesSpawner {
 public:
@@ -17,9 +17,11 @@ public:
     bool randomDirection = false;
 
     nsParticlesRightVelSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 };

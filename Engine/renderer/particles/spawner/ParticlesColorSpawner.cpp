@@ -16,3 +16,8 @@ bool nsParticlesColorSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
 
     return true;
 }
+
+void nsParticlesColorSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat4("color1", color1, nsColor());
+    ss->VarFloat4("color2", color2, nsColor());
+}
