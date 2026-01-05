@@ -43,3 +43,11 @@ nsParticlesUpdater *nsParticlesUpdaterFactory::ParseList(script_state_t *ss) {
     return nullptr;
 }
 
+void nsParticlesUpdaterFactory::Save(nsScriptSaver *ss, nsParticlesUpdater *updater) {
+    if (ss->BlockBegin(updater->GetName())) {
+        updater->Save(ss, this);
+        ss->BlockEnd();
+    }
+}
+
+

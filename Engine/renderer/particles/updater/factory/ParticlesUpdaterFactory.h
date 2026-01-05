@@ -13,6 +13,7 @@
 class nsParticlesUpdaterFactory : public nsAbstractFactory<nsParticlesUpdater>, public nsParticlesUpdaterContext {
 public:
     nsParticlesUpdaterFactory();
-    nsParticlesUpdater* Parse(script_state_t *ss);
+    nsParticlesUpdater* Parse(script_state_t *ss) override;
     nsParticlesUpdater* ParseList(script_state_t *ss);
+    void Save(nsScriptSaver *ss, nsParticlesUpdater *updater) override;
 };

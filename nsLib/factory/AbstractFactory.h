@@ -12,6 +12,7 @@
 template <class TBaseClass>
 class nsAbstractFactory {
 public:
+    virtual ~nsAbstractFactory() = default;
     typedef std::function<TBaseClass*()>  builder_t;
 
     void RegisterBuilder(const char *name, const builder_t &builder) {
@@ -28,7 +29,7 @@ public:
     }
 
     bool HasBuilder(const char *name) {
-        return _builders.find(name) != _builders.end();
+        return _builders.contains(name);
     }
 
     builder_t* GetBuilder(const char *name) {
@@ -40,7 +41,7 @@ public:
         return nullptr;
     }
 
-    TBaseClass* Create(const char *name) {
+    virtual TBaseClass* Create(const char *name) {
         if (!StrCheck(name)) {
             Log::Warning("invalid builder name!");
             return nullptr;

@@ -16,11 +16,13 @@ public:
     float maxAngle = 0;
 
     nsParticlesAngleSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
     static nsParticlesAngleSpawner* Init(float minAngle, float maxAngle);
 };

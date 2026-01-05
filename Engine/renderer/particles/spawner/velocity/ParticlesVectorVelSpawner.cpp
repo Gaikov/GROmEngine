@@ -36,3 +36,10 @@ bool nsParticlesVectorVelSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCo
     randomDirection = ParseFloat(ss, "randomDirection") > 0;
     return true;
 }
+
+void nsParticlesVectorVelSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat2("direction", direction, nsVec2());
+    ss->VarFloat("minSpeed", minSpeed, 0);
+    ss->VarFloat("maxSpeed", maxSpeed, 100);
+    ss->VarBool("randomDirection", randomDirection, false);
+}

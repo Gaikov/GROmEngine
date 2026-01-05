@@ -11,7 +11,7 @@ void nsParticlesAngleSpawner::Spawn(nsParticle *p, float angle) {
 }
 
 nsParticlesAngleSpawner *nsParticlesAngleSpawner::Init(float minAngle, float maxAngle) {
-    auto s = new nsParticlesAngleSpawner();
+    const auto s = new nsParticlesAngleSpawner();
     s->minAngle = minAngle;
     s->maxAngle = maxAngle;
     return s;
@@ -21,4 +21,9 @@ bool nsParticlesAngleSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
     minAngle = nsMath::ToRad(ParseFloat(ss, "minAngle", 0));
     maxAngle = nsMath::ToRad(ParseFloat(ss, "maxAngle", 0));
     return true;
+}
+
+void nsParticlesAngleSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    ss->VarFloat("minAngle", nsMath::ToDeg(minAngle), 0);
+    ss->VarFloat("maxAngle", nsMath::ToDeg(maxAngle), 0);
 }

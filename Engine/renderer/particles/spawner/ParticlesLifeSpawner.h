@@ -16,11 +16,13 @@ public:
     float maxLifeTime = 0.2;
 
     nsParticlesLifeSpawner() {
-        _name = TITLE;
+        _title = TITLE;
+        _name = NAME;
     }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
     static nsParticlesLifeSpawner* Init(float minTime, float maxTime);
 };

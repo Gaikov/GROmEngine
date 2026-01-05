@@ -19,3 +19,7 @@ bool nsParticlesSizeUpdater::Parse(script_state_t *ss, nsParticlesUpdaterContext
     scale = ParseFloat(ss, "scale", 1);
     return true;
 }
+
+void nsParticlesSizeUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
+    ss->VarFloat("scale", scale, 2);
+}

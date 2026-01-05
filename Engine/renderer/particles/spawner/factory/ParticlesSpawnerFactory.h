@@ -6,9 +6,9 @@
 #pragma once
 
 #include "nsLib/factory/AbstractFactory.h"
-#include "Core/SmartPtr.h"
 #include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 #include "ParticlesSpawnerContext.h"
+#include "Core/ScriptSaver.h"
 
 class nsParticlesSpawnerFactory : public nsAbstractFactory<nsParticlesSpawner>, nsParticlesSpawnerContext {
 public:
@@ -16,4 +16,5 @@ public:
 
     nsParticlesSpawner* Parse(script_state_t *ss) override;
     nsParticlesSpawner* ParseList(script_state_t *ss);
+    void Save(nsScriptSaver *ss, nsParticlesSpawner *spawner) override;
 };

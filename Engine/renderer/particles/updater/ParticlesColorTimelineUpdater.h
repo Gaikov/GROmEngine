@@ -11,7 +11,12 @@ class nsParticlesColorTimelineUpdater : public nsParticlesTimelineUpdater<nsColo
 public:
     static constexpr auto NAME = "colorTimeline";
 
+    nsParticlesColorTimelineUpdater() {
+        _name = NAME;
+    };
+
 protected:
     bool ParseFrame(script_state_t *ss, nsColor &frame) override;
     void LerpFrame(nsParticle *p, const nsColor &f1, const nsColor &f2, float t) override;
+    void SaveFrame(nsScriptSaver *ss, nsColor &frame) override;
 };

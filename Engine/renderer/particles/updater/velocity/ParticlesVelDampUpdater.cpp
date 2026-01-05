@@ -6,9 +6,8 @@
 #include "Core/ParserUtils.h"
 
 void nsParticlesVelDampUpdater::Update(nsParticle *p, float deltaTime) {
-    float len = p->vel.Length();
-    if (len > 0) {
-        float newLen = len - deltaTime * _value;
+    if (const float len = p->vel.Length(); len > 0) {
+        float newLen = len - deltaTime * value;
         if (newLen < 0) {
             newLen = 0;
         }
@@ -17,7 +16,11 @@ void nsParticlesVelDampUpdater::Update(nsParticle *p, float deltaTime) {
 }
 
 bool nsParticlesVelDampUpdater::Parse(script_state_t *ss, nsParticlesUpdaterContext *context) {
-    _value = ParseFloat(ss, "value", _value);
+    value = ParseFloat(ss, "value", value);
 
     return true;
+}
+
+void nsParticlesVelDampUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
+    ss->VarFloat("value", value, 1);
 }

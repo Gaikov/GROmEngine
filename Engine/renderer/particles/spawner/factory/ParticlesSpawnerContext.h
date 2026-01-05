@@ -9,5 +9,7 @@
 
 class nsParticlesSpawnerContext {
 public:
+    virtual ~nsParticlesSpawnerContext() = default;
     virtual nsParticlesSpawner* Parse(script_state_t *ss) = 0;
+    virtual void Save(nsScriptSaver *ss, nsParticlesSpawner *spawner) = 0;
 };

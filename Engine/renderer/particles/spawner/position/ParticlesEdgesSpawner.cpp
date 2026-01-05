@@ -67,3 +67,13 @@ bool nsParticlesEdgesSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
 
     return true;
 }
+
+void nsParticlesEdgesSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
+    for (const auto &e: _frame) {
+        if (ss->BlockBegin("edge")) {
+            ss->VarFloat2("point1", e->pos1.GetValue(), nsVec2());
+            ss->VarFloat2("point2", e->pos2.GetValue(), nsVec2());
+            ss->BlockEnd();
+        }
+    }
+}
