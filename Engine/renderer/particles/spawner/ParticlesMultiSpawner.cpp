@@ -25,9 +25,6 @@ bool nsParticlesMultiSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
 
 void nsParticlesMultiSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
     for (const auto &s: list) {
-        if (ss->BlockBegin(s->GetName())) {
-            context->Save(ss, s);
-            ss->BlockEnd();
-        }
+        context->Save(ss, s);
     }
 }
