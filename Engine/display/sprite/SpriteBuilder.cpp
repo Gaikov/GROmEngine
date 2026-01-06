@@ -19,7 +19,7 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
     const auto sprite = dynamic_cast<nsSprite *>(object);
     const auto dev = nsRenDevice::Shared()->Device();
 
-    auto assetPath = context->ParseAssetPath(ss, "texture");
+    auto assetPath = context->assetsContext->ParseAssetPath(ss, "texture");
     if (!assetPath.IsEmpty()) {
         if (const auto tex = dev->TextureLoad(assetPath, false)) {
             sprite->desc.tex = tex;
@@ -49,7 +49,7 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
         sprite->desc.tex2.y = ps_var_f(ss);
     }
 
-    assetPath = context->ParseAssetPath(ss, "renState");
+    assetPath = context->assetsContext->ParseAssetPath(ss, "renState");
     if (!assetPath.IsEmpty()) {
         if (const auto state = dev->StateLoad(ParseString(ss, "renState"))) {
             sprite->renState = state;
@@ -72,7 +72,7 @@ bool nsSpriteBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, 
 
     const auto dev = nsRenDevice::Shared()->Device();
     if (desc.tex) {
-        context->SaveAssetPath(saver, "texture", dev->TextureGetPath(desc.tex));
+        context->assetsContext->SaveAssetPath(saver, "texture", dev->TextureGetPath(desc.tex));
     }
 
     saver.VarFloat2("pivot", desc.center, nsVec2());
@@ -87,7 +87,7 @@ bool nsSpriteBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, 
     saver.VarFloat("tilesY", desc.tex2.y, 1.0f);
 
     if (sprite->renState) {
-        context->SaveAssetPath(saver, "renState", dev->StateGetPath(sprite->renState));
+        context->assetsContext->SaveAssetPath(saver, "renState", dev->StateGetPath(sprite->renState));
     }
 
     return true;

@@ -4,6 +4,7 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include "Engine/assets/VisualAssetsContext.h"
 #include "Engine/renderer/particles/ParticlesBehaviour.h"
 #include "Engine/renderer/particles/renderer/ParticlesRendererFactory.h"
 #include "Engine/renderer/particles/spawner/factory/ParticlesSpawnerFactory.h"
@@ -11,6 +12,7 @@
 
 class nsParticlesFactory final {
 public:
+    nsVisualAssetsContext::sp_t assetsContext;
     nsParticlesBehaviour* LoadBehaviour(const char* path);
     bool SaveBehaviour(const nsParticlesBehaviour* behaviour, const char* path);
 

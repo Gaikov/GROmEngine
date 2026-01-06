@@ -18,10 +18,10 @@ bool nsTextLabelBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
     }
 
     const auto label = dynamic_cast<nsTextLabel*>(object);
-    if (const auto font = nsFontsCache::Shared()->LoadFont(context->ParseAssetPath(ss, "font"))) {
+    if (const auto font = nsFontsCache::Shared()->LoadFont(context->assetsContext->ParseAssetPath(ss, "font"))) {
         label->font = font;
     }
-    if (const auto state = nsRenDevice::Shared()->Device()->StateLoad(context->ParseAssetPath(ss, "renState"))) {
+    if (const auto state = nsRenDevice::Shared()->Device()->StateLoad(context->assetsContext->ParseAssetPath(ss, "renState"))) {
         label->renState = state;
     }
 
@@ -44,12 +44,12 @@ bool nsTextLabelBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *
 
     const auto label = Cast<nsTextLabel>(o);
     if (label->font) {
-        context->SaveAssetPath(saver, "font", label->font->GetPath());
+        context->assetsContext->SaveAssetPath(saver, "font", label->font->GetPath());
     }
 
     if (label->renState) {
         const auto path = nsRenDevice::Shared()->Device()->StateGetPath(label->renState);
-        context->SaveAssetPath(saver, "renState", path);
+        context->assetsContext->SaveAssetPath(saver, "renState", path);
     }
 
     saver.VarString("text", label->text);
