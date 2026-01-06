@@ -4,7 +4,7 @@
 #include "RoundParticlesRenderer.h"
 #include "Core/ParserUtils.h"
 #include "RenManager.h"
-#include "nsLib/StrTools.h"
+#include "assets/VisualAssetsContext.h"
 
 nsParticlesRoundRenderer::nsParticlesRoundRenderer() {
     _buffer = new nsQuadsBuffer(nsRenDevice::Shared()->Device(), 2000, true);
@@ -43,10 +43,11 @@ void nsParticlesRoundRenderer::Draw(nsParticle *head) {
     _buffer->Clear();
 }
 
-bool nsParticlesRoundRenderer::Parse(script_state_t *ss) {
+bool nsParticlesRoundRenderer::Parse(script_state_t *ss, const nsVisualAssetsContext *context) {
     const auto dev = nsRenDevice::Shared()->Device();
-    texture = dev->TextureLoad(ParseStrP(ss, "texture"));
-    renState = dev->StateLoad(nsString(ParseStrP(ss, "renState")));
+
+    texture = dev->TextureLoad(context->ParseAssetPath(ss, "texture"));
+    renState = dev->StateLoad(context->ParseAssetPath(ss, "renState"));
     return true;
 }
 

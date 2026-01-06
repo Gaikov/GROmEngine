@@ -34,7 +34,7 @@ nsParticlesBehaviour * nsParticlesFactory::LoadBehaviour(const char *path) {
     behaviour->spawnTime = ParseFloat(ss, "spawnTime", 0);
     behaviour->spawner = spawners;
     behaviour->updater = _updaterFactory.ParseList(ss);
-    behaviour->renderer = _rendererFactory.Parse(ss);
+    behaviour->renderer = _rendererFactory.Parse(ss, assetsContext.get());
 
     return behaviour;
 }

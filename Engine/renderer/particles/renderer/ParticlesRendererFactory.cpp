@@ -12,12 +12,12 @@ nsParticlesRendererFactory::nsParticlesRendererFactory() {
     RegisterWithName<nsParticlesToonRenderer>();
 }
 
-nsParticlesRenderer * nsParticlesRendererFactory::Parse(script_state_t *ss) {
+nsParticlesRenderer * nsParticlesRendererFactory::Parse(script_state_t *ss, const nsVisualAssetsContext *context) {
     if (ps_block_begin(ss, "renderer")) {
         const auto name = ParseStrP(ss, "name", "__not_specified__");
         if (const auto builder = GetBuilder(name)) {
             if (const auto renderer = (*builder)()) {
-                if (renderer->Parse(ss)) {
+                if (renderer->Parse(ss, context)) {
                     return renderer;
                 }
                 delete renderer;

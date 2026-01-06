@@ -12,5 +12,5 @@ class nsParticlesRendererFactory : public nsAbstractFactory<nsParticlesRenderer>
 public:
     nsParticlesRendererFactory();
 
-    nsParticlesRenderer *Parse(script_state_t *ss);
+    nsParticlesRenderer *Parse(script_state_t *ss, const nsVisualAssetsContext* context);
 };
