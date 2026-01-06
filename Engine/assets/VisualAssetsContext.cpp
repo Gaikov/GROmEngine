@@ -10,7 +10,7 @@ nsVisualAssetsContext::nsVisualAssetsContext() : assetsPath("") {
 }
 
 nsVisualAssetsContext::~nsVisualAssetsContext() {
-    Log::Info("...VisualAssetsContext destroyed");
+    Log::Info("...assets context destroyed");
 }
 
 nsFilePath nsVisualAssetsContext::ParseAssetPath(script_state_t *ss, const char *name) const {

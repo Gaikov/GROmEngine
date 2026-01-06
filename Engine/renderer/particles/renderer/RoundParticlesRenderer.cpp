@@ -8,6 +8,7 @@
 
 nsParticlesRoundRenderer::nsParticlesRoundRenderer() {
     _buffer = new nsQuadsBuffer(nsRenDevice::Shared()->Device(), 2000, true);
+    _name = NAME;
 }
 
 nsParticlesRoundRenderer::~nsParticlesRoundRenderer() {
@@ -51,3 +52,13 @@ bool nsParticlesRoundRenderer::Parse(script_state_t *ss, const nsVisualAssetsCon
     return true;
 }
 
+void nsParticlesRoundRenderer::Save(const nsScriptSaver &saver, const nsVisualAssetsContext *context) {
+    const auto dev = nsRenDevice::Shared()->Device();
+
+    if (texture) {
+        saver.VarString("texture", context->RelativeAssetPath(dev->TextureGetPath(texture)));
+    }
+    if (renState) {
+        saver.VarString("renState", context->RelativeAssetPath(dev->StateGetPath(renState)));
+    }
+}
