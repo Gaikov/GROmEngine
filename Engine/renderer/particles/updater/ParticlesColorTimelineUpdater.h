@@ -10,9 +10,11 @@
 class nsParticlesColorTimelineUpdater : public nsParticlesTimelineUpdater<nsColor> {
 public:
     static constexpr auto NAME = "colorTimeline";
+    static constexpr auto TITLE = "Color Timeline";
 
     nsParticlesColorTimelineUpdater() {
         _name = NAME;
+        _title = TITLE;
     };
 
 protected:

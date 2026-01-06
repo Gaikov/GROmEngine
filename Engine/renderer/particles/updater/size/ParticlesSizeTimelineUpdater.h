@@ -10,9 +10,11 @@
 class nsParticlesSizeTimelineUpdater : public nsParticlesTimelineUpdater<float> {
 public:
     static constexpr auto NAME = "sizeTimeline";
+    static constexpr auto TITLE = "Size Timeline";
 
     nsParticlesSizeTimelineUpdater() {
         _name = NAME;
+        _title = TITLE;
     };
 
 protected:

@@ -10,11 +10,13 @@
 class nsParticlesGravityUpdater : public nsParticlesUpdater {
 public:
     static constexpr auto NAME = "gravity";
+    static constexpr auto TITLE = "Gravity";
 
     nsVec2  gravity;
 
     nsParticlesGravityUpdater() {
         _name = NAME;
+        _title = TITLE;
     };
 
     bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) override;

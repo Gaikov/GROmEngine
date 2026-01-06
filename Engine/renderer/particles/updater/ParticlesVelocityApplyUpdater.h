@@ -10,9 +10,11 @@
 class nsParticlesVelocityApplyUpdater : public nsParticlesUpdater {
 public:
     static constexpr auto NAME = "velApply";
+    static constexpr auto TITLE = "Velocity Apply";
 
     nsParticlesVelocityApplyUpdater() {
         _name = NAME;
+        _title = TITLE;
     };
 
     void Update(nsParticle *p, float deltaTime) override;
