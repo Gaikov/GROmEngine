@@ -5,12 +5,8 @@
 #include "ParticlesMultiUpdater.h"
 #include "renderer/particles/updater/factory/ParticlesUpdaterContext.h"
 
-void nsParticlesCompositeUpdater::Add(nsParticlesUpdater::sp_t u) {
-    _list.push_back(u);
-}
-
 void nsParticlesCompositeUpdater::Update(nsParticle *p, float deltaTime) {
-    for (auto &u: _list) {
+    for (auto &u: list) {
         u->Update(p, deltaTime);
     }
 }
@@ -20,7 +16,7 @@ bool nsParticlesCompositeUpdater::Parse(script_state_t *ss, nsParticlesUpdaterCo
         do {
             auto u = context->Parse(ss);
             if (u) {
-                Add(u);
+                list.push_back(u);
             }
         } while (ps_block_next(ss));
         ps_block_end(ss);
@@ -29,7 +25,7 @@ bool nsParticlesCompositeUpdater::Parse(script_state_t *ss, nsParticlesUpdaterCo
 }
 
 void nsParticlesCompositeUpdater::Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) {
-    for (auto &u: _list) {
+    for (auto &u: list) {
         context->Save(ss, u);
     }
 }

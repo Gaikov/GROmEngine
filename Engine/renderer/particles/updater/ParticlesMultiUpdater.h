@@ -10,16 +10,16 @@
 class nsParticlesCompositeUpdater : public nsParticlesUpdater {
 public:
     static constexpr auto NAME = "updaters";
+    static constexpr auto TITLE = "Multi Updaters";
 
     nsParticlesCompositeUpdater() {
         _name = NAME;
+        _title = TITLE;
     };
 
-    void Add(nsParticlesUpdater::sp_t u);
+    std::vector<sp_t>   list;
+
     void Update(nsParticle *p, float deltaTime) override;
     bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) override;
     void Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) override;
-
-private:
-    std::vector<nsParticlesUpdater::sp_t>   _list;
 };

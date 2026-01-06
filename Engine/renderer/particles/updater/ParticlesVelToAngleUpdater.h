@@ -10,9 +10,11 @@
 class nsParticlesVelToAngleUpdater : public nsParticlesUpdater {
 public:
     static constexpr auto NAME = "velAngle";
+    static constexpr auto TITLE = "Velocity To Angle";
 
     nsParticlesVelToAngleUpdater() {
         _name = NAME;
+        _title = TITLE;
     };
 
     void Update(nsParticle *p, float deltaTime) override;

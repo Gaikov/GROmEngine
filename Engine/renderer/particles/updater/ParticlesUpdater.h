@@ -21,6 +21,7 @@ public:
     typedef nsSmartPtr<nsParticlesUpdater>  sp_t;
 
     [[nodiscard]] const char *GetName() const { return _name; }
+    const char* GetTitle() const { return _title; }
 
     virtual void Update(nsParticle *p, float deltaTime) = 0;
     virtual bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) = 0;
@@ -28,4 +29,5 @@ public:
 
 protected:
     const char *_name = "";
+    const char * _title = "";
 };
