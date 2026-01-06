@@ -20,6 +20,10 @@ public:
         return GetResourceName(particles);
     }
 
+    void SetAssetsContext(const nsVisualAssetsContext::sp_t &context) {
+        _factory.assetsContext = context;
+    }
+
 protected:
     bool OnInit() override;
     void OnRelease() override;

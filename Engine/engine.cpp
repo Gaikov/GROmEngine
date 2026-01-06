@@ -79,19 +79,22 @@ bool nsEngine::Init()
         return false;
     }
 
+	const auto assetsContext = std::make_shared<nsVisualAssetsContext>();
+
     if (!nsParticlesManager::Init()) {
         return false;
     }
+	nsParticlesManager::Shared()->SetAssetsContext(assetsContext);
 
     nsVisualFactory2d::Init();
 	const auto vf = nsVisualFactory2d::Shared();
-	vf->particlesLoader = nsParticlesManager::Shared();
+	vf->assetsContext = assetsContext;
 	vf->BindClass<nsParticlesEffect>("ParticlesEffect");
 	vf->BindClass<nsParticlesEffectHolder>("ParticlesEffectHolder");
 
 	nsLayoutsPool::Init();
 	nsDebugDrawManager::Init();
-	auto ddm = nsDebugDrawManager::Shared();
+	const auto ddm = nsDebugDrawManager::Shared();
 	ddm->AddPolicy(new nsFastMemDebugDraw());
 	ddm->AddPolicy(new nsVisualsPoolDebugDraw());
 

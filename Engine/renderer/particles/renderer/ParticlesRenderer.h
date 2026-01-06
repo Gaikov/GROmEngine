@@ -16,4 +16,8 @@ public:
     virtual ~nsParticlesRenderer() = default;
     virtual bool Parse(script_state_t *ss) = 0;
     virtual void Draw(nsParticle *head) = 0;
+    [[nodiscard]] const char* GetName() const { return _name; }
+
+protected:
+    const char *_name = "";
 };

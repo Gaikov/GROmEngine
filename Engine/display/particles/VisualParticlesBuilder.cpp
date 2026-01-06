@@ -21,9 +21,9 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
     }
 
     auto &system = p->GetSystem();
-    const auto path = context->ParseAssetPath(ss, "source");
+    const auto path = context->assetsContext->ParseAssetPath(ss, "source");
     if (!path.IsEmpty()) {
-        if (const auto b = context->particlesLoader->LoadParticles(path)) {
+        if (const auto b = context->assetsContext->particlesLoader->LoadParticles(path)) {
             system.behaviour = b;
         }
     }
@@ -53,8 +53,8 @@ bool nsVisualParticlesBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObje
     const auto p = Cast<nsVisualParticles>(o);
     const auto &system = p->GetSystem();
     if (system.behaviour) {
-        const nsFilePath path = context->particlesLoader->GetParticlesPath(system.behaviour);
-        context->SaveAssetPath(saver, "source", path);
+        const nsFilePath path = context->assetsContext->particlesLoader->GetParticlesPath(system.behaviour);
+        context->assetsContext->SaveAssetPath(saver, "source", path);
     }
 
     saver.VarBool("spawn", system.spawnEnabled, true);
