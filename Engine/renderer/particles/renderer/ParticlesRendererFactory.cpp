@@ -12,7 +12,7 @@ nsParticlesRendererFactory::nsParticlesRendererFactory() {
     RegisterWithName<nsParticlesToonRenderer>();
 }
 
-nsParticlesRenderer * nsParticlesRendererFactory::Parse(script_state_t *ss, const nsVisualAssetsContext *context) {
+nsParticlesRenderer *nsParticlesRendererFactory::Parse(script_state_t *ss, const nsVisualAssetsContext *context) {
     if (ps_block_begin(ss, "renderer")) {
         const auto name = ParseStrP(ss, "name", "__not_specified__");
         if (const auto builder = GetBuilder(name)) {
@@ -27,4 +27,15 @@ nsParticlesRenderer * nsParticlesRendererFactory::Parse(script_state_t *ss, cons
         Log::Warning("Particles renderer is not specified!");
     }
     return nullptr;
+}
+
+bool nsParticlesRendererFactory::Save(nsScriptSaver &saver, nsParticlesRenderer *renderer,
+                                      const nsVisualAssetsContext *context) const {
+    if (saver.BlockBegin("renderer")) {
+        saver.VarString("name", renderer->GetName());
+        renderer->Save(saver, context);
+        saver.BlockEnd();
+        return true;
+    }
+    return false;
 }

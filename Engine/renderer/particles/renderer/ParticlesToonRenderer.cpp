@@ -9,6 +9,7 @@
 
 nsParticlesToonRenderer::nsParticlesToonRenderer() :
         _buffer(nsRenDevice::Shared()->Device(), 5000, false) {
+    _name = NAME;
 }
 
 bool nsParticlesToonRenderer::Parse(script_state_t *ss, const nsVisualAssetsContext *context) {
@@ -22,6 +23,17 @@ bool nsParticlesToonRenderer::Parse(script_state_t *ss, const nsVisualAssetsCont
     _borderSize = ParseFloat(ss, "borderSize");
 
     return true;
+}
+
+void nsParticlesToonRenderer::Save(const nsScriptSaver &saver, const nsVisualAssetsContext *context) {
+    const auto dev = nsRenDevice::Shared()->Device();
+
+    saver.VarString("frontTexture", context->RelativeAssetPath(dev->TextureGetPath(_front)));
+    saver.VarString("backTexture", context->RelativeAssetPath(dev->TextureGetPath(_back)));
+    saver.VarString("renState", context->RelativeAssetPath(dev->StateGetPath(_state)));
+    saver.VarFloat4("borderColor", _borderColor, nsColor());
+    saver.VarFloat4("color", _color, nsColor());
+    saver.VarFloat("borderSize", _borderSize, 0);
 }
 
 void nsParticlesToonRenderer::Draw(nsParticle *head) {

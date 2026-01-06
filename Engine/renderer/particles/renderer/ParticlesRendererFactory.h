@@ -7,10 +7,12 @@
 #include "ParticlesRenderer.h"
 #include "nsLib/factory/AbstractFactory.h"
 #include "Core/Parser.h"
+#include "Core/ScriptSaver.h"
 
-class nsParticlesRendererFactory : public nsAbstractFactory<nsParticlesRenderer> {
+class nsParticlesRendererFactory final : public nsAbstractFactory<nsParticlesRenderer> {
 public:
     nsParticlesRendererFactory();
 
     nsParticlesRenderer *Parse(script_state_t *ss, const nsVisualAssetsContext* context);
+    bool Save(nsScriptSaver &saver, nsParticlesRenderer *renderer, const nsVisualAssetsContext* context) const;
 };

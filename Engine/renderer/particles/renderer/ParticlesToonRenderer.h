@@ -16,6 +16,7 @@ public:
     nsParticlesToonRenderer();
 
     bool Parse(script_state_t *ss, const nsVisualAssetsContext *context) override;
+    void Save(const nsScriptSaver &saver, const nsVisualAssetsContext *context) override;
     void Draw(nsParticle *head) override;
 
 private:

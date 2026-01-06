@@ -53,6 +53,7 @@ bool nsParticlesFactory::SaveBehaviour(const nsParticlesBehaviour *behaviour, co
 
         _spawnerFactory.Save(&ss, behaviour->spawner);
         _updaterFactory.Save(&ss, behaviour->updater);
+        _rendererFactory.Save(ss, behaviour->renderer, assetsContext.get());
 
         return true;
     }
