@@ -55,6 +55,12 @@ public:
         return (*builder)();
     }
 
+    void GetNamesList(std::vector<std::string> &list) {
+        for (auto &builder : _builders) {
+            list.push_back(builder.first);
+        }
+    }
+
 protected:
     std::map<std::string, builder_t> _builders;
 };

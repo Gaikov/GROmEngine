@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "renderer/particles/updater/ParticlesTimelineUpdater.h"
+#include "Engine/renderer/particles/updater/ParticlesTimelineUpdater.h"
 
 class nsParticlesSizeTimelineUpdater : public nsParticlesTimelineUpdater<float> {
 public:
