@@ -14,5 +14,5 @@ void nsParticlesSizeTimelineUpdater::LerpFrame(nsParticle *p, const float &f1, c
 }
 
 void nsParticlesSizeTimelineUpdater::SaveFrame(nsScriptSaver *ss, float &frame) {
-    ss->VarFloat("scale", frame, 1);
+    ss->VarFloat("scale", frame, 0);
 }
