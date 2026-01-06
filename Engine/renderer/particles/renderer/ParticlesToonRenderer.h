@@ -6,8 +6,8 @@
 #pragma once
 
 #include "ParticlesRenderer.h"
-#include "RenDevice.h"
-#include "renderer/QuadsBuffer.h"
+#include "Engine/RenDevice.h"
+#include "Engine/renderer/QuadsBuffer.h"
 
 class nsParticlesToonRenderer : public nsParticlesRenderer {
 public:
@@ -15,7 +15,7 @@ public:
 
     nsParticlesToonRenderer();
 
-    bool Parse(script_state_t *ss) override;
+    bool Parse(script_state_t *ss, const nsVisualAssetsContext *context) override;
     void Draw(nsParticle *head) override;
 
 private:

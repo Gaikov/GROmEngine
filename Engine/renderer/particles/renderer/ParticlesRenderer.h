@@ -9,12 +9,14 @@
 #include "Core/SmartPtr.h"
 #include "Core/Parser.h"
 
+class nsVisualAssetsContext;
+
 class nsParticlesRenderer {
 public:
     typedef nsSmartPtr<nsParticlesRenderer> sp_t;
 
     virtual ~nsParticlesRenderer() = default;
-    virtual bool Parse(script_state_t *ss) = 0;
+    virtual bool Parse(script_state_t *ss, const nsVisualAssetsContext *context) = 0;
     virtual void Draw(nsParticle *head) = 0;
     [[nodiscard]] const char* GetName() const { return _name; }
 

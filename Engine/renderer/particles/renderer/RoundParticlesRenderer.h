@@ -21,7 +21,7 @@ public:
 
     void Draw(nsParticle *head) override;
 
-    bool Parse(script_state_t *ss) override;
+    bool Parse(script_state_t *ss, const nsVisualAssetsContext *context) override;
 
 private:
     nsQuadsBuffer *_buffer;

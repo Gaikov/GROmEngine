@@ -5,17 +5,18 @@
 #include "ParticlesToonRenderer.h"
 #include "RenManager.h"
 #include "Core/ParserUtils.h"
+#include "assets/VisualAssetsContext.h"
 
 nsParticlesToonRenderer::nsParticlesToonRenderer() :
         _buffer(nsRenDevice::Shared()->Device(), 5000, false) {
 }
 
-bool nsParticlesToonRenderer::Parse(script_state_t *ss) {
+bool nsParticlesToonRenderer::Parse(script_state_t *ss, const nsVisualAssetsContext *context) {
     auto dev = nsRenDevice::Shared()->Device();
 
-    _front = dev->TextureLoad(ParseString(ss, "frontTexture"));
-    _back = dev->TextureLoad(ParseString(ss, "backTexture"));
-    _state = dev->StateLoad(ParseString(ss, "renState"));
+    _front = dev->TextureLoad(context->ParseAssetPath(ss, "frontTexture"));
+    _back = dev->TextureLoad(context->ParseAssetPath(ss, "backTexture"));
+    _state = dev->StateLoad(context->ParseAssetPath(ss, "renState"));
     ParseColorExt(ss, "borderColor", _borderColor);
     ParseColorExt(ss, "color", _color);
     _borderSize = ParseFloat(ss, "borderSize");
