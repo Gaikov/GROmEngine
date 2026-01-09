@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Core/serialization/var/ArrayVar.h"
 #include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 #include "nsLib/models/Property.h"
 
@@ -13,37 +14,44 @@ public:
     static constexpr auto NAME = "edges";
     static constexpr auto TITLE = "Edges Position";
 
-    class Edge {
+    class nsPoint final : public nsProperty<nsVec2> {
         friend class nsParticlesEdgesSpawner;
     public:
-        typedef nsSmartPtr<Edge> sp_t;
-        typedef std::function<void()> ChangeCallback;
+        typedef std::shared_ptr<nsPoint> sp_t;
+        typedef std::function<void()> callback_t;
 
-        Edge();
 
-        nsProperty<nsVec2>  pos1 = nsVec2();
-        nsProperty<nsVec2>  pos2 = nsVec2();
-
-        float Length() const { return length; }
+        nsPoint() : nsPoint(nsVec2()) {};
+        nsPoint(const nsVec2 &value) : nsProperty(value) {
+            AddHandler(nsPropChangedName::CHANGED, [this](const nsBaseEvent *e) {
+                if (owner) {
+                    owner->_valid = false;
+                }
+            });
+        }
 
     private:
-        void UpdateEdge();
-
-        nsVec2  dir;
-        float   length = 0;
+        nsParticlesEdgesSpawner *owner = nullptr;
     };
 
-    nsParticlesEdgesSpawner() {
-        _title = TITLE;
-        _name = NAME;
-    }
+    nsVector<nsPoint::sp_t> points;
+
+    nsParticlesEdgesSpawner();
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
     void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
 protected:
+    struct Edge {
+        nsVec2  pos;
+        nsVec2  dir;
+        float   length = 0;
+    };
 
-    std::vector<Edge::sp_t> _frame;
+    bool _valid = false;
+    std::vector<Edge> _frame;
     float _length = 0;
+
+    virtual void Validate();
 };

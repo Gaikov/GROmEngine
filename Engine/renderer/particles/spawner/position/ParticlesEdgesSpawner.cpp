@@ -6,32 +6,28 @@
 #include "Core/ParserUtils.h"
 #include "nsLib/log.h"
 
-nsParticlesEdgesSpawner::Edge::Edge() {
-    pos1.AddHandler(nsPropChangedName::CHANGED, [&](const nsBaseEvent*) {
-        UpdateEdge();
-    });
+nsParticlesEdgesSpawner::nsParticlesEdgesSpawner() {
+    _name = TITLE;
+    _title = TITLE;
 
-    pos2.AddHandler(nsPropChangedName::CHANGED, [&](const nsBaseEvent*) {
-        UpdateEdge();
+    points.AddHandler(nsVectorEvent::ID, [this](const nsBaseEvent *e) {
+        _valid = false;
+        for (const auto &p : points.GetItems()) {
+            p->owner = this;
+        }
     });
 }
 
-void nsParticlesEdgesSpawner::Edge::UpdateEdge() {
-    dir = pos2 - pos1;
-    length = dir.Length();
-    if (length > 0) {
-        dir /= length;
-    }
-}
+void nsParticlesEdgesSpawner::Spawn(nsParticle *p, const float angle) {
+    Validate();
 
-void nsParticlesEdgesSpawner::Spawn(nsParticle *p, float angle) {
     if (!_frame.empty()) {
         float dist = nsMath::Random() * _length * 0.999f;
 
-        for (auto &e: _frame) {
-            dist -= e->length;
+        for (const auto &e: _frame) {
+            dist -= e.length;
             if (dist < 0) {
-                p->pos = (e->pos1 + e->dir * (e->length + dist)).Rotate(angle);
+                p->pos = (e.pos + e.dir * (e.length + dist)).Rotate(angle);
                 break;
             }
         }
@@ -39,26 +35,19 @@ void nsParticlesEdgesSpawner::Spawn(nsParticle *p, float angle) {
 }
 
 bool nsParticlesEdgesSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContext *context) {
-
     if (ps_block_begin(ss, "edge")) {
-        _frame.clear();
-        _length = 0;
-
         do {
-            Edge::sp_t e = new Edge();
             nsVec2 p1, p2;
             if (ParseFloat2(ss, "point1", p1)
                 && ParseFloat2(ss, "point2", p2)) {
-
-                e->pos1 = p1;
-                e->pos2 = p2;
-
-                _frame.push_back(e);
-                _length += e->length;
+                points.Add(std::make_shared<nsPoint>(p1));
+                points.Add(std::make_shared<nsPoint>(p2));
             }
         } while (ps_block_next(ss));
         ps_block_end(ss);
     }
+
+    Validate();
 
     if (_frame.empty()) {
         Log::Warning("Edges spawner is empty!");
@@ -71,9 +60,35 @@ bool nsParticlesEdgesSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
 void nsParticlesEdgesSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
     for (const auto &e: _frame) {
         if (ss->BlockBegin("edge")) {
+            /*
             ss->VarFloat2("point1", e->pos1.GetValue(), nsVec2());
             ss->VarFloat2("point2", e->pos2.GetValue(), nsVec2());
+            */
             ss->BlockEnd();
+        }
+    }
+}
+
+void nsParticlesEdgesSpawner::Validate() {
+    if (!_valid) {
+        _valid = true;
+
+        _frame.clear();
+        _length = 0;
+
+        const auto &list = points.GetItems();
+        const int count = list.size() / 2;
+        for (int i = 0; i < count; ++i) {
+            auto &p1 = list[i * 2];
+            auto &p2 = list[i * 2 + 1];
+            Edge e;
+            e.pos = p1->GetValue();
+            e.dir = p2->GetValue() - e.pos;
+            e.length = e.dir.Length();
+            e.dir /= e.length;
+
+            _frame.push_back(e);
+            _length += e.length;
         }
     }
 }
