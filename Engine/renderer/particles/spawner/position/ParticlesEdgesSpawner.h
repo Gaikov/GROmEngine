@@ -7,34 +7,15 @@
 
 #include "Core/serialization/var/ArrayVar.h"
 #include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
+#include "nsLib/models/Point.h"
 #include "nsLib/models/Property.h"
 
-class nsParticlesEdgesSpawner : public nsParticlesSpawner {
+class nsParticlesEdgesSpawner : public nsParticlesSpawner, public nsPoint::Owner {
 public:
     static constexpr auto NAME = "edges";
     static constexpr auto TITLE = "Edges Position";
 
-    class nsPoint final : public nsProperty<nsVec2> {
-        friend class nsParticlesEdgesSpawner;
-    public:
-        typedef std::shared_ptr<nsPoint> sp_t;
-        typedef std::function<void()> callback_t;
-
-
-        nsPoint() : nsPoint(nsVec2()) {};
-        nsPoint(const nsVec2 &value) : nsProperty(value) {
-            AddHandler(nsPropChangedName::CHANGED, [this](const nsBaseEvent *e) {
-                if (owner) {
-                    owner->_valid = false;
-                }
-            });
-        }
-
-    private:
-        nsParticlesEdgesSpawner *owner = nullptr;
-    };
-
-    nsVector<nsPoint::sp_t> points;
+    nsArray<nsPoint::sp_t> points;
 
     nsParticlesEdgesSpawner();
 
@@ -43,6 +24,7 @@ public:
     void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 
 protected:
+
     struct Edge {
         nsVec2  pos;
         nsVec2  dir;
@@ -54,4 +36,5 @@ protected:
     float _length = 0;
 
     virtual void Validate();
+    void OnPointChanged(const nsPoint &point) override;
 };

@@ -7,9 +7,9 @@
 #include <memory>
 
 #include "Core/serialization/Serializable.h"
-#include "nsLib/structs/Vector.h"
+#include "nsLib/structs/Array.h"
 
-class nsBaseArrayVar : public nsVector<std::shared_ptr<nsSerializable>>, public nsSerializable {
+class nsBaseArrayVar : public nsArray<std::shared_ptr<nsSerializable>>, public nsSerializable {
 public:
     std::string serializationName;
 
