@@ -60,6 +60,7 @@ bool nsParticlesEdgesSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
 void nsParticlesEdgesSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
     for (const auto &e: _frame) {
         if (ss->BlockBegin("edge")) {
+
             /*
             ss->VarFloat2("point1", e->pos1.GetValue(), nsVec2());
             ss->VarFloat2("point2", e->pos2.GetValue(), nsVec2());
@@ -91,4 +92,8 @@ void nsParticlesEdgesSpawner::Validate() {
             _length += e.length;
         }
     }
+}
+
+void nsParticlesEdgesSpawner::OnPointChanged(const nsPoint &point) {
+    _valid = false;
 }
