@@ -6,14 +6,18 @@
 #include "nsLib/log.h"
 #include "Core/ParserUtils.h"
 
-void nsParticlesMultiDirectionSpawner::Spawn(nsParticle *p, float angle) {
-    int dirIndex = int(nsMath::Random() * 0.999f * (float)_directions.size());
-    auto &dir = _directions[dirIndex];
+void nsParticlesMultiDirectionSpawner::Spawn(nsParticle *p, const float angle) {
+    if (directions.empty()) {
+        return;
+    }
 
-    float partAngle = nsMath::Lerp(dir.minAngle, dir.maxAngle, nsMath::Random());
-    float speed = nsMath::Lerp(dir.minSpeed, dir.maxSpeed, nsMath::Random());
+    const int dirIndex = int(nsMath::Random() * 0.999f * (float)directions.size());
+    const auto &dir = directions[dirIndex];
 
-    auto vel = nsVec2::FromAngle(partAngle) * speed;
+    const float partAngle = nsMath::Lerp(dir->minAngle, dir->maxAngle, nsMath::Random());
+    const float speed = nsMath::Lerp(dir->minSpeed, dir->maxSpeed, nsMath::Random());
+
+    const auto vel = nsVec2::FromAngle(partAngle) * speed;
 
     p->vel = vel.Rotate(angle);
 }
@@ -22,19 +26,19 @@ bool nsParticlesMultiDirectionSpawner::Parse(script_state_t *ss, nsParticlesSpaw
 
     if (ps_block_begin(ss, "direction")) {
         do {
-            Direction   dir;
-            dir.minAngle = nsMath::ToRad(ParseFloat(ss, "minAngle"));
-            dir.maxAngle = nsMath::ToRad(ParseFloat(ss, "maxAngle"));
+            auto dir = std::make_shared<Direction>();
+            dir->minAngle = nsMath::ToRad(ParseFloat(ss, "minAngle"));
+            dir->maxAngle = nsMath::ToRad(ParseFloat(ss, "maxAngle"));
 
-            dir.minSpeed = ParseFloat(ss, "minSpeed");
-            dir.maxSpeed = ParseFloat(ss, "maxSpeed");
+            dir->minSpeed = ParseFloat(ss, "minSpeed");
+            dir->maxSpeed = ParseFloat(ss, "maxSpeed");
 
-            _directions.push_back(dir);
+            directions.push_back(dir);
         } while (ps_block_next(ss));
         ps_block_end(ss);
     }
 
-    if (_directions.empty()) {
+    if (directions.empty()) {
         Log::Warning("no multiple directions parsed!");
         return false;
     }
@@ -43,12 +47,12 @@ bool nsParticlesMultiDirectionSpawner::Parse(script_state_t *ss, nsParticlesSpaw
 }
 
 void nsParticlesMultiDirectionSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
-    for (const auto &dir: _directions) {
+    for (const auto &dir: directions) {
         if (ss->BlockBegin("direction")) {
-            ss->VarFloat("minAngle", nsMath::ToDeg(dir.minAngle), 0);
-            ss->VarFloat("maxAngle", nsMath::ToDeg(dir.maxAngle), 0);
-            ss->VarFloat("minSpeed", dir.minSpeed, 0);
-            ss->VarFloat("maxSpeed", dir.maxSpeed, 0);
+            ss->VarFloat("minAngle", nsMath::ToDeg(dir->minAngle), 0);
+            ss->VarFloat("maxAngle", nsMath::ToDeg(dir->maxAngle), 0);
+            ss->VarFloat("minSpeed", dir->minSpeed, 0);
+            ss->VarFloat("maxSpeed", dir->maxSpeed, 0);
             ss->BlockEnd();
         }
     }

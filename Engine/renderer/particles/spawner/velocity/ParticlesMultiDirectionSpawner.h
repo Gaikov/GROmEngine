@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "renderer/particles/spawner/ParticlesSpawner.h"
+#include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 
 class nsParticlesMultiDirectionSpawner : public nsParticlesSpawner {
 public:
@@ -17,17 +17,18 @@ public:
         _name = NAME;
     }
 
-    void Spawn(nsParticle *p, float angle) override;
-    bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
-    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
-
-private:
     struct Direction {
+        typedef std::shared_ptr<Direction> sp_t;
+
         float minAngle = 0;
         float maxAngle = 0;
         float minSpeed = 0;
         float maxSpeed = 0;
     };
 
-    std::vector<Direction>  _directions;
+    std::vector<Direction::sp_t>  directions;
+
+    void Spawn(nsParticle *p, float angle) override;
+    bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;
+    void Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) override;
 };
