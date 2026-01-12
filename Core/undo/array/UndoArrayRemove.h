@@ -1,6 +1,6 @@
 // Copyright (c) 2003-2026, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file UndoArrayAdd.h
+// file UndoArrayRemove.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
@@ -8,29 +8,25 @@
 #include "nsLib/structs/Array.h"
 
 template<typename TItem>
-class nsUndoArrayAdd final : public nsUndoRedoOperation {
+class nsUndoArrayRemove final : public nsUndoRedoOperation {
 public:
-    nsUndoArrayAdd(nsArray<TItem> &list, const TItem &item)
-        : _list(list),
-          _item(item),
-          _index(-1) {
+    nsUndoArrayRemove(nsArray<TItem> &list, const TItem &item) : _list(list), _item(item) {
     }
 
     void Init() override {
-        _index = _list.Size();
+        _index = _list.GetIndex(_item);
         Redo();
     }
-
     void Redo() override {
-        _list.Insert(_index, _item);
+        _list.RemoveAt(_index);
     }
 
     void Undo() override {
-        _list.RemoveAt(_index);
+        _list.Insert(_index, _item);
     }
 
 private:
     nsArray<TItem> &_list;
     TItem _item;
-    int _index;
+    int _index = -1;
 };

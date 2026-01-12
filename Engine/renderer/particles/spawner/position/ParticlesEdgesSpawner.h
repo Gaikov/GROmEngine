@@ -8,7 +8,6 @@
 #include "Core/serialization/var/ArrayVar.h"
 #include "Engine/renderer/particles/spawner/ParticlesSpawner.h"
 #include "nsLib/models/Point.h"
-#include "nsLib/models/Property.h"
 
 class nsParticlesEdgesSpawner : public nsParticlesSpawner, public nsPoint::Owner {
 public:
@@ -18,6 +17,7 @@ public:
     nsArray<nsPoint::sp_t> points;
 
     nsParticlesEdgesSpawner();
+    ~nsParticlesEdgesSpawner() override;
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;

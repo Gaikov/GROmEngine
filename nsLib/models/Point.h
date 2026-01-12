@@ -6,14 +6,12 @@
 #pragma once
 #include <memory>
 
-#include "Property.h"
 #include "nsLib/Vec2.h"
 
-class nsPoint final : public nsProperty<nsVec2> {
+class nsPoint final {
     friend class nsParticlesEdgesSpawner;
 public:
     typedef std::shared_ptr<nsPoint> sp_t;
-    typedef std::function<void()> callback_t;
 
     class Owner {
     public:
@@ -26,16 +24,24 @@ public:
 
     Owner *owner = nullptr;
 
-    explicit nsPoint(const nsVec2 &value) : nsProperty(value) {
-        AddHandler(nsPropChangedName::CHANGED, [this](const nsBaseEvent *e) {
+    explicit nsPoint(const nsVec2 &value) : _value(value) {
+    }
+
+    [[nodiscard]] const nsVec2 &GetValue() const { return _value; }
+
+    operator const nsVec2& () const { return _value; }
+
+    nsPoint &operator = (const nsVec2 &value) {
+        if (_value != value) {
+            _value = value;
             if (owner) {
                 owner->OnPointChanged(*this);
             }
-        });
-    }
-
-    nsPoint &operator = (const nsVec2 &value) {
-        SetValue(value);
+        }
         return *this;
     }
+
+private:
+    nsVec2 _value;
+
 };

@@ -7,15 +7,21 @@
 #include "nsLib/log.h"
 
 nsParticlesEdgesSpawner::nsParticlesEdgesSpawner() {
-    _name = TITLE;
+    _name = NAME;
     _title = TITLE;
 
-    points.AddHandler(nsVectorEvent::ID, [this](const nsBaseEvent *e) {
+    points.AddHandler(nsArrayEvent::ID, [this](const nsBaseEvent *e) {
         _valid = false;
         for (const auto &p : points.GetItems()) {
             p->owner = this;
         }
     });
+}
+
+nsParticlesEdgesSpawner::~nsParticlesEdgesSpawner() {
+    for (const auto &p : points.GetItems()) {
+        p->owner = nullptr;
+    }
 }
 
 void nsParticlesEdgesSpawner::Spawn(nsParticle *p, const float angle) {
@@ -58,13 +64,15 @@ bool nsParticlesEdgesSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContex
 }
 
 void nsParticlesEdgesSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
-    for (const auto &e: _frame) {
-        if (ss->BlockBegin("edge")) {
+    auto &list = points.GetItems();
+    const auto numEdges = list.size() / 2;
 
-            /*
-            ss->VarFloat2("point1", e->pos1.GetValue(), nsVec2());
-            ss->VarFloat2("point2", e->pos2.GetValue(), nsVec2());
-            */
+    for (int i = 0; i < numEdges; ++i) {
+        if (ss->BlockBegin("edge")) {
+            auto &p1 = list[i * 2];
+            auto &p2 = list[i * 2 + 1];
+            ss->VarFloat2("point1", p1->GetValue(), nsVec2());
+            ss->VarFloat2("point2", p2->GetValue(), nsVec2());
             ss->BlockEnd();
         }
     }
