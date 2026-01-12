@@ -7,28 +7,6 @@
 #include "nsLib/log.h"
 #include "renderer/particles/spawner/factory/ParticlesSpawnerContext.h"
 
-void nsParticlesPolygonSpawner::UpdateFrame() {
-    if (_frame.size() > 1) {
-        _length = 0;
-        for (auto i = 0; i < _frame.size(); i++) {
-            auto &e1 = _frame[i];
-            auto &e2 = _frame[(i + 1) % _frame.size()];
-
-            e1.dir = e2.pos - e1.pos;
-            e1.length = e1.dir.Length();
-            e1.dir /= e1.length;
-
-            _length += e1.length;
-        }
-    }
-}
-
-void nsParticlesPolygonSpawner::AddPoint(const nsVec2 &p) {
-    Edge e = {p};
-    _frame.push_back(e);
-    UpdateFrame();
-}
-
 bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerContext *context) {
     _frame.clear();
     if (ps_var_begin(ss, "point")) {
@@ -55,12 +33,39 @@ bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCont
         return false;
     }
 
-    UpdateFrame();
+    Validate();
     return true;
 }
 
 void nsParticlesPolygonSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext *context) {
-    for (const auto &e: _frame) {
-        //ss->VarFloat2("point", e->pos1.GetValue(), nsVec2());
+    for (const auto &p: points.GetItems()) {
+        const auto pos = p->GetValue();
+        ss->PrintVar("point", "%f %f", pos.x, pos.y);
+    }
+}
+
+void nsParticlesPolygonSpawner::Validate() {
+    if (!_valid) {
+        _frame.clear();
+        _length = 0;
+
+        for (auto &p : points.GetItems()) {
+            _frame.push_back({p->GetValue()});
+        }
+
+        if (_frame.size() > 1) {
+            for (auto i = 0; i < _frame.size(); i++) {
+                auto &e1 = _frame[i];
+                auto &e2 = _frame[(i + 1) % _frame.size()];
+
+                e1.dir = e2.pos - e1.pos;
+                e1.length = e1.dir.Length();
+                e1.dir /= e1.length;
+
+                _length += e1.length;
+            }
+        } else {
+            Log::Warning("Polygon spawner has only one point!");
+        }
     }
 }
