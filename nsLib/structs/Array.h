@@ -8,11 +8,11 @@
 
 #include "nsLib/events/EventDispatcher.h"
 
-class nsVectorEvent final : public nsBaseEvent {
+class nsArrayEvent final : public nsBaseEvent {
 public:
     static constexpr int ID = 0;
 
-    explicit nsVectorEvent()
+    explicit nsArrayEvent()
         : nsBaseEvent(ID) {
     }
 };
@@ -23,16 +23,17 @@ class nsArray : public nsEventDispatcher {
 public:
     void Add(const TItem &item) {
         _items.push_back(item);
-        Emmit(nsVectorEvent());
+        Emmit(nsArrayEvent());
     }
 
-    void Remove(TItem &item) {
+    void Remove(const TItem &item) {
         _items.erase(std::remove(_items.begin(), _items.end(), item), _items.end());
-        Emmit(nsVectorEvent());
+        Emmit(nsArrayEvent());
     }
 
     void RemoveAt(int index) {
         _items.erase(_items.begin() + index);
+        Emmit(nsArrayEvent());
     }
 
     int GetIndex(TItem &item) {
@@ -41,17 +42,19 @@ public:
 
     void Insert(int index, const TItem &item) {
         _items.insert(_items.begin() + index, item);
-        Emmit(nsVectorEvent());
+        Emmit(nsArrayEvent());
     }
 
     void Clear() {
         _items.clear();
-        Emmit(nsVectorEvent());
+        Emmit(nsArrayEvent());
     }
 
     int Size() {
         return _items.size();
     }
+
+    TItem &operator[](int index) { return _items[index]; }
 
     const std::vector<TItem> &GetItems() const { return _items; }
 
