@@ -13,7 +13,7 @@ bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCont
         do {
             nsVec2 point;
             if (ps_var_2f(ss, point)) {
-                _frame.push_back({point});
+                points.Add(std::make_shared<nsPoint>(point));
             }
         } while (ps_var_next(ss));
     }
@@ -23,14 +23,9 @@ bool nsParticlesPolygonSpawner::Parse(script_state_t *ss, nsParticlesSpawnerCont
             float angle[2];
             if (ps_var_2f(ss, angle)) {
                 auto p = nsVec2::FromAngle(nsMath::ToRad(angle[0])) * angle[1];
-                _frame.push_back({p});
+                points.Add(std::make_shared<nsPoint>(p));
             }
         } while (ps_var_next(ss));
-    }
-
-    if (_frame.empty()) {
-        Log::Warning("Can't parse polygon spawner!");
-        return false;
     }
 
     Validate();
@@ -46,6 +41,7 @@ void nsParticlesPolygonSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContex
 
 void nsParticlesPolygonSpawner::Validate() {
     if (!_valid) {
+        _valid = true;
         _frame.clear();
         _length = 0;
 
