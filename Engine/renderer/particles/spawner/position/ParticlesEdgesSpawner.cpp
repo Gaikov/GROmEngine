@@ -69,10 +69,10 @@ void nsParticlesEdgesSpawner::Save(nsScriptSaver *ss, nsParticlesSpawnerContext 
 
     for (int i = 0; i < numEdges; ++i) {
         if (ss->BlockBegin("edge")) {
-            auto &p1 = list[i * 2];
-            auto &p2 = list[i * 2 + 1];
-            ss->VarFloat2("point1", p1->GetValue(), nsVec2());
-            ss->VarFloat2("point2", p2->GetValue(), nsVec2());
+            const auto p1 = list[i * 2]->GetValue();
+            const auto p2 = list[i * 2 + 1]->GetValue();
+            ss->PrintVar("point1", "%f %f", p1.x, p1.y);
+            ss->PrintVar("point2", "%f %f", p2.x, p2.y);
             ss->BlockEnd();
         }
     }
@@ -86,7 +86,7 @@ void nsParticlesEdgesSpawner::Validate() {
         _length = 0;
 
         const auto &list = points.GetItems();
-        const int count = list.size() / 2;
+        const auto count = list.size() / 2;
         for (int i = 0; i < count; ++i) {
             auto &p1 = list[i * 2];
             auto &p2 = list[i * 2 + 1];
@@ -98,6 +98,10 @@ void nsParticlesEdgesSpawner::Validate() {
 
             _frame.push_back(e);
             _length += e.length;
+        }
+
+        if (_frame.empty()) {
+            Log::Warning("Edges spawner is empty!");
         }
     }
 }
