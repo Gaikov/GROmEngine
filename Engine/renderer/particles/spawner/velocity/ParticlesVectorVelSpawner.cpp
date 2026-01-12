@@ -5,7 +5,7 @@
 #include "ParticlesVectorVelSpawner.h"
 #include "Core/ParserUtils.h"
 
-void nsParticlesVectorVelSpawner::Spawn(nsParticle *p, float angle) {
+void nsParticlesVectorVelSpawner::Spawn(nsParticle *p, const float angle) {
     float speed = nsMath::RandRange(minSpeed, maxSpeed);
     if (randomDirection) {
         if (nsMath::Random() > 0.5) {
@@ -17,8 +17,8 @@ void nsParticlesVectorVelSpawner::Spawn(nsParticle *p, float angle) {
 }
 
 nsParticlesVectorVelSpawner *
-nsParticlesVectorVelSpawner::Init(const nsVec2 &direction, float minSpeed, float maxSpeed, bool randomDirection) {
-    auto s = new nsParticlesVectorVelSpawner();
+nsParticlesVectorVelSpawner::Init(const nsVec2 &direction, const float minSpeed, const float maxSpeed, const bool randomDirection) {
+    const auto s = new nsParticlesVectorVelSpawner();
     s->direction = direction;
     s->direction.Norm();
 
