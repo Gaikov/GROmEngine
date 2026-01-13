@@ -17,3 +17,22 @@ void nsParticlesColorTimelineUpdater::SaveFrame(nsScriptSaver *ss, nsColor &fram
     ss->VarFloat4("color", frame, nsColor());
 }
 
+void nsParticlesColorTimelineUpdater::Validate() {
+    if (timeline.size() < 2) {
+        timeline.push_back(std::make_shared<Frame>());
+        timeline.push_back(std::make_shared<Frame>());
+
+        timeline[0]->time = 0;
+        timeline[0]->data = nsColor::magenta;
+
+        timeline[1]->time = 1;
+        timeline[1]->data = nsColor::blue;
+    }
+
+    if (timeline[0]->time > 0) {
+        const auto frame = std::make_shared<Frame>();
+        frame->time = 0;
+        frame->data = nsColor();
+        timeline.insert(timeline.begin(), frame);
+    }
+}
