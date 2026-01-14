@@ -1,21 +1,20 @@
-// Copyright (c) 2003-2024, Roman Gaikov. All rights reserved.
+// Copyright (c) 2003-2026, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file UndoVarChange.h
+// file UndoVarPrevChange.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-
 #include "UndoRedoOperation.h"
 
 template<typename TVar, typename TValue>
-class nsUndoVarChange final : public nsUndoRedoOperation {
+class nsUndoVarPrevChange final : public nsUndoRedoOperation {
 
 public:
-    explicit nsUndoVarChange(TVar &var, TValue newValue) : _var(var), _newValue(newValue) {
+    explicit nsUndoVarPrevChange(TVar &var, TValue prevValue) : _var(var), _prevValue(prevValue) {
     }
 
     void Init() override {
-        _prevValue = _var;
+        _newValue = _var;
         Redo();
     }
 
@@ -28,7 +27,7 @@ public:
     }
 
 private:
-    TVar&   _var;
+    TVar&     _var;
     TValue    _prevValue;
     TValue    _newValue;
 };
