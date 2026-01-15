@@ -29,10 +29,6 @@ void nsParticlesSizeTimelineUpdater::Validate() {
         timeline[1]->data = 0;
     }
 
-    if (timeline[0]->time > 0) {
-        const auto frame = std::make_shared<Frame>();
-        frame->time = 0;
-        frame->data = 0;
-        timeline.insert(timeline.begin(), frame);
-    }
+    timeline[0]->time = 0;
+    timeline[timeline.size() - 1]->time = 1;
 }

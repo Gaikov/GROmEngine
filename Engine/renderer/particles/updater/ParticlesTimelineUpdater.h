@@ -18,41 +18,41 @@ public:
         auto prevFrame = timeline[0];
         for (int i = 0; i < timeline.size(); i++) {
             auto &f = timeline[i];
-            timeLine -= f->time;
-            if (timeLine < 0) {
-                auto t = (timeLine + f->time) / f->time;
+            if (timeLine < f->time) {
+                float delta = f->time - prevFrame->time;
+                float t = 0;
+                if (delta > 0) {
+                    t = (timeLine - prevFrame->time) / delta;
+                }
+
                 LerpFrame(p, prevFrame->data, f->data, t);
-                break;
+                return;
             }
             prevFrame = f;
         }
+
+
     }
 
     bool Parse(script_state_t *ss, nsParticlesUpdaterContext *context) override {
         if (ps_block_begin(ss, "frame")) {
+            float time = 0;
             do {
                 auto   frame = std::make_shared<Frame>();
-                frame->time = abs(ParseFloat(ss, "time"));
+                time += abs(ParseFloat(ss, "time"));
+                frame->time = time;
                 if (ParseFrame(ss, frame->data)) {
                     timeline.push_back(frame);
                 }
             } while (ps_block_next(ss));
             ps_block_end(ss);
 
-            Validate();
-
-            float total = 0;
             for (auto &f : timeline) {
-                total += f->time;
+                f->time = std::clamp(f->time, 0.0f, 1.0f);
             }
+            std::sort(timeline.begin(), timeline.end(), [](const auto &f1, const auto &f2) { return f1->time < f2->time; });
 
-            if (total > 1) {
-                Log::Warning("Timeline total time more than 1! Normalizing...");
-                for (auto &f : timeline) {
-                    f->time /= total;
-                }
-            }
-
+            Validate();
         } else {
             Log::Warning("Frame info not found!");
             return false;
@@ -62,9 +62,11 @@ public:
     }
 
     void Save(nsScriptSaver *ss, nsParticlesUpdaterContext *context) override {
+        float prevTime = 0;
         for (auto &f : timeline) {
             if (ss->BlockBegin("frame")) {
-                ss->VarFloat("time", f->time, -1);
+                ss->VarFloat("time", f->time - prevTime, -1);
+                prevTime = f->time;
                 SaveFrame(ss, f->data);
                 ss->BlockEnd();
             }
