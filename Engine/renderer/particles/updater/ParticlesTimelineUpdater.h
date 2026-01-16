@@ -72,12 +72,12 @@ public:
             }
         }
     }
+    virtual void Validate() = 0;
 
 protected:
     virtual bool ParseFrame(script_state_t *ss, TFrameData &frame) = 0;
     virtual void SaveFrame(nsScriptSaver *ss, TFrameData &frame) = 0;
     virtual void LerpFrame(nsParticle *p, const TFrameData &f1, const TFrameData &f2, float t) = 0;
-    virtual void Validate() = 0;
 
 public:
     struct Frame {
