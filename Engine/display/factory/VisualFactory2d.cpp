@@ -95,8 +95,12 @@ bool nsVisualFactory2d::Serialize(const char *filePath, nsVisualObject2d *object
         return false;
     }
 
+    return Serialize(ss, object);
+}
+
+bool nsVisualFactory2d::Serialize(nsScriptSaver &saver, nsVisualObject2d *object) {
     if (const auto builder = GetBuilder(object->GetType())) {
-        builder->Serialize(ss, object, this);
+        builder->Serialize(saver, object, this);
         return true;
     }
 

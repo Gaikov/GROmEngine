@@ -8,12 +8,13 @@
 
 #include "Parser.h"
 #include "Package.h"
+#include "nsLib/utils/NoCopyable.h"
 
-class nsParseFile
+class nsParseFile : public nsNoCopyable
 {
 public:
     nsParseFile() = default;
-	virtual			~nsParseFile();
+	~nsParseFile() override;
 	script_state_t* BeginFile( const char *fileName, char prefix = '$' );
 
 private:
@@ -25,11 +26,6 @@ private:
 
 private:
 	std::vector<scriptFile_t>   m_files;
-
-private:
-	//����� ����������
-	nsParseFile( const nsParseFile& );
-	const nsParseFile& operator = ( const nsParseFile& );
 };
 
 class nsParseBlock {

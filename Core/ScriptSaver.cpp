@@ -10,26 +10,24 @@
 //---------------------------------------------------------
 // nsScriptSaver::nsScriptSaver: 
 //---------------------------------------------------------
-nsScriptSaver::nsScriptSaver(const char *fileName) : m_file(nullptr),
-                                                     m_tabCount(0) {
-    if (!StrCheck(fileName)) return;
-    m_file = fopen(fileName, "w");
-    if (!m_file)
-        LogPrintf(PRN_ALL, "WARNING: can't create '%s'\n", fileName);
+nsScriptSaver::nsScriptSaver(const char *fileName) {
+    m_file = std::make_shared<nsFileWriter>(fileName, "w");
+}
+
+nsScriptSaver::nsScriptSaver(const std::shared_ptr<IDataWriter> &file)  {
+    m_file = file;
 }
 
 //---------------------------------------------------------
 // nsScriptSaver::~nsScriptSaver:
 //---------------------------------------------------------
 nsScriptSaver::~nsScriptSaver() {
-    if (m_file)
-        fclose(m_file);
 }
 
 //---------------------------------------------------------
 // nsScriptSaver::Printf:
 //---------------------------------------------------------
-void nsScriptSaver::Printf(const char *fmt, ...) {
+void nsScriptSaver::Printf(const char *fmt, ...) const {
     char msg[MAX_OUT_LEN];
 
     va_list list;
@@ -37,13 +35,11 @@ void nsScriptSaver::Printf(const char *fmt, ...) {
     vsprintf(msg, fmt, list);
     va_end(list);
 
-    if (m_file)
-        fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), msg);
+    m_file->Printf("%s%s\n", StrTabs(m_tabCount), msg);
 }
 
 void nsScriptSaver::Print(const char *line) const {
-    if (m_file)
-        fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), line);
+    m_file->Printf("%s%s\n", StrTabs(m_tabCount), line);
 }
 
 void nsScriptSaver::PrintVar(const char *name, const char *fmt, ...) const {
@@ -54,27 +50,22 @@ void nsScriptSaver::PrintVar(const char *name, const char *fmt, ...) const {
     vsprintf(msg, fmt, list);
     va_end(list);
 
-    if (m_file)
-        fprintf(m_file, "%s$%s %s\n", StrTabs(m_tabCount), name, msg);
+    m_file->Printf("%s$%s %s\n", StrTabs(m_tabCount), name, msg);
 }
 
 void nsScriptSaver::VarName(const char *name) const {
-    if (m_file) {
-        fprintf(m_file, "%s$%s ", StrTabs(m_tabCount), name);
-    }
+    m_file->Printf("%s$%s ", StrTabs(m_tabCount), name);
 }
 
 void nsScriptSaver::VarValue(const char *fmt, ...) const {
-    if (m_file) {
-        char msg[MAX_OUT_LEN];
+    char msg[MAX_OUT_LEN];
 
-        va_list list;
-        va_start(list, fmt);
-        vsprintf(msg, fmt, list);
-        va_end(list);
+    va_list list;
+    va_start(list, fmt);
+    vsprintf(msg, fmt, list);
+    va_end(list);
 
-        fprintf(m_file, "%s%s\n", StrTabs(m_tabCount), msg);
-    }
+    m_file->Printf("%s%s\n", StrTabs(m_tabCount), msg);
 }
 
 void nsScriptSaver::VarBool(const char *name, bool value, bool defValue) const {
@@ -136,6 +127,6 @@ void nsScriptSaver::BlockEnd() {
     Printf("}\n");
 }
 
-bool nsScriptSaver::IsValid() {
-    return m_file;
+bool nsScriptSaver::IsValid() const {
+    return m_file->IsValid();
 }

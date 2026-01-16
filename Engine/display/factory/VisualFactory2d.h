@@ -19,6 +19,7 @@ public:
     nsVisualObject2d *Create(const char *filePath) override;
 
     bool Serialize(const char *filePath, nsVisualObject2d *object);
+    bool Serialize(nsScriptSaver &saver, nsVisualObject2d *object);
 
     nsVisualBuilder2d* GetBuilder(const char *name) override;
 
