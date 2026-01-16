@@ -21,6 +21,7 @@ class nsVisualObject2d {
 
 public:
     std::string id;
+    std::string bindingId;
 
     nsTransform2        origin;
     nsProperty<bool>    visible = true;

@@ -13,10 +13,11 @@ nsVisualObject2d *nsVisualBuilder2d::Create(script_state_t *ss, nsVisualCreation
 }
 
 bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
-
-    auto id = ParseStrP(ss, "id");
-    if (id) {
+    if (const auto id = ParseStrP(ss, "id")) {
         o->id = id;
+    }
+    if (const auto bindingId = ParseStrP(ss, "bindingId")) {
+        o->bindingId = bindingId;
     }
 
     ParseAnchor(ss, "xMin", o->xMin);
@@ -45,6 +46,9 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
 bool nsVisualBuilder2d::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
     if (!o->id.empty()) {
         saver.VarString("id", o->id.c_str());
+    }
+    if (!o->bindingId.empty()) {
+        saver.VarString("bindingId", o->bindingId.c_str());
     }
 
     SaveAnchor(saver, "xMin", o->xMin);
