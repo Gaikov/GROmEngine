@@ -17,9 +17,10 @@ public:
         _title = TITLE;
     };
 
+    void Validate() override;
+
 protected:
     bool ParseFrame(script_state_t *ss, nsColor &frame) override;
     void LerpFrame(nsParticle *p, const nsColor &f1, const nsColor &f2, float t) override;
     void SaveFrame(nsScriptSaver *ss, nsColor &frame) override;
-    void Validate() override;
 };
