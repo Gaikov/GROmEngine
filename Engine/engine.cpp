@@ -85,6 +85,7 @@ bool nsEngine::Init()
         return false;
     }
 	nsParticlesManager::Shared()->SetAssetsContext(assetsContext);
+	assetsContext->particlesLoader = nsParticlesManager::Shared();
 
     nsVisualFactory2d::Init();
 	const auto vf = nsVisualFactory2d::Shared();
