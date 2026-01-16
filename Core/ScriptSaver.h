@@ -6,6 +6,7 @@
 #ifndef	_ScriptSaver_H_
 #define	_ScriptSaver_H_
 
+#include "FileWriter.h"
 #include "headers.h"
 
 class nsScriptSaver
@@ -15,11 +16,12 @@ public:
 
 public:
 	explicit nsScriptSaver( const char *fileName );
+	explicit nsScriptSaver( const std::shared_ptr<IDataWriter> &file );
 	virtual ~nsScriptSaver();
 
-    bool            IsValid();
+    bool            IsValid() const;
 
-	void        	Printf( const char *fmt, ... );
+	void        	Printf( const char *fmt, ... ) const;
 	void			Print(const char *line) const;
 	void			PrintVar(const char *name, const char *fmt, ...) const;
 
@@ -37,8 +39,8 @@ public:
 	void			BlockEnd();
 
 private:
-	FILE			*m_file;
-	int				m_tabCount;
+	std::shared_ptr<IDataWriter>	m_file;
+	int								m_tabCount = 0;
 };
 
 #endif //_ScriptSaver_H_
