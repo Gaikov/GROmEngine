@@ -9,8 +9,8 @@
 
 nsVisualMaskManager::nsVisualMaskManager() {
     _device = nsRenDevice::Shared()->Device();
-    _maskState = _device->StencilLoad("default/rs/mask.ggrs");
-    _maskedState = _device->StencilLoad("default/rs/masked.ggrs");
+    _maskState = _device->StencilLoad("default/rs/mask.ggss");
+    _maskedState = _device->StencilLoad("default/rs/masked.ggss");
     if (!_maskState || !_maskedState) {
         Sys_FatalError("Stencil state was not loaded!");
     }

@@ -30,6 +30,8 @@ public:
     nsLayoutAnchor  xMin, xMax, yMin, yMax;
     IRenDevice* const _device;
 
+    std::vector<nsVisualMask*> masks;
+
 public:
     nsVisualObject2d();
     virtual const char* GetType() = 0;
@@ -48,7 +50,8 @@ public:
     virtual void Loop() = 0;
 
     void AddMask(nsVisualMask *mask);
-    void RemoveMask(nsVisualMask *mask);
+    void RemoveMask(const nsVisualMask *mask);
+    bool HasMask(const nsVisualMask *mask);
 
     virtual void DrawNode(const nsVisualContext2d &context);
     virtual void ApplyWorldMatrix();
@@ -66,7 +69,6 @@ protected:
 private:
     bool _onStage = false;
     nsVisualContainer2d *_parent = nullptr;
-    std::vector<nsVisualMask*> _masks;
 
     static int _leakCounter;
 };

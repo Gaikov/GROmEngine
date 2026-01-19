@@ -36,13 +36,13 @@ void nsVisualObject2d::ApplyWorldMatrix() {
 
 void nsVisualObject2d::DrawNode(const nsVisualContext2d &context) {
     auto mm = context.GetMaskManager();
-    mm->PushMasks(&_masks, context);
+    mm->PushMasks(&masks, context);
     mm->EnsureMasks(context);
 
     ApplyWorldMatrix();
     DrawContent(context);
 
-    mm->PopMasks(&_masks, context);
+    mm->PopMasks(&masks, context);
 }
 
 bool nsVisualObject2d::HitTest(float x, float y) {
@@ -140,18 +140,21 @@ void nsVisualObject2d::OnRemovedFromStage() {
 }
 
 void nsVisualObject2d::AddMask(nsVisualMask *mask) {
-#ifdef DEBUG
-    auto it = std::find(_masks.begin(), _masks.end(),mask);
-    assert(it == _masks.end());
-#endif
+    assert(!HasMask(mask));
+
     mask->visible = false;
-    _masks.push_back(mask);
+    masks.push_back(mask);
 }
 
-void nsVisualObject2d::RemoveMask(nsVisualMask *mask) {
-    auto it = std::find(_masks.begin(), _masks.end(), mask);
-    if (it != _masks.end()) {
+void nsVisualObject2d::RemoveMask(const nsVisualMask *mask) {
+    auto it = std::find(masks.begin(), masks.end(), mask);
+    if (it != masks.end()) {
         (*it)->visible = true;
-        _masks.erase(it);
+        masks.erase(it);
     }
+}
+
+bool nsVisualObject2d::HasMask(const nsVisualMask *mask) {
+    const auto it = std::find(masks.begin(), masks.end(), mask);
+    return it != masks.end();
 }
