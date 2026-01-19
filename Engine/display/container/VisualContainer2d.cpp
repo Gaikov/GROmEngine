@@ -205,12 +205,12 @@ void nsVisualContainer2d::OnPointerCancel(int pointerId) {
 
 void nsVisualContainer2d::DrawNode(const nsVisualContext2d &context) {
     auto mm = context.GetMaskManager();
-    mm->PushMasks(&_masks, context);
+    mm->PushMasks(&masks, context);
 
     ApplyWorldMatrix();
     DrawContent(context);
 
-    mm->PopMasks(&_masks, context);
+    mm->PopMasks(&masks, context);
 }
 
 nsVisualObject2d *nsVisualContainer2d::GetChildById(const char *id) {
