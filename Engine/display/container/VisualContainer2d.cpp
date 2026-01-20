@@ -239,14 +239,29 @@ nsVisualObject2d *nsVisualContainer2d::GetChildByIdRecursive(const char *id) {
     return nullptr;
 }
 
-bool nsVisualContainer2d::IterateRecursive(const tChildCallback &callback) {
-    for (auto child : _children) {
+bool nsVisualContainer2d::GetChildPath(nsVisualObject2d *obj, std::vector<int> &path) {
+    path.clear();
+    auto parent = obj->GetParent();
+    auto child = obj;
+    while (parent) {
+        path.push_back(GetChildIndex(child));
+        if (parent == this) {
+            break;
+        }
+        child = parent;
+        parent = parent->GetParent();
+    }
+    std::reverse(path.begin(), path.end());
+    return parent == this;
+}
+
+bool nsVisualContainer2d::IterateRecursive(const tChildCallback &callback) const {
+    for (const auto child : _children) {
         if (!callback(child)) {
             return false;
         }
 
-        auto container = dynamic_cast<nsVisualContainer2d*>(child);
-        if (container) {
+        if (const auto container = dynamic_cast<nsVisualContainer2d*>(child)) {
             if (!container->IterateRecursive(callback)) {
                 return false;
             }
