@@ -89,8 +89,43 @@ bool nsVisualContainerBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObje
         }
 
         saver.BlockEnd();
-        return res;
+        if (!res) {
+            return false;
+        }
     }
 
-    return false;
+    if (!container->GetParent()) {
+        container->IterateRecursive([&](nsVisualObject2d *child) {
+            if (!child->masks.empty()) {
+                if (saver.BlockBegin("masked")) {
+                    std::vector<int> path;
+                    if (container->GetChildPath(child, path)) {
+                        VarPath(saver, "path", path);
+                        for (const auto mask : child->masks) {
+                            if (container->GetChildPath(mask, path)) {
+                                VarPath(saver, "mask", path);
+                            }
+                        }
+                    }
+                    saver.BlockEnd();
+                }
+            }
+            return true;
+        });
+    }
+
+    return true;
+}
+
+void nsVisualContainerBuilder::VarPath(const nsScriptSaver &saver, const char *name, const std::vector<int> &path) {
+    std::string s;
+
+    for (size_t i = 0; i < path.size(); ++i) {
+        s += std::to_string(path[i]);
+        if (i != path.size() - 1) {
+            s += ",";
+        }
+    }
+
+    saver.VarString(name, s.c_str());
 }

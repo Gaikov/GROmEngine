@@ -12,7 +12,7 @@
 template<typename TItem>
 class nsUndoVectorRemove : public nsUndoRedoOperation {
 public:
-    nsUndoVectorRemove(std::vector<TItem> &list, TItem &item) : _list(list), _item(item), _index(-1) {
+    nsUndoVectorRemove(std::vector<TItem> &list, const TItem &item) : _list(list), _item(item), _index(-1) {
     }
 
     void Init() override {

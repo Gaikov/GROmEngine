@@ -50,8 +50,9 @@ public:
             }
         }
     }
+    bool GetChildPath(nsVisualObject2d *obj, std::vector<int> &path);
 
-    bool IterateRecursive(const tChildCallback &callback);
+    bool IterateRecursive(const tChildCallback &callback) const;
     static nsVisualContainer2d* CreateStage();
 
 protected:
