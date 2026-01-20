@@ -6,6 +6,7 @@
 #include "Engine/display/container/VisualContainer2d.h"
 #include "nsLib/log.h"
 #include "Core/ParserUtils.h"
+#include <sstream>
 
 nsVisualObject2d *nsVisualContainerBuilder::CreateDefault() {
     return new nsVisualContainer2d();
@@ -55,6 +56,25 @@ bool nsVisualContainerBuilder::Parse(script_state_t *ss, nsVisualObject2d *objec
 
     if (ps_var_begin(ss, "interactiveChildren")) {
         container->interactiveChildren = ps_var_f(ss) != 0.0f;
+    }
+
+    if (ps_block_begin(ss, "masked")) {
+        do {
+            std::vector<int> path;
+            if (ps_var_begin(ss, "path") && ParseVarPath(ss, path)) {
+                if (const auto child = container->GetChildByPath(path)) {
+                    std::vector<int> maskPath;
+                    ps_var_begin(ss, "mask");
+                    do {
+                        if (ParseVarPath(ss, maskPath)) {
+                            if (const auto mask = dynamic_cast<nsVisualMask*>(container->GetChildByPath(maskPath))) {
+                                child->masks.push_back(mask);
+                            }
+                        }
+                    } while (ps_var_next(ss));
+                }
+            }
+        } while (ps_block_next(ss));
     }
 
     return true;
@@ -128,4 +148,28 @@ void nsVisualContainerBuilder::VarPath(const nsScriptSaver &saver, const char *n
     }
 
     saver.VarString(name, s.c_str());
+}
+
+bool nsVisualContainerBuilder::ParseVarPath(script_state_t *ss, std::vector<int> &path) {
+    path.clear();
+
+    const auto str = ps_var_str(ss);
+    if (!ss) {
+        return false;
+    }
+
+    const std::string source(str);
+
+    std::stringstream stream(source);
+    std::string item;
+
+    while (std::getline(stream, item, ',')) {
+        try {
+            path.push_back(std::stoi(item));
+        } catch (...) {
+            return false;
+        }
+    }
+
+    return !path.empty();
 }

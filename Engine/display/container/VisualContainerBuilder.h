@@ -19,4 +19,5 @@ protected:
     bool SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
 
     static void VarPath(const nsScriptSaver &saver, const char *name, const std::vector<int> &path);
+    static bool ParseVarPath(script_state_t *ss, std::vector<int> &path);
 };

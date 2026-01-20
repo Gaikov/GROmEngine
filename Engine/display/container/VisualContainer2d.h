@@ -21,7 +21,7 @@ public:
     virtual void DestroyChildren();
 
     nsVisualObject2d *GetChildById(const char *id);
-    nsVisualObject2d *GetChildByIdRecursive(const char *id);
+    nsVisualObject2d *GetChildByIdRecursive(const char *id) const;
 
     virtual void AddChild(nsVisualObject2d *obj);
     virtual void AddChildAt(nsVisualObject2d *obj, int index);
@@ -50,9 +50,11 @@ public:
             }
         }
     }
-    bool GetChildPath(nsVisualObject2d *obj, std::vector<int> &path);
+    bool GetChildPath(nsVisualObject2d *obj, std::vector<int> &indexesPath) const;
+    nsVisualObject2d* GetChildByPath(const std::vector<int> & indexesPath) const;
 
     bool IterateRecursive(const tChildCallback &callback) const;
+
     static nsVisualContainer2d* CreateStage();
 
 protected:
