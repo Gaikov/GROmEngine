@@ -222,16 +222,14 @@ nsVisualObject2d *nsVisualContainer2d::GetChildById(const char *id) {
     return nullptr;
 }
 
-nsVisualObject2d *nsVisualContainer2d::GetChildByIdRecursive(const char *id) {
-    for (auto child : _children) {
+nsVisualObject2d *nsVisualContainer2d::GetChildByIdRecursive(const char *id) const {
+    for (const auto child : _children) {
         if (child->id == id) {
             return child;
         }
 
-        auto container = dynamic_cast<nsVisualContainer2d*>(child);
-        if (container) {
-            auto found = container->GetChildByIdRecursive(id);
-            if (found) {
+        if (const auto container = dynamic_cast<nsVisualContainer2d*>(child)) {
+            if (const auto found = container->GetChildByIdRecursive(id)) {
                 return found;
             }
         }
@@ -239,20 +237,36 @@ nsVisualObject2d *nsVisualContainer2d::GetChildByIdRecursive(const char *id) {
     return nullptr;
 }
 
-bool nsVisualContainer2d::GetChildPath(nsVisualObject2d *obj, std::vector<int> &path) {
-    path.clear();
+bool nsVisualContainer2d::GetChildPath(nsVisualObject2d *obj, std::vector<int> &indexesPath) const {
+    indexesPath.clear();
     auto parent = obj->GetParent();
     auto child = obj;
     while (parent) {
-        path.push_back(GetChildIndex(child));
+        indexesPath.push_back(parent->GetChildIndex(child));
         if (parent == this) {
             break;
         }
         child = parent;
         parent = parent->GetParent();
     }
-    std::reverse(path.begin(), path.end());
+    std::reverse(indexesPath.begin(), indexesPath.end());
     return parent == this;
+}
+
+nsVisualObject2d * nsVisualContainer2d::GetChildByPath(const std::vector<int> &indexesPath) const {
+    auto parent = this;
+    nsVisualObject2d *child = nullptr;
+    for (const auto index : indexesPath) {
+        if (!parent) {
+            return nullptr;
+        }
+
+        if (index >= 0 && index < parent->_children.size()) {
+            child = parent->_children[index];
+            parent = dynamic_cast<nsVisualContainer2d*>(child);
+        }
+    }
+    return child;
 }
 
 bool nsVisualContainer2d::IterateRecursive(const tChildCallback &callback) const {
