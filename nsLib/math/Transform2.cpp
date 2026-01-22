@@ -80,6 +80,20 @@ void nsTransform2::Reset() {
     angle = 0;
 }
 
+float nsTransform2::ToGlobalAngle(float localAngle) const {
+    if (_parent) {
+        return localAngle + _parent->ToGlobalAngle(angle);
+    }
+    return localAngle + angle;
+}
+
+float nsTransform2::ToLocalAngle(float globalAngle) const {
+    if (_parent) {
+        return globalAngle - _parent->ToGlobalAngle(angle);
+    }
+    return globalAngle - angle;
+}
+
 void nsTransform2::InvalidateWorld() {
     _worldValid = false;
     _invWorldValid = false;

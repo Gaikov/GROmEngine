@@ -28,6 +28,9 @@ public:
     nsTransform2* GetParent() const { return _parent; }
     void Reset();
 
+    float ToGlobalAngle(float localAngle) const;
+    float ToLocalAngle(float globalAngle) const;
+
 private:
     nsFastList<nsTransform2>    _children;
 
