@@ -7,9 +7,9 @@
 #include "Core/undo/UndoRedoOperation.h"
 #include "Engine/display/VisualObject2d.h"
 
-class nsUndoRemoveChild : public nsUndoRedoOperation {
+class nsUndoRemoveChild final : public nsUndoRedoOperation {
 public:
-    nsUndoRemoveChild(nsVisualObject2d *obj);
+    explicit nsUndoRemoveChild(nsVisualObject2d *obj);
     void Init() override;
     void Redo() override;
     void Undo() override;
