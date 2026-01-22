@@ -27,8 +27,9 @@ public:
 	inline void operator *= (const nsVec2& v);
     inline nsVec2 operator + (float k) const;
 	inline nsVec2 operator - () const;
+	inline nsVec2 operator / (const nsVec2 &v) const;
 
-    inline float		Length();
+	inline float		Length();
     inline float        SqLength() { return x * x + y * y; }
     inline void			Norm();
     inline float		Dot( const nsVec2 &v ) const;
@@ -126,6 +127,10 @@ void nsVec2::operator *= ( float t )
 nsVec2 nsVec2::operator - () const
 {
 	return nsVec2( -x, -y );
+}
+
+nsVec2 nsVec2::operator/(const nsVec2 &v) const {
+	return nsVec2( x / v.x, y / v.y );
 }
 
 //---------------------------------------------------------

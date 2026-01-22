@@ -5,13 +5,13 @@
 #include "UndoRemoveChild.h"
 #include "display/container/VisualContainer2d.h"
 
-nsUndoRemoveChild::nsUndoRemoveChild(nsVisualObject2d *obj) : _obj(obj) {
+nsUndoRemoveChild::nsUndoRemoveChild(nsVisualObject2d *obj) : _obj(obj), _index(-1) {
     _parent = obj->GetParent();
-    _index = _parent->GetChildIndex(obj);
     assert(_parent);
 }
 
 void nsUndoRemoveChild::Init() {
+    _index = _parent->GetChildIndex(_obj);
     Redo();
 }
 
