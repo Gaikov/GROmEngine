@@ -25,7 +25,7 @@ public:
 
     virtual void AddChild(nsVisualObject2d *obj);
     virtual void AddChildAt(nsVisualObject2d *obj, int index);
-    virtual int GetChildIndex(nsVisualObject2d *obj);
+    int GetChildIndex(const nsVisualObject2d *obj) const;
     virtual void RemoveChild(nsVisualObject2d *obj);
     virtual void RemoveChildren();
 

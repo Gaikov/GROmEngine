@@ -53,7 +53,7 @@ void nsVisualContainer2d::AddChildAt(nsVisualObject2d *obj, int index) {
     }
 }
 
-int nsVisualContainer2d::GetChildIndex(nsVisualObject2d *obj) {
+int nsVisualContainer2d::GetChildIndex(const nsVisualObject2d *obj) const {
     return std::distance(_children.begin(), std::find(_children.begin(), _children.end(), obj));
 }
 
