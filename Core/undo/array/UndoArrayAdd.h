@@ -5,12 +5,11 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 #include "Core/undo/UndoRedoOperation.h"
-#include "nsLib/structs/Array.h"
 
-template<typename TItem>
+template<typename TArray, typename TItem>
 class nsUndoArrayAdd final : public nsUndoRedoOperation {
 public:
-    nsUndoArrayAdd(nsArray<TItem> &list, const TItem &item)
+    nsUndoArrayAdd(TArray &list, const TItem &item)
         : _list(list),
           _item(item),
           _index(-1) {
@@ -30,7 +29,7 @@ public:
     }
 
 private:
-    nsArray<TItem> &_list;
+    TArray &_list;
     TItem _item;
     int _index;
 };

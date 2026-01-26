@@ -8,6 +8,8 @@
 
 class nsStringVar : public nsSerializableVar<std::string> {
 public:
+    nsStringVar() : nsSerializableVar("") {};
+
     nsStringVar(const std::string &defValue)
         : nsSerializableVar(defValue) {
     }
