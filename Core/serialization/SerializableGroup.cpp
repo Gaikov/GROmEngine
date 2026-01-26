@@ -29,7 +29,7 @@ bool nsSerializableGroup::Deserialize(script_state_t *ss) {
             return false;
         }
     }
-    return false;
+    return true;
 }
 
 void nsSerializableGroup::ResetDefault() {

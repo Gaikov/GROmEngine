@@ -34,7 +34,9 @@ bool nsBaseArrayVar::Deserialize(script_state_t *ss) {
     const bool group = dynamic_cast<nsSerializableGroup*>(test.get());
 
     if (group) {
-        ps_block_begin(ss, serializationName.c_str());
+        if (!ps_block_begin(ss, serializationName.c_str())) {
+            return true;
+        }
     } else {
         ps_var_begin(ss, serializationName.c_str());
     }
