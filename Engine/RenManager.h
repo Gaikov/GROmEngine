@@ -28,7 +28,7 @@ private:
     void OnRelease() override;
 
 private:
-    IRenDevice  *_current;
+    IRenDevice  *_current = nullptr;
 };
 
 /**
