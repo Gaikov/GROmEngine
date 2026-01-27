@@ -46,5 +46,5 @@ void nsDefaultVisualObject::DrawContent(const nsVisualContext2d &context) {
     font->GetBounds(_tagName.c_str(), rect);
 
     const nsVec2 pos = {- rect.width / 2, - rect.height / 2};
-    font->Draw(_tagName.c_str(), pos, nsVec2(1, 1), nsColor::white);
+    font->Draw(_tagName.c_str(), pos, nsVec2(1, 1), nsColor::black);
 }

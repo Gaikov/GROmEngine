@@ -15,6 +15,7 @@
 #include "display/button/TextButtonBuilder.h"
 #include "display/helpers/VisualAnchorBuilder.h"
 #include "CustomVisual.h"
+#include "DefaultVisualBuilder2d.h"
 #include "display/graphics/VirtualCircleBuilder.h"
 #include "display/graphics/VisualRectBuilder.h"
 #include "display/group/horizontal/HGroupLayoutBuilder.h"
@@ -38,6 +39,8 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsVisualRectBuilder>();
     RegisterBuilderWithName<nsImageButtonBuilder>();
     RegisterBuilderWithName<nsSprite9SliceBuilder>();
+
+    _defaultBuilder = new nsDefaultVisualBuilder2d();
 }
 
 void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_t &builder) {
@@ -56,7 +59,7 @@ nsVisualObject2d *nsVisualFactory2d::Create(script_state_t *ss) {
 
     auto builder = GetBuilder(blockName);
     if (!builder) {
-        builder = &_defaultBuilder;
+        builder = _defaultBuilder;
     }
 
     if (auto object = builder->Create(ss, this)) {
