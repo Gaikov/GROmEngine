@@ -12,6 +12,12 @@ public:
     nsEnumVar(const TEnum &defValue)
         : nsSerializableVar<TEnum>(defValue) {
     }
+
+    nsEnumVar& operator = (const TEnum &value) {
+        this->SetValue(value);
+        return *this;
+    }
+
     bool Serialize(nsScriptSaver &ss) override;
     bool Deserialize(script_state_t *ss) override;
 };
