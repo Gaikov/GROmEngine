@@ -43,9 +43,7 @@ public:
         }
     }
 
-    void SetDefaultBuilder(const nsVisualBuilder2d::sp_t &builder) {
-        _defaultBuilder = builder;
-    }
+    void SetDefaultBuilder(const nsVisualBuilder2d::sp_t &builder);
 
 private:
     std::map<std::string, nsVisualBuilder2d::sp_t>  _builders;

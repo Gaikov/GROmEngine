@@ -20,10 +20,10 @@ DEFINE_STATIC_MAP(nsVisualPropType, nsVisualCustomProp::Type, {
                   });
 
 nsVisualCustomPropFactory::nsVisualCustomPropFactory() {
-    Register<nsFloatVar>(nsVisualCustomProp::NUMBER, 0.0f);
-    Register<nsBoolVar>(nsVisualCustomProp::BOOL, false);
-    Register<nsStringVar>(nsVisualCustomProp::STRING, "");
-    Register<nsStringVar>(nsVisualCustomProp::ENUM, "");
+    Register<nsFloatVar>(nsVisualCustomProp::NUMBER);
+    Register<nsBoolVar>(nsVisualCustomProp::BOOL);
+    Register<nsStringVar>(nsVisualCustomProp::STRING);
+    Register<nsStringVar>(nsVisualCustomProp::ENUM);
 }
 
 nsVisualCustomProp::sp_t nsVisualCustomPropFactory::Create(const nsVisualCustomProp::Type type) {

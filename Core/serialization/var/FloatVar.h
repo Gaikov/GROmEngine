@@ -8,6 +8,8 @@
 
 class nsFloatVar : public nsSerializableVar<float> {
 public:
+    nsFloatVar() : nsFloatVar(0) {}
+
     nsFloatVar(const float defValue)
         : nsSerializableVar(defValue) {
     }

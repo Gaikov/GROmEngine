@@ -8,6 +8,8 @@
 
 class nsBoolVar : public nsSerializableVar<bool> {
 public:
+    nsBoolVar() : nsBoolVar(false) {}
+
     nsBoolVar(const bool defValue)
         : nsSerializableVar(defValue) {
     }

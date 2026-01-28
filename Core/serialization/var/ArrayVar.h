@@ -26,4 +26,9 @@ public:
     nsSerializable * CreateItem() override {
         return new TItem();
     };
+
+    TItem* GetItem(const int index) {
+        auto &item = GetItems()[index];
+        return dynamic_cast<TItem*>(item.get());
+    }
 };

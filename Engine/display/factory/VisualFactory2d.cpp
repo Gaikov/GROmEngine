@@ -116,13 +116,12 @@ nsVisualBuilder2d *nsVisualFactory2d::GetBuilder(const char *name) {
         return nullptr;
     }
 
-    auto it = _builders.find(name);
-    if (it != _builders.end()) {
-        return (*it).second;
+    if (const auto it = _builders.find(name); it != _builders.end()) {
+        return it->second;
     }
 
     Log::Warning("Layout builder not found: %s", name);
-    return nullptr;
+    return _defaultBuilder;
 }
 
 nsVisualObject2d *nsVisualFactory2d::CreateByID(const char *bindingId) {
@@ -135,4 +134,12 @@ nsVisualObject2d *nsVisualFactory2d::CreateByID(const char *bindingId) {
         return it->second();
     }
     return nullptr;
+}
+
+void nsVisualFactory2d::SetDefaultBuilder(const nsVisualBuilder2d::sp_t &builder) {
+    if (builder) {
+        _defaultBuilder = builder;
+    } else {
+        _defaultBuilder = new nsDefaultVisualBuilder2d();
+    }
 }
