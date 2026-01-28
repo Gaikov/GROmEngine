@@ -32,6 +32,10 @@ public:
         return GetValue() == value;
     }
 
+    bool operator==(const std::string &value) const {
+        return GetValue() == value;
+    }
+
     bool Serialize(nsScriptSaver &ss) override;
     bool Deserialize(script_state_t *ss) override;
 };
