@@ -3,6 +3,7 @@
 //
 #include "VisualBuilder2d.h"
 #include "Core/ParserUtils.h"
+#include "display/property/VisualCustomPropFactory.h"
 
 nsVisualObject2d *nsVisualBuilder2d::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
     auto visual = context->CreateByID(ParseString(ss, "bindingId"));
@@ -40,6 +41,19 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
     }
 
     o->visible = ParseBool(ss, "visible", o->visible);
+
+    if (ps_block_begin(ss, "custom_props")) {
+        if (ps_block_begin(ss, nullptr)) {
+            do {
+                std::string name = ps_block_name(ss);
+                if (const auto prop = context->propsFactory.Deserialize(ss)) {
+                    o->customProps[name] = prop;
+                }
+            } while (ps_block_next(ss));
+        }
+        ps_block_end(ss);
+    }
+
     return true;
 }
 
@@ -64,6 +78,19 @@ bool nsVisualBuilder2d::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o
     saver.VarFloat("sy", o->origin.scale->y, 1);
     saver.VarFloat("angle",  nsMath::ToDeg(o->origin.angle), 0);
     saver.VarBool("visible", o->visible, true);
+
+    if (!o->customProps.empty()) {
+        if (saver.BlockBegin("custom_props")) {
+            for (const auto &prop : o->customProps) {
+                if (saver.BlockBegin(prop.first.c_str())) {
+                    context->propsFactory.Serialize(saver, prop.second);
+                    saver.BlockEnd();
+                }
+            }
+
+            saver.BlockEnd();
+        }
+    }
 
     return true;
 }

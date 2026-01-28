@@ -10,6 +10,7 @@
 #include "Engine/RenDevice.h"
 #include "VisualContext2d.h"
 #include "Engine/display/anchors/LayoutAnchor.h"
+#include "property/VisualCustomProp.h"
 
 class nsVisualContainer2d;
 
@@ -31,6 +32,7 @@ public:
     IRenDevice* const _device;
 
     std::vector<nsVisualMask*> masks;
+    std::map<std::string, nsVisualCustomProp::sp_t> customProps;
 
 public:
     nsVisualObject2d();

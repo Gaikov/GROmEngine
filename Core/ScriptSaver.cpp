@@ -65,7 +65,7 @@ void nsScriptSaver::VarValue(const char *fmt, ...) const {
     vsprintf(msg, fmt, list);
     va_end(list);
 
-    m_file->Printf("%s%s\n", StrTabs(m_tabCount), msg);
+    m_file->Printf("%s\n", msg);
 }
 
 void nsScriptSaver::VarBool(const char *name, bool value, bool defValue) const {

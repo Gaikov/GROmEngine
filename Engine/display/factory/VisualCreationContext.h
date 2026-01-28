@@ -7,6 +7,7 @@
 
 #include "Engine/assets/VisualAssetsContext.h"
 #include "Core/Parser.h"
+#include "Engine/display/property/VisualCustomPropFactory.h"
 #include "Engine/display/VisualObject2d.h"
 
 class nsVisualBuilder2d;
@@ -14,6 +15,7 @@ class nsVisualBuilder2d;
 class nsVisualCreationContext2d {
 public:
     nsVisualAssetsContext::sp_t assetsContext;
+    nsVisualCustomPropFactory propsFactory;
 
     virtual ~nsVisualCreationContext2d() = default;
 
