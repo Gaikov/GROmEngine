@@ -22,6 +22,10 @@ void nsDefaultVisualObject::SetTagName(const char *tag) {
     _sprite.color.FromRGBA(std::stoul(color, nullptr, 16));
 }
 
+const std::string & nsDefaultVisualObject::GetTagName() const {
+    return _tagName;
+}
+
 const char * nsDefaultVisualObject::GetType() {
     return _tagName.c_str();
 }

@@ -50,6 +50,7 @@ bool nsVisualBuilder2d::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualC
                     o->customProps[name] = prop;
                 }
             } while (ps_block_next(ss));
+            ps_block_end(ss);
         }
         ps_block_end(ss);
     }

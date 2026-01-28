@@ -5,12 +5,13 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 #include "Engine/display/VisualObject2d.h"
-#include "renderer/sprites/SpriteDesc.h"
+#include "Engine/renderer/sprites/SpriteDesc.h"
 
 class nsDefaultVisualObject : public nsVisualObject2d {
 public:
     nsDefaultVisualObject();
     void SetTagName(const char *tag);
+    const std::string &GetTagName() const;
     const char * GetType() override;
     void GetLocalBounds(nsRect &bounds) override;
     void Loop() override;

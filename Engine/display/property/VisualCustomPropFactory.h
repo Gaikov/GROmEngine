@@ -19,9 +19,11 @@ public:
     nsVisualCustomProp::sp_t Deserialize(script_state_t *ss);
 
 private:
-    template<class TVar, class TValue>
-    void Register(const nsVisualCustomProp::Type type, TValue defValue) {
-        _builders[type] = [&] { return new TVar(defValue); };
+    template<class TVar>
+    void Register(const nsVisualCustomProp::Type type) {
+        _builders[type] = [] {
+            return new TVar();
+        };
     }
 
     std::map<nsVisualCustomProp::Type, builder_t> _builders;
