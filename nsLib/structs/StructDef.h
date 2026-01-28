@@ -18,4 +18,14 @@ public: \
         } \
         return data[0].value; \
     } \
+    static const char* GetName(Type value) { \
+        static const struct { \
+            const char* name; \
+            Type value; \
+        } data[] = __VA_ARGS__; \
+        for (const auto& item : data) { \
+            if (item.value == value) return item.name; \
+        } \
+        return data[0].name; \
+    } \
 };
