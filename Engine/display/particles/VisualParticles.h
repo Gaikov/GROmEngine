@@ -18,6 +18,7 @@ public:
     };
 
     nsProperty<Space> space = LOCAL;
+    nsProperty<bool> preSpawn = false;
 
     nsVisualParticles();
 

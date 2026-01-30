@@ -19,6 +19,7 @@ public:
     explicit nsParticleSystem();
     ~nsParticleSystem();
 
+    void PreSpawn();
     bool IsActive() { return _active || spawnEnabled; }
     void Emit(int amount = 0);
 

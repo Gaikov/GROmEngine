@@ -16,7 +16,7 @@ public:
         if (!_head) {
             Reserve(_capacity);
         }
-        auto res = _head;
+        const auto res = _head;
         res->Reset();
         _head = res->next;
         res->next = nullptr;
