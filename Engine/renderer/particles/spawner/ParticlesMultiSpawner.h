@@ -17,7 +17,21 @@ public:
         _name = NAME;
     }
 
-    std::vector<nsParticlesSpawner::sp_t>   list;
+    std::vector<sp_t>   list;
+
+    template <class TSpawner>
+    TSpawner* FindSpawner() {
+        for (auto &s : list) {
+            nsParticlesSpawner *spawner = s;
+            if (auto res = dynamic_cast<TSpawner *>(spawner)) {
+                return res;
+            }
+            if (const auto ms = dynamic_cast<nsParticlesMultiSpawner *>(spawner)) {
+                return ms->FindSpawner<TSpawner>();
+            }
+        }
+        return nullptr;
+    }
 
     void Spawn(nsParticle *p, float angle) override;
     bool Parse(script_state_t *ss, nsParticlesSpawnerContext *context) override;

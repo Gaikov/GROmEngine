@@ -5,6 +5,8 @@
 #include "ParticleSystem.h"
 #include "nsLib/log.h"
 #include "Core/Var.h"
+#include "spawner/ParticlesLifeSpawner.h"
+#include "spawner/ParticlesMultiSpawner.h"
 
 extern nsVar   *r_draw_particles;
 
@@ -17,20 +19,34 @@ nsParticleSystem::~nsParticleSystem() {
     RemoveAll();
 }
 
+void nsParticleSystem::PreSpawn() {
+    if (behaviour && spawnEnabled) {
+        if (behaviour->spawner) {
+            nsParticlesSpawner *root = behaviour->spawner;
+            if (const auto ms = dynamic_cast<nsParticlesMultiSpawner*>(root)) {
+                if (const auto ls = ms->FindSpawner<nsParticlesLifeSpawner>()) {
+                    const auto time = (ls->minLifeTime + ls->maxLifeTime) / 2;
+                    Update(time);
+                }
+            }
+        }
+    }
+}
+
 void nsParticleSystem::RemoveAll() {
     _pool->FreeList(_active);
     _active = nullptr;
 }
 
-void nsParticleSystem::Reset(bool spawn) {
+void nsParticleSystem::Reset(const bool spawn) {
     RemoveAll();
     spawnEnabled = spawn;
 }
 
 void nsParticleSystem::GetBounds(nsRect &rect) const {
     if (_active) {
-        nsVec2 min, max;
-        min = max = _active->pos;
+        nsVec2 min = _active->pos;
+        nsVec2 max = min;
         for (auto p = _active; p; p = p->next) {
             min = nsVec2::Min(min, p->pos);
             max = nsVec2::Max(max, p->pos);

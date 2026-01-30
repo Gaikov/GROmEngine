@@ -33,7 +33,7 @@ void nsParticlesEdgesSpawner::Spawn(nsParticle *p, const float angle) {
         for (const auto &e: _frame) {
             dist -= e.length;
             if (dist < 0) {
-                p->pos = (e.pos + e.dir * (e.length + dist)).Rotate(angle);
+                p->pos += (e.pos + e.dir * (e.length + dist)).Rotate(angle);
                 break;
             }
         }

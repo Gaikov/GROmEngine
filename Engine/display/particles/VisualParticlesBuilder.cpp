@@ -29,6 +29,7 @@ bool nsVisualParticlesBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, ns
     }
 
     system.spawnEnabled = ParseBool(ss, "spawn", system.spawnEnabled);
+    p->preSpawn = ParseBool(ss, "pre_spawn", p->preSpawn);
 
     if (ps_var_begin(ss, "space")) {
         const auto space = ps_var_str(ss);
@@ -58,6 +59,7 @@ bool nsVisualParticlesBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObje
     }
 
     saver.VarBool("spawn", system.spawnEnabled, true);
+    saver.VarBool("pre_spawn", p->preSpawn, false);
 
     if (p->space == nsVisualParticles::GLOBAL) {
         saver.VarString("space", "global");

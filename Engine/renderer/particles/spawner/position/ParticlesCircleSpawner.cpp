@@ -14,9 +14,7 @@ void nsParticlesCircleSpawner::Spawn(nsParticle *p, float angle) {
         } else {
             pos.Random(radius * nsMath::Random());
         }
-        p->pos = pos;
-    } else {
-        p->pos = {0, 0};
+        p->pos += pos;
     }
 }
 

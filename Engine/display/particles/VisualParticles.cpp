@@ -11,6 +11,12 @@ nsVisualParticles::nsVisualParticles() {
         _system.RemoveAll();
         ResetPosition();
     });
+
+    preSpawn.AddHandler(nsPropChangedName::CHANGED, [&](const nsBaseEvent*) {
+        if (IsOnStage() && preSpawn) {
+            _system.PreSpawn();
+        }
+    });
 }
 
 void nsVisualParticles::GetLocalBounds(nsRect &bounds) {
@@ -55,6 +61,9 @@ void nsVisualParticles::ApplyWorldMatrix() {
 void nsVisualParticles::OnAddedToStage() {
     nsVisualObject2d::OnAddedToStage();
     ResetPosition();
+    if (preSpawn) {
+        _system.PreSpawn();
+    }
 }
 
 void nsVisualParticles::OnRemovedFromStage() {
