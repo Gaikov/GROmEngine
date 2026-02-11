@@ -17,6 +17,7 @@ struct nsParticle {
     float   size = 0;
 
     float   angle = 0;
+    float   rotationSpeed = 0;
 
     float   timeLeft = 0;
     float   maxTime = 0;
@@ -31,6 +32,7 @@ struct nsParticle {
         startSize = size = 0;
         angle = 0;
         timeLine = timeLeft = maxTime = 0;
+        rotationSpeed = 0;
     }
 
     inline void Update(float deltaTime) {
