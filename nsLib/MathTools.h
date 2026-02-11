@@ -209,8 +209,8 @@ float nsMath::ToDeg(float radians) {
     return radians * 180.0f / M_PI;
 }
 
-float nsMath::RandRange(float min, float max) {
-    return Math_RandRange(min, max);
+float nsMath::RandRange(const float min, const float max) {
+    return Lerp(min, max, Random());
 }
 
 float nsMath::Random() {
