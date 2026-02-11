@@ -23,4 +23,7 @@ public:
     void OnKeyDown(int key, bool rept, int mods) override;
     void OnChar(char ch) override;
     bool OnMouseWheel(float delta) override;
+
+private:
+    void ShowDockSpace();
 };
