@@ -51,6 +51,7 @@ struct nsMath
     static inline float     Random();
 	static inline float		NormalizeAngle(float angle);
 	static inline float		ClosestAngle(float from, float to);
+	static inline bool		Equal(float a, float b, float eps = 0.0001f);
 };
 
 //---------------------------------------------------------
@@ -241,4 +242,8 @@ float nsMath::ClosestAngle(float from, float to) {
 		to -= M_2PI;
 	}
 	return to;
+}
+
+bool nsMath::Equal(const float a, const float b, const float eps) {
+	return fabsf(a - b) < eps;
 }
