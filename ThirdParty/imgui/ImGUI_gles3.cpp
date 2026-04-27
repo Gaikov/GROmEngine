@@ -13,6 +13,8 @@
 
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
+static bool initialized = false;
+
 bool nsImGUI_gles3::Init(void *window) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -23,15 +25,21 @@ bool nsImGUI_gles3::Init(void *window) {
 
     ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window), false);
     ImGui_ImplOpenGL3_Init("#version 300 es");
+    initialized = true;
     return true;
 }
 
 void nsImGUI_gles3::Shutdown() {
+    if (!initialized) {
+        Log::Warning("ImGUI was not initialized");
+        return;
+    }
     // Очистка
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
+    initialized = false;
 }
 
 void nsImGUI_gles3::StartFrame() {
