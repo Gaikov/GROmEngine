@@ -82,6 +82,27 @@ Client/server packet architecture with Windows/POSIX socket abstraction. Exclude
 
 **Undo/Redo** — command pattern via `nsUndoService` subsystem; used by the GROmEditor layer.
 
+## Code Style
+
+- **Header guards:** `#pragma once` everywhere (не `#ifndef`)
+- **Поля класса:** приватные/protected с префиксом `_` (например, `_children`, `_value`); публичные — без префикса (например, `x`, `y`, `id`)
+- **Методы:** PascalCase — `GetWidth()`, `AddChild()`, `IsValid()`
+- **Классы:** `ns` префикс + PascalCase (`nsVec2`, `nsConfig`); интерфейсы — `I` префикс (`IRenDevice`)
+- **Отступы:** 4 пробела
+- **Скобки:** открывающая `{` всегда на той же строке — для функций, методов, `if/for/while/class/struct`
+- **Указатели/ссылки:** `*` и `&` прижаты к типу: `const nsVec2 &v`, `nsObject *obj`
+- **Порядок секций:** `public` → `protected` → `private`
+- **`auto`:** использовать везде где возможно
+- **Порядок `#include`:** сначала стандартная библиотека, потом локальные заголовки (не критично)
+- **Separator-комментарии** перед методами в `.cpp` — опционально, но приветствуются:
+  ```cpp
+  //---------------------------------------------------------
+  // ClassName::MethodName:
+  //---------------------------------------------------------
+  ```
+
+Старый код в `Core/` и `nsLib/` может содержать `m_` префиксы и `#ifndef` guards — при правке файла приводить к актуальному стилю.
+
 ## External Dependencies
 
 OpenGL (glad), OpenAL (openal-soft), OggVorbis, libpng + zlib (in `ThirdParty/ImageDecoder`), GLFW (Desktop), ImGui (`ThirdParty/ImGui`), GTest.
