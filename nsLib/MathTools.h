@@ -49,6 +49,7 @@ struct nsMath
     static inline float     ToDeg(float radians);
     static inline float     RandRange(float min, float max);
     static inline float     Random();
+	static inline float		RandomSign();
 	static inline float		NormalizeAngle(float angle);
 	static inline float		ClosestAngle(float from, float to);
 	static inline bool		Equal(float a, float b, float eps = 0.0001f);
@@ -104,7 +105,7 @@ inline void Math_Scale( float &v, float fromStart, float fromEnd, float toStart,
 //---------------------------------------------------------
 inline float Math_Rand( float max )
 {
-	return float(rand()) * max / float(RAND_MAX);
+	return nsMath::Random() * max;
 }
 
 //---------------------------------------------------------
@@ -112,14 +113,7 @@ inline float Math_Rand( float max )
 //---------------------------------------------------------
 inline float Math_RandRange( float min, float max )
 {
-	if ( min > max )
-	{
-		float	tmp = min;
-		min = max;
-		max = tmp;
-	}
-
-	return min + Math_Rand( 1 ) * (max - min);
+	return nsMath::RandRange(min, max);
 }
 
 //---------------------------------------------------------
@@ -215,7 +209,14 @@ float nsMath::RandRange(const float min, const float max) {
 }
 
 float nsMath::Random() {
-    return float(rand()) / float(RAND_MAX);
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	static std::uniform_real_distribution dis(0.0f, 1.0f);
+	return dis(gen);
+}
+
+float nsMath::RandomSign() {
+	return Random() > 0.5f ? 1.0f : -1.0f;
 }
 
 float nsMath::NormalizeAngle(float angle) {
