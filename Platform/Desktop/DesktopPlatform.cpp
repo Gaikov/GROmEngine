@@ -112,10 +112,10 @@ void DesktopPlatform::GetDisplayModes(Platform::tDisplayModesList &result) {
     int count;
     auto modes = glfwGetVideoModes(_display, &count);
     if (count < 1) {
-        LogPrintf(PRN_ERROR, "Display modes are not available!");
+        Log::Error("Display modes are not available!");
     }
 
-    LogPrintf(PRN_ALL, "num display modes: %i\n", count);
+    Log::Info("num display modes: %i", count);
 
     for (int i = 0; i < count; ++i) {
         auto m = &modes[i];
@@ -130,7 +130,7 @@ void DesktopPlatform::GetDisplayModes(Platform::tDisplayModesList &result) {
 
         result.push_back(mode);
 
-        LogPrintf(PRN_ALL, "Mode bpp:%i, %i x %i, format: %i%i%i, refresh: %i\n",
+        Log::Info("Mode bpp:%i, %i x %i, format: %i%i%i, refresh: %i",
                   bits, m->width, m->height, m->redBits, m->greenBits, m->blueBits, m->refreshRate);
     }
 }
@@ -139,7 +139,7 @@ bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, i
 #if !defined(WEB_ASM)
     glfwGetError(nullptr);
 
-    LogPrintf(PRN_ALL, "Applying display mode: %ix%i...\n", width, height);
+    Log::Info("Applying display mode: %ix%i...", width, height);
 
     if (fullScreen) {
         glfwSetWindowMonitor(_wnd, _display, 0, 0, width, height, frequency);
@@ -169,7 +169,7 @@ bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, i
 
 
     //glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
-    LogPrintf(PRN_ALL, "DONE\n");
+    Log::Info("DONE");
 #endif
     return true;
 }

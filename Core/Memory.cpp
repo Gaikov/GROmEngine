@@ -136,11 +136,11 @@ void mem_free( void *data )
 {
 	if ( !data ) return;
 
-	//LogPrintf( PRN_ALL, "free block: %x\n", data );
+	//Log::Info("free block: %x", data );
 	memblock_t	*block = ((memblock_t*)data) - 1;
 	if ( !g_memList || block->id != MEM_ID )
 	{
-		LogPrintf( PRN_DEV, "WARNING: free invalid allocated block\n" );
+		Log::Debug("WARNING: free invalid allocated block" );
 		return;
 	}
 
@@ -150,7 +150,7 @@ void mem_free( void *data )
 	{
 		memblock_t	*prev = block->prev;
 		memblock_t	*next = block->next;
-		//LogPrintf( PRN_ALL, "free OK\n" );
+		//Log::Info("free OK" );
 		if ( prev ) prev->next = next;
 		if ( next ) next->prev = prev;
 	}

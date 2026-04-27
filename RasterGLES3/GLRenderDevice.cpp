@@ -31,9 +31,9 @@ static GLADapiproc getProcAddr(const char *name) {
 
 bool GLRenderDevice::Init(void *wnd)
 {
-	LogPrintf(PRN_ALL, "*****************************************\n");
-	LogPrintf(PRN_ALL, "+       initializing GL renderer        +\n");
-	LogPrintf(PRN_ALL, "*****************************************\n");
+	Log::Info("*****************************************");
+	Log::Info("+       initializing GL renderer        +");
+	Log::Info("*****************************************");
 
 	if (!gladLoadGLES2(getProcAddr)) {
 		Sys_FatalError("Failed to initialize GLAD");
@@ -51,9 +51,9 @@ bool GLRenderDevice::Init(void *wnd)
 		return false;
 	}
 
-	LogPrintf(PRN_ALL, "GL Vendor: %s\n", glGetString(GL_VENDOR));
-	LogPrintf(PRN_ALL, "GL Renderer: %s\n", glGetString(GL_RENDERER));
-	LogPrintf(PRN_ALL, "GL Version: %s\n", glGetString(GL_VERSION));
+	Log::Info("GL Vendor: %s", glGetString(GL_VENDOR));
+	Log::Info("GL Renderer: %s", glGetString(GL_RENDERER));
+	Log::Info("GL Version: %s", glGetString(GL_VERSION));
 
 	_quadBuff = dynamic_cast<GLVertexBuffer *>(VerticesCreate(4, 6, true, false));
 

@@ -17,7 +17,7 @@ nsFileReader::nsFileReader(const char *fileName, const char *mode) :
     //Log::Debug("Reading disk file: %s", fileName);
     m_fp = fopen(fileName, mode);
     if (!m_fp)
-        LogPrintf(PRN_ALL, "WARNING: can't open file '%s'\n", fileName);
+        Log::Warning("can't open file '%s'", fileName);
 }
 
 //---------------------------------------------------------

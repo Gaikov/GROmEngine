@@ -21,7 +21,7 @@ void  Sys_FatalError( const char *fmt, ... )
 	nsString	cap;
 	cap.Format( "%s: FatalError", App_GetInfo()->GetAppName() );
 	
-	LogPrintf( PRN_ALL, "FATAL ERROR: %s\n", msg );
+	Log::Info("FATAL ERROR: %s", msg );
     App_GetPlatform()->MessagePopup(cap, msg);
 	Sys_Exit();
 }
@@ -41,7 +41,7 @@ void  Sys_Message( const char *fmt, ... )
 	nsString	cap;
 	cap.Format( "%s: Message", App_GetInfo()->GetAppName() );
 	
-	LogPrintf( PRN_ALL, "MESSAGE: %s\n", msg );
+	Log::Info("MESSAGE: %s", msg );
     App_GetPlatform()->MessagePopup(cap, msg);
 }
 
@@ -121,7 +121,7 @@ std::string Sys_OSName()
 //---------------------------------------------------------
 void Sys_SetMaxPriority()
 {
-	LogPrintf(PRN_ALL, "Sys_SetMaxPriority - not implemented\n");
+	Log::Info("Sys_SetMaxPriority - not implemented");
 }
 
 //---------------------------------------------------------
@@ -129,7 +129,7 @@ void Sys_SetMaxPriority()
 //---------------------------------------------------------
 void Sys_SetNormalPriority()
 {
-	LogPrintf(PRN_ALL, "Sys_SetNormalPriority - not implemented\n");
+	Log::Info("Sys_SetNormalPriority - not implemented");
 }
 
 //-----------------------------------------------------
@@ -151,7 +151,7 @@ bool Sys_MakePath( const char* dirPath )
 		if ( slash ) *slash = 0;
 		if ( !nsFilePath::MakeFolder(str) )
 		{
-			LogPrintf( PRN_ALL, "WARNING: can't create directory '%s'\n", str );
+			Log::Warning("can't create directory '%s'", str );
 			return false;
 		}
 		
@@ -228,7 +228,7 @@ static int	flagsCount = sizeof(flags) / sizeof(FPU_Flag_t);
 
 void Sys_FPUState()
 {
-	LogPrintf( PRN_ALL, "============= FPU flags ===============\n" );
+	Log::Info("============= FPU flags ===============" );
 	/*unsigned int state = _controlfp( 0, 0 );
 
 	for ( int i = 0; i < flagsCount; i++ )
@@ -236,15 +236,15 @@ void Sys_FPUState()
 		unsigned int bits = state & flags[i].mask;
 
 		if ( flags[i].group )
-			LogPrintf( PRN_ALL, "%s\n", flags[i].group );
+			Log::Info("%s", flags[i].group );
 
 		if ( bits & flags[i].value )
-			LogPrintf( PRN_ALL, "%s\n", flags[i].name );
+			Log::Info("%s", flags[i].name );
 		else if ( !bits && !flags[i].value )
-			LogPrintf( PRN_ALL, "%s\n", flags[i].name );
+			Log::Info("%s", flags[i].name );
 	}*/
-	LogPrintf( PRN_ALL, "not implemented");
-	LogPrintf( PRN_ALL, "=======================================\n" );
+	Log::Info("not implemented");
+	Log::Info("=======================================" );
 }
 
 //---------------------------------------------------------

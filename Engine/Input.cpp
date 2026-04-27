@@ -33,14 +33,14 @@ void nsInput::keycmd_f( int argc, const char *argv[] )
 {
 	if ( argc < 2 )
 	{
-		LogPrintf( PRN_ALL, "usage: keycmd [keyname] [command/variable] [command params]\n" );
+		Log::Info("usage: keycmd [keyname] [command/variable] [command params]" );
 		return;
 	}
 
 	KeyBinding_t	*key = g_inp.GetKey( argv[1] );
 	if ( !key )
 	{
-		LogPrintf( PRN_ALL, "invalid key name - '%s'\n", argv[1] );
+		Log::Info("invalid key name - '%s'", argv[1] );
 		return;
 	}
 
@@ -49,18 +49,18 @@ void nsInput::keycmd_f( int argc, const char *argv[] )
 		switch ( key->type )
 		{
 		case IC_NONE:
-			LogPrintf( PRN_ALL, "key '%s' unbound\n", argv[1] );
+			Log::Info("key '%s' unbound", argv[1] );
 			break;
 		case IC_VAR:
-			LogPrintf( PRN_ALL, "key: '%s' variable: '%s'\n", argv[1], key->var->GetName() );
+			Log::Info("key: '%s' variable: '%s'", argv[1], key->var->GetName() );
 			break;
 		case IC_CMD:
-			LogPrintf( PRN_ALL, "key: '%s' command: '%s'\n", argv[1], key->cmd->name );
+			Log::Info("key: '%s' command: '%s'", argv[1], key->cmd->name );
 			if ( key->argc )
 			{
-				LogPrintf( PRN_ALL, "params count: %i\n", key->argc );
+				Log::Info("params count: %i", key->argc );
 				for ( int i = 0; i < key->argc; i++ )
-					LogPrintf( PRN_ALL, "[%i] -> '%s'\n", i, key->argv[i] );
+					Log::Info("[%i] -> '%s'", i, key->argv[i] );
 			}
 			break;
 		}
@@ -74,7 +74,7 @@ void nsInput::keycmd_f( int argc, const char *argv[] )
 	else if ( (c = g_cfg->FindCmd( argv[2][0] == '+' ? &argv[2][1] : argv[2] )) )
 		g_inp.BindKeyCmd( key, c, argc - 2, &argv[2], argv[2][0] == '+' );
 	else
-		LogPrintf( PRN_ALL, "WARNING: '%s' - invalid variable or command!\n", argv[2] );
+		Log::Warning("'%s' - invalid variable or command!", argv[2] );
 }//*/
 
 //---------------------------------------------------------
@@ -92,13 +92,13 @@ void nsInput::keydesc_f( int argc, const char *argv[] )
 {
 	if ( argc < 2 )
 	{
-		LogPrintf( PRN_ALL, "usage: in_keydesc [keycode]\n" );
+		Log::Info("usage: in_keydesc [keycode]" );
 		return;
 	}
 
 	int			code = atoi( argv[1] );
 	const char	*desc = g_inp.GetKeyDesc( code );
-	LogPrintf( PRN_ALL, "code: %i desc: %s\n", code, desc );
+	Log::Info("code: %i desc: %s", code, desc );
 }
 
 //---------------------------------------------------------
@@ -144,7 +144,7 @@ void nsInput::Release()
 {
 	if ( m_joyUse )
 	{
-		LogPrintf( PRN_ALL, "...release joystick capture\n" );
+		Log::Info("...release joystick capture" );
 		//joyReleaseCapture( 0 );
 	}
 
@@ -557,22 +557,22 @@ void nsInput::UnbindKey(KeyBinding_t *key)
 //---------------------------------------------------------
 void nsInput::ShowKeys()
 {
-	LogPrintf( PRN_ALL, "------------------------- key names ------------------------\n" );
+	Log::Info("------------------------- key names ------------------------" );
 	int	count = 0;
 	for (auto & m_inKey : m_inKeys)
 		if ( strlen(m_inKey.keyname) )
 		{
-			LogPrintf( PRN_ALL, "%s\n", m_inKey.keyname );
+			Log::Info("%s", m_inKey.keyname );
 /*
 			if ( count > 4 )
 			{
-				LogPrintf( PRN_ALL, "\n" );
+				Log::Info("" );
 				count = -1;
 			}
 */
 			count ++;
 		}
-	LogPrintf( PRN_ALL, "\n------------------------------------------------------------\n" );
+	Log::Info("\n------------------------------------------------------------" );
 }
 
 //---------------------------------------------------------

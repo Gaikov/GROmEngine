@@ -43,11 +43,11 @@ nsALSound* nsSoundManager::LoadSound( const char *fileName )
 	//name.ToLower();
 		
 	nsALSound	*s = 0;
-	LogPrintf( PRN_ALL, "loading sound '%s'\n", name.AsChar() );
+	Log::Info("loading sound '%s'", name.AsChar() );
 	if ( s = FindSound( name ) )
 	{
 		s->m_refCount ++;
-		LogPrintf( PRN_ALL, "found\n" );
+		Log::Info("found" );
 	}
 	else
 	{
@@ -61,7 +61,7 @@ nsALSound* nsSoundManager::LoadSound( const char *fileName )
 		{
 			s->m_refCount = 1;
 			AddToList( &m_sndList, s );
-			LogPrintf( PRN_ALL, "loaded\n" );
+			Log::Info("loaded" );
 		}
 	}
 
@@ -115,13 +115,13 @@ void nsSoundManager::ReleaseSound( nsALSound *s )
 //---------------------------------------------------------
 void nsSoundManager::ReleaseAll()
 {
-	LogPrintf( PRN_ALL, "...delete buffers\n" );
+	Log::Info("...delete buffers" );
 	nsALSound	*s = m_sndList;
 	while ( s )
 	{
 		nsALSound	*del = s;
 		s = s->next;
-		LogPrintf( PRN_DEV, "...delete sound: %s\n", del->GetFileName() );
+		Log::Debug("...delete sound: %s", del->GetFileName() );
 		delete del;
 	}
 }

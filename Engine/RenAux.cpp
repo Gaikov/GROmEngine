@@ -62,7 +62,7 @@ bool RX_Init()
 		i[1] = 1;
 	}
 	else
-		LogPrintf( PRN_ALL, "WARNING: can't create line vb!\n" );
+		Log::Warning("can't create line vb!" );
 
 
 	return true;

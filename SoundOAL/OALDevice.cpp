@@ -23,7 +23,7 @@ void nsOALDevice::track_play_f( int argc, const char *argv[] )
 {
 	if ( argc < 2 )
 	{
-		LogPrintf( PRN_ALL, "usage: track_play [track filename]\n" );
+		Log::Info("usage: track_play [track filename]" );
 		return;
 	}
 
@@ -37,7 +37,7 @@ void nsOALDevice::sound_play_f( int argc, const char *argv[] )
 {
 	if ( argc < 2 )
 	{
-		LogPrintf( PRN_ALL, "usage: sound_play [sound filename]\n" );
+		Log::Info("usage: sound_play [sound filename]" );
 		return;
 	}
 
@@ -74,7 +74,7 @@ void nsOALDevice::SetSFXVolume( float vol )
 	if ( vol > 1.0 ) vol = 1.0;
 
 #ifdef _DEBUG
-	LogPrintf( PRN_ALL, "sfx volume: %f\n", vol );
+	Log::Info("sfx volume: %f", vol );
 #endif
 	m_prevSfxVol = vol;
 
@@ -91,7 +91,7 @@ void nsOALDevice::SetMusVolume( float vol )
 	if ( vol > 1.0 ) vol = 1.0;
 
 #ifdef _DEBUG
-	LogPrintf( PRN_ALL, "mus volume: %f\n", vol );
+	Log::Info("mus volume: %f", vol );
 #endif
 	
 	m_prevMusVol = vol;
@@ -113,7 +113,7 @@ void nsOALDevice::TestTrack( const char *fileName )
 	nsSource *src = m_srcMgr.GetFreeSource();
 	if ( !src )
 	{
-		LogPrintf( PRN_ALL, "WARNING: no free sources for test track\n" );
+		Log::Warning("no free sources for test track" );
 		return;
 	}
 
@@ -132,7 +132,7 @@ void nsOALDevice::TestSound( const char *fileName )
 	nsSource *src = m_srcMgr.GetFreeSource();
 	if ( !src )
 	{
-		LogPrintf( PRN_ALL, "WARNING: no free sources for test sound\n" );
+		Log::Warning("no free sources for test sound" );
 		return;
 	}
 	
@@ -144,10 +144,9 @@ void nsOALDevice::TestSound( const char *fileName )
 //---------------------------------------------------------
 bool nsOALDevice::Init()
 {
-	LogPrintf( PRN_ALL,
-		"============================================\n" \
-		"*            Init Sound Subsystem          *\n" \
-		"============================================\n" );
+	Log::Info("============================================"
+		"*            Init Sound Subsystem          *\n"
+		"============================================");
 
 	snd_volume = g_cfg->RegVar( "snd_volume", "0.5", GVF_SAVABLE );
 	mus_volume = g_cfg->RegVar( "mus_volume", "0.5", GVF_SAVABLE );
@@ -169,43 +168,43 @@ bool nsOALDevice::Init()
 	//------------------------------
 
 	if ( dev_name )
-		LogPrintf( PRN_ALL, "open AL device: '%s'\n", dev_name );
+		Log::Info("open AL device: '%s'", dev_name );
 	else
-		LogPrintf( PRN_ALL, "open default AL device: '%s'\n", (char*)alcGetString( 0, ALC_DEFAULT_DEVICE_SPECIFIER ) );
+		Log::Info("open default AL device: '%s'", (char*)alcGetString( 0, ALC_DEFAULT_DEVICE_SPECIFIER ) );
 	//if ( !(m_aldev = alcOpenDevice( "Generic Software" )) )//*/
 	if ( !(m_aldev = alcOpenDevice( dev_name )) )
 	{
-		LogPrintf( PRN_ALL, "ERROR: open device: %s\n", ALC_GetError( alcGetError( 0 ) ) );
+		Log::Error("open device: %s", ALC_GetError( alcGetError( 0 ) ) );
 		return false;
 	}
 #else
 	if ( !(m_aldev = alcOpenDevice(nullptr)) )
 	{
-		LogPrintf( PRN_ALL, "ERROR: open device: %s\n", ALC_GetError( alcGetError(nullptr) ) );
+		Log::Error("open device: %s", ALC_GetError( alcGetError(nullptr) ) );
 		return false;
 	}
 #endif
 
-	LogPrintf( PRN_ALL, "create AL context\n" );
+	Log::Info("create AL context" );
 	if ( !(m_alc = alcCreateContext( m_aldev, nullptr)) )
 	{
-		LogPrintf( PRN_ALL, "ERROR: create context\n" );
+		Log::Error("create context" );
 		return false;
 	}
 
-	LogPrintf( PRN_ALL, "use context\n" );
+	Log::Info("use context" );
 	if ( !alcMakeContextCurrent( m_alc ) )
 	{
-		LogPrintf( PRN_ALL, "ERROR: make context current\n" );
+		Log::Error("make context current" );
 		return false;
 	}
 
-	LogPrintf( PRN_ALL, "---------- OpenAL info -----------\n" );
-	LogPrintf( PRN_ALL, "version: %s\n", alGetString( AL_VERSION ) );
-	LogPrintf( PRN_ALL, "renderer: %s\n", alGetString( AL_RENDERER ) );
-	LogPrintf( PRN_ALL, "vendor: %s\n", alGetString( AL_VENDOR ) );
-	LogPrintf( PRN_ALL, "extensions: %s\n", alGetString( AL_EXTENSIONS ) );
-	LogPrintf( PRN_ALL, "----------------------------------\n" );
+	Log::Info("---------- OpenAL info -----------" );
+	Log::Info("version: %s", alGetString( AL_VERSION ) );
+	Log::Info("renderer: %s", alGetString( AL_RENDERER ) );
+	Log::Info("vendor: %s", alGetString( AL_VENDOR ) );
+	Log::Info("extensions: %s", alGetString( AL_EXTENSIONS ) );
+	Log::Info("----------------------------------" );
 
 	m_srcMgr.Init();
 
@@ -219,10 +218,9 @@ bool nsOALDevice::Init()
 void nsOALDevice::Release()
 {
 	bool	res = true;
-	LogPrintf( PRN_ALL, 
-		"============================================\n" \
-		"*           Release Sound Subsystem        *\n" \
-		"============================================\n" );
+	Log::Info("============================================\n"
+		"*           Release Sound Subsystem        *\n"
+		"============================================");
 
 	m_trkMgr.ReleaseTracks();
 	m_srcMgr.Release();
@@ -231,19 +229,19 @@ void nsOALDevice::Release()
 	alcMakeContextCurrent(nullptr);
 	if ( m_alc )
 	{
-		LogPrintf( PRN_ALL, "...destroy context\n" );
+		Log::Info("...destroy context" );
 		alcDestroyContext( m_alc );
 		m_alc = nullptr;
 	}
 
 	if ( m_aldev )
 	{
-		LogPrintf( PRN_ALL, "...close device\n" );
+		Log::Info("...close device" );
 		alcCloseDevice( m_aldev );
 		m_aldev = nullptr;
 	}
 
-	LogPrintf( PRN_ALL, "\n" );
+	Log::Info("" );
 }
 
 //---------------------------------------------------------
@@ -278,11 +276,11 @@ void nsOALDevice::SetListener( const nsVec3 &pos, const nsVec3 &at, const nsVec3
 	ALfloat	ort[] = { dir.x, dir.y, dir.z,	up.x, up.y, up.z };
 	alListener3f( AL_POSITION, pos.x, pos.y, pos.z );
 	if ( code = alGetError() )
-		LogPrintf( PRN_ALL, "set pos: %s\n", AL_GetError( code ) );
+		Log::Info("set pos: %s", AL_GetError( code ) );
 	
 	alListenerfv( AL_ORIENTATION, ort ); //*/
 	if ( code = alGetError() )
-		LogPrintf( PRN_ALL, "set ort: %s\n", AL_GetError( code ) );	
+		Log::Info("set ort: %s", AL_GetError( code ) );	
 }
 
 //---------------------------------------------------------
@@ -352,7 +350,7 @@ IVoice* nsOALDevice::SoundPlay( ISound *snd, bool loop /*= false */ )
 	auto *s = (nsALSound*)snd;
 	if ( !src )
 	{
-		LogPrintf( PRN_ALL, "WARNING: no free playsound '%s'\n", s->GetFileName() );
+		Log::Warning("no free playsound '%s'", s->GetFileName() );
 		return nullptr;
 	}
 
@@ -369,7 +367,7 @@ IVoice* nsOALDevice::SoundPlay( ISound *snd, bool loop /*= false */ )
 		alSourcei( ps, AL_LOOPING, AL_FALSE );
 #ifdef _DEBUG
 	if ( code = alGetError() )
-		LogPrintf( PRN_ALL, "ERROR: alSourcei( AL_LOOPING ): %s\n", AL_GetError( code ) );
+		Log::Error("alSourcei( AL_LOOPING ): %s", AL_GetError( code ) );
 #endif
 
 	alSourcef( ps, AL_PITCH, 1 );
@@ -391,7 +389,7 @@ IVoice*	nsOALDevice::SoundPlay3D( ISound *snd, const nsVec3 &pos, bool loop, flo
 	auto *s = (nsALSound*)snd;
 	if ( !src )
 	{
-		LogPrintf( PRN_ALL, "WARNING: no free playsound '%s'\n", s->GetFileName() );
+		Log::Warning("no free playsound '%s'", s->GetFileName() );
 		return nullptr;
 	}
 
@@ -417,7 +415,7 @@ IVoice*	nsOALDevice::SoundPlay3D( ISound *snd, const nsVec3 &pos, bool loop, flo
 #ifdef _DEBUG
 	code = alGetError();
 	if ( code )
-		LogPrintf( PRN_ALL, "WARNING: play source: %s\n", AL_GetError( code ) );
+		Log::Warning("play source: %s", AL_GetError( code ) );
 #endif
 
 	return src;
@@ -549,7 +547,7 @@ void nsOALDevice::TrackPlay( ITrack *t )
 	nsSource	*src = m_srcMgr.GetFreeSource();
 	if ( !src )
 	{
-		LogPrintf( PRN_ALL, "WARNING: no free playtrack '%s'\n", track->GetFileName() );
+		Log::Warning("no free playtrack '%s'", track->GetFileName() );
 		return;
 	}
 
@@ -626,7 +624,7 @@ void nsOALDevice::TrackSetVolume( ITrack *t, float vol )
 	{
 		nsSource	*src = track->GetSource();
 		src->m_volume = vol;
-		//LogPrintf( PRN_ALL, "track volume: %f\n" );
+		//Log::Info("track volume: %f" );
 		src->UpdateVolume( mus_volume->Value(), m_musGameVol );
 	}
 }

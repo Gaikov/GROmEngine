@@ -31,7 +31,7 @@ bool nsSource::BindBuffer( nsALSound *snd )
 	ALuint	buff = snd->GetALBuffer();
 	if ( !buff )
 	{
-		LogPrintf( PRN_ALL, "WARNING: sound '%s' not loaded!\n", snd->GetFileName() );
+		Log::Warning("sound '%s' not loaded!", snd->GetFileName() );
 		return false;
 	}
 
@@ -41,7 +41,7 @@ bool nsSource::BindBuffer( nsALSound *snd )
 #ifdef _DEBUG
 	ALenum	code;
 	if ( code = alGetError() )
-		LogPrintf( PRN_ALL, "ERROR: alSourcei( AL_BUFFER ): %s\n", AL_GetError( code ) );
+		Log::Error("alSourcei( AL_BUFFER ): %s", AL_GetError( code ) );
 #endif
 
 	m_trk = 0;
@@ -111,7 +111,7 @@ bool nsSourceManager::Init()
 		{
 			if ( maxSrc < 4 )
 			{
-				LogPrintf( PRN_ALL, "ERROR: can't allocate AL sources\n" );
+				Log::Error("can't allocate AL sources" );
 				return false;
 			}
 			maxSrc /= 2;
@@ -119,7 +119,7 @@ bool nsSourceManager::Init()
 		else
 		{
 			al_max_sources->SetValue( (float)maxSrc );
-			LogPrintf( PRN_ALL, "... %i sources used\n", maxSrc );
+			Log::Info("... %i sources used", maxSrc );
 			break;
 		}
 	}
@@ -142,7 +142,7 @@ void nsSourceManager::Release()
 
 	if ( m_sources )
 	{
-		LogPrintf( PRN_ALL, "...free sources\n" );
+		Log::Info("...free sources" );
 
 		alDeleteSources( m_srcCount, m_sources );
 		my_free( m_sources );
@@ -175,7 +175,7 @@ nsSource*	nsSourceManager::GetFreeSource()
 		ALenum	code;
 		if ( code = alGetError() )
 		{
-			LogPrintf( PRN_ALL, "ERROR: alGetSourcei( AL_SOURCE_STATE ): %s\n", AL_GetError( code ) );
+			Log::Error("alGetSourcei( AL_SOURCE_STATE ): %s", AL_GetError( code ) );
 			return 0;
 		}
 #endif
@@ -227,9 +227,9 @@ void nsSourceManager::PauseAllSources( bool pause, bool onlyLooped )
 {
 	ALint	loop, state;
 	if ( pause )
-		LogPrintf( PRN_ALL, "pause sounds\n" );
+		Log::Info("pause sounds" );
 	else
-		LogPrintf( PRN_ALL, "unpause sounds\n" );
+		Log::Info("unpause sounds" );
 
 	if ( pause )
 	{

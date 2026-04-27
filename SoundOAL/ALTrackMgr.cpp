@@ -45,11 +45,11 @@ bool nsALTrackMgr::PlayTrack( nsALTrack *track, nsSource *src )
 {
 	if ( !track ) return false;
 
-	LogPrintf( PRN_ALL, "play track: '%s'\n", track->GetFileName() );
+	Log::Info("play track: '%s'", track->GetFileName() );
 
 	if ( track->IsPlaying() )
 	{
-		LogPrintf( PRN_ALL, "WARNING: track already playing!\n" );
+		Log::Warning("track already playing!" );
 		return false;
 	}
 

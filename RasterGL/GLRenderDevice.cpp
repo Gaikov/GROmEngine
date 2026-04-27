@@ -28,9 +28,9 @@ GLRenderDevice::GLRenderDevice() :
 
 bool GLRenderDevice::Init(void *wnd)
 {
-	LogPrintf(PRN_ALL, "*****************************************\n");
-	LogPrintf(PRN_ALL, "+       initializing GL renderer        +\n");
-	LogPrintf(PRN_ALL, "*****************************************\n");
+	Log::Info("*****************************************");
+	Log::Info("+       initializing GL renderer        +");
+	Log::Info("*****************************************");
 	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) {_queryRestart = true;});
 
 	if (!_modes.Init())
@@ -38,9 +38,9 @@ bool GLRenderDevice::Init(void *wnd)
 		return false;
 	}
 
-	LogPrintf(PRN_ALL, "GL Vendor: %s\n", glGetString(GL_VENDOR));
-	LogPrintf(PRN_ALL, "GL Renderer: %s\n", glGetString(GL_RENDERER));
-	LogPrintf(PRN_ALL, "GL Version: %s\n", glGetString(GL_VERSION));
+	Log::Info("GL Vendor: %s", glGetString(GL_VENDOR));
+	Log::Info("GL Renderer: %s", glGetString(GL_RENDERER));
+	Log::Info("GL Version: %s", glGetString(GL_VERSION));
 
 	_debug.Init(&_textures);
 

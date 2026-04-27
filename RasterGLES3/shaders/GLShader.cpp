@@ -78,12 +78,12 @@ GLShader::GLShader(nsGLProgramsCache &programs) : _programs(programs)
 //---------------------------------------------------------
 bool GLShader::Reload()
 {
-	LogPrintf(PRN_ALL, "...loading shader: %s\n", m_fileName.AsChar());
+	Log::Info("...loading shader: %s", m_fileName.AsChar());
 	nsParseFile	pf;
 	script_state_t	*ss = pf.BeginFile( m_fileName );
 	if ( !ss )
 	{
-		LogPrintf( PRN_ALL, "WARNING: can't load shader '%s'\n", m_fileName.AsChar() );
+		Log::Warning("can't load shader '%s'", m_fileName.AsChar() );
 		return false;
 	}
 

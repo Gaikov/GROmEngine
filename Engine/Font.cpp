@@ -26,7 +26,7 @@ nsFont::~nsFont() {
 bool nsFont::Load( const char *fileName )
 {
     if ( !StrCheck( fileName ) ) return false;
-    LogPrintf( PRN_ALL, "loading font: %s\n", fileName );
+    Log::Info("loading font: %s", fileName );
 
 
     nsFilePath  filePath(fileName);
@@ -50,7 +50,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 	script_state_t	*ss = pf.BeginFile( filePath );
 	if ( !ss )
 	{
-		LogPrintf( PRN_ALL, "WARNING: can't parsing font!\n" );
+		Log::Warning("can't parsing font!" );
 		return false;
 	}
 
@@ -70,7 +70,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 
 	if ( _pages.empty() )
 	{
-		LogPrintf( PRN_ALL, "WARNING: font textures not loaded!\n" );
+		Log::Warning("font textures not loaded!" );
 		return false;
 	}
 
@@ -143,7 +143,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 
 	if ( !i )
 	{
-		LogPrintf( PRN_ALL, "WARNING: no chars data present!\n" );
+		Log::Warning("no chars data present!" );
 		return false;
 	}
     _lineHeight = max_h - min_h;

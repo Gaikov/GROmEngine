@@ -114,10 +114,10 @@ void BaseTestApp::OnTestCommand(int argc, const char **argv)
 
 	if (printTests)
 	{
-		LogPrintf(PRN_ALL, "Available tests: \n");
+		Log::Info("Available tests: ");
 		for (auto &it : _tests)
 		{
-			LogPrintf(PRN_ALL, "%s\n", it.first.c_str());
+			Log::Info("%s", it.first.c_str());
 		}
 	}
 
@@ -125,9 +125,9 @@ void BaseTestApp::OnTestCommand(int argc, const char **argv)
 
 bool BaseTestApp::RunTest(const char *name)
 {
-	LogPrintf(PRN_ALL, "===================================\n");
-	LogPrintf(PRN_ALL, "test running: %s\n", name);
-	LogPrintf(PRN_ALL, "===================================\n");
+	Log::Info("===================================");
+	Log::Info("test running: %s", name);
+	Log::Info("===================================");
 	auto it = _tests.find(name);
 	if (it != _tests.end())
 	{
@@ -136,7 +136,7 @@ bool BaseTestApp::RunTest(const char *name)
 	}
 	else
 	{
-		LogPrintf(PRN_ALL, "WARNING: test not found: %s\n", name);
+		Log::Warning("test not found: %s", name);
 	}
 	return false;
 }

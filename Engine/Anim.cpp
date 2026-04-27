@@ -72,7 +72,7 @@ void nsAnim::anim_make_f( int argc, const char *argv[] )
 {
 	if ( argc < 2 )
 	{
-		LogPrintf( PRN_ALL, "usage: anim_make [filename] [framesets count]\n" );
+		Log::Info("usage: anim_make [filename] [framesets count]" );
 		return;
 	}
 
@@ -95,7 +95,7 @@ void nsAnim::anim_make_f( int argc, const char *argv[] )
 		s.BlockEnd();
 	}
 
-	LogPrintf( PRN_ALL, "Done!\n" );
+	Log::Info("Done!" );
 }
 
 //---------------------------------------------------------
@@ -108,7 +108,7 @@ void nsAnim::AnimPlay( const nsName &name, nsAnimState &state )
 	nsAnimFrames	*fs = FindFrameset( name );
 	if ( !fs )
 	{
-		LogPrintf( PRN_ALL, "WARNING: '%s' frameset not found!\n", name.AsChar() );
+		Log::Warning("'%s' frameset not found!", name.AsChar() );
 		return;
 	}
 
@@ -175,7 +175,7 @@ bool nsAnim::Parse( script_state_t *ss )
 		ps_block_end( ss );
 	}
 	else
-		LogPrintf( PRN_ALL, "WARNING: frameset not found!\n" );
+		Log::Warning("frameset not found!" );
 	//--------------------------------------------
 
 	return m_frameCount != 0;

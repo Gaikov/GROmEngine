@@ -66,20 +66,20 @@ const char* AL_EnumDevices()
 {
 	char *devList = nullptr;
 
-	LogPrintf( PRN_ALL, "...enum sound devices\n" );
+	Log::Info("...enum sound devices" );
 	if ( alcIsExtensionPresent(nullptr, "ALC_ENUMERATION_EXT" ) )
 	{
-		LogPrintf( PRN_ALL, "ALC_ENUMERATION_EXT - present!\n" );
+		Log::Info("ALC_ENUMERATION_EXT - present!" );
 		devList = (char*)alcGetString(nullptr, ALC_DEVICE_SPECIFIER );
 		if ( !devList )
 		{
-			LogPrintf( PRN_ALL, "WARNING: can't retrieve device list!\n" );
+			Log::Warning("can't retrieve device list!" );
 			return nullptr;
 		}
 	}
 	else
 	{
-		LogPrintf( PRN_ALL, "WARNING: 'ALC_ENUMERATION_EXT' not present\n" );
+		Log::Warning("'ALC_ENUMERATION_EXT' not present" );
 		return nullptr;
 	}
 	return devList;
@@ -92,15 +92,15 @@ void AL_PrintDevices( const char *devList )
 {
 	if ( !devList ) return;
 
-	LogPrintf( PRN_ALL, "-----------------------------------\n" );
+	Log::Info("-----------------------------------" );
 	const char	*list = devList;
 	while ( list[0] )
 	{
-		LogPrintf( PRN_ALL, " - '%s'\n", list );
+		Log::Info(" - '%s'", list );
 		list = strchr( list, 0 );
 		list ++;
 	}
-	LogPrintf( PRN_ALL, "-----------------------------------\n" );
+	Log::Info("-----------------------------------" );
 }
 
 //---------------------------------------------------------
@@ -127,5 +127,5 @@ const char* AL_MatchDevice( const char *devList, const char *devName )
 //---------------------------------------------------------
 void AL_PrintError( const char *func, ALenum code )
 {
-	LogPrintf( PRN_ALL, "AL ERROR: %s: %s\n", func, AL_GetError( code ) );
+	Log::Info("AL ERROR: %s: %s", func, AL_GetError( code ) );
 }

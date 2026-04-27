@@ -25,7 +25,7 @@ GLTexture *GLTexture::Load(const char *filePath)
         return nullptr;
     }
 
-	LogPrintf(PRN_ALL, "...creating texture: %s\n", filePath);
+	Log::Info("...creating texture: %s", filePath);
 	auto t = new GLTexture();
 	t->CreateFromFile(filePath);
 	return t;
@@ -33,7 +33,7 @@ GLTexture *GLTexture::Load(const char *filePath)
 
 void GLTexture::Free(GLTexture *t)
 {
-	LogPrintf(PRN_ALL, "...releasing texture: %s\n", t->_id.c_str());
+	Log::Info("...releasing texture: %s", t->_id.c_str());
 	delete t;
 }
 

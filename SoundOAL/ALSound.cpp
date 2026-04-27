@@ -34,7 +34,7 @@ bool nsALSound::Reload() {
     if (!m_fileName.Length()) return false;
 
     if (!Free()) {
-        LogPrintf(PRN_ALL, "WARNING: al buffer is busy!\n");
+        Log::Warning("al buffer is busy!");
         return false;
     }
 
@@ -55,7 +55,7 @@ bool nsALSound::Free() {
 
     alDeleteBuffers(1, &m_alBuff);
     if (const ALenum code = alGetError()) {
-        LogPrintf(PRN_ALL, "WARNING: delete buffer: %s\n", AL_GetError(code));
+        Log::Warning("delete buffer: %s", AL_GetError(code));
         return false;
     }
 
@@ -97,7 +97,7 @@ bool nsALSound::CreateSBFromOgg(const char *fileName, bool sound3d) {
     my_free(buff);
 
     if ((code = alGetError())) {
-        Log::Error("copy OGG to buff: %s\n", AL_GetError(code));
+        Log::Error("copy OGG to buff: %s", AL_GetError(code));
         return false;
     }
 
@@ -123,7 +123,7 @@ bool nsALSound::CreateSBFromWav(const char *filename, bool sound3d) {
 
     alGenBuffers(1, &m_alBuff);
     if ((code = alGetError())) {
-        Log::Error("gen buffer: %s\n", AL_GetError(code));
+        Log::Error("gen buffer: %s", AL_GetError(code));
         return false;
     }
 
@@ -135,11 +135,11 @@ bool nsALSound::CreateSBFromWav(const char *filename, bool sound3d) {
 
     alBufferData(m_alBuff, format, wav.GetSamples(), wav.GetSamplesSize(), fmt->nSamplesPerSec);
     if ((code = alGetError())) {
-        LogPrintf(PRN_DEV, "\nch: %i\nbits: %i\nhz: %i\n",
+        Log::Debug("\nch: %i\nbits: %i\nhz: %i",
                   fmt->nChannels,
                   fmt->wBitsPerSample,
                   fmt->nSamplesPerSec);
-        Log::Error("ERROR: copy WAV to buff: %s\n", AL_GetError(code));
+        Log::Error("copy WAV to buff: %s", AL_GetError(code));
         return false;
     }
 

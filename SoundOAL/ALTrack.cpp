@@ -70,7 +70,7 @@ bool nsALTrack::Load( const char *fileName )
 	if ( !fileName || !strlen( fileName ) ) return false;
 
 	ALenum	code;
-	LogPrintf( PRN_ALL, "loading track '%s'\n", fileName );
+	Log::Info("loading track '%s'", fileName );
 	
 	alGenBuffers( MAX_BUFFERS, m_alBuff );
 	if ( code = alGetError() )
@@ -222,7 +222,7 @@ void nsALTrack::UpdatePlaySources()
 
 	if ( play_src )
 	{
-		LogPrintf( PRN_ALL, "WARNING: need more music buffers (curr: %i)\n", MAX_BUFFERS );
+		Log::Warning("need more music buffers (curr: %i)", MAX_BUFFERS );
 		alSourcePlay( src );
 	}
 }

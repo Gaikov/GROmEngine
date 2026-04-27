@@ -17,10 +17,10 @@ nsPackage g_pack;
 //---------------------------------------------------------
 bool nsPackage::Init() {
     nsString *list = nullptr;
-    LogPrintf(PRN_ALL, "...enum packs\n");
+    Log::Info("...enum packs");
     int count = EnumDirFiles("./", "pak", &list);
     if (!count)
-        LogPrintf(PRN_ALL, "WARNING: packs not found!\n");
+        Log::Warning("packs not found!");
     else {
         for (int i = 0; i < count; i++)
             AddPack(list[i]);
@@ -157,7 +157,7 @@ int nsPackage::EnumDirFiles(const char *dir, const char *type, nsString **list, 
 // nsPackage::InitPack: 
 //---------------------------------------------------------
 bool nsPackage::InitPack(const char *fileName) {
-    LogPrintf(PRN_ALL, "checking '%s'... ", fileName);
+    Log::Info("checking '%s'... ", fileName);
     IDataReader::sp_t packReader = App_GetPlatform()->FileRead(fileName);
 
     unsigned int filesCount;
@@ -206,7 +206,7 @@ bool nsPackage::InitPack(const char *fileName) {
 packFileDesc_t *nsPackage::FindPackFile(const char *fileName, int pack) {
     if (!StrCheck(fileName)) return nullptr;
 
-    LogPrintf(PRN_DEV, "searching file desc '%s'\n", fileName);
+    Log::Debug("searching file desc '%s'", fileName);
     for (int i = 0; i < m_packs[pack].count; i++)
         if (strcmp(m_packs[pack].files[i].filename, fileName) == 0) {
             Log::Info("Found");

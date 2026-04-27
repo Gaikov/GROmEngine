@@ -49,12 +49,12 @@ bool GLUtils::HasError(const char *funcName)
 	{
 		if (error.code == code)
 		{
-			LogPrintf(PRN_ALL, "GL ERROR: %s: %s\n", funcName, error.message);
+			Log::Info("GL ERROR: %s: %s", funcName, error.message);
 			return true;
 		}
 	}
 
-	LogPrintf(PRN_ALL, "GL ERROR: unknown error\n");
+	Log::Info("GL ERROR: unknown error");
 	return true;
 }
 

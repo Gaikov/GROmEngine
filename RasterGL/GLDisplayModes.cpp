@@ -66,7 +66,7 @@ bool GLDisplayModes::ApplyFullScreenMode()
     if (!mode) {
         return false;
     }
-	LogPrintf(PRN_ALL, "Applying full screen mode: %ix%i...\n", _cfg.currWidth, _cfg.currHeight);
+	Log::Info("Applying full screen mode: %ix%i...", _cfg.currWidth, _cfg.currHeight);
     return App_GetPlatform()->ApplyDisplayMode((int)_cfg.currWidth, (int)_cfg.currHeight, true, mode->bits, mode->frequency);
 }
 
@@ -75,7 +75,7 @@ void GLDisplayModes::ApplyWindowMode()
     _cfg.currWidth = (int)r_width->Value();
     _cfg.currHeight = (int)r_height->Value();
 
-	LogPrintf(PRN_ALL, "Applying window mode: %ix%i\n", _cfg.currWidth, _cfg.currHeight);
+	Log::Info("Applying window mode: %ix%i", _cfg.currWidth, _cfg.currHeight);
     App_GetPlatform()->ApplyDisplayMode((int)_cfg.currWidth, (int)_cfg.currHeight, false, 0, 0);
 }
 

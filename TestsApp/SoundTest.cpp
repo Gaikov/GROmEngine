@@ -10,7 +10,7 @@ void play_sound_f(int argv, const char **argc)
 {
 	if (argv < 2)
 	{
-		LogPrintf(PRN_ALL, "Not enough params");
+		Log::Info("Not enough params");
 		return;
 	}
 
@@ -18,10 +18,10 @@ void play_sound_f(int argv, const char **argc)
 	auto device = GetSoundDevice();
 	auto sound = device->SoundLoad(fileName);
 	if (!sound) {
-		LogPrintf(PRN_ALL, "sound not found");
+		Log::Info("sound not found");
 		return;
 	}
 
-	LogPrintf(PRN_ALL, "Playing: %s\n", fileName);
+	Log::Info("Playing: %s", fileName);
 	device->SoundPlay(sound);
 }

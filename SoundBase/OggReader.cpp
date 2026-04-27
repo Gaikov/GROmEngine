@@ -50,13 +50,13 @@ bool nsOggReader::StartReading( const char* fileName, bool looped )
 	
 	if ( !(m_file = g_pack.LoadFile( fileName )) )
 	{
-		LogPrintf( PRN_ALL, "WARNING: ogg file not found '%s'\n", fileName );
+		Log::Warning("ogg file not found '%s'", fileName );
 		return false;
 	}
 
 	if ( ov_open_callbacks( this, &m_oggFile, 0, 0, m_oggCallbacks ) )
 	{
-		LogPrintf( PRN_ALL, "WARNING: error read ogg '%s'\n", fileName );
+		Log::Warning("error read ogg '%s'", fileName );
 		g_pack.ReleaseFile( m_file );
         m_file = nullptr;
 		return false;
@@ -108,10 +108,10 @@ OggResult nsOggReader::Read( void *buff, long &size )
 			ret = ov_read( &m_oggFile, (char*)buff, size, 0, 2, 1, &m_oggSection );
 			if ( !ret || ret == OV_HOLE || ret == OV_EBADLINK )
 			{
-				LogPrintf( PRN_ALL, "WARNING: ogg rewing error!\n" );
+				Log::Warning("ogg rewing error!" );
 				return OGG_ERROR;
 			}
-			LogPrintf( PRN_ALL, "ogg rewind\n" );
+			Log::Info("ogg rewind" );
 			size = ret;
 		}
 		else
@@ -121,7 +121,7 @@ OggResult nsOggReader::Read( void *buff, long &size )
 	}
 	else if ( ret == OV_HOLE || ret == OV_EBADLINK )
 	{
-		LogPrintf( PRN_ALL, "WARNING: ogg read error!\n" );
+		Log::Warning("ogg read error!" );
 		return OGG_ERROR;
 	}
 

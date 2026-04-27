@@ -43,7 +43,7 @@ nsTexFrames* nsTexFrames::LoadFromEnum( const char *filesName, const char *ext, 
 		&& !StrCheck( ext ) )
 		return 0;
 
-	LogPrintf( PRN_ALL, "loading frames: '%s', type: '%s'\n", filesName, ext );
+	Log::Info("loading frames: '%s', type: '%s'", filesName, ext );
 
 	nsTexFrames	*f = new nsTexFrames;
 
@@ -66,10 +66,10 @@ nsTexFrames* nsTexFrames::LoadFromEnum( const char *filesName, const char *ext, 
 	{
 		delete f;
 		f = 0;
-		LogPrintf( PRN_ALL, "fail!\n" );
+		Log::Info("fail!" );
 	}
 	else
-		LogPrintf( PRN_ALL, "%i - frames loaded\n", f->m_frameCount );
+		Log::Info("%i - frames loaded", f->m_frameCount );
 
 	
 	return f;

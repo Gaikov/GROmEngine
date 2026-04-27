@@ -21,7 +21,7 @@ static void writeconfig_f( int argc, const char *argv[] )
 {
 	if ( argc < 2 )
 	{
-		LogPrintf( PRN_ALL, "usage: writeconfig [filename]\n" );
+		Log::Info("usage: writeconfig [filename]" );
 		return;
 	}
 
@@ -41,9 +41,9 @@ static void quit_f( int argc, const char *argv[] )
 //---------------------------------------------------------
 static void testcmd_f( int argc, const char *argv[] )
 {
-	LogPrintf( PRN_ALL, "===== test command =====\n" );
+	Log::Info("===== test command =====" );
 	for ( int i = 0; i < argc; i++ )
-		LogPrintf( PRN_ALL, "arg: %s\n", argv[i] );
+		Log::Info("arg: %s", argv[i] );
 }
 
 //---------------------------------------------------------
@@ -202,7 +202,7 @@ const char* nsConfig::CompleteLine( const char* line )
 		if (strstr(var->GetName(), line)) {
 			refCount++;
 			outLine = var->GetName();
-			LogPrintf(PRN_ALL, " %s\n", outLine);
+			Log::Info(" %s", outLine);
 		}
 	}
 
@@ -212,7 +212,7 @@ const char* nsConfig::CompleteLine( const char* line )
 		if (strstr(cmd->name, line)) {
 			refCount++;
 			outLine = cmd->name;
-			LogPrintf(PRN_ALL, " %s\n", outLine);
+			Log::Info(" %s", outLine);
 		}
 	}
 	m_cmdHash.FetchEnd();
@@ -344,10 +344,10 @@ bool nsConfig::ExecLine( const char* cmdLine )
 	{
 		if ( args.ArgCount() < 2 )
 		{
-			LogPrintf( PRN_ALL, "%s = %s (default: %s)\n", var->GetName(), var->String(), var->GetDefaultString() );
+			Log::Info("%s = %s (default: %s)", var->GetName(), var->String(), var->GetDefaultString() );
 		}
 		else if ( (var->m_flags & GVF_INTERNAL) || (var->m_flags & GVF_READONLY) )
-			LogPrintf( PRN_ALL, "WARNING: read only variable!\n" );
+			Log::Warning("read only variable!" );
 		else
 			var->SetString( args.Arg( 1 ) );
 		return true;
@@ -358,7 +358,7 @@ bool nsConfig::ExecLine( const char* cmdLine )
 		return true;
 	}
 
-	LogPrintf( PRN_ALL, "WARNING: '%s' - invalid variable or command name!\n", cmdLine );
+	Log::Warning("'%s' - invalid variable or command name!", cmdLine );
 	return false;
 }
 
@@ -409,7 +409,7 @@ const char *nsConfig::GetString(const char *name)
 	auto var = FindVar(name);
 	if (var)
 	{
-		LogPrintf( PRN_ALL, "WARNING: variable '%s' not found\n", name );
+		Log::Warning("variable '%s' not found", name );
 		return var->String();
 	}
 	return nullptr;
@@ -431,7 +431,7 @@ float nsConfig::GetValue(const char *name)
 	auto var = FindVar(name);
 	if (var)
 	{
-		LogPrintf( PRN_ALL, "WARNING: variable '%s' not found\n", name );
+		Log::Warning("variable '%s' not found", name );
 		return var->Value();
 	}
 	return 0;

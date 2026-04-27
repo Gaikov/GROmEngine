@@ -15,7 +15,7 @@ nsFileWriter::nsFileWriter(const char *fileName, const char *mode) :
     if (StrCheck(fileName)) {
         m_fp = fopen(fileName, mode);
         if (!m_fp)
-            LogPrintf(PRN_ALL, "WARNING: can't create file '%s'\n", fileName);
+            Log::Warning("can't create file '%s'", fileName);
     }
 }
 	

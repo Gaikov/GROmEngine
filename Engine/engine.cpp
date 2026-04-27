@@ -127,10 +127,9 @@ bool nsEngine::Init()
 void nsEngine::Release(bool failed)
 {
 
-	LogPrintf( PRN_ALL,
-				"----------------------------------------\n"\
-				"********** Shutting Down App ***********\n"\
-				"----------------------------------------\n" );
+	Log::Info("----------------------------------------"
+				"********** Shutting Down App ***********\n"
+				"----------------------------------------");
 
     if ( !failed )
         g_cfg->SaveConfig();
@@ -326,7 +325,7 @@ void nsEngine::OnCharDown(char ch) {
 }
 
 void nsEngine::OnActivateApp(bool active) {
-    LogPrintf(PRN_ALL, "activate :%i\n", active ? 1 : 0);
+    Log::Info("activate :%i", active ? 1 : 0);
 
     //SDL_CaptureMouse(SDL_FALSE);
 

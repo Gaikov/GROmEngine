@@ -16,7 +16,7 @@ IAppInfo *App_GetInfo() {
 }
 
 void ShowHelp() {
-    Log::Info("DataPacker v%s\n"\
+    Log::Info("DataPacker v%s"\
         "GROm Games (c) 2002-2024\n\n"\
         "usage to pack: DataPacker [directory] [outfile] [--pass [encoding phrase]]\n"\
               "usage to unpack: DataPacker --unpack [packedfile] [outdirectory]\n", PACKER_VERSION
