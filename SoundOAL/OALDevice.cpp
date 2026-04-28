@@ -144,9 +144,9 @@ void nsOALDevice::TestSound( const char *fileName )
 //---------------------------------------------------------
 bool nsOALDevice::Init()
 {
-	Log::Info("============================================"
-		"*            Init Sound Subsystem          *\n"
-		"============================================");
+	Log::Info("============================================\n"
+				  "*            Init Sound Subsystem          *\n"
+				  "============================================");
 
 	snd_volume = g_cfg->RegVar( "snd_volume", "0.5", GVF_SAVABLE );
 	mus_volume = g_cfg->RegVar( "mus_volume", "0.5", GVF_SAVABLE );
