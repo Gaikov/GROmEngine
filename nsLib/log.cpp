@@ -1,93 +1,82 @@
 #include "headers.h"
 #include "log.h"
 
-#define va_print(format, msg) \
-    va_list list; \
-	va_start(list, format); \
-	vsprintf(msg, format, list); \
-	va_end(list)
-
-void Log::AddPolicy(ILogListener *policy)
-{
-	_policies.push_back(policy);
+static const char *FormatLine(const char *prefix, const char *fmt, va_list list) {
+    thread_local char buf[MAX_MSG];
+    int offset = snprintf(buf, MAX_MSG, "%s", prefix);
+    int n = vsnprintf(buf + offset, MAX_MSG - offset - 1, fmt, list);
+    int total = offset + (n > 0 ? n : 0);
+    if (total < MAX_MSG - 1) {
+        buf[total] = '\n';
+        buf[total + 1] = '\0';
+    }
+    return buf;
 }
 
-void Log::RemovePolicy(ILogListener *policy)
-{
-	auto it = std::find(_policies.begin(), _policies.end(), policy);
-	if (it != _policies.end())
-	{
-		_policies.erase(it);
-	}
+void Log::AddPolicy(ILogListener *policy) {
+    _policies.push_back(policy);
+}
+
+void Log::RemovePolicy(ILogListener *policy) {
+    auto it = std::find(_policies.begin(), _policies.end(), policy);
+    if (it != _policies.end()) {
+        _policies.erase(it);
+    }
 }
 
 void Log::OnRelease() {
-	for (const auto policy : _policies) {
-		delete policy;
-	}
-	_policies.clear();
+    for (const auto policy: _policies) {
+        delete policy;
+    }
+    _policies.clear();
 
-	nsSubSystem::OnRelease();
+    nsSubSystem::OnRelease();
 }
 
-void Log::Print(LogLevel level, const char *msg)
-{
+void Log::Print(LogLevel level, const char *msg) {
 #ifdef NDEBUG
-	if (level == PRN_DEV)
-	{
-		return;
-	}
+    if (level == PRN_DEV) {
+        return;
+    }
 #endif
-	for (auto policy : _policies)
-	{
-		policy->LogPrint(level, msg);
-	}
+    for (auto policy: _policies) {
+        policy->LogPrint(level, msg);
+    }
 }
 
-void Log::PrintLine(LogLevel level, const char *title, const char *msg)
-{
-	char line[MAX_MSG];
-	sprintf(line, "%s%s\n", title, msg);
-	Print(level, line);
+void Log::Info(const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    Shared()->Print(PRN_ALL, FormatLine("", fmt, list));
+    va_end(list);
 }
 
-void Log::Info(const char *fmt, ...)
-{
-	char message[MAX_MSG];
-	va_print(fmt, message);
-	Shared()->PrintLine(PRN_ALL, "", message);
+void Log::Warning(const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    Shared()->Print(PRN_WARNING, FormatLine("WARNING: ", fmt, list));
+    va_end(list);
 }
 
-void Log::Warning(const char *fmt, ...)
-{
-	char message[MAX_MSG];
-	va_print(fmt, message);
-	Shared()->PrintLine(PRN_WARNING, "WARNING: ", message);
-}
-
-void Log::Error(const char *fmt, ...)
-{
-	char message[MAX_MSG];
-	va_print(fmt, message);
-	Shared()->PrintLine(PRN_ERROR, "ERROR: ", message);
+void Log::Error(const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    Shared()->Print(PRN_ERROR, FormatLine("ERROR: ", fmt, list));
+    va_end(list);
 }
 
 void Log::Debug(const char *fmt, ...) {
 #ifdef DEBUG
-    char message[MAX_MSG];
-    va_print(fmt, message);
-    Shared()->PrintLine(PRN_DEV, "", message);
+    va_list list;
+    va_start(list, fmt);
+    Shared()->Print(PRN_DEV, FormatLine("", fmt, list));
+    va_end(list);
 #endif
 }
 
-//---------------------------------------------------------
-// log_printf: 
-//---------------------------------------------------------
-void LogPrintf(LogLevel prnLevel, const char *fmt, ...)
-{
-	if (!strlen(fmt)) return;
-
-	char    msg[MAX_MSG];
-	va_print(fmt, msg);
-	Log::Shared()->Print(prnLevel, msg);
+void LogPrintf(LogLevel prnLevel, const char *fmt, ...) {
+    va_list list;
+    va_start(list, fmt);
+    Log::Shared()->Print(prnLevel, FormatLine("", fmt, list));
+    va_end(list);
 }

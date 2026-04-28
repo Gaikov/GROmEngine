@@ -43,8 +43,6 @@ protected:
 private:
 	std::list<ILogListener *>	_policies;
 
-private:
-	void PrintLine(LogLevel level, const char *title, const char *msg);
 };
 
 
