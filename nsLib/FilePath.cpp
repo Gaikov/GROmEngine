@@ -170,6 +170,14 @@ nsFilePath nsFilePath::GetParent() const
 	return parent.AsChar();
 }
 
+nsFilePath nsFilePath::ToAbsolute() const {
+    if (_path.IsEmpty()) return *this;
+    const fs::path abs = fs::absolute(static_cast<const char *>(_path));
+    nsString result = abs.string().c_str();
+    Normalize(result);
+    return nsFilePath(result);
+}
+
 bool nsFilePath::CreateFolders() const
 {
 	if (_path.IsEmpty())

@@ -34,6 +34,7 @@ public:
 	bool Remove() const;
 
 	nsFilePath GetParent() const;
+	nsFilePath ToAbsolute() const;
 	bool CreateFolders() const;
 
 	const nsString &GetPath() const
