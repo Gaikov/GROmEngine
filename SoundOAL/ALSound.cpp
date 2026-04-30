@@ -115,9 +115,9 @@ bool nsALSound::CreateSBFromWav(const char *filename, bool sound3d) {
         return false;
     }
 
-    auto fmt = wav.GetFormat();
+    const auto fmt = wav.GetFormat();
     if (sound3d && fmt->nChannels > 1) {
-        Log::Warning("invalid 3D sound $s!", filename);
+        Log::Warning("invalid 3D sound %s!", filename);
         return false;
     }
 
