@@ -22,6 +22,7 @@
 #include "display/button/ImageButtonBuilder.h"
 #include "display/sprite/Sprite9SliceBuilder.h"
 #include "display/text/TextAreaBuilder.h"
+#include "display/movieClip/MovieClipBuilder.h"
 
 nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsSpriteBuilder>();
@@ -37,8 +38,9 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsVisualAnchorBuilder>();
     RegisterBuilderWithName<nsVirtualCircleBuilder>();
     RegisterBuilderWithName<nsVisualRectBuilder>();
-    RegisterBuilderWithName<nsImageButtonBuilder>();
+        RegisterBuilderWithName<nsImageButtonBuilder>();
     RegisterBuilderWithName<nsSprite9SliceBuilder>();
+    RegisterBuilderWithName<nsMovieClipBuilder>();
 
     _defaultBuilder = new nsDefaultVisualBuilder2d();
 }

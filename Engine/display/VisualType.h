@@ -22,4 +22,5 @@ struct nsVisualType {
     static constexpr auto CONTAINER = "container";
     static constexpr auto PARTICLES = "particles";
     static constexpr auto RECTANGLE = "rectangle";
+    static constexpr auto MOVIE_CLIP = "movieClip";
 };
