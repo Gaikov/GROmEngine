@@ -17,6 +17,5 @@ public:
 
 private:
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
-    void ParseState(script_state_t *ss, const char *name, nsSpriteDesc &desc);
 
 };

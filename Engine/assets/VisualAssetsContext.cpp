@@ -5,6 +5,7 @@
 #include "VisualAssetsContext.h"
 #include "Core/ParserUtils.h"
 #include "nsLib/log.h"
+#include "RenManager.h"
 
 nsVisualAssetsContext::nsVisualAssetsContext() : assetsPath("") {
 }
@@ -27,4 +28,10 @@ void nsVisualAssetsContext::SaveAssetPath(const nsScriptSaver &saver, const char
 
 nsString nsVisualAssetsContext::RelativeAssetPath(const nsFilePath &path) const {
     return assetsPath.GetRelativePath(path);
+}
+
+ITexture *nsVisualAssetsContext::ParseTexture(script_state_t *ss, const char *name) const {
+    const auto path = ParseAssetPath(ss, name);
+    if (path.IsEmpty()) return nullptr;
+    return nsRenDevice::Shared()->Device()->TextureLoad(path, false);
 }

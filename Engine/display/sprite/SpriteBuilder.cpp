@@ -17,40 +17,12 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
     }
 
     const auto sprite = dynamic_cast<nsSprite *>(object);
-    const auto dev = nsRenDevice::Shared()->Device();
 
-    auto assetPath = context->assetsContext->ParseAssetPath(ss, "texture");
+    sprite->desc.Parse(ss, context->assetsContext.get());
+
+    auto assetPath = context->assetsContext->ParseAssetPath(ss, "renState");
     if (!assetPath.IsEmpty()) {
-        if (const auto tex = dev->TextureLoad(assetPath, false)) {
-            sprite->desc.tex = tex;
-            sprite->desc.ResetSize();
-        }
-    }
-
-    if (ps_var_begin(ss, "pivot")) {
-        ps_var_2f(ss, sprite->desc.center);
-    }
-
-    if (ps_var_begin(ss, "size")) {
-        ps_var_2f(ss, sprite->desc.size);
-    }
-
-    ParseColorExt(ss, "color", sprite->desc.color);
-
-    if (ps_var_begin(ss, "tex1")) {
-        ps_var_2f(ss, sprite->desc.tex1);
-    }
-
-    if (ps_var_begin(ss, "tilesX")) {
-        sprite->desc.tex2.x = ps_var_f(ss);
-    }
-
-    if (ps_var_begin(ss, "tilesY")) {
-        sprite->desc.tex2.y = ps_var_f(ss);
-    }
-
-    assetPath = context->assetsContext->ParseAssetPath(ss, "renState");
-    if (!assetPath.IsEmpty()) {
+        const auto dev = nsRenDevice::Shared()->Device();
         if (const auto state = dev->StateLoad(ParseString(ss, "renState"))) {
             sprite->renState = state;
         }

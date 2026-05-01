@@ -18,10 +18,10 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
     auto button = Cast<nsImageButton>(o);
     button->renState = dev->StateLoad(ParseString(ss, "renState"));
 
-    ParseState(ss, "up", button->up);
-    ParseState(ss, "over", button->over);
-    ParseState(ss, "down", button->down);
-    ParseState(ss, "disabled", button->disabled);
+    button->up      .Parse(ss, context->assetsContext.get(), "up");
+    button->over    .Parse(ss, context->assetsContext.get(), "over");
+    button->down    .Parse(ss, context->assetsContext.get(), "down");
+    button->disabled.Parse(ss, context->assetsContext.get(), "disabled");
 
     if (ps_block_begin(ss, "label")) {
         if (ps_var_begin(ss, "font")) {
@@ -49,15 +49,6 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
     }
 
     return nsVisualBuilder2d::Parse(ss, o, context);
-}
-
-void nsImageButtonBuilder::ParseState(script_state_t *ss, const char *name, nsSpriteDesc &desc) {
-    auto dev = nsRenDevice::Shared()->Device();
-    if (ps_var_begin(ss, name)) {
-        nsString    fileName = ps_var_str(ss);
-        desc.tex = dev->TextureLoad(fileName, false);
-        desc.ResetSize();
-    }
 }
 
 

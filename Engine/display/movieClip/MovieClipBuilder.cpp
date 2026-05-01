@@ -44,12 +44,9 @@ bool nsMovieClipBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
                 do {
                     nsSpriteDesc desc;
 
-                    assetPath = context->assetsContext->ParseAssetPath(ss, "texture");
-                    if (!assetPath.IsEmpty()) {
-                        if (const auto tex = dev->TextureLoad(assetPath, false)) {
-                            desc.tex = tex;
-                            desc.ResetSize();
-                        }
+                    if (const auto tex = context->assetsContext->ParseTexture(ss, "texture")) {
+                        desc.tex = tex;
+                        desc.ResetSize();
                     }
 
                     if (ps_var_begin(ss, "tex1")) {

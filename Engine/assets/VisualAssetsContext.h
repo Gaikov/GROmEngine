@@ -7,6 +7,9 @@
 #include "nsLib/FilePath.h"
 #include "Engine/renderer/particles/factory/ParticlesLoader.h"
 
+struct script_state_t;
+struct ITexture;
+
 class nsVisualAssetsContext {
 public:
     typedef std::shared_ptr<nsVisualAssetsContext> sp_t;
@@ -19,6 +22,7 @@ public:
     virtual ~nsVisualAssetsContext();
 
     nsFilePath ParseAssetPath(script_state_t *ss, const char *name) const;
+    ITexture *ParseTexture(script_state_t *ss, const char *name) const;
     void SaveAssetPath(const nsScriptSaver &saver, const char *name, const nsFilePath &path) const;
 
     [[nodiscard]] nsString RelativeAssetPath(const nsFilePath &path) const;

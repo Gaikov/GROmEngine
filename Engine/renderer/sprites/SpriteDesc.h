@@ -12,6 +12,9 @@
 #include "Engine/renderer/QuadsBuffer.h"
 #include "nsLib/math/Rect.h"
 
+struct script_state_t;
+class nsVisualAssetsContext;
+
 struct nsSpriteDesc
 {
     inline nsSpriteDesc() :
@@ -32,6 +35,7 @@ struct nsSpriteDesc
 	void FlipX();
 
     void Draw(IRenDevice *dev) const;
+    void Parse(script_state_t *ss, nsVisualAssetsContext *assets, const char *name = nullptr);
 
 private:
     static nsQuadsBuffer    *_buff;
