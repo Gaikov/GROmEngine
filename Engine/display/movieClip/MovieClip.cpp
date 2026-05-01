@@ -46,8 +46,6 @@ void nsMovieClip::GoToFrame(int index) {
 }
 
 void nsMovieClip::Loop() {
-    nsVisualObject2d::Loop();
-
     if (paused || !_currentAnim || _currentAnim->frames.empty()) return;
 
     float prevFrame = _currentFrameIdx;

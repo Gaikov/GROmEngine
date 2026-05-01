@@ -59,14 +59,12 @@ void nsSpriteDesc::FlipX() {
 // nsSpriteDesc::Parse:
 //---------------------------------------------------------
 void nsSpriteDesc::Parse(script_state_t *ss, nsVisualAssetsContext *assets, const char *name) {
-    auto dev = nsRenDevice::Shared()->Device();
-
     if (name) {
         if (ps_block_begin(ss, name)) {
             Parse(ss, assets);
             ps_block_end(ss);
         } else if (ps_var_begin(ss, name)) {
-            tex = dev->TextureLoad(ps_var_str(ss), false);
+            tex = assets->ParseTexture(ss, ps_var_str(ss));
             ResetSize();
         }
         return;
