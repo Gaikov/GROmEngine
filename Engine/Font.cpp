@@ -160,9 +160,9 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
         while ((page = strstr(page, "page "))) {
             int id;
             nsString    path;
-            sscanf( page, "page id=%i file=%255s", &id, path.AsChar());
+            sscanf( page, "page id=%i file=\"%255[^\"]\"", &id, path.AsChar());
             if (!path.IsEmpty()) {
-                auto texPath = filePath.GetParent().ResolvePath(path.Replace("\"", ""));
+                auto texPath = filePath.GetParent().ResolvePath(path);
                 _pages.push_back(_device->TextureLoad(texPath, false));
             }
             page ++;
