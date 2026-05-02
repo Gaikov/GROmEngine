@@ -9,6 +9,7 @@
 #include "Engine/display/VisualType.h"
 #include "Engine/display/align/Align.h"
 #include "nsLib/color.h"
+#include "nsLib/models/Property.h"
 
 class nsTextArea : public nsVisualObject2d {
 public:
@@ -16,6 +17,7 @@ public:
     bool            drawFrame = false;
     nsAlign::Type   hAlign = nsAlign::BEGIN;
     IRenState       *renState = nullptr;
+    nsProperty<float> textWidth;
 
     nsTextArea();
     const char * GetType() override { return nsVisualType::TEXT_AREA; }
@@ -38,6 +40,7 @@ private:
 
     nsFont              *_font;
     float               _lineSpace = 0;
+    const nsEventDispatcher::tEventHandler _onChangeHandler;
     std::vector<Line>   _lines;
     std::string         _text;
 

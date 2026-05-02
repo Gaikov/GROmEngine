@@ -39,6 +39,7 @@ bool nsTextAreaBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVi
     area->drawFrame = ParseBool(ss, "drawFrame", area->drawFrame);
     area->hAlign = nsAlign::Parse(ss, "hAlign", area->hAlign);
     area->SetLineSpace(ParseFloat(ss, "lineSpace", area->GetLineSpace()));
+    area->textWidth = ParseFloat(ss, "width", area->textWidth);
 
     return true;
 }

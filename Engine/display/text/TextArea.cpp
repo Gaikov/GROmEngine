@@ -6,8 +6,12 @@
 #include "RenAux.h"
 #include "renderer/font/FontsCache.h"
 
-nsTextArea::nsTextArea() {
+nsTextArea::nsTextArea() : textWidth(0),
+                           _onChangeHandler([this](const nsBaseEvent *) {
+                               _validMetrics = false;
+                           }) {
     _font = nsFontsCache::Shared()->SysFont();
+    textWidth.AddHandler(nsPropChangedName::CHANGED, _onChangeHandler);
 }
 
 void nsTextArea::SetText(const char *text) {
@@ -49,6 +53,9 @@ void nsTextArea::ValidateMetrics() {
                 _bounds += i.bounds;
                 yPos -= (i.bounds.height + _lineSpace);
             }
+        }
+        if (textWidth > 0) {
+            _bounds.width = textWidth;
         }
     }
 }
