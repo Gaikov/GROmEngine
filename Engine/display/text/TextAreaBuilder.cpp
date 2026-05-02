@@ -22,11 +22,11 @@ bool nsTextAreaBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVi
         return false;
     }
 
-    const auto font = nsFontsCache::Shared()->LoadFont(ParseString(ss, "font"));
+    const auto font = nsFontsCache::Shared()->LoadFont(context->assetsContext->ParseAssetPath(ss, "font"));
     if (font) {
         area->SetFont(font);
     }
-    const auto state = nsRenDevice::Shared()->Device()->StateLoad(ParseString(ss, "renState"));
+    const auto state = nsRenDevice::Shared()->Device()->StateLoad(context->assetsContext->ParseAssetPath(ss, "renState"));
     if (state) {
         area->renState = state;
     }
