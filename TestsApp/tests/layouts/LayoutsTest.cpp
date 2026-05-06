@@ -122,9 +122,9 @@ void nsLayoutsTest::CreateHGroupLayout() {
     _root.AddChild(group);
 
     auto *back = new nsSprite9Slice();
-    back->desc.tex = _device->TextureLoad("default/ui/frame.png");
-    back->desc.SetGrid(6, 6, 6, 6);
-    back->desc.color = nsColor::red;
+    back->tex = _device->TextureLoad("default/ui/frame.png");
+    back->SetGrid(6, 6, 6, 6);
+    back->color = nsColor::red;
     back->xMin.SetNumber(20);
     back->xMax.SetNumber(20);
     back->yMin.SetNumber(20);

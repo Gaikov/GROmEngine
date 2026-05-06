@@ -16,9 +16,9 @@ nsScrollBar::nsScrollBar() :
     auto tex = _device->TextureLoad("default/ui/frame.png");
 
     auto back = new nsSprite9Slice();
-    back->desc.tex = tex;
-    back->desc.SetGrid(6, 6, 6, 6);
-    back->desc.color = nsColor::gray;
+    back->tex = tex;
+    back->SetGrid(6, 6, 6, 6);
+    back->color = nsColor::gray;
     SetBackground(back);
 
     SetThumb(new nsScrollThumb());

@@ -17,7 +17,7 @@ bool SpriteTest::Init()
 
 
     _origin3.pos = { 200, 200};
-    _slice9.tex = _device->TextureLoad("default/ui/frame.png");
+    _slice9.SetTex(_device->TextureLoad("default/ui/frame.png"));
     _slice9.SetGrid(6, 6, 6, 6);
     _slice9.color = nsColor::green;
 

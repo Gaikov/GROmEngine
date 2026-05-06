@@ -10,42 +10,64 @@ nsSprite9SliceDesc::~nsSprite9SliceDesc() {
     delete _buff;
 }
 
+void nsSprite9SliceDesc::SetTex(ITexture *t) {
+    if (_tex != t) {
+        _tex = t;
+        _invalid = true;
+    }
+}
+
+void nsSprite9SliceDesc::SetAtlasRegion(nsVec2 t1, nsVec2 t2) {
+    if (_tex1Px != t1 || _tex2Px != t2) {
+        _tex1Px = t1;
+        _tex2Px = t2;
+        _invalid = true;
+    }
+}
+
 void nsSprite9SliceDesc::SetGrid(float xMinPad, float xMaxPad, float yMinPad, float yMaxPad) {
     _xMinPad = xMinPad;
     _xMaxPad = xMaxPad;
     _yMinPad = yMinPad;
     _yMaxPad = yMaxPad;
-    _invalid = false;
+    _invalid = true;
 }
 
 void nsSprite9SliceDesc::AddToBuffer(nsQuadsBuffer *buffer) {
-    if (!tex) {
+    if (!_tex) {
         Log::Warning("Texture is not set for Sprite9Grid!");
         return;
     }
 
     int w, h;
-    tex->GetSize(w, h);
+    _tex->GetSize(w, h);
 
     auto texWidth = (float) w;
     auto texHeight = (float) h;
 
-    auto midHorz = texWidth - (_xMinPad + _xMaxPad);
-    auto midVert = texHeight - (_yMinPad + _yMaxPad);
-    auto right = texWidth - _xMaxPad;
-    auto bottom = texHeight - _yMaxPad;
+    // Atlas sub-region support: _tex2Px != {0,0} means pixel sub-region
+    const bool hasAtlas = (_tex2Px.x > 0 || _tex2Px.y > 0);
+    const float frameW = hasAtlas ? (_tex2Px.x - _tex1Px.x) : texWidth;
+    const float frameH = hasAtlas ? (_tex2Px.y - _tex1Px.y) : texHeight;
+    const float offX   = _tex1Px.x;
+    const float offY   = _tex1Px.y;
+
+    auto midHorz = frameW - (_xMinPad + _xMaxPad);
+    auto midVert = frameH - (_yMinPad + _yMaxPad);
+    auto right = frameW - _xMaxPad;
+    auto bottom = frameH - _yMaxPad;
     auto left = _xMinPad;
     auto top = _yMinPad;
 
-    float posX[] = {0, left, right};
-    float sizeX[] = {_xMinPad, midHorz, _xMaxPad};
-    float posY[] = {bottom, top, 0};
-    float sizeY[] = {_yMaxPad, midVert, _yMinPad};
+    float posX[] = {offX,         offX + left,  offX + right};
+    float sizeX[] = {_xMinPad,    midHorz,      _xMaxPad};
+    float posY[] = {offY + bottom, offY + top,  offY};
+    float sizeY[] = {_yMaxPad,    midVert,      _yMinPad};
 
     nsTileDef   tiles[3][3];
     for (int x = 0; x < 3; x++) {
         for (int y = 0; y < 3; y++) {
-            tiles[x][y].Compute(tex, posX[x], posY[y], sizeX[x], sizeY[y]);
+            tiles[x][y].Compute(_tex, posX[x], posY[y], sizeX[x], sizeY[y]);
         }
     }
 
@@ -95,7 +117,7 @@ void nsSprite9SliceDesc::Draw(IRenDevice *dev) {
         AddToBuffer(_buff);
     }
 
-    dev->TextureBind(tex);
+    dev->TextureBind(_tex);
     dev->SetColor(color);
     _buff->Draw();
 }

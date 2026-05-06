@@ -8,23 +8,28 @@
 #include "Engine/display/VisualType.h"
 #include "Engine/TimeFormat.h"
 
-nsMovieClip::nsMovieClip() {
+nsMovieClip::nsMovieClip()
+    : defaultAnim(""), loop(true),
+      _onDefaultAnimChanged([this](const nsBaseEvent *) {
+          SetAnim(defaultAnim.GetValue().c_str());
+      }) {
+    defaultAnim.AddHandler(nsPropChangedName::CHANGED, _onDefaultAnimChanged);
 }
 
-void nsMovieClip::AddAnim(const nsAnimClip &anim) {
-    _anims.push_back(anim);
+void nsMovieClip::AddAnim(std::shared_ptr<nsAnimClip> clip) {
+    anims.push_back(clip);
     if (!_currentAnim) {
-        _currentAnim = &_anims.back();
-        updateView();
+        _currentAnim = clip;
+        UpdateView();
     }
 }
 
 void nsMovieClip::SetAnim(const char *animName) {
-    for (auto &a : _anims) {
-        if (a.name == animName) {
-            _currentAnim = &a;
+    for (auto &a : anims) {
+        if (a->name == animName) {
+            _currentAnim = a;
             _currentFrameIdx = 0;
-            updateView();
+            UpdateView();
             return;
         }
     }
@@ -41,7 +46,7 @@ void nsMovieClip::Stop() {
 void nsMovieClip::GoToFrame(int index) {
     if (_currentAnim && index >= 0 && index < (int)_currentAnim->frames.size()) {
         _currentFrameIdx = (float)index;
-        updateView();
+        UpdateView();
     }
 }
 
@@ -62,11 +67,11 @@ void nsMovieClip::Loop() {
     }
 
     if ((int)_currentFrameIdx != (int)prevFrame) {
-        updateView();
+        UpdateView();
     }
 }
 
-void nsMovieClip::updateView() {
+void nsMovieClip::UpdateView() {
     if (!_currentAnim || _currentAnim->frames.empty()) {
         _currentFrame = nullptr;
         return;
@@ -75,14 +80,14 @@ void nsMovieClip::updateView() {
     int index = (int)_currentFrameIdx;
     if (index >= (int)_currentAnim->frames.size()) index = 0;
 
-    _currentFrame = &_currentAnim->frames[index];
+    _currentFrame = _currentAnim->frames[index];
 }
 
 void nsMovieClip::GetLocalBounds(nsRect &bounds) {
     if (_currentFrame) {
-        bounds.x = -_currentFrame->center.x;
-        bounds.y = -_currentFrame->center.y;
-        bounds.width = _currentFrame->size.x;
+        bounds.x      = -_currentFrame->center.x;
+        bounds.y      = -_currentFrame->center.y;
+        bounds.width  = _currentFrame->size.x;
         bounds.height = _currentFrame->size.y;
     } else {
         bounds = nsRect(0, 0, 0, 0);

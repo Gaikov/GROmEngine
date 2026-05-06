@@ -27,6 +27,8 @@ set(SRC
         tests/layouts/ScrollTest.h
         tests/sprites/ParticlesTest.cpp
         tests/sprites/ParticlesTest.h
+        tests/sprites/MovieClipTest.cpp
+        tests/sprites/MovieClipTest.h
         tests/FontTest.cpp
         tests/LinesTest.cpp
         tests/SpriteTest.cpp

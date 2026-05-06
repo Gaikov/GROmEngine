@@ -5,8 +5,11 @@
 #include "ScrollThumb.h"
 
 nsScrollThumb::nsScrollThumb() {
-    desc.tex = _device->TextureLoad("default/ui/frame-white.png");
-    desc.SetGrid(6, 6, 6, 6);
+    tex = _device->TextureLoad("default/ui/frame-white.png");
+    gridLeft = 6;
+    gridTop = 6;
+    gridRight = 6;
+    gridBottom = 6;
     UpdateState();
 }
 
@@ -40,11 +43,11 @@ void nsScrollThumb::OnClick() {
 
 void nsScrollThumb::UpdateState() {
     if (_down) {
-        desc.color = colorDown;
+        color = colorDown;
     } else if (_over) {
-        desc.color = colorOver;
+        color = colorOver;
     } else {
-        desc.color = colorOut;
+        color = colorOut;
     }
 }
 
