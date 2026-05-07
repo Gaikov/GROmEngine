@@ -19,6 +19,7 @@
 #include "tests/sprites/ParticlesTest.h"
 #include "tests/collision/CollisionTest.h"
 #include "tests/sprites/MovieClipTest.h"
+#include "tests/sprites/Sprite9SliceTest.h"
 
 TestGameApp *g_gameApp = nullptr;
 
@@ -47,6 +48,7 @@ void TestGameApp::RegisterTests() {
     RegisterTest("collision", new nsCollisionTest());
     RegisterTest("render_texture", new nsRenderTextureTest());
     RegisterTest("movieclip", new nsMovieClipTest());
+    RegisterTest("9slice", new nsSprite9SliceTest());
 
     Log::Info("info test message: %i", 1);
     Log::Warning("warning test message: %i", 2);

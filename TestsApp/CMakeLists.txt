@@ -29,6 +29,8 @@ set(SRC
         tests/sprites/ParticlesTest.h
         tests/sprites/MovieClipTest.cpp
         tests/sprites/MovieClipTest.h
+        tests/sprites/Sprite9SliceTest.cpp
+        tests/sprites/Sprite9SliceTest.h
         tests/FontTest.cpp
         tests/LinesTest.cpp
         tests/SpriteTest.cpp
