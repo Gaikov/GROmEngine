@@ -162,8 +162,9 @@ void nsALTrack::Stop( bool pause )
 	while ( !code );//*/
 
 	//alSourceQueueBuffers()
-		
+
 	m_src->BindTrack( 0 );
+	m_src = nullptr;
 }
 
 //---------------------------------------------------------
