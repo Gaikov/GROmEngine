@@ -1,4 +1,5 @@
 #include "StrTools.h"
+#include <cctype>
 
 //---------------------------------------------------------
 // StrPrintf:
@@ -140,6 +141,30 @@ const char * nsStr::GetBrightColor(const char *str) {
 
 	color[7] = '\0';
 	return strcat(color, "ff");
+}
+
+bool nsStr::ContainsIgnoreCase(const char *str, const char *find) {
+	if (!find || !*find) {
+		return true;
+	}
+	if (!str) {
+		return false;
+	}
+
+	for (const char *start = str; *start; ++start) {
+		const char *current = start;
+		const char *pattern = find;
+		while (*current && *pattern
+			&& std::tolower(static_cast<unsigned char>(*current))
+			   == std::tolower(static_cast<unsigned char>(*pattern))) {
+			++current;
+			++pattern;
+		}
+		if (!*pattern) {
+			return true;
+		}
+	}
+	return false;
 }
 
 //---------------------------------------------------------

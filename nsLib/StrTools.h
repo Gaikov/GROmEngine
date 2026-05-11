@@ -28,6 +28,7 @@ char*		StrToken( const char *strToken, const char *strDelimit, int &resLength );
 class nsStr final {
 public:
 	static const char* GetBrightColor(const char *str);
+	static bool ContainsIgnoreCase(const char *str, const char *find);
 };
 
 
@@ -137,4 +138,3 @@ char& nsString::operator [] ( int idx )
 }
 
 #endif
- 
