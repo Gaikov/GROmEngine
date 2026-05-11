@@ -8,6 +8,6 @@
 
 uint64_t nsTime::GetTimeMS() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::system_clock::now().time_since_epoch()
+               std::chrono::steady_clock::now().time_since_epoch()
            ).count();
 }

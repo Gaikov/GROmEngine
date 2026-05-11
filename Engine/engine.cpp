@@ -168,7 +168,7 @@ void GetElapsedTime( uint &res, dword &currtime )
 	while ( res < 1 );
 }
 
-dword	add = 0;
+static float g_timeCarryMs = 0.0f;
 
 void nsEngine::MainLoop()
 {
@@ -194,10 +194,12 @@ void nsEngine::MainLoop()
 
 
 	{
-		auto count = int(frametime / MIN_MS);
+		const float adjustedMs = (float)frametime + g_timeCarryMs;
+		auto count = int(adjustedMs / MIN_MS);
 		if ( !count )
 		{
-			g_frameTime = frametime / 1000.0f;
+			g_timeCarryMs = 0.0f;
+			g_frameTime = adjustedMs / 1000.0f;
 			if ( com_time_scale->Value() > 0 ) g_frameTime *= com_time_scale->Value();
 
 			g_inp.Process();
@@ -207,11 +209,13 @@ void nsEngine::MainLoop()
 		else
 		{
 			if ( count > MIN_FPS )
+			{
 				count = MIN_FPS;
+				g_timeCarryMs = 0.0f;
+			}
 			else
 			{
-				add = frametime - uint(count * MIN_MS);
-				currtime -= add;
+				g_timeCarryMs = adjustedMs - count * MIN_MS;
 			}
 
 			for ( int i = 0; i < count; ++i )
