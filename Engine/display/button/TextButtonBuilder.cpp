@@ -6,6 +6,7 @@
 #include "TextButton.h"
 #include "renderer/font/FontsCache.h"
 #include "Core/ParserUtils.h"
+#include "Engine/assets/VisualAssetsContext.h"
 
 nsVisualObject2d *nsTextButtonBuilder::CreateDefault() {
     return new nsTextButton();
@@ -21,7 +22,7 @@ bool nsTextButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisua
         return false;
     }
 
-    auto font = nsFontsCache::Shared()->LoadFont(ParseString(ss, "font"));
+    auto font = nsFontsCache::Shared()->LoadFont(context->assetsContext->ParseAssetPath(ss, "font"));
     if (font) {
         button->font = font;
     }

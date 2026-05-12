@@ -6,6 +6,7 @@
 #include "ImageButton.h"
 #include "Core/ParserUtils.h"
 #include "RenManager.h"
+#include "Engine/assets/VisualAssetsContext.h"
 #include "renderer/font/FontsCache.h"
 
 nsVisualObject2d *nsImageButtonBuilder::CreateDefault() {
@@ -16,7 +17,7 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
     auto dev = nsRenDevice::Shared()->Device();
 
     auto button = Cast<nsImageButton>(o);
-    button->renState = dev->StateLoad(ParseString(ss, "renState"));
+    button->renState = dev->StateLoad(context->assetsContext->ParseAssetPath(ss, "renState"));
 
     button->up      .Parse(ss, context->assetsContext.get(), "up");
     button->over    .Parse(ss, context->assetsContext.get(), "over");
@@ -24,9 +25,8 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
     button->disabled.Parse(ss, context->assetsContext.get(), "disabled");
 
     if (ps_block_begin(ss, "label")) {
-        if (ps_var_begin(ss, "font")) {
-            nsString    fileName = ps_var_str(ss);
-            button->font = nsFontsCache::Shared()->LoadFont(fileName);
+        if (const auto font = nsFontsCache::Shared()->LoadFont(context->assetsContext->ParseAssetPath(ss, "font"))) {
+            button->font = font;
         }
 
         if (ps_var_begin(ss, "text")) {

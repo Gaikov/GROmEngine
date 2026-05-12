@@ -5,10 +5,11 @@
 #include "LayoutRefBuilder.h"
 #include "Core/ParserUtils.h"
 #include "Core/ParseFile.h"
+#include "Engine/assets/VisualAssetsContext.h"
 #include "nsLib/log.h"
 
 nsVisualObject2d *nsLayoutRefBuilder::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
-    auto refPath = ParseString(ss, "source");
+    const auto refPath = context->assetsContext->ParseAssetPath(ss, "source");
     if (refPath.IsEmpty()) {
         Log::Warning("Invalid layout reference: %s", refPath.AsChar());
         return nullptr;
@@ -18,7 +19,7 @@ nsVisualObject2d *nsLayoutRefBuilder::Create(script_state_t *ss, nsVisualCreatio
 }
 
 bool nsLayoutRefBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) {
-    auto refPath = ParseString(ss, "source");
+    const auto refPath = context->assetsContext->ParseAssetPath(ss, "source");
     nsParseFile pf;
     auto source = pf.BeginFile(refPath);
     if (ps_block_begin(source, nullptr)) {
