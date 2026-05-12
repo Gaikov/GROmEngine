@@ -16,6 +16,7 @@ public:
 	GLTexture *GetTexture(const char *id, int flags);
 	bool BindTexture(nsGLBaseTexture *t);
 	GLTexture *CreateFromBitmapData(nsBitmapData::tSP &data);
+    void DumpKeys() const;
 
 	[[nodiscard]] bool HasBoundTexture() const { return _current; }
 	[[nodiscard]] nsGLBaseTexture *GetBoundTexture() const { return _current; }

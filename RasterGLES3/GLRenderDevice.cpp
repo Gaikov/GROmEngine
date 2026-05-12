@@ -45,6 +45,7 @@ bool GLRenderDevice::Init(void *wnd)
 	Log::Info("stencil bits: %i", stencilBits);
 
 	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) {_queryRestart = true;});
+    g_cfg->RegCmd("r_texkeys", [this](int argc, const char* argv[]) {_textures.DumpKeys();});
 
 	if (!_modes.Init())
 	{

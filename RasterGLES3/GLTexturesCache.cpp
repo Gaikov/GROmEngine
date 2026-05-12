@@ -80,6 +80,13 @@ GLTexture *GLTexturesCache::CreateFromBitmapData(nsBitmapData::tSP &data)
 	return t;
 }
 
+void GLTexturesCache::DumpKeys() const {
+    Log::Info("...texture cache keys: %i", static_cast<int>(_cache.size()));
+    for (const auto &it : _cache) {
+        Log::Info("texture key: %s", it.first.c_str());
+    }
+}
+
 void GLTexturesCache::UnloadFromGPU() const {
     for (const auto& it : _cache) {
         auto t = it.second.item;
