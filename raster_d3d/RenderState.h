@@ -72,7 +72,7 @@ public:
 	virtual void			SetColor( const float c[4] ); 
 
 	//textures
-	virtual ITexture*		TextureLoad( const char *filename, bool mipmap, texfmt_t fmt );
+	virtual ITexture*		TextureLoad( const char *filename, bool mipmap, texfmt_t fmt, int flags = TLF_NONE );
 	virtual ITexture*		TextureGenerate( int width, int height, const void *data, texfmt_t fmt, bool mipmap );
 	virtual void			TextureRelease( ITexture *tex );
 	virtual void			TextureBind( ITexture *tex );

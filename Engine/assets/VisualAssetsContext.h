@@ -4,6 +4,7 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include "Engine/RenDevice.h"
 #include "nsLib/FilePath.h"
 #include "Engine/renderer/particles/factory/ParticlesLoader.h"
 
@@ -22,7 +23,7 @@ public:
     virtual ~nsVisualAssetsContext();
 
     nsFilePath ParseAssetPath(script_state_t *ss, const char *name) const;
-    ITexture *ParseTexture(script_state_t *ss, const char *name) const;
+    ITexture *ParseTexture(script_state_t *ss, const char *name, int flags = TLF_NONE) const;
     void SaveAssetPath(const nsScriptSaver &saver, const char *name, const nsFilePath &path) const;
 
     [[nodiscard]] nsString RelativeAssetPath(const nsFilePath &path) const;

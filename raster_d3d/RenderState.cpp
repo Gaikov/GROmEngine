@@ -573,7 +573,7 @@ void CRenderState::SetColor( const float c[4] )
 //---------------------------------------------------------
 // CRenderState::TextureLoad: 
 //---------------------------------------------------------
-ITexture* CRenderState::TextureLoad( const char *filename, bool mipmap, texfmt_t fmt )
+ITexture* CRenderState::TextureLoad( const char *filename, bool mipmap, texfmt_t fmt, int flags )
 {
 	if ( !StrCheck( filename ) ) return 0;
 

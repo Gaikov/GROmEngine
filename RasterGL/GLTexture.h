@@ -13,7 +13,7 @@
 class GLTexture : public nsGLBaseTexture
 {
 public:
-	static GLTexture *Load(const char *filePath);
+	static GLTexture *Load(const char *filePath, int flags);
 	static void Free(GLTexture *t);
 	static GLTexture *Create(const char *id, nsBitmapData::tSP &data);
 	bool Bind() override;
@@ -27,6 +27,7 @@ private:
 	GLTexture();
 	~GLTexture() override;
 	bool CreateFromFile(const char *filePath);
+	void SetLoadFlags(int flags);
     bool UploadToGPU();
     bool EnsureBitmapData();
 
@@ -34,6 +35,7 @@ private:
 	std::string        _id;
 	GLuint             _glTexture;
 	nsBitmapData::tSP _bmData;
+	bool               _premultiplyAlpha = false;
 };
 
 

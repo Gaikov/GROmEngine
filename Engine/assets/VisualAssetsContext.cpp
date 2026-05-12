@@ -30,8 +30,8 @@ nsString nsVisualAssetsContext::RelativeAssetPath(const nsFilePath &path) const 
     return assetsPath.GetRelativePath(path);
 }
 
-ITexture *nsVisualAssetsContext::ParseTexture(script_state_t *ss, const char *name) const {
+ITexture *nsVisualAssetsContext::ParseTexture(script_state_t *ss, const char *name, int flags) const {
     const auto path = ParseAssetPath(ss, name);
     if (path.IsEmpty()) return nullptr;
-    return nsRenDevice::Shared()->Device()->TextureLoad(path, false);
+    return nsRenDevice::Shared()->Device()->TextureLoad(path, false, TF_RGBA, flags);
 }

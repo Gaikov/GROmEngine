@@ -144,9 +144,9 @@ void GLShader::Apply( GLShader *prev )
 		GLUtils::SetState(GL_CULL_FACE, m_cullMode);
 
 	if ( m_texCoordU != prev->m_texCoordU )
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordU);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordU);
 	if ( m_texCoordV != prev->m_texCoordV )
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordV);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordV);
 
 	GL_CHECK_R("GLShader::Apply",)
 }
@@ -196,7 +196,7 @@ bool GLShader::Parse( script_state_t *ss )
 }
 
 void GLShader::ApplyTextureParams() const {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordU);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordV);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordU);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordV);
     GL_CHECK_R("glTexParameteri",)
 }

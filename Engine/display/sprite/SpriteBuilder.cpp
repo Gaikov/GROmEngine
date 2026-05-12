@@ -23,7 +23,7 @@ bool nsSpriteBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisu
     auto assetPath = context->assetsContext->ParseAssetPath(ss, "renState");
     if (!assetPath.IsEmpty()) {
         const auto dev = nsRenDevice::Shared()->Device();
-        if (const auto state = dev->StateLoad(ParseString(ss, "renState"))) {
+        if (const auto state = dev->StateLoad(assetPath)) {
             sprite->renState = state;
         }
     }
@@ -50,6 +50,7 @@ bool nsSpriteBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, 
     saver.VarFloat2("pivot", desc.center, nsVec2());
     saver.VarFloat2("size", desc.size, nsVec2());
     saver.VarFloat4("color", desc.color, nsColor());
+    saver.VarBool("premultiplyAlpha", desc.premultiplyAlpha, false);
 
     if (desc.tex1 != nsVec2()) {
         saver.VarFloat2("tex1", desc.tex1, nsVec2());

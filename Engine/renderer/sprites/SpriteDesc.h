@@ -27,6 +27,7 @@ struct nsSpriteDesc
 	nsVec2		size;
 	nsColor		color;
 	nsVec2		tex1, tex2;
+	bool        premultiplyAlpha = false;
 
     nsSpriteDesc& ResetSize();
     nsSpriteDesc& ComputeCenter();

@@ -13,6 +13,7 @@ class GLTexturesCache : public ResourcesCache<GLTexture, int>
 {
 public:
 	GLTexturesCache();
+	GLTexture *GetTexture(const char *id, int flags);
 	bool BindTexture(nsGLBaseTexture *t);
 	GLTexture *CreateFromBitmapData(nsBitmapData::tSP &data);
 

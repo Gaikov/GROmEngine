@@ -4,6 +4,18 @@
 
 #include "GLTexturesCache.h"
 #include "GLTexture.h"
+#include <string>
+
+namespace {
+std::string TextureCacheKey(const char *id, int flags) {
+	if ((flags & TLF_PREMULTIPLY_ALPHA) == 0) {
+		return id;
+	}
+	std::string key = id;
+	key += "#pma";
+	return key;
+}
+}
 
 GLTexturesCache::GLTexturesCache() :
 		_current(nullptr)
@@ -12,12 +24,32 @@ GLTexturesCache::GLTexturesCache() :
 
 GLTexture *GLTexturesCache::AllocateResource(const char *id, int param)
 {
-	return GLTexture::Load(id);
+	return GLTexture::Load(id, param);
 }
 
 void GLTexturesCache::FreeResource(GLTexture *item)
 {
 	GLTexture::Free(item);
+}
+
+GLTexture *GLTexturesCache::GetTexture(const char *id, int flags) {
+	if (!id) {
+		return nullptr;
+	}
+
+	const auto key = TextureCacheKey(id, flags);
+	auto it = _cache.find(key);
+	if (it != _cache.end()) {
+		Entry &entry = it->second;
+		entry.refCount++;
+		return entry.item;
+	}
+
+	auto item = AllocateResource(id, flags);
+	if (item) {
+		AddToCache(key.c_str(), item);
+	}
+	return item;
 }
 
 bool GLTexturesCache::BindTexture(nsGLBaseTexture *t)

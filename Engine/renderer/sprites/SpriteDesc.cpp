@@ -30,8 +30,15 @@ void nsSpriteDesc::Draw(IRenDevice *dev) const {
         _buff = new nsQuadsBuffer(dev, 1, false);
     }
 
+    nsColor drawColor = color;
+    if (premultiplyAlpha) {
+        drawColor.r *= drawColor.a;
+        drawColor.g *= drawColor.a;
+        drawColor.b *= drawColor.a;
+    }
+
     dev->TextureBind( tex );
-    dev->SetColor(color);
+    dev->SetColor(drawColor);
 
     _buff->Clear();
     _buff->AddQuad(pos - center, {}, size, nsColor::white, tex1, tex2);
@@ -64,13 +71,17 @@ void nsSpriteDesc::Parse(script_state_t *ss, nsVisualAssetsContext *assets, cons
             Parse(ss, assets);
             ps_block_end(ss);
         } else if (ps_var_begin(ss, name)) {
-            tex = assets->ParseTexture(ss, ps_var_str(ss));
+            const int flags = premultiplyAlpha ? TLF_PREMULTIPLY_ALPHA : TLF_NONE;
+            tex = nsRenDevice::Shared()->Device()->TextureLoad(assets->assetsPath.ResolvePath(ps_var_str(ss)), false, TF_RGBA, flags);
             ResetSize();
         }
         return;
     }
 
-    if (auto t = assets->ParseTexture(ss, "texture")) {
+    premultiplyAlpha = ps_get_f(ss, "premultiplyAlpha", premultiplyAlpha) != 0;
+    const int flags = premultiplyAlpha ? TLF_PREMULTIPLY_ALPHA : TLF_NONE;
+
+    if (auto t = assets->ParseTexture(ss, "texture", flags)) {
         tex = t;
         ResetSize();
     }

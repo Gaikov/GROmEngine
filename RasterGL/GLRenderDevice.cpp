@@ -135,9 +135,9 @@ void GLRenderDevice::SetColor(const float *c)
 	glColor4f(c[0], c[1], c[2], c[3]);
 }
 
-ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt)
+ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt, int flags)
 {
-	return _textures.GetResource(filename, 0);
+	return _textures.GetTexture(filename, flags);
 }
 
 ITexture *GLRenderDevice::TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap)

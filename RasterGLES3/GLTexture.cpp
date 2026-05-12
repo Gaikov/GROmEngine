@@ -19,7 +19,7 @@ GLTexture::~GLTexture()
     UnloadFromGPU();
 }
 
-GLTexture *GLTexture::Load(const char *filePath)
+GLTexture *GLTexture::Load(const char *filePath, int flags)
 {
     if (!StrCheck(filePath)) {
         return nullptr;
@@ -27,6 +27,7 @@ GLTexture *GLTexture::Load(const char *filePath)
 
 	Log::Info("...creating texture: %s", filePath);
 	auto t = new GLTexture();
+	t->_loadFlags = flags;
 	t->CreateFromFile(filePath);
 	return t;
 }
@@ -148,6 +149,9 @@ bool GLTexture::EnsureBitmapData() {
 
     Log::Debug("...loading bitmap data: %s", _id.c_str());
     _bmData = BitmapLoader::LoadFromFile(_id.c_str());
+    if (_bmData && (_loadFlags & TLF_PREMULTIPLY_ALPHA) != 0) {
+        _bmData->PremultiplyAlpha();
+    }
     return _bmData.get();
 }
 

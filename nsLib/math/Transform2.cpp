@@ -46,7 +46,8 @@ const nsMatrix2 &nsTransform2::GetWorldInvert() {
     if (!_invWorldValid) {
         _invWorldValid = true;
         if (!GetWorld().Inverse(_invWorldMatrix)) {
-            printf("Can't invert matrix!");
+            printf("Can't invert matrix!\n");
+            _invWorldMatrix.Identity();
         }
     }
     return _invWorldMatrix;

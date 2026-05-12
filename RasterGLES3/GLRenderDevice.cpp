@@ -146,9 +146,9 @@ void GLRenderDevice::SetColor(const float *c)
 	_currentColor = c;
 }
 
-ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt)
+ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt, int flags)
 {
-	return _textures.GetResource(filename, 0);
+	return _textures.GetTexture(filename, flags);
 }
 
 const char * GLRenderDevice::TextureGetPath(ITexture *t) {
