@@ -15,6 +15,7 @@ public:
 	static bool FolderListing(const char *folderPath, std::vector<nsString> &result);
 	static void Normalize(nsString &path);
 	static bool Exists(const char *path);
+    static bool IsAbsolute(const char *path);
 
 public:
 	nsFilePath(const char *path);

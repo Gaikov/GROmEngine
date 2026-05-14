@@ -238,6 +238,14 @@ bool nsFilePath::Exists(const char *path)
 	return stat(path, &s) == 0;
 }
 
+bool nsFilePath::IsAbsolute(const char *path) {
+    if (!StrCheck(path)) {
+        return false;
+    }
+
+    return (strlen(path) > 2 && path[1] == ':') || path[0] == '/';
+}
+
 bool nsFilePath::ListingRecursive(nsFilePath::tList &result) const {
     if (!IsFolder()) {
         return false;
