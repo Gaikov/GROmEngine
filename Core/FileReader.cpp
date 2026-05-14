@@ -24,7 +24,6 @@ nsFileReader::nsFileReader(const char *fileName, const char *mode) :
 // nsFileReader::~nsFileReader: 
 //---------------------------------------------------------
 nsFileReader::~nsFileReader() {
-    IDataReader::~IDataReader();
     if (m_fp)
         fclose(m_fp);
 }

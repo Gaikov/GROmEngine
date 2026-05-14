@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <filesystem>
 #include <dirent.h>
+#include <unistd.h>
 
 namespace fs = std::filesystem;
 
@@ -160,7 +161,7 @@ bool nsFilePath::FolderListing(const char *folderPath, std::vector<nsString> &re
 nsFilePath nsFilePath::GetParent() const
 {
 	nsString parent = _path;
-	const auto     slash  = strrchr(parent, '/');
+	char            *slash  = strrchr(parent.AsChar(), '/');
 	if (!slash)
 	{
 		return "";

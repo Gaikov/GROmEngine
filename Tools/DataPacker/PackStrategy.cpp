@@ -37,7 +37,7 @@ bool nsPackStrategy::Perform() {
     inputFolder.ListingRecursive(filesPaths);
 
     for (auto &file: filesPaths) {
-        char *path = strstr(file, inputFolder);
+        char *path = const_cast<char*>(strstr(static_cast<const char*>(file), static_cast<const char*>(inputFolder)));
         if (path) {
             path += strlen(inputFolder) + 1;
             packFileDesc_t desc;

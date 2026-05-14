@@ -7,3 +7,4 @@ include_directories(./)
 
 add_library(Engine STATIC ${sources})
 target_include_directories(Engine PUBLIC ../Platform)
+target_link_libraries(Engine PUBLIC ${PLATFORM})

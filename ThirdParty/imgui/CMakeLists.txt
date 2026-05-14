@@ -21,4 +21,12 @@ add_library(imgui
         STATIC
         ${sources}
 )
+find_package(glfw3 REQUIRED)
+target_link_libraries(imgui glfw)
+if(TARGET glfw)
+    get_target_property(GLFW_INC glfw INTERFACE_INCLUDE_DIRECTORIES)
+    if(GLFW_INC)
+        target_include_directories(imgui PRIVATE ${GLFW_INC})
+    endif()
+endif()
 
