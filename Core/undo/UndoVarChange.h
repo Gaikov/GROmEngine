@@ -7,7 +7,7 @@
 
 #include "UndoRedoOperation.h"
 
-template<typename TVar, typename TValue>
+template<typename TVar, typename TValue = TVar>
 class nsUndoVarChange final : public nsUndoRedoOperation {
 
 public:

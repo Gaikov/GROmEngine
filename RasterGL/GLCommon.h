@@ -5,8 +5,13 @@
 #ifndef _GROM_GL_COMMON_H
 #define _GROM_GL_COMMON_H
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#else
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+#endif
 #include "Core/headers.h"
 #include "nsLib/nsLib.h"
 #include "nsLib/log.h"

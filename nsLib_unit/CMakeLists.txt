@@ -24,6 +24,6 @@ add_executable(nsLib_unit ${TESTS})
 
 target_link_libraries(nsLib_unit
         nsLib
-        gtest
-        gtest_main
+        GTest::gtest
+        GTest::gtest_main
 )
