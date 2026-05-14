@@ -59,12 +59,7 @@ bool GLTexturesCache::BindTexture(nsGLBaseTexture *t)
 		_current = t;
 		if (_current)
 		{
-			glEnable(GL_TEXTURE_2D);
 			_current->Bind();
-
-		} else
-		{
-			glDisable(GL_TEXTURE_2D);
 		}
         return true;
 	}
