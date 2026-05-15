@@ -27,19 +27,6 @@ endif ()
 
 set(SOUND_LIB SoundOAL)
 
-set(ENGINE_LIBS
-        ${PLATFORM}
-        Engine
-        RasterGL
-        ImageDecoder
-        ${SOUND_LIB}
-        SoundBase
-        Core
-        nsLib
-)
-
-set(GROM_ENGINE_LIBS ${ENGINE_LIBS} PARENT_SCOPE)
-
 add_subdirectory(ThirdParty/OggVorbis)
 
 include_directories(
@@ -61,8 +48,28 @@ add_subdirectory(Core)
 add_subdirectory(ImageDecoder)
 add_subdirectory(SoundBase)
 add_subdirectory(${SOUND_LIB})
-add_subdirectory(RasterGLES3)
+if (APPLE)
+    add_subdirectory(RasterMetal)
+    set(RASTER_LIB RasterMetal)
+else ()
+    add_subdirectory(RasterGLES3)
+    set(RASTER_LIB RasterGL)
+endif ()
 add_subdirectory(Engine)
+
+set(ENGINE_LIBS
+        ${PLATFORM}
+        Engine
+        ${RASTER_LIB}
+        ImageDecoder
+        ${SOUND_LIB}
+        SoundBase
+        Core
+        nsLib
+)
+
+set(GROM_ENGINE_LIBS ${ENGINE_LIBS} PARENT_SCOPE)
+
 if (NOT NO_NETWORKING)
     add_subdirectory(Networking)
 endif()
@@ -82,7 +89,7 @@ endif()
 add_dependencies(Core nsLib)
 add_dependencies(SoundBase Core)
 add_dependencies(${SOUND_LIB} SoundBase)
-add_dependencies(RasterGL Core)
+add_dependencies(${RASTER_LIB} Core)
 add_dependencies(ImageDecoder Core)
-add_dependencies(Engine Core ${SOUND_LIB} RasterGL ${PLATFORM})
+add_dependencies(Engine Core ${SOUND_LIB} ${RASTER_LIB} ${PLATFORM})
 

@@ -86,7 +86,7 @@ struct vbVertex_t
 {
 	nsVec3	v;
 	nsVec3	n;
-	dword	c = 0xffffff;
+	dword	c = 0xffffffff;
 	float tu = 0, tv = 0;
 
 	inline void SetUV(float _u, float _v)

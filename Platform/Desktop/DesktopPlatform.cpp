@@ -23,7 +23,7 @@ bool DesktopPlatform::Init() {
     UpdateSoftInput();
 
 #ifdef __APPLE__
-    glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_METAL);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
     if (!glfwInit()) {
@@ -31,11 +31,10 @@ bool DesktopPlatform::Init() {
         return false;
     }
 
+#ifndef __APPLE__
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 #endif
 
     _wnd = nsEnv::Shared()->CreateGameWindow();
@@ -43,7 +42,9 @@ bool DesktopPlatform::Init() {
         Sys_FatalError("Could not create game window!");
         return false;
     }
+#ifndef __APPLE__
     glfwMakeContextCurrent(_wnd);
+#endif
 
     _display = glfwGetPrimaryMonitor();
 
@@ -198,11 +199,15 @@ Platform::ProcAddr DesktopPlatform::GetProcAddr(const char *name) {
 }
 
 void DesktopPlatform::SwapBuffers() {
+#ifdef __APPLE__
+    // Metal handles presentation via presentDrawable in EndScene
+#else
     if (_wnd) {
         glfwSwapBuffers(_wnd);
     } else {
         Log::Warning("Can't swap buffers! Window is not initialized!");
     }
+#endif
 }
 
 bool DesktopPlatform::ShowInterstitialAd() {
