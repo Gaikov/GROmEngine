@@ -20,7 +20,7 @@ void nsEnv::MainLoop() {
 }
 
 void nsEnv::GetClientSize(int &width, int &height) {
-    glfwGetWindowSize(_wnd, &width, &height);
+    glfwGetFramebufferSize(_wnd, &width, &height);
 }
 
 GLFWwindow* nsEnv::CreateGameWindow() {

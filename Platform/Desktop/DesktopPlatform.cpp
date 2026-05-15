@@ -153,20 +153,20 @@ bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, i
     } else {
         glfwSetWindowMonitor(_wnd, nullptr, 0, 0, width, height,0);
 
-        int count;
-        auto monitors = glfwGetMonitors(&count);
-        auto mode = glfwGetVideoMode(monitors[0]);
-        if (mode) {
-            int posX = (mode->width - width) / 2;
-            int posY = (mode->height - height) / 2;
-            glfwSetWindowPos(_wnd, posX, posY);
-        } else {
-            glfwSetWindowPos(_wnd, 50, 50);
-        }
+        if (_display) {
+            auto mode = glfwGetVideoMode(_display);
+            if (mode) {
+                int posX = (mode->width - width) / 2;
+                int posY = (mode->height - height) / 2;
+                glfwSetWindowPos(_wnd, posX, posY);
+            } else {
+                glfwSetWindowPos(_wnd, 50, 50);
+            }
 
-        float sx, sy;
-        glfwGetMonitorContentScale(monitors[0], &sx, &sy);
-        Log::Info("Monitor content scale: %fx%f", sx, sy);
+            float sx, sy;
+            glfwGetMonitorContentScale(_display, &sx, &sy);
+            Log::Info("Monitor content scale: %fx%f", sx, sy);
+        }
     }
 
     if (glfwGetError(nullptr) != GLFW_NO_ERROR) {
