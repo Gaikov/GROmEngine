@@ -55,6 +55,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
             _mtkView = [[nsMetalView alloc] initWithFrame:view.bounds device:_device];
             _mtkView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
             _mtkView.framebufferOnly = NO;
+            _mtkView.layer.opaque = YES;
             _mtkView.enableSetNeedsDisplay = NO;
             _mtkView.paused = YES;
             _mtkView.autoResizeDrawable = NO;
@@ -63,6 +64,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
             layer.device = _device;
             layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
             layer.framebufferOnly = NO;
+            layer.opaque = YES;
             [view addSubview:_mtkView positioned:NSWindowAbove relativeTo:nil];
         }
     }
@@ -271,8 +273,8 @@ void nsMetalRenderDevice::TextureBind(ITexture *texture) {
 void nsMetalRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
     nsMatrix m;
     m.Identity();
-    if (scale2) { m.Scale(scale2[0], scale2[1], 1.0f); }
-    if (offs2) { m._41 = offs2[0]; m._42 = offs2[1]; }
+    if (offs2) m.SetPos(offs2);
+    if (scale2) m.Scale(scale2[0], scale2[1], 1.0f);
     _programs->SetTextureMatrix(m);
 }
 

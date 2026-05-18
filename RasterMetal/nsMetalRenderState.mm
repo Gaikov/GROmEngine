@@ -7,6 +7,7 @@
 #include "nsLib/log.h"
 #include <cstddef>
 #include <cstring>
+#include <string>
 
 static MTLBlendFactor MapBlendFactor(const char *name, MTLBlendFactor def) {
     if (!name || !*name || StrEqual(name, "none")) return def;
@@ -47,9 +48,9 @@ bool nsMetalRenderState::Load(const char *fileName) {
 }
 
 bool nsMetalRenderState::Parse(script_state_t *ss) {
-    auto vs = ps_get_str(ss, "vs", nsMetalProgramsCache::DEFAULT_VERTEX_SHADER);
-    auto fs = ps_get_str(ss, "fs", nsMetalProgramsCache::DEFAULT_FRAGMENT_SHADER);
-    _program = _programs.GetProgram(vs, fs);
+    const std::string vs = ps_get_str(ss, "vs", nsMetalProgramsCache::DEFAULT_VERTEX_SHADER);
+    const std::string fs = ps_get_str(ss, "fs", nsMetalProgramsCache::DEFAULT_FRAGMENT_SHADER);
+    _program = _programs.GetProgram(vs.c_str(), fs.c_str());
     if (!_program) return false;
 
     _zEnable  = ps_get_f(ss, "z_enable", 1) != 0;
@@ -60,18 +61,18 @@ bool nsMetalRenderState::Parse(script_state_t *ss) {
     if (_alphaRef > 255) _alphaRef = 255;
     _alphaRef /= 255.0f;
 
-    auto src = ps_get_str(ss, "blend_src", "none");
-    auto dst = ps_get_str(ss, "blend_dst", "none");
-    auto srcAlpha = ps_get_str(ss, "blend_src_alpha", "none");
-    auto dstAlpha = ps_get_str(ss, "blend_dst_alpha", "none");
-    _srcBlend = MapBlendFactor(src, MTLBlendFactorOne);
-    _dstBlend = MapBlendFactor(dst, MTLBlendFactorZero);
-    _srcAlphaBlend = MapBlendFactor(srcAlpha, MTLBlendFactorOne);
-    _dstAlphaBlend = MapBlendFactor(dstAlpha, MTLBlendFactorOne);
-    _alphaBlend = !StrEqual(src, "none")
-        || !StrEqual(dst, "none")
-        || !StrEqual(srcAlpha, "none")
-        || !StrEqual(dstAlpha, "none");
+    const std::string src = ps_get_str(ss, "blend_src", "none");
+    const std::string dst = ps_get_str(ss, "blend_dst", "none");
+    const std::string srcAlpha = ps_get_str(ss, "blend_src_alpha", "none");
+    const std::string dstAlpha = ps_get_str(ss, "blend_dst_alpha", "none");
+    _srcBlend = MapBlendFactor(src.c_str(), MTLBlendFactorOne);
+    _dstBlend = MapBlendFactor(dst.c_str(), MTLBlendFactorZero);
+    _srcAlphaBlend = MapBlendFactor(srcAlpha.c_str(), _srcBlend);
+    _dstAlphaBlend = MapBlendFactor(dstAlpha.c_str(), _dstBlend);
+    _alphaBlend = !StrEqual(src.c_str(), "none")
+        || !StrEqual(dst.c_str(), "none")
+        || !StrEqual(srcAlpha.c_str(), "none")
+        || !StrEqual(dstAlpha.c_str(), "none");
 
     _cullMode = ps_get_f(ss, "cull_mode", 1) != 0;
     _texCoordU = StrEqual(ps_get_str(ss, "tex_coord_u", "wrap"), "clamp")
