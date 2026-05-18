@@ -4,6 +4,7 @@
 
 #include "nsMetalVertexBuffer.h"
 #include "nsMetalTexturesCache.h"
+#include "Core/Memory.h"
 
 nsMetalVertexBuffer::nsMetalVertexBuffer(id<MTLDevice> device,
                                            nsMetalTexturesCache *cache,
@@ -32,30 +33,55 @@ nsMetalVertexBuffer::~nsMetalVertexBuffer() {
 
 void nsMetalVertexBuffer::InitBuffers() {
     ReleaseBuffers();
-    _vertexBuffer = [_device newBufferWithLength:sizeof(vbVertex_t) * _numVertices
-                                        options:MTLResourceStorageModeShared];
-    _indexBuffer = [_device newBufferWithLength:sizeof(unsigned short) * _numIndexes
-                                       options:MTLResourceStorageModeShared];
+    _lastFrameIndex = ~0u;
+    _drawSlot = 0;
 }
 
 void nsMetalVertexBuffer::ReleaseBuffers() {
-    _vertexBuffer = nil;
-    _indexBuffer = nil;
+	for (uint i = 0; i < kMetalInFlightFrameSlots; ++i) {
+	    _vertexBuffers[i].clear();
+	    _indexBuffers[i].clear();
+	}
 }
 
-void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder) {
+bool nsMetalVertexBuffer::EnsureBuffers(uint frameSlot, uint drawSlot) {
+    auto &vertexBuffers = _vertexBuffers[frameSlot];
+    auto &indexBuffers = _indexBuffers[frameSlot];
+
+	while (vertexBuffers.size() <= drawSlot) {
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    id<MTLBuffer> vertexBuffer = [_device newBufferWithLength:sizeof(vbVertex_t) * _numVertices
+	                                                      options:MTLResourceStorageModeShared];
+        id<MTLBuffer> indexBuffer = [_device newBufferWithLength:sizeof(unsigned short) * _numIndexes
+                                                         options:MTLResourceStorageModeShared];
+        if (!vertexBuffer || !indexBuffer) return false;
+        vertexBuffers.push_back(vertexBuffer);
+        indexBuffers.push_back(indexBuffer);
+    }
+
+    return true;
+}
+
+void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder, uint frameIndex) {
     if (!encoder || _maxDrawVertices == 0 || _maxDrawIndexes == 0) return;
+
+    if (_lastFrameIndex != frameIndex) {
+        _lastFrameIndex = frameIndex;
+        _drawSlot = 0;
+    }
+
+	const auto frameSlot = frameIndex % kMetalInFlightFrameSlots;
+    const auto drawSlot = _drawSlot++;
+    if (!EnsureBuffers(frameSlot, drawSlot)) return;
 
     const auto vertexBytes = sizeof(vbVertex_t) * _maxDrawVertices;
     const auto indexBytes = sizeof(unsigned short) * _maxDrawIndexes;
-    id<MTLBuffer> vertexBuffer = [_device newBufferWithBytes:_verts
-                                                       length:vertexBytes
-                                                      options:MTLResourceStorageModeShared];
-    id<MTLBuffer> indexBuffer = [_device newBufferWithBytes:_indexes
-                                                      length:indexBytes
-                                                     options:MTLResourceStorageModeShared];
+    id<MTLBuffer> vertexBuffer = _vertexBuffers[frameSlot][drawSlot];
+    id<MTLBuffer> indexBuffer = _indexBuffers[frameSlot][drawSlot];
     if (!vertexBuffer || !indexBuffer) return;
 
+    memcpy([vertexBuffer contents], _verts, vertexBytes);
+    memcpy([indexBuffer contents], _indexes, indexBytes);
     [encoder setVertexBuffer:vertexBuffer offset:0 atIndex:0];
 
     MTLPrimitiveType mode;

@@ -4,6 +4,7 @@
 
 #include "nsMetalProgram.h"
 #include "nsMetalShaderLibrary.h"
+#include "Core/Memory.h"
 #include "Engine/RenDevice.h"
 #include "nsLib/log.h"
 #include <cstddef>
@@ -87,7 +88,11 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
 
 void nsMetalProgram::Unload() {
     _pipelineState = nil;
-    _uniformBuffer = nil;
+	for (uint i = 0; i < kMetalInFlightFrameSlots; ++i) {
+	    _uniformBuffers[i].clear();
+	}
+    _lastFrameIndex = ~0u;
+    _uniformSlot = 0;
     _vertexFunction = nil;
     _fragmentFunction = nil;
 }
@@ -126,7 +131,30 @@ bool nsMetalProgram::Bind(id<MTLRenderCommandEncoder> encoder) {
     return true;
 }
 
-void nsMetalProgram::UploadUniforms(id<MTLRenderCommandEncoder> encoder) {
-    [encoder setVertexBytes:&_uniforms length:sizeof(MetalUniforms) atIndex:1];
-    [encoder setFragmentBytes:&_uniforms length:sizeof(MetalUniforms) atIndex:1];
+bool nsMetalProgram::EnsureUniformBuffer(uint frameSlot, uint uniformSlot) {
+	auto &buffers = _uniformBuffers[frameSlot];
+	while (buffers.size() <= uniformSlot) {
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    id<MTLBuffer> buffer = [_device newBufferWithLength:sizeof(MetalUniforms)
+	                                                options:MTLResourceStorageModeShared];
+        if (!buffer) return false;
+        buffers.push_back(buffer);
+    }
+    return true;
+}
+
+void nsMetalProgram::UploadUniforms(id<MTLRenderCommandEncoder> encoder, uint frameIndex) {
+    if (_lastFrameIndex != frameIndex) {
+        _lastFrameIndex = frameIndex;
+        _uniformSlot = 0;
+    }
+
+	const auto frameSlot = frameIndex % kMetalInFlightFrameSlots;
+    const auto uniformSlot = _uniformSlot++;
+    if (!EnsureUniformBuffer(frameSlot, uniformSlot)) return;
+
+    id<MTLBuffer> buffer = _uniformBuffers[frameSlot][uniformSlot];
+    memcpy([buffer contents], &_uniforms, sizeof(MetalUniforms));
+    [encoder setVertexBuffer:buffer offset:0 atIndex:1];
+    [encoder setFragmentBuffer:buffer offset:0 atIndex:1];
 }

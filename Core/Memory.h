@@ -39,7 +39,14 @@ class nsMemory final {
 public:
 	static void BeginLoop();
 	static void EndLoop();
+	static void PushLoopAllocationsScope();
+	static void PopLoopAllocationsScope();
 };
 
+class nsMemoryLoopAllocScope final {
+public:
+	nsMemoryLoopAllocScope() { nsMemory::PushLoopAllocationsScope(); }
+	~nsMemoryLoopAllocScope() { nsMemory::PopLoopAllocationsScope(); }
+};
 
 #endif

@@ -78,6 +78,7 @@ private:
     id<MTLRenderCommandEncoder> _encoder         = nil;
     id<CAMetalDrawable>         _currentDrawable = nil;
     id<MTLTexture>              _depthStencilTexture = nil;
+    MTLRenderPassDescriptor    *_passDescriptor  = nil;
 
     nsMetalTexturesCache       *_textures        = nullptr;
     nsMetalProgramsCache       *_programs        = nullptr;
@@ -97,6 +98,7 @@ private:
     nsColor  _currentColor = nsColor::white;
     rasterConfig_t _config = {32, 800, 600};
     uint _pendingClearFlags = CLR_ALL;
+    uint _frameIndex = 0;
 
     bool BeginEncoder();
     void EndEncoder();

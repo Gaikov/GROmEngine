@@ -5,6 +5,7 @@
 #include "nsMetalRenderDevice.h"
 #include "nsMetalRenderState.h"
 #include "nsMetalStencilState.h"
+#include "Core/Memory.h"
 #include "nsLib/log.h"
 #include "nsLib/FilePath.h"
 #include "Engine/Platform.h"
@@ -44,6 +45,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
     Log::Info("Metal device: %s", [[_device name] UTF8String]);
 
     _commandQueue = [_device newCommandQueue];
+    _passDescriptor = [[MTLRenderPassDescriptor alloc] init];
 
     void *wndPtr = App_GetPlatform()->GetWindowHandler();
     if (wndPtr) {
@@ -92,6 +94,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
 void nsMetalRenderDevice::Release() {
     EndEncoder();
     _commandBuffer = nil;
+    _passDescriptor = nil;
 
     _currentState = nullptr;
     _currentStencil = nullptr;
@@ -155,8 +158,11 @@ bool nsMetalRenderDevice::BeginEncoder() {
     auto layer = (CAMetalLayer *)_mtkView.layer;
     layer.drawableSize = drawableSize;
 
-    _commandBuffer = [_commandQueue commandBuffer];
-    _currentDrawable = [layer nextDrawable];
+	{
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    _commandBuffer = [_commandQueue commandBuffer];
+	    _currentDrawable = [layer nextDrawable];
+	}
     if (!_currentDrawable || _currentDrawable.texture.width == 0 || _currentDrawable.texture.height == 0) {
         _currentDrawable = nil;
         _commandBuffer = nil;
@@ -167,8 +173,11 @@ bool nsMetalRenderDevice::BeginEncoder() {
     _config.currHeight = (uint)_currentDrawable.texture.height;
     EnsureDepthStencilTexture(_config.currWidth, _config.currHeight);
 
-    MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(_currentDrawable.texture, _depthStencilTexture);
-    _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
+	MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(_currentDrawable.texture, _depthStencilTexture);
+	{
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
+	}
     if (!_encoder) return false;
 
     MTLViewport viewport = {
@@ -188,6 +197,7 @@ void nsMetalRenderDevice::EndEncoder() {
 
 bool nsMetalRenderDevice::BeginScene() {
     _currentRenderTexture = nullptr;
+    _frameIndex++;
     return BeginEncoder();
 }
 
@@ -221,8 +231,11 @@ void nsMetalRenderDevice::ClearScene(uint flags) {
         return;
     }
 
-    MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(color, depthStencil);
-    _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
+	MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(color, depthStencil);
+	{
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
+	}
     MTLViewport viewport = {0.0, 0.0, (double)color.width, (double)color.height, 0.0, 1.0};
     [_encoder setViewport:viewport];
     if (_currentState) {
@@ -396,8 +409,8 @@ void nsMetalRenderDevice::VerticesDraw(IVertexBuffer *vb) {
         program->SetColor(_currentColor);
         program->SetHasTexture(_textures->HasBoundTexture());
         program->SetHasVertexColor(metalVB->UsesColor());
-        program->UploadUniforms(_encoder);
-        metalVB->Draw(_encoder);
+        program->UploadUniforms(_encoder, _frameIndex);
+        metalVB->Draw(_encoder, _frameIndex);
     }
 }
 
@@ -560,10 +573,11 @@ IRenderTexture* nsMetalRenderDevice::RenderTextureCreate(int width, int height, 
 
 void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
     EndEncoder();
-    _currentRenderTexture = dynamic_cast<nsMetalRenderTexture*>(rt);
-    if (!_commandBuffer) {
-        _commandBuffer = [_commandQueue commandBuffer];
-    }
+	_currentRenderTexture = dynamic_cast<nsMetalRenderTexture*>(rt);
+	if (!_commandBuffer) {
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    _commandBuffer = [_commandQueue commandBuffer];
+	}
 
     id<MTLTexture> color = nil;
     id<MTLTexture> depthStencil = nil;
@@ -576,8 +590,11 @@ void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
     }
     if (!color) return;
 
-    MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(color, depthStencil);
-    _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
+	MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(color, depthStencil);
+	{
+	    nsMemoryLoopAllocScope metalAllocScope;
+	    _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
+	}
     MTLViewport viewport = {0.0, 0.0, (double)color.width, (double)color.height, 0.0, 1.0};
     [_encoder setViewport:viewport];
     if (_currentState) {
@@ -586,15 +603,16 @@ void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
 }
 
 void nsMetalRenderDevice::EnsureDepthStencilTexture(int width, int height) {
-    if (_depthStencilTexture &&
-        _depthStencilTexture.width == width &&
-        _depthStencilTexture.height == height) {
-        return;
-    }
+	if (_depthStencilTexture &&
+	    _depthStencilTexture.width == width &&
+	    _depthStencilTexture.height == height) {
+	    return;
+	}
 
-    MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float_Stencil8
-                                                                                    width:width
-                                                                                   height:height
+	nsMemoryLoopAllocScope metalAllocScope;
+	MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatDepth32Float_Stencil8
+	                                                                                width:width
+	                                                                               height:height
                                                                                 mipmapped:NO];
     desc.usage = MTLTextureUsageRenderTarget;
     _depthStencilTexture = [_device newTextureWithDescriptor:desc];
@@ -602,7 +620,7 @@ void nsMetalRenderDevice::EnsureDepthStencilTexture(int width, int height) {
 
 MTLRenderPassDescriptor *nsMetalRenderDevice::CreatePassDescriptor(id<MTLTexture> colorTexture,
                                                                     id<MTLTexture> depthStencilTexture) {
-    MTLRenderPassDescriptor *passDesc = [MTLRenderPassDescriptor renderPassDescriptor];
+    MTLRenderPassDescriptor *passDesc = _passDescriptor ?: [MTLRenderPassDescriptor renderPassDescriptor];
     passDesc.colorAttachments[0].texture = colorTexture;
     passDesc.colorAttachments[0].loadAction = (_pendingClearFlags & CLR_CBUFF)
         ? MTLLoadActionClear
@@ -624,6 +642,9 @@ MTLRenderPassDescriptor *nsMetalRenderDevice::CreatePassDescriptor(id<MTLTexture
             : MTLLoadActionLoad;
         passDesc.stencilAttachment.storeAction = MTLStoreActionStore;
         passDesc.stencilAttachment.clearStencil = 0;
+    } else {
+        passDesc.depthAttachment.texture = nil;
+        passDesc.stencilAttachment.texture = nil;
     }
 
     _pendingClearFlags = 0;

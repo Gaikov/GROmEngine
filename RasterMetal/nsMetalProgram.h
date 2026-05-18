@@ -4,7 +4,9 @@
 #pragma once
 
 #include <Metal/Metal.h>
+#include "nsMetalConfig.h"
 #include "nsLib/matrix4.h"
+#include <vector>
 
 class nsMetalShaderLibrary;
 
@@ -40,14 +42,18 @@ public:
     void SetHasVertexColor(bool hasVertexColor);
 
     bool Bind(id<MTLRenderCommandEncoder> encoder);
-    void UploadUniforms(id<MTLRenderCommandEncoder> encoder);
+    void UploadUniforms(id<MTLRenderCommandEncoder> encoder, uint frameIndex);
 
 private:
     id<MTLDevice>               _device            = nil;
     id<MTLRenderPipelineState>  _pipelineState     = nil;
-    id<MTLBuffer>               _uniformBuffer     = nil;
+    std::vector<id<MTLBuffer>>  _uniformBuffers[kMetalInFlightFrameSlots];
+    uint                        _lastFrameIndex    = ~0u;
+    uint                        _uniformSlot       = 0;
     MetalUniforms               _uniforms          = {};
     nsMetalShaderLibrary       *_shaderLibrary     = nullptr;
     id<MTLFunction>             _vertexFunction    = nil;
     id<MTLFunction>             _fragmentFunction  = nil;
+
+    bool EnsureUniformBuffer(uint frameSlot, uint uniformSlot);
 };

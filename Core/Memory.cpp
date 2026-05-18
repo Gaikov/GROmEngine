@@ -4,8 +4,9 @@
 #include "nsLib/StrTools.h"
 #include <cstdlib>
 
-static bool g_inLoop = false;
-static int g_loopAllocations = 0;
+static thread_local bool g_inLoop = false;
+static thread_local int g_loopAllocations = 0;
+static thread_local int g_loopAllocationScope = 0;
 
 void *operator new(size_t size)
 {
@@ -37,6 +38,15 @@ void nsMemory::EndLoop() {
 		Log::Warning("Memory allocations in game loop: %i", g_loopAllocations);
 	}
 	g_loopAllocations = 0;
+}
+
+void nsMemory::PushLoopAllocationsScope() {
+	g_loopAllocationScope++;
+}
+
+void nsMemory::PopLoopAllocationsScope() {
+	assert(g_loopAllocationScope > 0);
+	g_loopAllocationScope--;
 }
 
 #define    MEM_ID    0xAFAF
@@ -166,7 +176,9 @@ static int g_allocatedBlocks = 0;
 
 void *mem_malloc(uint size, const char *file, int line)
 {
-	g_loopAllocations++;
+	if (g_inLoop && g_loopAllocationScope == 0) {
+		g_loopAllocations++;
+	}
     g_allocatedBlocks ++;
 	auto data = malloc(size);
 	memset(data, 0, size);
@@ -175,7 +187,9 @@ void *mem_malloc(uint size, const char *file, int line)
 
 void *mem_realloc(void *data, uint size, const char *file, int line)
 {
-	g_loopAllocations++;
+	if (g_inLoop && g_loopAllocationScope == 0) {
+		g_loopAllocations++;
+	}
 	assert(data);
 	return realloc(data, size);
 }
@@ -243,6 +257,3 @@ void mem_report()
         printf("WARNING: Leaked mem blocks: %i\n", g_allocatedBlocks);
     }
 }
-
-
-

@@ -4,7 +4,9 @@
 #pragma once
 
 #include "Engine/RenDevice.h"
+#include "nsMetalConfig.h"
 #include "nsLib/color.h"
+#include <vector>
 
 #import <Metal/Metal.h>
 
@@ -31,7 +33,7 @@ public:
     word *GetReadIndices() override;
     word *GetWriteIndices() override;
 
-    void Draw(id<MTLRenderCommandEncoder> encoder);
+    void Draw(id<MTLRenderCommandEncoder> encoder, uint frameIndex);
     bool UsesColor() const { return _useColor; }
     void SetPos(int vertexIndex, float x, float y, float z);
     void SetTex(int vertexIndex, float tu, float tv);
@@ -51,12 +53,15 @@ private:
     primitiveMode_t         _primitiveMode    = PM_TRIANGLES;
     nsColor                 _color;
 
-    id<MTLBuffer>           _vertexBuffer     = nil;
-    id<MTLBuffer>           _indexBuffer      = nil;
+    std::vector<id<MTLBuffer>> _vertexBuffers[kMetalInFlightFrameSlots];
+    std::vector<id<MTLBuffer>> _indexBuffers[kMetalInFlightFrameSlots];
 
     uint                    _maxDrawVertices  = 0;
     uint                    _maxDrawIndexes   = 0;
+    uint                    _lastFrameIndex   = ~0u;
+    uint                    _drawSlot         = 0;
 
     void InitBuffers();
     void ReleaseBuffers();
+    bool EnsureBuffers(uint frameSlot, uint drawSlot);
 };
