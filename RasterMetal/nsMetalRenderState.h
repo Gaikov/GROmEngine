@@ -16,11 +16,15 @@ public:
     ~nsMetalRenderState() override = default;
 
     bool Load(const char *fileName);
+    bool InitDefault();
     const char* GetPath() const { return _fileName; }
 
     bool IsAlphaTest() override { return _alphaTest; }
     bool IsAlphaBlend() override { return _alphaBlend; }
     float GetAlphaCutoff() const { return _alphaRef; }
+    bool IsDepthEnabled() const { return _zEnable; }
+    bool IsDepthWriteEnabled() const { return _zEnable && _zWrite; }
+    void SetColorWriteMask(MTLColorWriteMask mask);
 
     void Apply(id<MTLRenderCommandEncoder> encoder,
                nsMetalProgramsCache &programs,
@@ -36,6 +40,7 @@ private:
 
     id<MTLRenderPipelineState> _pipelineState = nil;
     id<MTLDepthStencilState>   _depthStencilState = nil;
+    id<MTLSamplerState>        _samplerState = nil;
 
     bool    _zEnable        = true;
     bool    _zWrite         = true;
@@ -44,7 +49,12 @@ private:
     bool    _alphaBlend     = false;
     MTLBlendFactor _srcBlend   = MTLBlendFactorOne;
     MTLBlendFactor _dstBlend   = MTLBlendFactorZero;
+    MTLBlendFactor _srcAlphaBlend = MTLBlendFactorOne;
+    MTLBlendFactor _dstAlphaBlend = MTLBlendFactorOne;
     bool    _cullMode       = true;
+    MTLColorWriteMask _colorWriteMask = MTLColorWriteMaskAll;
+    MTLSamplerAddressMode _texCoordU = MTLSamplerAddressModeRepeat;
+    MTLSamplerAddressMode _texCoordV = MTLSamplerAddressModeRepeat;
 
     bool Parse(class script_state_t *ss);
     bool CreatePipeline();

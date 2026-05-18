@@ -32,6 +32,7 @@ public:
     word *GetWriteIndices() override;
 
     void Draw(id<MTLRenderCommandEncoder> encoder);
+    bool UsesColor() const { return _useColor; }
     void SetPos(int vertexIndex, float x, float y, float z);
     void SetTex(int vertexIndex, float tu, float tv);
     void SetIndex(int index, unsigned short vertexIndex);

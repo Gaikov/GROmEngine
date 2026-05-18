@@ -5,6 +5,7 @@
 #include "nsMetalRenderState.h"
 #include "Core/ParseFile.h"
 #include "nsLib/log.h"
+#include <cstddef>
 #include <cstring>
 
 static MTLBlendFactor MapBlendFactor(const char *name, MTLBlendFactor def) {
@@ -25,6 +26,13 @@ static MTLBlendFactor MapBlendFactor(const char *name, MTLBlendFactor def) {
 
 nsMetalRenderState::nsMetalRenderState(id<MTLDevice> device, nsMetalProgramsCache &programs)
     : _device(device), _programs(programs) {}
+
+bool nsMetalRenderState::InitDefault() {
+    _fileName = "";
+    _program = _programs.GetProgram(nsMetalProgramsCache::DEFAULT_VERTEX_SHADER,
+                                    nsMetalProgramsCache::DEFAULT_FRAGMENT_SHADER);
+    return _program && CreatePipeline();
+}
 
 bool nsMetalRenderState::Load(const char *fileName) {
     _fileName = fileName;
@@ -54,11 +62,24 @@ bool nsMetalRenderState::Parse(script_state_t *ss) {
 
     auto src = ps_get_str(ss, "blend_src", "none");
     auto dst = ps_get_str(ss, "blend_dst", "none");
+    auto srcAlpha = ps_get_str(ss, "blend_src_alpha", "none");
+    auto dstAlpha = ps_get_str(ss, "blend_dst_alpha", "none");
     _srcBlend = MapBlendFactor(src, MTLBlendFactorOne);
     _dstBlend = MapBlendFactor(dst, MTLBlendFactorZero);
-    _alphaBlend = !StrEqual(src, "none") && !StrEqual(dst, "none");
+    _srcAlphaBlend = MapBlendFactor(srcAlpha, MTLBlendFactorOne);
+    _dstAlphaBlend = MapBlendFactor(dstAlpha, MTLBlendFactorOne);
+    _alphaBlend = !StrEqual(src, "none")
+        || !StrEqual(dst, "none")
+        || !StrEqual(srcAlpha, "none")
+        || !StrEqual(dstAlpha, "none");
 
     _cullMode = ps_get_f(ss, "cull_mode", 1) != 0;
+    _texCoordU = StrEqual(ps_get_str(ss, "tex_coord_u", "wrap"), "clamp")
+        ? MTLSamplerAddressModeClampToEdge
+        : MTLSamplerAddressModeRepeat;
+    _texCoordV = StrEqual(ps_get_str(ss, "tex_coord_v", "wrap"), "clamp")
+        ? MTLSamplerAddressModeClampToEdge
+        : MTLSamplerAddressModeRepeat;
 
     return CreatePipeline();
 }
@@ -72,29 +93,32 @@ bool nsMetalRenderState::CreatePipeline() {
     desc.vertexFunction = vertexFunc;
     desc.fragmentFunction = fragmentFunc;
     desc.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    desc.colorAttachments[0].writeMask = _colorWriteMask;
+    desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+    desc.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 
     if (_alphaBlend) {
         desc.colorAttachments[0].blendingEnabled = YES;
         desc.colorAttachments[0].sourceRGBBlendFactor = _srcBlend;
         desc.colorAttachments[0].destinationRGBBlendFactor = _dstBlend;
         desc.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
-        desc.colorAttachments[0].sourceAlphaBlendFactor = _srcBlend;
-        desc.colorAttachments[0].destinationAlphaBlendFactor = _dstBlend;
+        desc.colorAttachments[0].sourceAlphaBlendFactor = _srcAlphaBlend;
+        desc.colorAttachments[0].destinationAlphaBlendFactor = _dstAlphaBlend;
         desc.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
     }
 
     auto vertexDesc = [[MTLVertexDescriptor alloc] init];
     vertexDesc.attributes[0].format = MTLVertexFormatFloat3;
-    vertexDesc.attributes[0].offset = 0;
+    vertexDesc.attributes[0].offset = offsetof(vbVertex_t, v);
     vertexDesc.attributes[0].bufferIndex = 0;
     vertexDesc.attributes[1].format = MTLVertexFormatFloat3;
-    vertexDesc.attributes[1].offset = 12;
+    vertexDesc.attributes[1].offset = offsetof(vbVertex_t, n);
     vertexDesc.attributes[1].bufferIndex = 0;
     vertexDesc.attributes[2].format = MTLVertexFormatUChar4Normalized;
-    vertexDesc.attributes[2].offset = 24;
+    vertexDesc.attributes[2].offset = offsetof(vbVertex_t, c);
     vertexDesc.attributes[2].bufferIndex = 0;
     vertexDesc.attributes[3].format = MTLVertexFormatFloat2;
-    vertexDesc.attributes[3].offset = 28;
+    vertexDesc.attributes[3].offset = offsetof(vbVertex_t, tu);
     vertexDesc.attributes[3].bufferIndex = 0;
     vertexDesc.layouts[0].stride = sizeof(vbVertex_t);
     vertexDesc.layouts[0].stepRate = 1;
@@ -114,7 +138,20 @@ bool nsMetalRenderState::CreatePipeline() {
     dsDesc.depthWriteEnabled = _zEnable && _zWrite;
     _depthStencilState = [_device newDepthStencilStateWithDescriptor:dsDesc];
 
+    MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
+    samplerDesc.minFilter = MTLSamplerMinMagFilterLinear;
+    samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
+    samplerDesc.sAddressMode = _texCoordU;
+    samplerDesc.tAddressMode = _texCoordV;
+    _samplerState = [_device newSamplerStateWithDescriptor:samplerDesc];
+
     return true;
+}
+
+void nsMetalRenderState::SetColorWriteMask(MTLColorWriteMask mask) {
+    if (_colorWriteMask == mask) return;
+    _colorWriteMask = mask;
+    CreatePipeline();
 }
 
 void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
@@ -123,6 +160,8 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
     if (!prev) {
         [encoder setRenderPipelineState:_pipelineState];
         if (_depthStencilState) [encoder setDepthStencilState:_depthStencilState];
+        [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
+        if (_samplerState) [encoder setFragmentSamplerState:_samplerState atIndex:0];
         programs.Bind(_program, true);
         return;
     }
@@ -132,6 +171,12 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
     }
     if (_depthStencilState != prev->_depthStencilState) {
         [encoder setDepthStencilState:_depthStencilState];
+    }
+    if (_cullMode != prev->_cullMode) {
+        [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
+    }
+    if (_samplerState != prev->_samplerState) {
+        [encoder setFragmentSamplerState:_samplerState atIndex:0];
     }
     if (_program != prev->_program) {
         programs.Bind(_program, true);

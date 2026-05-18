@@ -46,16 +46,10 @@ void nsMetalVertexBuffer::ReleaseBuffers() {
 void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder) {
     if (!_vertexBuffer || !_indexBuffer) return;
 
-    if (!_useColor) {
-        dword c = (uint(_color.a * 255) << 24) | (uint(_color.b * 255) << 16)
-                | (uint(_color.g * 255) << 8)  | uint(_color.r * 255);
-        for (uint i = 0; i < _maxDrawVertices; i++) {
-            _verts[i].c = c;
-        }
-    }
-
     memcpy([_vertexBuffer contents], _verts, sizeof(vbVertex_t) * _maxDrawVertices);
     memcpy([_indexBuffer contents], _indexes, sizeof(unsigned short) * _maxDrawIndexes);
+    [_vertexBuffer didModifyRange:NSMakeRange(0, sizeof(vbVertex_t) * _maxDrawVertices)];
+    [_indexBuffer didModifyRange:NSMakeRange(0, sizeof(unsigned short) * _maxDrawIndexes)];
 
     [encoder setVertexBuffer:_vertexBuffer offset:0 atIndex:0];
 
@@ -95,12 +89,11 @@ void nsMetalVertexBuffer::UseColor(const nsColor &color) {
 }
 
 void nsMetalVertexBuffer::Invalidate() {
-    _maxDrawVertices = _numVertices;
-    _maxDrawIndexes = _numIndexes;
+    InitBuffers();
 }
 
 void nsMetalVertexBuffer::SetValidVertices(uint count) {
-    _maxDrawVertices = count;
+    _maxDrawVertices = count <= _numVertices ? count : _numVertices;
 }
 
 uint nsMetalVertexBuffer::GetValidVertices() {
@@ -108,7 +101,7 @@ uint nsMetalVertexBuffer::GetValidVertices() {
 }
 
 void nsMetalVertexBuffer::SetValidIndices(uint count) {
-    _maxDrawIndexes = count;
+    _maxDrawIndexes = count <= _numIndexes ? count : _numIndexes;
 }
 
 uint nsMetalVertexBuffer::GetValidIndices() {

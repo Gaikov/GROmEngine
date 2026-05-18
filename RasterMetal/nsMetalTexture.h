@@ -11,6 +11,7 @@
 class nsMetalTexture : public ITexture {
 public:
     static nsMetalTexture* Load(id<MTLDevice> device, const char *filePath, int flags);
+    static nsMetalTexture* Create(id<MTLDevice> device, const char *id, nsBitmapData::tSP data);
     static void Free(nsMetalTexture *t);
 
     nsMetalTexture(id<MTLDevice> device, const char *id);
@@ -18,6 +19,7 @@ public:
 
     bool UploadFromBitmap(nsBitmapData *bmData);
     bool Bind(id<MTLRenderCommandEncoder> encoder, int index);
+    void UnloadFromGPU();
 
     int GetWidth();
     int GetHeight();
@@ -28,7 +30,6 @@ public:
 private:
     id<MTLDevice>   _device     = nil;
     id<MTLTexture>  _texture    = nil;
-    id<MTLSamplerState> _sampler = nil;
     std::string     _id;
     nsBitmapData::tSP _bmData;
     int             _loadFlags  = 0;

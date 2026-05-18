@@ -6,11 +6,16 @@
 #include "nsMetalShaderLibrary.h"
 #include "Engine/RenDevice.h"
 #include "nsLib/log.h"
+#include <cstddef>
 #include <cstring>
 
 nsMetalProgram::nsMetalProgram(id<MTLDevice> device) : _device(device) {
     _shaderLibrary = new nsMetalShaderLibrary(device);
     memset(&_uniforms, 0, sizeof(_uniforms));
+    _uniforms.color[0] = 1.0f;
+    _uniforms.color[1] = 1.0f;
+    _uniforms.color[2] = 1.0f;
+    _uniforms.color[3] = 1.0f;
 }
 
 nsMetalProgram::~nsMetalProgram() {
@@ -40,6 +45,8 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
     descriptor.vertexFunction = vertexFunc;
     descriptor.fragmentFunction = fragmentFunc;
     descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+    descriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     descriptor.colorAttachments[0].blendingEnabled = YES;
     descriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
     descriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
@@ -50,16 +57,16 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
 
     auto vertexDesc = [[MTLVertexDescriptor alloc] init];
     vertexDesc.attributes[0].format = MTLVertexFormatFloat3;
-    vertexDesc.attributes[0].offset = 0;
+    vertexDesc.attributes[0].offset = offsetof(vbVertex_t, v);
     vertexDesc.attributes[0].bufferIndex = 0;
     vertexDesc.attributes[1].format = MTLVertexFormatFloat3;
-    vertexDesc.attributes[1].offset = 12;
+    vertexDesc.attributes[1].offset = offsetof(vbVertex_t, n);
     vertexDesc.attributes[1].bufferIndex = 0;
     vertexDesc.attributes[2].format = MTLVertexFormatUChar4Normalized;
-    vertexDesc.attributes[2].offset = 24;
+    vertexDesc.attributes[2].offset = offsetof(vbVertex_t, c);
     vertexDesc.attributes[2].bufferIndex = 0;
     vertexDesc.attributes[3].format = MTLVertexFormatFloat2;
-    vertexDesc.attributes[3].offset = 28;
+    vertexDesc.attributes[3].offset = offsetof(vbVertex_t, tu);
     vertexDesc.attributes[3].bufferIndex = 0;
     vertexDesc.layouts[0].stride = sizeof(vbVertex_t);
     vertexDesc.layouts[0].stepRate = 1;
@@ -88,17 +95,19 @@ void nsMetalProgram::Unload() {
 }
 
 void nsMetalProgram::SetProjView(const float *matrix) {
-    fprintf(stderr, "METAL SetProjView: _11=%.4f\n", matrix[0]);
     memcpy(_uniforms.projView, matrix, sizeof(float) * 16);
 }
 
 void nsMetalProgram::SetModel(const float *matrix) {
-    fprintf(stderr, "METAL SetModel: _11=%.4f _12=%.4f\n", matrix[0], matrix[1]);
     memcpy(_uniforms.model, matrix, sizeof(float) * 16);
 }
 
 void nsMetalProgram::SetTextureMatrix(const float *matrix) {
     memcpy(_uniforms.texMat, matrix, sizeof(float) * 16);
+}
+
+void nsMetalProgram::SetColor(const float *color) {
+    memcpy(_uniforms.color, color, sizeof(float) * 4);
 }
 
 void nsMetalProgram::SetAlphaCutoff(float cutoff) {
@@ -109,6 +118,10 @@ void nsMetalProgram::SetHasTexture(bool hasTexture) {
     _uniforms.hasTexture = hasTexture ? 1 : 0;
 }
 
+void nsMetalProgram::SetHasVertexColor(bool hasVertexColor) {
+    _uniforms.hasVertexColor = hasVertexColor ? 1 : 0;
+}
+
 bool nsMetalProgram::Bind(id<MTLRenderCommandEncoder> encoder) {
     if (!_pipelineState) return false;
     [encoder setRenderPipelineState:_pipelineState];
@@ -117,16 +130,6 @@ bool nsMetalProgram::Bind(id<MTLRenderCommandEncoder> encoder) {
 
 void nsMetalProgram::UploadUniforms(id<MTLRenderCommandEncoder> encoder) {
     if (!_uniformBuffer) return;
-    fprintf(stderr, "METAL Upload: model._11=%.4f model._12=%.4f proj._11=%.4f\n",
-        _uniforms.model[0], _uniforms.model[1], _uniforms.projView[0]);
-
-    static int testFrame = 300;
-    if (testFrame > 0) {
-        for (int i = 0; i < 16; i++) _uniforms.model[i] *= 2.0f;
-        fprintf(stderr, "METAL TEST: model x2, model._11=%.4f frames left=%d\n", _uniforms.model[0], testFrame);
-        testFrame--;
-    }
-
     memcpy([_uniformBuffer contents], &_uniforms, sizeof(MetalUniforms));
     [encoder setVertexBuffer:_uniformBuffer offset:0 atIndex:1];
     [encoder setFragmentBuffer:_uniformBuffer offset:0 atIndex:1];

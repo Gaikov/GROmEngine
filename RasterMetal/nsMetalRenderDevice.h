@@ -8,6 +8,8 @@
 #include "nsMetalTexturesCache.h"
 #include "nsMetalProgramsCache.h"
 #include "nsMetalRenderState.h"
+#include "nsMetalStencilState.h"
+#include "nsMetalRenderTexture.h"
 #include "nsLib/color.h"
 
 #import <Metal/Metal.h>
@@ -51,10 +53,10 @@ public:
     void VerticesRelease(IVertexBuffer *vb) override;
     void VerticesDraw(IVertexBuffer *vb) override;
 
-    void DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height) override {}
-    void DrawSprite3D(const nsVec3 &pos, float width, float height, float angle) override {}
-    void DrawChar3D(const rchar_t *ch, const nsVec3 &pos, float sx, float sy) override {}
-    void DrawPlaneSprite(const nsVec3 &p1, const nsVec3 &p2, float width, uint wrap_count) override {}
+    void DrawLinedSprite(float x1, float y1, float x2, float y2, float width, float height) override;
+    void DrawSprite3D(const nsVec3 &pos, float width, float height, float angle) override;
+    void DrawChar3D(const rchar_t *ch, const nsVec3 &pos, float sx, float sy) override;
+    void DrawPlaneSprite(const nsVec3 &p1, const nsVec3 &p2, float width, uint wrap_count) override;
 
     IStencilState* StencilLoad(const char *fileName) override;
     void StencilRelease(IStencilState *state) override;
@@ -75,6 +77,7 @@ private:
     id<MTLCommandBuffer>        _commandBuffer   = nil;
     id<MTLRenderCommandEncoder> _encoder         = nil;
     id<CAMetalDrawable>         _currentDrawable = nil;
+    id<MTLTexture>              _depthStencilTexture = nil;
 
     nsMetalTexturesCache       *_textures        = nullptr;
     nsMetalProgramsCache       *_programs        = nullptr;
@@ -82,14 +85,24 @@ private:
 
     std::vector<nsMetalVertexBuffer*> _allocatedVBS;
     std::map<std::string, nsMetalRenderState*> _stateCache;
+    std::map<nsMetalRenderState*, uint> _stateRefs;
 
     nsMetalRenderState         *_defaultState    = nullptr;
     nsMetalRenderState         *_currentState    = nullptr;
+    nsMetalStencilState        *_currentStencil  = nullptr;
+    nsMetalRenderTexture       *_currentRenderTexture = nullptr;
 
     nsMatrix _projMatrix;
     nsMatrix _viewMatrix;
     nsColor  _currentColor = nsColor::white;
+    rasterConfig_t _config = {32, 800, 600};
+    uint _pendingClearFlags = CLR_ALL;
 
     bool BeginEncoder();
     void EndEncoder();
+    void EnsureDepthStencilTexture(int width, int height);
+    MTLRenderPassDescriptor *CreatePassDescriptor(id<MTLTexture> colorTexture,
+                                                  id<MTLTexture> depthStencilTexture);
+    void ApplyProjectionMatrix();
+    void DrawQuad(vbVertex_t v[4]);
 };

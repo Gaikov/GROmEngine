@@ -12,9 +12,11 @@ struct MetalUniforms {
     float projView[16];
     float model[16];
     float texMat[16];
+    float color[4];
     float alphaCutoff;
     int   hasTexture;
-    float padding[2];
+    int   hasVertexColor;
+    float padding;
 };
 
 class nsMetalProgram {
@@ -32,8 +34,10 @@ public:
     void SetProjView(const float *matrix);
     void SetModel(const float *matrix);
     void SetTextureMatrix(const float *matrix);
+    void SetColor(const float *color);
     void SetAlphaCutoff(float cutoff);
     void SetHasTexture(bool hasTexture);
+    void SetHasVertexColor(bool hasVertexColor);
 
     bool Bind(id<MTLRenderCommandEncoder> encoder);
     void UploadUniforms(id<MTLRenderCommandEncoder> encoder);

@@ -11,6 +11,10 @@ nsMetalProgramsCache::~nsMetalProgramsCache() {
 }
 
 bool nsMetalProgramsCache::Init() {
+    _textureMatrix.Identity();
+    _projView.Identity();
+    _model.Identity();
+
     _defaultProgram = GetProgram(DEFAULT_VERTEX_SHADER, DEFAULT_FRAGMENT_SHADER);
     if (!_defaultProgram) {
         Log::Error("Can't load default Metal program!");
@@ -82,8 +86,6 @@ void nsMetalProgramsCache::SetAlphaCutoff(float alphaRef) {
 
 void nsMetalProgramsCache::SetProjViewMatrix(const float *m) {
     _projView = m;
-    fprintf(stderr, "CACHE SetProjViewMatrix: _11=%.4f curProg=%s\n", 
-        (*m), _currentProgram ? "YES" : "nil");
     if (_currentProgram) {
         _currentProgram->SetProjView(m);
     }
@@ -91,8 +93,6 @@ void nsMetalProgramsCache::SetProjViewMatrix(const float *m) {
 
 void nsMetalProgramsCache::SetModelMatrix(const float *m) {
     _model = m;
-    fprintf(stderr, "CACHE SetModelMatrix: _11=%.4f _12=%.4f curProg=%s\n",
-        m[0], m[1], _currentProgram ? "YES" : "nil");
     if (_currentProgram) {
         _currentProgram->SetModel(m);
     }

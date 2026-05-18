@@ -10,8 +10,7 @@ nsMetalTexture::nsMetalTexture(id<MTLDevice> device, const char *id)
     : _device(device), _id(id) {}
 
 nsMetalTexture::~nsMetalTexture() {
-    _texture = nil;
-    _sampler = nil;
+    UnloadFromGPU();
 }
 
 nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, const char *filePath, int flags) {
@@ -26,18 +25,25 @@ nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, const char *filePath,
     auto texture = new nsMetalTexture(device, filePath);
     texture->_bmData = bmData;
     texture->_loadFlags = flags;
+    if ((flags & TLF_PREMULTIPLY_ALPHA) != 0) {
+        texture->_bmData->PremultiplyAlpha();
+    }
     if (!texture->UploadFromBitmap(bmData.get())) {
         delete texture;
         return nullptr;
     }
 
-    MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
-    samplerDesc.minFilter = MTLSamplerMinMagFilterLinear;
-    samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
-    samplerDesc.sAddressMode = MTLSamplerAddressModeRepeat;
-    samplerDesc.tAddressMode = MTLSamplerAddressModeRepeat;
-    texture->_sampler = [device newSamplerStateWithDescriptor:samplerDesc];
+    return texture;
+}
 
+nsMetalTexture* nsMetalTexture::Create(id<MTLDevice> device, const char *id, nsBitmapData::tSP data) {
+    if (!data) return nullptr;
+    auto texture = new nsMetalTexture(device, id);
+    texture->_bmData = std::move(data);
+    if (!texture->UploadFromBitmap(texture->_bmData.get())) {
+        delete texture;
+        return nullptr;
+    }
     return texture;
 }
 
@@ -70,10 +76,11 @@ bool nsMetalTexture::UploadFromBitmap(nsBitmapData *bmData) {
 bool nsMetalTexture::Bind(id<MTLRenderCommandEncoder> encoder, int index) {
     if (!_texture) return false;
     [encoder setFragmentTexture:_texture atIndex:index];
-    if (_sampler) {
-        [encoder setFragmentSamplerState:_sampler atIndex:index];
-    }
     return true;
+}
+
+void nsMetalTexture::UnloadFromGPU() {
+    _texture = nil;
 }
 
 int nsMetalTexture::GetWidth() {
