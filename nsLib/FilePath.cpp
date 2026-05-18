@@ -94,7 +94,8 @@ bool nsFilePath::Remove() const
 
 bool nsFilePath::MakeFolder(const char *name)
 {
-	return std::filesystem::create_directories(name);
+    std::error_code ec;
+	return std::filesystem::create_directories(name, ec) || !ec;
 }
 
 bool nsFilePath::Listing(nsFilePath::tList &result) const
@@ -188,6 +189,11 @@ bool nsFilePath::CreateFolders() const
 
 	nsString str    = _path;
 	char     *slash = str.AsChar();
+    if (IsAbsolute(str) && strlen(str) > 2 && str[1] == ':' && str[2] == '/') {
+        slash += 3;
+    } else if (str[0] == '/') {
+        slash += 1;
+    }
 	do
 	{
 		slash = strchr(slash, '/');
