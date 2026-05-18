@@ -44,14 +44,19 @@ void nsMetalVertexBuffer::ReleaseBuffers() {
 }
 
 void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder) {
-    if (!_vertexBuffer || !_indexBuffer) return;
+    if (!encoder || _maxDrawVertices == 0 || _maxDrawIndexes == 0) return;
 
-    memcpy([_vertexBuffer contents], _verts, sizeof(vbVertex_t) * _maxDrawVertices);
-    memcpy([_indexBuffer contents], _indexes, sizeof(unsigned short) * _maxDrawIndexes);
-    [_vertexBuffer didModifyRange:NSMakeRange(0, sizeof(vbVertex_t) * _maxDrawVertices)];
-    [_indexBuffer didModifyRange:NSMakeRange(0, sizeof(unsigned short) * _maxDrawIndexes)];
+    const auto vertexBytes = sizeof(vbVertex_t) * _maxDrawVertices;
+    const auto indexBytes = sizeof(unsigned short) * _maxDrawIndexes;
+    id<MTLBuffer> vertexBuffer = [_device newBufferWithBytes:_verts
+                                                       length:vertexBytes
+                                                      options:MTLResourceStorageModeShared];
+    id<MTLBuffer> indexBuffer = [_device newBufferWithBytes:_indexes
+                                                      length:indexBytes
+                                                     options:MTLResourceStorageModeShared];
+    if (!vertexBuffer || !indexBuffer) return;
 
-    [encoder setVertexBuffer:_vertexBuffer offset:0 atIndex:0];
+    [encoder setVertexBuffer:vertexBuffer offset:0 atIndex:0];
 
     MTLPrimitiveType mode;
     switch (_primitiveMode) {
@@ -61,9 +66,9 @@ void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder) {
     }
 
     [encoder drawIndexedPrimitives:mode
-                        indexCount:_maxDrawIndexes
-                         indexType:MTLIndexTypeUInt16
-                       indexBuffer:_indexBuffer
+                       indexCount:_maxDrawIndexes
+                        indexType:MTLIndexTypeUInt16
+                      indexBuffer:indexBuffer
                  indexBufferOffset:0];
 }
 

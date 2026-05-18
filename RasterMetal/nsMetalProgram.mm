@@ -82,8 +82,6 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
         return false;
     }
 
-    _uniformBuffer = [_device newBufferWithLength:sizeof(MetalUniforms)
-                                         options:MTLResourceStorageModeShared];
     return true;
 }
 
@@ -129,8 +127,6 @@ bool nsMetalProgram::Bind(id<MTLRenderCommandEncoder> encoder) {
 }
 
 void nsMetalProgram::UploadUniforms(id<MTLRenderCommandEncoder> encoder) {
-    if (!_uniformBuffer) return;
-    memcpy([_uniformBuffer contents], &_uniforms, sizeof(MetalUniforms));
-    [encoder setVertexBuffer:_uniformBuffer offset:0 atIndex:1];
-    [encoder setFragmentBuffer:_uniformBuffer offset:0 atIndex:1];
+    [encoder setVertexBytes:&_uniforms length:sizeof(MetalUniforms) atIndex:1];
+    [encoder setFragmentBytes:&_uniforms length:sizeof(MetalUniforms) atIndex:1];
 }
