@@ -29,6 +29,7 @@ nsMetalRenderState::nsMetalRenderState(id<MTLDevice> device, nsMetalProgramsCach
     : _device(device), _programs(programs) {}
 
 bool nsMetalRenderState::InitDefault() {
+    Invalidate();
     _fileName = "";
     _program = _programs.GetProgram(nsMetalProgramsCache::DEFAULT_VERTEX_SHADER,
                                     nsMetalProgramsCache::DEFAULT_FRAGMENT_SHADER);
@@ -36,6 +37,7 @@ bool nsMetalRenderState::InitDefault() {
 }
 
 bool nsMetalRenderState::Load(const char *fileName) {
+    Invalidate();
     _fileName = fileName;
     Log::Info("...loading Metal render state: %s", fileName);
     nsParseFile pf;
@@ -86,6 +88,7 @@ bool nsMetalRenderState::Parse(script_state_t *ss) {
 }
 
 bool nsMetalRenderState::CreatePipeline() {
+    if (!_program) return false;
     auto vertexFunc = _program->GetVertexFunction();
     auto fragmentFunc = _program->GetFragmentFunction();
     if (!vertexFunc || !fragmentFunc) return false;
@@ -149,6 +152,12 @@ bool nsMetalRenderState::CreatePipeline() {
     return true;
 }
 
+void nsMetalRenderState::Invalidate() {
+    _pipelineState = nil;
+    _depthStencilState = nil;
+    _samplerState = nil;
+}
+
 void nsMetalRenderState::SetColorWriteMask(MTLColorWriteMask mask) {
     if (_colorWriteMask == mask) return;
     _colorWriteMask = mask;
@@ -157,7 +166,12 @@ void nsMetalRenderState::SetColorWriteMask(MTLColorWriteMask mask) {
 
 void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
                                 nsMetalProgramsCache &programs,
-                                nsMetalRenderState *prev) {
+	                                nsMetalRenderState *prev) {
+    if (!_pipelineState || !_depthStencilState || !_samplerState) {
+        if (!CreatePipeline()) return;
+        prev = nullptr;
+    }
+
     if (!prev) {
         [encoder setRenderPipelineState:_pipelineState];
         if (_depthStencilState) [encoder setDepthStencilState:_depthStencilState];

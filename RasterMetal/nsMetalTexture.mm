@@ -28,10 +28,6 @@ nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, const char *filePath,
     if ((flags & TLF_PREMULTIPLY_ALPHA) != 0) {
         texture->_bmData->PremultiplyAlpha();
     }
-    if (!texture->UploadFromBitmap(bmData.get())) {
-        delete texture;
-        return nullptr;
-    }
 
     return texture;
 }
@@ -40,10 +36,6 @@ nsMetalTexture* nsMetalTexture::Create(id<MTLDevice> device, const char *id, nsB
     if (!data) return nullptr;
     auto texture = new nsMetalTexture(device, id);
     texture->_bmData = std::move(data);
-    if (!texture->UploadFromBitmap(texture->_bmData.get())) {
-        delete texture;
-        return nullptr;
-    }
     return texture;
 }
 
@@ -53,6 +45,7 @@ void nsMetalTexture::Free(nsMetalTexture *t) {
 
 bool nsMetalTexture::UploadFromBitmap(nsBitmapData *bmData) {
     if (!bmData) return false;
+    if (_texture) return true;
 
     MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
                                                                                     width:bmData->GetWidth()
@@ -73,8 +66,12 @@ bool nsMetalTexture::UploadFromBitmap(nsBitmapData *bmData) {
     return true;
 }
 
+bool nsMetalTexture::UploadToGPU() {
+    return _texture || UploadFromBitmap(_bmData.get());
+}
+
 bool nsMetalTexture::Bind(id<MTLRenderCommandEncoder> encoder, int index) {
-    if (!_texture) return false;
+    if (!UploadToGPU()) return false;
     [encoder setFragmentTexture:_texture atIndex:index];
     return true;
 }
@@ -97,6 +94,7 @@ void nsMetalTexture::GetSize(int &width, int &height) {
 }
 
 uint64_t nsMetalTexture::GetId() {
+    UploadToGPU();
     return reinterpret_cast<uint64_t>(_texture);
 }
 

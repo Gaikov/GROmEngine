@@ -5,6 +5,7 @@
 #include "nsMetalRenderDevice.h"
 #include "nsMetalRenderState.h"
 #include "nsMetalStencilState.h"
+#include "Core/Config.h"
 #include "Core/Memory.h"
 #include "nsLib/log.h"
 #include "nsLib/FilePath.h"
@@ -42,10 +43,12 @@ bool nsMetalRenderDevice::Init(void *wnd) {
         return false;
     }
 
-    Log::Info("Metal device: %s", [[_device name] UTF8String]);
+	Log::Info("Metal device: %s", [[_device name] UTF8String]);
 
-    _commandQueue = [_device newCommandQueue];
-    _passDescriptor = [[MTLRenderPassDescriptor alloc] init];
+	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) { _queryRestart = true; });
+
+	_commandQueue = [_device newCommandQueue];
+	_passDescriptor = [[MTLRenderPassDescriptor alloc] init];
 
     void *wndPtr = App_GetPlatform()->GetWindowHandler();
     if (wndPtr) {
@@ -107,8 +110,10 @@ void nsMetalRenderDevice::Release() {
     delete _textures; _textures = nullptr;
     delete _quadBuff; _quadBuff = nullptr;
 
-    for (auto vb : _allocatedVBS) delete vb;
-    _allocatedVBS.clear();
+	for (auto vb : _allocatedVBS) delete vb;
+	_allocatedVBS.clear();
+	for (auto rt : _allocatedRenderTextures) delete rt;
+	_allocatedRenderTextures.clear();
 
     _commandQueue = nil;
     _mtkView = nil;
@@ -116,21 +121,25 @@ void nsMetalRenderDevice::Release() {
 }
 
 void nsMetalRenderDevice::InvalidateResources() {
-    _currentState = nullptr;
-    for (auto &it : _stateCache) delete it.second;
-    _stateCache.clear();
-    _stateRefs.clear();
+	_queryRestart = true;
+}
+
+void nsMetalRenderDevice::RestartResources() {
+	_currentState = nullptr;
+	if (_defaultState) {
+	    _defaultState->Invalidate();
+	}
+	for (auto &it : _stateCache) {
+	    it.second->Invalidate();
+	}
     _textures->UnloadFromGPU();
-    _programs->Release();
-    _programs->Init();
-    if (_defaultState) {
-        delete _defaultState;
-        _defaultState = new nsMetalRenderState(_device, *_programs);
-        _defaultState->InitDefault();
-    }
-    for (auto vb : _allocatedVBS) {
-        vb->Invalidate();
-    }
+    _programs->Invalidate();
+	for (auto vb : _allocatedVBS) {
+	    vb->Invalidate();
+	}
+	for (auto rt : _allocatedRenderTextures) {
+	    rt->Invalidate();
+	}
 }
 void nsMetalRenderDevice::GetDisplayInfo(DisplayInfo &info) {
     info.modes.push_back({static_cast<int>(_config.currWidth), static_cast<int>(_config.currHeight)});
@@ -196,9 +205,13 @@ void nsMetalRenderDevice::EndEncoder() {
 }
 
 bool nsMetalRenderDevice::BeginScene() {
-    _currentRenderTexture = nullptr;
-    _frameIndex++;
-    return BeginEncoder();
+	_currentRenderTexture = nullptr;
+	_frameIndex++;
+	if (_queryRestart) {
+	    _queryRestart = false;
+	    RestartResources();
+	}
+	return BeginEncoder();
 }
 
 void nsMetalRenderDevice::EndScene() {
@@ -568,7 +581,9 @@ void nsMetalRenderDevice::StencilApply(IStencilState *state) {
 }
 
 IRenderTexture* nsMetalRenderDevice::RenderTextureCreate(int width, int height, texfmt_t fmt) {
-    return new nsMetalRenderTexture(_device, width, height, fmt);
+    auto rt = new nsMetalRenderTexture(_device, width, height, fmt);
+    _allocatedRenderTextures.push_back(rt);
+    return rt;
 }
 
 void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {

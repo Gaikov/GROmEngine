@@ -24,6 +24,7 @@ bool nsMetalProgramsCache::Init() {
 }
 
 void nsMetalProgramsCache::Release() {
+    Invalidate();
     _currentProgram = nullptr;
     _defaultProgram = nullptr;
 
@@ -31,6 +32,13 @@ void nsMetalProgramsCache::Release() {
         delete it.second;
     }
     _cache.clear();
+}
+
+void nsMetalProgramsCache::Invalidate() {
+    _currentProgram = nullptr;
+    for (auto &it : _cache) {
+        it.second->Invalidate();
+    }
 }
 
 nsMetalProgram* nsMetalProgramsCache::GetProgram(const char *vertexShaderPath,

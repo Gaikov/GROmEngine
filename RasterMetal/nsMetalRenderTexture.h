@@ -17,9 +17,10 @@ public:
     void GetSize(int &width, int &height) override;
     uint64_t GetId() override;
 
-    id<MTLTexture> GetColorTexture() const { return _colorTexture; }
-    id<MTLTexture> GetDepthStencilTexture() const { return _depthStencilTexture; }
+    id<MTLTexture> GetColorTexture();
+    id<MTLTexture> GetDepthStencilTexture();
     bool Bind(id<MTLRenderCommandEncoder> encoder, int index);
+    void Invalidate();
 
 private:
     id<MTLDevice> _device = nil;
@@ -29,6 +30,6 @@ private:
     int _height = 0;
     texfmt_t _fmt = TF_RGBA;
 
-    void Upload();
+    bool Upload();
     void ReleaseGPU();
 };

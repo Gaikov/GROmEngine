@@ -84,8 +84,9 @@ private:
     nsMetalProgramsCache       *_programs        = nullptr;
     nsMetalVertexBuffer        *_quadBuff        = nullptr;
 
-    std::vector<nsMetalVertexBuffer*> _allocatedVBS;
-    std::map<std::string, nsMetalRenderState*> _stateCache;
+	std::vector<nsMetalVertexBuffer*> _allocatedVBS;
+	std::vector<nsMetalRenderTexture*> _allocatedRenderTextures;
+	std::map<std::string, nsMetalRenderState*> _stateCache;
     std::map<nsMetalRenderState*, uint> _stateRefs;
 
     nsMetalRenderState         *_defaultState    = nullptr;
@@ -97,12 +98,14 @@ private:
     nsMatrix _viewMatrix;
     nsColor  _currentColor = nsColor::white;
     rasterConfig_t _config = {32, 800, 600};
-    uint _pendingClearFlags = CLR_ALL;
-    uint _frameIndex = 0;
+	uint _pendingClearFlags = CLR_ALL;
+	uint _frameIndex = 0;
+	bool _queryRestart = false;
 
-    bool BeginEncoder();
-    void EndEncoder();
-    void EnsureDepthStencilTexture(int width, int height);
+	bool BeginEncoder();
+	void EndEncoder();
+	void RestartResources();
+	void EnsureDepthStencilTexture(int width, int height);
     MTLRenderPassDescriptor *CreatePassDescriptor(id<MTLTexture> colorTexture,
                                                   id<MTLTexture> depthStencilTexture);
     void ApplyProjectionMatrix();

@@ -17,6 +17,7 @@ public:
 
     bool Load(const char *fileName);
     bool InitDefault();
+    void Invalidate();
     const char* GetPath() const { return _fileName; }
 
     bool IsAlphaTest() override { return _alphaTest; }

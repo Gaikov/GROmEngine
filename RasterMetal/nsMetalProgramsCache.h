@@ -14,6 +14,7 @@ public:
 
     bool Init();
     void Release();
+    void Invalidate();
 
     nsMetalProgram* GetProgram(const char *vertexShaderPath, const char *fragmentShaderPath);
 

@@ -9,6 +9,7 @@
 #include "nsLib/log.h"
 #include <cstddef>
 #include <cstring>
+#include <string>
 
 nsMetalProgram::nsMetalProgram(id<MTLDevice> device) : _device(device) {
     _shaderLibrary = new nsMetalShaderLibrary(device);
@@ -25,7 +26,9 @@ nsMetalProgram::~nsMetalProgram() {
 }
 
 bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShaderPath) {
-    Unload();
+    _vertexShaderPath = vertexShaderPath ? vertexShaderPath : "";
+    _fragmentShaderPath = fragmentShaderPath ? fragmentShaderPath : "";
+    Invalidate();
 
     Log::Info("...loading Metal program: %s + %s", vertexShaderPath, fragmentShaderPath);
 
@@ -87,6 +90,12 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
 }
 
 void nsMetalProgram::Unload() {
+    Invalidate();
+    _vertexShaderPath.clear();
+    _fragmentShaderPath.clear();
+}
+
+void nsMetalProgram::Invalidate() {
     _pipelineState = nil;
 	for (uint i = 0; i < kMetalInFlightFrameSlots; ++i) {
 	    _uniformBuffers[i].clear();
@@ -95,6 +104,34 @@ void nsMetalProgram::Unload() {
     _uniformSlot = 0;
     _vertexFunction = nil;
     _fragmentFunction = nil;
+}
+
+bool nsMetalProgram::EnsureLoaded() {
+    if (_vertexFunction && _fragmentFunction) {
+        return true;
+    }
+    if (_vertexShaderPath.empty() || _fragmentShaderPath.empty()) {
+        return false;
+    }
+
+    const std::string vs = _vertexShaderPath;
+    const std::string fs = _fragmentShaderPath;
+    return Load(vs.c_str(), fs.c_str());
+}
+
+id<MTLRenderPipelineState> nsMetalProgram::GetPipelineState() {
+    EnsureLoaded();
+    return _pipelineState;
+}
+
+id<MTLFunction> nsMetalProgram::GetVertexFunction() {
+    EnsureLoaded();
+    return _vertexFunction;
+}
+
+id<MTLFunction> nsMetalProgram::GetFragmentFunction() {
+    EnsureLoaded();
+    return _fragmentFunction;
 }
 
 void nsMetalProgram::SetProjView(const float *matrix) {
@@ -126,6 +163,7 @@ void nsMetalProgram::SetHasVertexColor(bool hasVertexColor) {
 }
 
 bool nsMetalProgram::Bind(id<MTLRenderCommandEncoder> encoder) {
+    EnsureLoaded();
     if (!_pipelineState) return false;
     [encoder setRenderPipelineState:_pipelineState];
     return true;

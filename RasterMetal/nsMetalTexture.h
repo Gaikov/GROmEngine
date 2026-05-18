@@ -33,4 +33,6 @@ private:
     std::string     _id;
     nsBitmapData::tSP _bmData;
     int             _loadFlags  = 0;
+
+    bool UploadToGPU();
 };

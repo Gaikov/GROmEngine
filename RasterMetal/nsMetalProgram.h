@@ -6,6 +6,7 @@
 #include <Metal/Metal.h>
 #include "nsMetalConfig.h"
 #include "nsLib/matrix4.h"
+#include <string>
 #include <vector>
 
 class nsMetalShaderLibrary;
@@ -28,10 +29,11 @@ public:
 
     bool Load(const char *vertexShaderPath, const char *fragmentShaderPath);
     void Unload();
+    void Invalidate();
 
-    id<MTLRenderPipelineState> GetPipelineState() const { return _pipelineState; }
-    id<MTLFunction> GetVertexFunction() const { return _vertexFunction; }
-    id<MTLFunction> GetFragmentFunction() const { return _fragmentFunction; }
+    id<MTLRenderPipelineState> GetPipelineState();
+    id<MTLFunction> GetVertexFunction();
+    id<MTLFunction> GetFragmentFunction();
 
     void SetProjView(const float *matrix);
     void SetModel(const float *matrix);
@@ -47,6 +49,8 @@ public:
 private:
     id<MTLDevice>               _device            = nil;
     id<MTLRenderPipelineState>  _pipelineState     = nil;
+    std::string                 _vertexShaderPath;
+    std::string                 _fragmentShaderPath;
     std::vector<id<MTLBuffer>>  _uniformBuffers[kMetalInFlightFrameSlots];
     uint                        _lastFrameIndex    = ~0u;
     uint                        _uniformSlot       = 0;
@@ -56,4 +60,5 @@ private:
     id<MTLFunction>             _fragmentFunction  = nil;
 
     bool EnsureUniformBuffer(uint frameSlot, uint uniformSlot);
+    bool EnsureLoaded();
 };
