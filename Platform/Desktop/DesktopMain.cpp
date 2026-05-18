@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
     if (success) {
         auto wnd = g_desktop.GetWindow();
 
+        glfwPollEvents();
+
         glfwSetJoystickCallback([](int id, int status) {
             if (status == GLFW_CONNECTED) {
                 Log::Info("gamepad connected: %s", glfwGetJoystickName(id));

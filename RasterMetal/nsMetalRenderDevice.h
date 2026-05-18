@@ -7,10 +7,11 @@
 #include "nsMetalVertexBuffer.h"
 #include "nsMetalTexturesCache.h"
 #include "nsMetalProgramsCache.h"
+#include "nsMetalRenderState.h"
+#include "nsLib/color.h"
 
 #import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
-#import <QuartzCore/QuartzCore.h>
+#import <MetalKit/MetalKit.h>
 
 class nsMetalRenderDevice : public IRenDevice {
 public:
@@ -70,7 +71,7 @@ public:
 private:
     id<MTLDevice>               _device          = nil;
     id<MTLCommandQueue>         _commandQueue    = nil;
-    CAMetalLayer               *_metalLayer      = nullptr;
+    MTKView                     *_mtkView         = nil;
     id<MTLCommandBuffer>        _commandBuffer   = nil;
     id<MTLRenderCommandEncoder> _encoder         = nil;
     id<CAMetalDrawable>         _currentDrawable = nil;
@@ -80,9 +81,14 @@ private:
     nsMetalVertexBuffer        *_quadBuff        = nullptr;
 
     std::vector<nsMetalVertexBuffer*> _allocatedVBS;
+    std::map<std::string, nsMetalRenderState*> _stateCache;
+
+    nsMetalRenderState         *_defaultState    = nullptr;
+    nsMetalRenderState         *_currentState    = nullptr;
 
     nsMatrix _projMatrix;
     nsMatrix _viewMatrix;
+    nsColor  _currentColor = nsColor::white;
 
     bool BeginEncoder();
     void EndEncoder();

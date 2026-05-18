@@ -20,9 +20,9 @@ bool nsMetalProgramsCache::Init() {
 }
 
 void nsMetalProgramsCache::Release() {
-    delete _defaultProgram;
-    _defaultProgram = nullptr;
     _currentProgram = nullptr;
+    _defaultProgram = nullptr;
+
     for (auto &it : _cache) {
         delete it.second;
     }
@@ -49,25 +49,51 @@ nsMetalProgram* nsMetalProgramsCache::GetProgram(const char *vertexShaderPath,
 void nsMetalProgramsCache::Bind(nsMetalProgram *program, bool force) {
     if (program != _currentProgram || force) {
         _currentProgram = program;
+        if (_currentProgram) {
+            _currentProgram->SetProjView(_projView);
+            _currentProgram->SetModel(_model);
+            _currentProgram->SetHasTexture(_textureBound);
+            _currentProgram->SetTextureMatrix(_textureMatrix);
+            _currentProgram->SetAlphaCutoff(_alphaCutoff);
+        }
     }
 }
 
 void nsMetalProgramsCache::SetTextureBound(bool hasBound) {
     _textureBound = hasBound;
+    if (_currentProgram) {
+        _currentProgram->SetHasTexture(hasBound);
+    }
 }
 
 void nsMetalProgramsCache::SetTextureMatrix(const nsMatrix &m) {
     _textureMatrix = m;
+    if (_currentProgram) {
+        _currentProgram->SetTextureMatrix(m);
+    }
 }
 
 void nsMetalProgramsCache::SetAlphaCutoff(float alphaRef) {
     _alphaCutoff = alphaRef;
+    if (_currentProgram) {
+        _currentProgram->SetAlphaCutoff(alphaRef);
+    }
 }
 
 void nsMetalProgramsCache::SetProjViewMatrix(const float *m) {
     _projView = m;
+    fprintf(stderr, "CACHE SetProjViewMatrix: _11=%.4f curProg=%s\n", 
+        (*m), _currentProgram ? "YES" : "nil");
+    if (_currentProgram) {
+        _currentProgram->SetProjView(m);
+    }
 }
 
 void nsMetalProgramsCache::SetModelMatrix(const float *m) {
     _model = m;
+    fprintf(stderr, "CACHE SetModelMatrix: _11=%.4f _12=%.4f curProg=%s\n",
+        m[0], m[1], _currentProgram ? "YES" : "nil");
+    if (_currentProgram) {
+        _currentProgram->SetModel(m);
+    }
 }

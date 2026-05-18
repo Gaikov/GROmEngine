@@ -12,6 +12,15 @@
 #include <GLFW/glfw3.h>
 extern "C" id glfwGetCocoaWindow(GLFWwindow* window);
 
+@interface nsMetalView : MTKView
+@end
+
+@implementation nsMetalView
+- (void)drawRect:(NSRect)dirtyRect {
+    // Never draw automatically — fully manual rendering
+}
+@end
+
 nsMetalRenderDevice::nsMetalRenderDevice()
     : _projMatrix(1), _viewMatrix(1) {}
 
@@ -39,20 +48,16 @@ bool nsMetalRenderDevice::Init(void *wnd) {
         GLFWwindow *glfwWin = (GLFWwindow *)wndPtr;
         NSWindow *window = glfwGetCocoaWindow(glfwWin);
         if (window) {
-            _metalLayer = [CAMetalLayer layer];
-            _metalLayer.device = _device;
-            _metalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-            _metalLayer.framebufferOnly = NO;
-            _metalLayer.contentsScale = [window backingScaleFactor];
-
             NSView *view = [window contentView];
-            [view setWantsLayer:YES];
-            _metalLayer.frame = view.bounds;
-            [view.layer addSublayer:_metalLayer];
-
-            _metalLayer.drawableSize = CGSizeMake(
-                _metalLayer.frame.size.width * _metalLayer.contentsScale,
-                _metalLayer.frame.size.height * _metalLayer.contentsScale);
+            view.wantsLayer = YES;
+            _mtkView = [[nsMetalView alloc] initWithFrame:view.bounds device:_device];
+            _mtkView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
+            _mtkView.framebufferOnly = NO;
+            _mtkView.enableSetNeedsDisplay = NO;
+            _mtkView.paused = NO;
+            _mtkView.autoResizeDrawable = NO;
+            _mtkView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+            [view addSubview:_mtkView positioned:NSWindowAbove relativeTo:nil];
         }
     }
 
@@ -61,6 +66,9 @@ bool nsMetalRenderDevice::Init(void *wnd) {
     if (!_programs->Init()) {
         return false;
     }
+
+    _defaultState = new nsMetalRenderState(_device, *_programs);
+    StateApply(_defaultState);
 
     _quadBuff = new nsMetalVertexBuffer(_device, _textures, 4, 6, false);
     auto i = _quadBuff->GetWriteIndices();
@@ -73,34 +81,52 @@ bool nsMetalRenderDevice::Init(void *wnd) {
 void nsMetalRenderDevice::Release() {
     EndEncoder();
     _commandBuffer = nil;
-    _metalLayer = nullptr;
+
+    _currentState = nullptr;
+    for (auto &it : _stateCache) delete it.second;
+    _stateCache.clear();
+    delete _defaultState; _defaultState = nullptr;
+
+    delete _programs; _programs = nullptr;
+    delete _textures; _textures = nullptr;
+    delete _quadBuff; _quadBuff = nullptr;
 
     for (auto vb : _allocatedVBS) delete vb;
     _allocatedVBS.clear();
-    delete _quadBuff; _quadBuff = nullptr;
-    delete _textures; _textures = nullptr;
-    delete _programs; _programs = nullptr;
 
     _commandQueue = nil;
+    _mtkView = nil;
     _device = nil;
 }
 
 void nsMetalRenderDevice::InvalidateResources() {}
-
 void nsMetalRenderDevice::GetDisplayInfo(DisplayInfo &info) {}
-
 const rasterConfig_t* nsMetalRenderDevice::GetCurrentConfig() {
     static rasterConfig_t cfg = {32, 800, 600};
     return &cfg;
 }
-
-void nsMetalRenderDevice::SetColor(const float c[4]) {}
+void nsMetalRenderDevice::SetColor(const float c[4]) {
+    _currentColor = nsColor(c[0], c[1], c[2], c[3]);
+}
 
 bool nsMetalRenderDevice::BeginEncoder() {
+    if (!_mtkView || !_mtkView.window || _mtkView.bounds.size.width <= 0) {
+        return false;
+    }
+
+    CGFloat scale = _mtkView.window.backingScaleFactor;
+    CGSize drawableSize = CGSizeMake(_mtkView.bounds.size.width * scale,
+                                      _mtkView.bounds.size.height * scale);
+    if (drawableSize.width != _mtkView.drawableSize.width ||
+        drawableSize.height != _mtkView.drawableSize.height) {
+        _mtkView.drawableSize = drawableSize;
+    }
+
     _commandBuffer = [_commandQueue commandBuffer];
-    _currentDrawable = _metalLayer.nextDrawable;
-    if (!_currentDrawable) {
-        Log::Warning("Metal: nextDrawable returned nil");
+    _currentDrawable = _mtkView.currentDrawable;
+    if (!_currentDrawable || _currentDrawable.texture.width == 0 || _currentDrawable.texture.height == 0) {
+        _currentDrawable = nil;
+        _commandBuffer = nil;
         return false;
     }
 
@@ -111,22 +137,24 @@ bool nsMetalRenderDevice::BeginEncoder() {
     passDesc.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1);
 
     _encoder = [_commandBuffer renderCommandEncoderWithDescriptor:passDesc];
-    return _encoder != nil;
+    if (!_encoder) return false;
+
+    MTLViewport viewport = {
+        0.0, 0.0,
+        (double)_currentDrawable.texture.width,
+        (double)_currentDrawable.texture.height,
+        0.0, 1.0
+    };
+    [_encoder setViewport:viewport];
+
+    return true;
 }
 
 void nsMetalRenderDevice::EndEncoder() {
-    if (_encoder) {
-        [_encoder endEncoding];
-        _encoder = nil;
-    }
+    if (_encoder) { [_encoder endEncoding]; _encoder = nil; }
 }
 
 bool nsMetalRenderDevice::BeginScene() {
-    if (_metalLayer) {
-        int w, h;
-        App_GetPlatform()->GetClientSize(w, h);
-        _metalLayer.drawableSize = CGSizeMake(w, h);
-    }
     return BeginEncoder();
 }
 
@@ -135,7 +163,6 @@ void nsMetalRenderDevice::EndScene() {
     if (_commandBuffer && _currentDrawable) {
         [_commandBuffer presentDrawable:_currentDrawable];
         [_commandBuffer commit];
-        [_commandBuffer waitUntilCompleted];
         _currentDrawable = nil;
         _commandBuffer = nil;
     }
@@ -149,7 +176,6 @@ ITexture* nsMetalRenderDevice::TextureLoad(const char *filename, bool, texfmt_t,
 
 const char* nsMetalRenderDevice::TextureGetPath(ITexture *t) { return nullptr; }
 ITexture* nsMetalRenderDevice::TextureGenerate(int, int, const void *, texfmt_t, bool) { return nullptr; }
-
 void nsMetalRenderDevice::TextureRelease(ITexture *) {}
 
 void nsMetalRenderDevice::TextureBind(ITexture *texture) {
@@ -167,15 +193,42 @@ void nsMetalRenderDevice::TextureTranform(const float *offs2, const float *scale
     _programs->SetTextureMatrix(m);
 }
 
-IRenState* nsMetalRenderDevice::StateLoad(const char *) {
-    if (auto prog = _programs->GetDefaultProgram()) {
-        return new nsMetalRenderState(prog->GetPipelineState());
+IRenState* nsMetalRenderDevice::StateLoad(const char *fileName) {
+    if (!fileName || !*fileName) return nullptr;
+    auto it = _stateCache.find(fileName);
+    if (it != _stateCache.end()) return it->second;
+    auto state = new nsMetalRenderState(_device, *_programs);
+    if (!state->Load(fileName)) {
+        delete state;
+        return nullptr;
     }
-    return nullptr;
+    _stateCache[fileName] = state;
+    return state;
 }
-const char* nsMetalRenderDevice::StateGetPath(IRenState *) { return ""; }
+
+const char* nsMetalRenderDevice::StateGetPath(IRenState *s) {
+    auto state = dynamic_cast<nsMetalRenderState*>(s);
+    return state ? state->GetPath() : "";
+}
+
 void nsMetalRenderDevice::StateRelease(IRenState *) {}
-void nsMetalRenderDevice::StateApply(IRenState *) {}
+
+void nsMetalRenderDevice::StateApply(IRenState *s) {
+    auto state = dynamic_cast<nsMetalRenderState*>(s);
+    if (!state) state = _defaultState;
+    if (state == _currentState) return;
+
+    if (_encoder) {
+        state->Apply(_encoder, *_programs, _currentState);
+    }
+    _currentState = state;
+
+    if (state->IsAlphaTest()) {
+        _programs->SetAlphaCutoff(state->GetAlphaCutoff());
+    } else {
+        _programs->SetAlphaCutoff(0);
+    }
+}
 
 void nsMetalRenderDevice::LoadProjMatrix(const float *m) { _projMatrix = m; }
 void nsMetalRenderDevice::LoadViewMartix(const float *m) {
@@ -198,18 +251,22 @@ void nsMetalRenderDevice::VerticesRelease(IVertexBuffer *vb) {
 
 void nsMetalRenderDevice::VerticesDraw(IVertexBuffer *vb) {
     if (!_encoder) return;
-    auto program = _programs->GetDefaultProgram();
+    auto state = _currentState ? _currentState : _defaultState;
+    if (!state) return;
+    auto program = state->GetProgram();
+    if (!program) program = _programs->GetDefaultProgram();
     if (!program) return;
-    program->Bind(_encoder);
-
+    _programs->Bind(program, true);
+    state->Apply(_encoder, *_programs, nullptr);
     auto tex = _textures->GetBoundTexture();
     if (tex) tex->Bind(_encoder, 0);
-
     program->SetHasTexture(_textures->HasBoundTexture());
     program->UploadUniforms(_encoder);
-
     auto metalVB = dynamic_cast<nsMetalVertexBuffer*>(vb);
-    if (metalVB) metalVB->Draw(_encoder);
+    if (metalVB) {
+        metalVB->UseColor(_currentColor);
+        metalVB->Draw(_encoder);
+    }
 }
 
 IStencilState* nsMetalRenderDevice::StencilLoad(const char *) { return new nsMetalStencilState(); }

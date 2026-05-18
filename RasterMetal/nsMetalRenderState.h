@@ -4,18 +4,48 @@
 #pragma once
 
 #include "Engine/RenDevice.h"
+#include "nsMetalProgram.h"
+#include "nsMetalProgramsCache.h"
+#include "nsLib/StrTools.h"
+
 #import <Metal/Metal.h>
 
 class nsMetalRenderState : public IRenState {
 public:
-    nsMetalRenderState(id<MTLRenderPipelineState> pipelineState);
+    nsMetalRenderState(id<MTLDevice> device, nsMetalProgramsCache &programs);
     ~nsMetalRenderState() override = default;
 
-    bool IsAlphaTest() override { return false; }
-    bool IsAlphaBlend() override { return false; }
+    bool Load(const char *fileName);
+    const char* GetPath() const { return _fileName; }
 
-    id<MTLRenderPipelineState> GetPipelineState() const { return _pipelineState; }
+    bool IsAlphaTest() override { return _alphaTest; }
+    bool IsAlphaBlend() override { return _alphaBlend; }
+    float GetAlphaCutoff() const { return _alphaRef; }
+
+    void Apply(id<MTLRenderCommandEncoder> encoder,
+               nsMetalProgramsCache &programs,
+               nsMetalRenderState *prev);
+
+    nsMetalProgram* GetProgram() const { return _program; }
 
 private:
-    id<MTLRenderPipelineState> _pipelineState;
+    nsString        _fileName;
+    nsMetalProgram *_program = nullptr;
+    nsMetalProgramsCache &_programs;
+    id<MTLDevice> _device = nil;
+
+    id<MTLRenderPipelineState> _pipelineState = nil;
+    id<MTLDepthStencilState>   _depthStencilState = nil;
+
+    bool    _zEnable        = true;
+    bool    _zWrite         = true;
+    bool    _alphaTest      = false;
+    float   _alphaRef       = 0;
+    bool    _alphaBlend     = false;
+    MTLBlendFactor _srcBlend   = MTLBlendFactorOne;
+    MTLBlendFactor _dstBlend   = MTLBlendFactorZero;
+    bool    _cullMode       = true;
+
+    bool Parse(class script_state_t *ss);
+    bool CreatePipeline();
 };

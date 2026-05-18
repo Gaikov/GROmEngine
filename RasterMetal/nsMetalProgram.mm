@@ -33,11 +33,20 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
         Log::Error("Metal: failed to get shader functions");
         return false;
     }
+    _vertexFunction = vertexFunc;
+    _fragmentFunction = fragmentFunc;
 
     auto descriptor = [[MTLRenderPipelineDescriptor alloc] init];
     descriptor.vertexFunction = vertexFunc;
     descriptor.fragmentFunction = fragmentFunc;
     descriptor.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
+    descriptor.colorAttachments[0].blendingEnabled = YES;
+    descriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
+    descriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+    descriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperationAdd;
+    descriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
+    descriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+    descriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperationAdd;
 
     auto vertexDesc = [[MTLVertexDescriptor alloc] init];
     vertexDesc.attributes[0].format = MTLVertexFormatFloat3;
@@ -74,14 +83,17 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
 void nsMetalProgram::Unload() {
     _pipelineState = nil;
     _uniformBuffer = nil;
-    _shaderLibrary->Invalidate();
+    _vertexFunction = nil;
+    _fragmentFunction = nil;
 }
 
 void nsMetalProgram::SetProjView(const float *matrix) {
+    fprintf(stderr, "METAL SetProjView: _11=%.4f\n", matrix[0]);
     memcpy(_uniforms.projView, matrix, sizeof(float) * 16);
 }
 
 void nsMetalProgram::SetModel(const float *matrix) {
+    fprintf(stderr, "METAL SetModel: _11=%.4f _12=%.4f\n", matrix[0], matrix[1]);
     memcpy(_uniforms.model, matrix, sizeof(float) * 16);
 }
 
@@ -105,6 +117,16 @@ bool nsMetalProgram::Bind(id<MTLRenderCommandEncoder> encoder) {
 
 void nsMetalProgram::UploadUniforms(id<MTLRenderCommandEncoder> encoder) {
     if (!_uniformBuffer) return;
+    fprintf(stderr, "METAL Upload: model._11=%.4f model._12=%.4f proj._11=%.4f\n",
+        _uniforms.model[0], _uniforms.model[1], _uniforms.projView[0]);
+
+    static int testFrame = 300;
+    if (testFrame > 0) {
+        for (int i = 0; i < 16; i++) _uniforms.model[i] *= 2.0f;
+        fprintf(stderr, "METAL TEST: model x2, model._11=%.4f frames left=%d\n", _uniforms.model[0], testFrame);
+        testFrame--;
+    }
+
     memcpy([_uniformBuffer contents], &_uniforms, sizeof(MetalUniforms));
     [encoder setVertexBuffer:_uniformBuffer offset:0 atIndex:1];
     [encoder setFragmentBuffer:_uniformBuffer offset:0 atIndex:1];
