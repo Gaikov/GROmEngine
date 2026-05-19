@@ -314,7 +314,7 @@ void nsOALDevice::Update()
 //---------------------------------------------------------
 // nsOALDevice::SoundLoad: 
 //---------------------------------------------------------
-ISound* nsOALDevice::SoundLoad( const char *fileName )
+ISound* nsOALDevice::SoundLoad( const char *fileName, bool sound3d )
 {
 	if ( !m_alc )
 	{
@@ -325,7 +325,7 @@ ISound* nsOALDevice::SoundLoad( const char *fileName )
 
 	if ( !fileName || !strlen( fileName ) ) return nullptr;
 	nsFilePath	name(fileName);
-	return m_sndMgr.LoadSound( name );
+	return m_sndMgr.LoadSound( name, sound3d );
 }
 
 //---------------------------------------------------------

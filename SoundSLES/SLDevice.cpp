@@ -35,7 +35,7 @@ void SLDevice::Update() {
 
 }
 
-ISound *SLDevice::SoundLoad(const char *fileName) {
+ISound *SLDevice::SoundLoad(const char *fileName, bool sound3d) {
     return nullptr;
 }
 

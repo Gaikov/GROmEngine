@@ -19,7 +19,7 @@ public:
 
     void Update() override;
 
-    ISound *SoundLoad(const char *fileName) override;
+    ISound *SoundLoad(const char *fileName, bool sound3d = true) override;
 
     void SoundFree(ISound *snd) override;
 

@@ -16,7 +16,7 @@ friend class nsSoundManager;
 public:
 	nsALSound	*prev, *next;	//��� ��������� (������� ������)
 
-	explicit nsALSound( const char *fileName );
+	explicit nsALSound( const char *fileName, bool sound3d = true );
 	virtual ~nsALSound();
 
 	bool			Reload();
@@ -29,6 +29,7 @@ private:
 	nsString	m_fileName;
 	int			m_refCount;
 	ALuint		m_alBuff;
+	bool		_sound3d;
 
 	bool	CreateSBFromOgg( const char *fileName, bool sound3d );
 	bool	CreateSBFromWav( const char *filename, bool sound3d );
