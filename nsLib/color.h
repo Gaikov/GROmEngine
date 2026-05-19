@@ -82,6 +82,7 @@ struct nsColor
 
 	static inline dword ToARGB( const float *c );
 	void FromRGBA(uint32_t c);
+	void FromHex(const char *hex);   // "RRGGBB" or "RRGGBBAA", optional leading '#'
 	void CopyTo( float c[4]) const;
 
 	inline void Rand()
