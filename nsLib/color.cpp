@@ -10,6 +10,29 @@ const nsColor nsColor::magenta = nsColor( 1, 0, 1 );
 const nsColor nsColor::gray = nsColor( 0.5, 0.5, 0.5 );
 const nsColor nsColor::darkGray = nsColor( 0.25, 0.25, 0.25 );
 
+void nsColor::FromHex(const char *hex) {
+    if (!hex) return;
+    if (*hex == '#') ++hex;
+
+    auto hexByte = [](const char *s, int pos) -> byte {
+        auto nibble = [](char c) -> int {
+            if (c >= '0' && c <= '9') return c - '0';
+            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+            return 0;
+        };
+        return byte((nibble(s[pos]) << 4) | nibble(s[pos + 1]));
+    };
+
+    int len = 0;
+    while (hex[len]) ++len;
+
+    if (len >= 8)
+        FromBytes(hexByte(hex, 0), hexByte(hex, 2), hexByte(hex, 4), hexByte(hex, 6));
+    else if (len >= 6)
+        FromBytes(hexByte(hex, 0), hexByte(hex, 2), hexByte(hex, 4));
+}
+
 void nsColor::FromRGBA(uint32_t c) {
     FromBytes(
         (c >> 24) & 0xFF,
