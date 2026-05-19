@@ -13,11 +13,12 @@
 //---------------------------------------------------------
 // nsALSound::nsALSound: 
 //---------------------------------------------------------
-nsALSound::nsALSound(const char *fileName) : prev(nullptr),
-                                             next(nullptr),
-                                             m_fileName(fileName),
-                                             m_refCount(0),
-                                             m_alBuff(0) {
+nsALSound::nsALSound(const char *fileName, bool sound3d) : prev(nullptr),
+                                                           next(nullptr),
+                                                           m_fileName(fileName),
+                                                           m_refCount(0),
+                                                           m_alBuff(0),
+                                                           _sound3d(sound3d) {
 }
 
 //---------------------------------------------------------
@@ -41,7 +42,7 @@ bool nsALSound::Reload() {
     if (strstr(m_fileName, ".ogg")) {
         if (!CreateSBFromOgg(m_fileName, true))
             return false;
-    } else if (!CreateSBFromWav(m_fileName, true))
+    } else if (!CreateSBFromWav(m_fileName, _sound3d))
         return false;
 
     return true;
@@ -88,9 +89,10 @@ bool nsALSound::CreateSBFromOgg(const char *fileName, bool sound3d) {
 
     ALenum format = 0;
     const vorbis_info *info = ogg.GetVorbisInfo();
-    if (info->channels > 1)
+    if (info->channels > 1) {
+        if (sound3d) Log::Warning("invalid 3D sound %s!", fileName);
         format = AL_FORMAT_STEREO16;
-    else
+    } else
         format = AL_FORMAT_MONO16;
 
     alBufferData(m_alBuff, format, buff, size, info->rate);
@@ -118,7 +120,6 @@ bool nsALSound::CreateSBFromWav(const char *filename, bool sound3d) {
     const auto fmt = wav.GetFormat();
     if (sound3d && fmt->nChannels > 1) {
         Log::Warning("invalid 3D sound %s!", filename);
-        return false;
     }
 
     alGenBuffers(1, &m_alBuff);

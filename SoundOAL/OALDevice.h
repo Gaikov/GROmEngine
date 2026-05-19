@@ -56,7 +56,7 @@ private:
 	virtual void		Update();
 
 	//��������� �������
-	virtual ISound*		SoundLoad( const char *fileName );
+	virtual ISound*		SoundLoad( const char *fileName, bool sound3d = true );
 	virtual void		SoundFree( ISound *snd );
 	virtual IVoice*		SoundPlay( ISound *snd, bool loop = false );
 	virtual IVoice*		SoundPlay3D( ISound *snd, const nsVec3 &pos, bool loop = false, float speedScale = 1 );

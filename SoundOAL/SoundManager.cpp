@@ -20,7 +20,7 @@ nsSoundManager::nsSoundManager() :
 //---------------------------------------------------------
 // nsSoundManager::LoadSound: 
 //---------------------------------------------------------
-nsALSound* nsSoundManager::LoadSound( const char *fileName )
+nsALSound* nsSoundManager::LoadSound( const char *fileName, bool sound3d )
 {
 	if ( !fileName || !strlen( fileName ) ) return 0;
 
@@ -51,7 +51,7 @@ nsALSound* nsSoundManager::LoadSound( const char *fileName )
 	}
 	else
 	{
-		s = new nsALSound( name );
+		s = new nsALSound( name, sound3d );
 		if ( !s->Reload() )
 		{
 			delete s;

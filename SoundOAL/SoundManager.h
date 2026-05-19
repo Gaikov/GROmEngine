@@ -13,10 +13,10 @@ class nsSoundManager
 public:
 	nsSoundManager();
 
-	nsALSound*	LoadSound( const char *fileName );
+	nsALSound*	LoadSound( const char *fileName, bool sound3d = true );
 	nsALSound*	FindSound( const char *fileName );
 	
-	//для тестирования
+	//пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	nsALSound*	GetSound( const char *fileName );
 	void		ReleaseSound( nsALSound *s );
 	void		ReleaseAll();
