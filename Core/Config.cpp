@@ -429,11 +429,11 @@ bool nsConfig::SetValue(const char *name, float value)
 float nsConfig::GetValue(const char *name)
 {
 	auto var = FindVar(name);
-	if (var)
+	if (!var)
 	{
-		Log::Warning("variable '%s' not found", name );
-		return var->Value();
+		Log::Warning("variable '%s' not found", name);
+		return 0;
 	}
-	return 0;
+	return var->Value();
 }
 
