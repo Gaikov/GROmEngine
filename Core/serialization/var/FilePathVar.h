@@ -40,6 +40,10 @@ public:
 
     void SetBaseFolder(const nsFilePath &folder) {
         _baseFolder = folder;
+        const auto &value = GetValue();
+        if (!value.empty() && !nsFilePath::IsAbsolute(value.c_str())) {
+            SetValue(_baseFolder.ResolvePath(value.c_str()).AsChar());
+        }
     }
 
     const nsFilePath &GetBaseFolder() const {
