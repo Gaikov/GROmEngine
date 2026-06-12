@@ -3,7 +3,6 @@
 #include "nsLib/log.h"
 #include "StructUt.h"
 #include "nsLib/StrTools.h"
-#include <dirent.h>
 #include <string>
 #include <algorithm>
 #include "nsLib/FilePath.h"

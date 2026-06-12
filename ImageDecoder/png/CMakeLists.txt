@@ -25,13 +25,17 @@ set(PNGLIB_SHARED_VERSION ${PNGLIB_ABI_VERSION}.${PNGLIB_REVISION}.${PNGLIB_SUBR
 
 project(libpng
         VERSION ${PNGLIB_VERSION}
-        LANGUAGES C ASM)
+        LANGUAGES C)
 
-file(GLOB sources
-        "*.c"
-        "arm/*.c"
-        "*.S"
-)
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|aarch64")
+    enable_language(ASM)
+endif()
+
+file(GLOB sources "*.c")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm|aarch64")
+    file(GLOB arm_sources "arm/*.c" "*.S")
+    list(APPEND sources ${arm_sources})
+endif()
 
 include_directories(
         ./

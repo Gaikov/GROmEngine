@@ -5,8 +5,6 @@
 #include "FilePath.h"
 #include <sys/stat.h>
 #include <filesystem>
-#include <dirent.h>
-#include <unistd.h>
 
 namespace fs = std::filesystem;
 
@@ -85,7 +83,9 @@ bool nsFilePath::Remove() const
 			}
 		}
 #if !(defined(ANDROID) || defined(WEB_ASM))
-		return rmdir(_path) == 0;
+		std::error_code ec;
+		fs::remove(static_cast<const char *>(_path), ec);
+		return !ec;
 #endif
 	}
 
@@ -139,24 +139,12 @@ nsString nsFilePath::GetRelativePath(const nsFilePath &path) const {
 
 bool nsFilePath::FolderListing(const char *folderPath, std::vector<nsString> &result)
 {
-	auto   handler = opendir(folderPath);
-	dirent *entry;
-
-	if (handler)
-	{
-		while ((entry = readdir(handler)) != nullptr)
-		{
-			nsString name = entry->d_name;
-			if (name != "." && name != "..")
-			{
-				result.push_back(name);
-			}
-		}
-		closedir(handler);
-		return true;
-	}
-
-	return false;
+    std::error_code ec;
+    for (const auto &entry : fs::directory_iterator(folderPath, ec)) {
+        nsString name = entry.path().filename().string().c_str();
+        result.push_back(name);
+    }
+    return !ec;
 }
 
 nsFilePath nsFilePath::GetParent() const
