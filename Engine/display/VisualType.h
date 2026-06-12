@@ -21,6 +21,7 @@ struct nsVisualType {
     static constexpr auto VGROUP = "vgroup";
     static constexpr auto CONTAINER = "container";
     static constexpr auto PARTICLES = "particles";
+    static constexpr auto POLYGON = "polygon";
     static constexpr auto RECTANGLE = "rectangle";
     static constexpr auto MOVIE_CLIP = "movieClip";
 };

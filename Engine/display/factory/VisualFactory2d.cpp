@@ -17,6 +17,7 @@
 #include "CustomVisual.h"
 #include "DefaultVisualBuilder2d.h"
 #include "display/graphics/VirtualCircleBuilder.h"
+#include "display/graphics/VisualPolygonBuilder.h"
 #include "display/graphics/VisualRectBuilder.h"
 #include "display/group/horizontal/HGroupLayoutBuilder.h"
 #include "display/button/ImageButtonBuilder.h"
@@ -37,6 +38,7 @@ nsVisualFactory2d::nsVisualFactory2d() {
     RegisterBuilderWithName<nsTextAreaBuilder>();
     RegisterBuilderWithName<nsVisualAnchorBuilder>();
     RegisterBuilderWithName<nsVirtualCircleBuilder>();
+    RegisterBuilderWithName<nsVisualPolygonBuilder>();
     RegisterBuilderWithName<nsVisualRectBuilder>();
         RegisterBuilderWithName<nsImageButtonBuilder>();
     RegisterBuilderWithName<nsSprite9SliceBuilder>();

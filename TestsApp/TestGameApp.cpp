@@ -3,6 +3,7 @@
 //
 
 #include "tests/PlaneSprite3dTest.h"
+#include "tests/PolygonTest.h"
 #include "tests/SpriteTest.h"
 #include "tests/LinesTest.h"
 #include "tests/FontTest.h"
@@ -33,7 +34,7 @@ IGameApp *App_GetGame() {
 
 void TestGameApp::RegisterTests() {
     RegisterTest("lines", new LinesTest());
-    RegisterTest("font", new FontTest());
+    RegisterTest("polygon", new PolygonTest());
     RegisterTest("sprite", new SpriteTest());
     RegisterTest("sprite3d", new Sprite3dTest());
     RegisterTest("plane3d", new PlaneSprite3dTest());
