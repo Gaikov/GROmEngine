@@ -33,6 +33,7 @@ set(SRC
         tests/sprites/Sprite9SliceTest.h
         tests/FontTest.cpp
         tests/LinesTest.cpp
+        tests/PolygonTest.cpp
         tests/SpriteTest.cpp
         tests/collision/CollisionTest.cpp
         tests/collision/CollisionTest.h
