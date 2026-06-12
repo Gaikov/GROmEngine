@@ -6,6 +6,11 @@
 #include "nsLib/FilePath.h"
 #include "Engine/Platform.h"
 
+#ifdef _WIN32
+#define WINVER 0x0601
+#include <windows.h>
+#endif
+
 //---------------------------------------------------------
 // Sys_FatalError: 
 //---------------------------------------------------------
@@ -222,6 +227,7 @@ static FPU_Flag_t	flags[] =
 	{ "Precision control", _MCW_PC, "_PC_24", _PC_24 },
 	{ 0, _MCW_PC, "_PC_53", _PC_53 },
 	{ 0, _MCW_PC, "_PC_64", _PC_64 }*/
+	{nullptr, 0, nullptr, 0}
 };
 
 static int	flagsCount = sizeof(flags) / sizeof(FPU_Flag_t);
