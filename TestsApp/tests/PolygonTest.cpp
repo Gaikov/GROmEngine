@@ -31,6 +31,6 @@ void PolygonTest::Draw() {
 }
 
 void PolygonTest::Release() {
-    delete _sceneRoot;
+    _sceneRoot->Destroy();
     _sceneRoot = nullptr;
 }
