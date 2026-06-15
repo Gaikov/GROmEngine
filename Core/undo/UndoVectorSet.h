@@ -1,37 +1,36 @@
-// Copyright (c) 2003-2025, Roman Gaikov. All rights reserved.
+// Copyright (c) 2003-2026, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file UndoVectorAdd.h
+// file UndoVectorSet.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-#include <algorithm>
 #include <vector>
 
 #include "UndoRedoOperation.h"
 
 template<typename TItem>
-class nsUndoVectorAdd : public nsUndoRedoOperation {
+class nsUndoVectorSet : public nsUndoRedoOperation {
 public:
-    nsUndoVectorAdd(std::vector<TItem> &list, const TItem &item)
-        : _list(list), _item(item) {
-
+    nsUndoVectorSet(std::vector<TItem> &list, int index, const TItem &newValue)
+        : _list(list), _index(index), _newValue(newValue) {
     }
 
     void Init() override {
-        _index = static_cast<int>(_list.size());
+        _prevValue = _list[_index];
         Redo();
     }
 
     void Redo() override {
-        _list.push_back(_item);
+        _list[_index] = _newValue;
     }
 
     void Undo() override {
-        _list.erase(_list.begin() + _index);
+        _list[_index] = _prevValue;
     }
 
 private:
     std::vector<TItem> &_list;
-    int _index = -1;
-    TItem _item;
+    int _index;
+    TItem _prevValue;
+    TItem _newValue;
 };
