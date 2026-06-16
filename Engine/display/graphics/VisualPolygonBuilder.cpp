@@ -6,7 +6,7 @@
 #include "VisualPolygon.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVisualPolygonBuilder::CreateDefault() {
+nsVisualObject2d *nsVisualPolygonBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVisualPolygon();
 }
 

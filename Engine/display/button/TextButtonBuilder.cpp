@@ -8,7 +8,7 @@
 #include "Core/ParserUtils.h"
 #include "Engine/assets/VisualAssetsContext.h"
 
-nsVisualObject2d *nsTextButtonBuilder::CreateDefault() {
+nsVisualObject2d *nsTextButtonBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsTextButton();
 }
 

@@ -31,6 +31,6 @@ bool nsLayoutRefBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsV
     return false;
 }
 
-nsVisualObject2d *nsLayoutRefBuilder::CreateDefault() {
+nsVisualObject2d *nsLayoutRefBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return nullptr;
 }

@@ -12,7 +12,7 @@ class nsTextLabelBuilder : public nsVisualBuilder2d {
 public:
     static constexpr auto NAME = nsVisualType::LABEL;
 
-    nsVisualObject2d *CreateDefault() override;
+    nsVisualObject2d *CreateDefault(nsVisualCreationContext2d *context) override;
     bool Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) override;
 
 protected:

@@ -6,7 +6,7 @@
 #include "VisualParticles.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVisualParticlesBuilder::CreateDefault() {
+nsVisualObject2d *nsVisualParticlesBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVisualParticles();
 }
 

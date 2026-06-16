@@ -16,6 +16,7 @@
 #include "display/helpers/VisualAnchorBuilder.h"
 #include "CustomVisual.h"
 #include "DefaultVisualBuilder2d.h"
+#include "Core/sys.h"
 #include "display/graphics/VirtualCircleBuilder.h"
 #include "display/graphics/VisualPolygonBuilder.h"
 #include "display/graphics/VisualRectBuilder.h"
@@ -92,6 +93,14 @@ nsVisualObject2d *nsVisualFactory2d::Create(const char *filePath) {
         return Create(ss);
     }
     Log::Warning("can't create layout: %s", filePath);
+    return nullptr;
+}
+
+nsVisualObject2d * nsVisualFactory2d::CreateByType(const char *type) {
+    if (const auto builder = GetBuilder(type)) {
+        return builder->CreateDefault(this);
+    }
+    Sys_FatalError("unknown layout type: %s", type);
     return nullptr;
 }
 

@@ -8,7 +8,7 @@
 #include "Core/ParserUtils.h"
 #include "Engine/assets/VisualAssetsContext.h"
 
-nsVisualObject2d *nsSprite9SliceBuilder::CreateDefault() {
+nsVisualObject2d *nsSprite9SliceBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsSprite9Slice();
 }
 

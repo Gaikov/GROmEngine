@@ -8,7 +8,7 @@
 #include "Core/ParserUtils.h"
 #include "RenManager.h"
 
-nsVisualObject2d *nsTextLabelBuilder::CreateDefault() {
+nsVisualObject2d *nsTextLabelBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsTextLabel();
 }
 

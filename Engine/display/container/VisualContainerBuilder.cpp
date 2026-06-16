@@ -8,7 +8,7 @@
 #include "Core/ParserUtils.h"
 #include <sstream>
 
-nsVisualObject2d *nsVisualContainerBuilder::CreateDefault() {
+nsVisualObject2d *nsVisualContainerBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVisualContainer2d();
 }
 
