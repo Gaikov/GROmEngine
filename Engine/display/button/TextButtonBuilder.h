@@ -12,7 +12,7 @@ class nsTextButtonBuilder : public nsBaseButtonBuilder {
 public:
     static constexpr auto NAME = nsVisualType::TEXT_BUTTON;
 
-    nsVisualObject2d *CreateDefault() override;
+    nsVisualObject2d *CreateDefault(nsVisualCreationContext2d *context) override;
 
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
 };

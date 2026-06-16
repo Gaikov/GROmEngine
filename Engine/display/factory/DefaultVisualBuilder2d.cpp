@@ -7,7 +7,7 @@
 #include "display/container/VisualContainer2d.h"
 #include "display/default/DefaultVisualObject.h"
 
-nsVisualObject2d * nsDefaultVisualBuilder2d::CreateDefault() {
+nsVisualObject2d * nsDefaultVisualBuilder2d::CreateDefault(nsVisualCreationContext2d *) {
     return new nsDefaultVisualObject();
 }
 

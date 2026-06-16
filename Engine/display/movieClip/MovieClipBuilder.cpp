@@ -9,7 +9,7 @@
 #include "RenManager.h"
 #include "Engine/assets/VisualAssetsContext.h"
 
-nsVisualObject2d *nsMovieClipBuilder::CreateDefault() {
+nsVisualObject2d *nsMovieClipBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsMovieClip();
 }
 

@@ -6,7 +6,7 @@
 #include "display/layouts/GroupLayout.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsGroupLayoutBuilder::CreateDefault() {
+nsVisualObject2d *nsGroupLayoutBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsGroupLayout();
 }
 

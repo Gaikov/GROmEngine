@@ -18,7 +18,7 @@ public:
     virtual ~nsVisualBuilder2d() = default;
 
     virtual nsVisualObject2d* Create(script_state_t *ss, nsVisualCreationContext2d *context);
-    virtual nsVisualObject2d* CreateDefault() = 0;
+    virtual nsVisualObject2d* CreateDefault(nsVisualCreationContext2d *context) = 0;
     virtual bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context);
     bool Serialize(nsScriptSaver &saver, nsVisualObject2d *o, nsVisualCreationContext2d *context);
 

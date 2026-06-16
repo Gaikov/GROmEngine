@@ -8,7 +8,7 @@
 nsVisualObject2d *nsVisualBuilder2d::Create(script_state_t *ss, nsVisualCreationContext2d *context) {
     auto visual = context->CreateByID(ParseString(ss, "bindingId"));
     if (!visual) {
-        visual = CreateDefault();
+        visual = CreateDefault(context);
     }
     return visual;
 }

@@ -6,7 +6,7 @@
 #include "VisualAnchor.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVisualAnchorBuilder::CreateDefault() {
+nsVisualObject2d *nsVisualAnchorBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVisualAnchor();
 }
 

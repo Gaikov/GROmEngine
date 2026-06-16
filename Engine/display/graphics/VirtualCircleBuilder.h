@@ -13,5 +13,5 @@ public:
     static constexpr auto NAME = nsVisualType::CIRCLE;
 
     bool Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) override;
-    nsVisualObject2d *CreateDefault() override;
+    nsVisualObject2d *CreateDefault(nsVisualCreationContext2d *context) override;
 };

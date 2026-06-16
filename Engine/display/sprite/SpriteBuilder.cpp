@@ -7,7 +7,7 @@
 #include "RenManager.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsSpriteBuilder::CreateDefault() {
+nsVisualObject2d *nsSpriteBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsSprite();
 }
 

@@ -6,7 +6,7 @@
 #include "VisualCircle.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVirtualCircleBuilder::CreateDefault() {
+nsVisualObject2d *nsVirtualCircleBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVisualCircle();
 }
 bool nsVirtualCircleBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) {

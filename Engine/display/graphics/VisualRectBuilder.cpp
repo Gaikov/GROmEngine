@@ -6,7 +6,7 @@
 #include "VisualRect.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVisualRectBuilder::CreateDefault() {
+nsVisualObject2d *nsVisualRectBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVisualRect();
 }
 

@@ -6,7 +6,7 @@
 #include "display/layouts/VGroupLayout.h"
 #include "Core/ParserUtils.h"
 
-nsVisualObject2d *nsVGroupLayoutBuilder::CreateDefault() {
+nsVisualObject2d *nsVGroupLayoutBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsVGroupLayout;
 }
 bool nsVGroupLayoutBuilder::Parse(script_state_t *ss, nsVisualObject2d *object, nsVisualCreationContext2d *context) {

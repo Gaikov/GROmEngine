@@ -9,7 +9,7 @@
 #include "Engine/assets/VisualAssetsContext.h"
 #include "renderer/font/FontsCache.h"
 
-nsVisualObject2d *nsImageButtonBuilder::CreateDefault() {
+nsVisualObject2d *nsImageButtonBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsImageButton();
 }
 

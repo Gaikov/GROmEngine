@@ -8,7 +8,7 @@
 #include "TextArea.h"
 #include "renderer/font/FontsCache.h"
 
-nsVisualObject2d * nsTextAreaBuilder::CreateDefault() {
+nsVisualObject2d * nsTextAreaBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsTextArea();
 }
 

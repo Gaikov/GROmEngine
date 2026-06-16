@@ -16,6 +16,7 @@ public:
 
     nsVisualObject2d *Create(script_state_t *ss) override;
     nsVisualObject2d *Create(const char *filePath) override;
+    nsVisualObject2d *CreateByType(const char *type);
 
     bool Serialize(const char *filePath, nsVisualObject2d *object);
     bool Serialize(nsScriptSaver &saver, nsVisualObject2d *object);
