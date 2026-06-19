@@ -40,13 +40,16 @@ nsString nsFilePath::GetPathWithoutExt() const
 
 bool nsFilePath::CheckExtension(const char *ext) const
 {
-	auto     currentExt = GetExtension();
-	nsString otherExt   = ext;
+	if (!StrCheck(ext)) {
+		return false;
+	}
 
-	currentExt.ToLower();
-	otherExt.ToLower();
+	const auto dot = strrchr(_path, '.');
+	if (!dot || !dot[1]) {
+		return false;
+	}
 
-	return currentExt == otherExt;
+	return nsStr::EqualIgnoreCase(dot + (ext[0] == '.' ? 0 : 1), ext);
 }
 
 bool nsFilePath::IsFolder() const
