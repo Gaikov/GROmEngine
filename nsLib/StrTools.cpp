@@ -167,6 +167,23 @@ bool nsStr::ContainsIgnoreCase(const char *str, const char *find) {
 	return false;
 }
 
+bool nsStr::EqualIgnoreCase(const char *a, const char *b) {
+	if (!a || !b) {
+		return a == b;
+	}
+
+	while (*a && *b) {
+		if (std::tolower(static_cast<unsigned char>(*a))
+			!= std::tolower(static_cast<unsigned char>(*b))) {
+			return false;
+		}
+		++a;
+		++b;
+	}
+
+	return *a == *b;
+}
+
 //---------------------------------------------------------
 // StrLineCount:
 //---------------------------------------------------------

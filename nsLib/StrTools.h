@@ -28,6 +28,7 @@ char*		StrToken( const char *strToken, const char *strDelimit, int &resLength );
 class nsStr final {
 public:
 	static const char* GetBrightColor(const char *str);
+	static bool EqualIgnoreCase(const char *a, const char *b);
 	static bool ContainsIgnoreCase(const char *str, const char *find);
 };
 
