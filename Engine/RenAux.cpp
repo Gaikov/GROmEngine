@@ -12,9 +12,45 @@
 #include "Engine/GameApp.h"
 #include "renderer/sprites/SpriteDesc.h"
 #include "renderer/font/FontsCache.h"
+#include <algorithm>
+#include <cmath>
 
 static IVertexBuffer	*g_sprBuff = nullptr;
 static IVertexBuffer	*g_lineBuff = nullptr;
+static IVertexBuffer *g_dashedLineBuff = nullptr;
+static uint g_dashedLineCapacity = 0;
+
+static constexpr uint MAX_DASH_SEGMENTS = 16384;
+
+static bool EnsureDashedLineBuffer(const uint verticesCount) {
+    if (g_dashedLineBuff && g_dashedLineCapacity >= verticesCount) {
+        return true;
+    }
+
+    uint capacity = g_dashedLineCapacity ? g_dashedLineCapacity : 2;
+    while (capacity < verticesCount) {
+        capacity *= 2;
+    }
+
+    if (g_dashedLineBuff) {
+        g_renDev->VerticesRelease(g_dashedLineBuff);
+    }
+
+    g_dashedLineBuff = g_renDev->VerticesCreate(capacity, capacity, true, true);
+    if (!g_dashedLineBuff) {
+        g_dashedLineCapacity = 0;
+        return false;
+    }
+
+    g_dashedLineCapacity = capacity;
+    g_dashedLineBuff->SetPrimitiveMode(PM_LINES);
+
+    auto *indices = g_dashedLineBuff->GetWriteIndices();
+    for (uint i = 0; i < capacity; ++i) {
+        indices[i] = static_cast<word>(i);
+    }
+    return true;
+}
 
 //---------------------------------------------------------
 // RX_Vec2ToVec3: 
@@ -78,6 +114,12 @@ void RX_Release()
 
 	if ( g_lineBuff )
 		g_renDev->VerticesRelease( g_lineBuff );
+
+    if (g_dashedLineBuff) {
+        g_renDev->VerticesRelease(g_dashedLineBuff);
+        g_dashedLineBuff = nullptr;
+        g_dashedLineCapacity = 0;
+    }
 }
 
 //---------------------------------------------------------
@@ -320,6 +362,61 @@ void nsGizmos::DrawCross(const nsVec2 &pos, float size, const nsColor &color) {
 
 void nsGizmos::DrawRect(const nsRect &rect, const nsColor &color) {
     RX_DrawRect(rect.minX(), rect.minY(), rect.maxX(), rect.maxY(), color);
+}
+
+void nsGizmos::DrawDashedLine(const nsVec2 &p1, const nsVec2 &p2,
+                              const nsColor &c1, const nsColor &c2, const float dashLength) {
+    nsVec2 delta = p2 - p1;
+    const float length = delta.Length();
+    if (length <= 0 || dashLength <= 0) {
+        return;
+    }
+
+    const float requestedSegments = std::ceil(length / dashLength);
+    const uint segmentsCount = requestedSegments > static_cast<float>(MAX_DASH_SEGMENTS)
+                                   ? MAX_DASH_SEGMENTS
+                                   : static_cast<uint>(requestedSegments);
+    const float segmentLength = requestedSegments > static_cast<float>(MAX_DASH_SEGMENTS)
+                                    ? length / static_cast<float>(segmentsCount)
+                                    : dashLength;
+    const uint verticesCount = segmentsCount * 2;
+    if (!EnsureDashedLineBuffer(verticesCount)) {
+        return;
+    }
+
+    const nsVec2 direction = delta * (1.0f / length);
+    const dword colors[] = {c1.ToARGB(), c2.ToARGB()};
+    auto *vertices = g_dashedLineBuff->GetWriteVertices();
+    for (uint i = 0; i < segmentsCount; ++i) {
+        const float startDistance = std::min(static_cast<float>(i) * segmentLength, length);
+        const float endDistance = std::min(startDistance + segmentLength, length);
+        const dword color = colors[i & 1];
+
+        const uint vertexIndex = i * 2;
+        RX_Vec2ToVec3(vertices[vertexIndex].v, p1 + direction * startDistance);
+        RX_Vec2ToVec3(vertices[vertexIndex + 1].v, p1 + direction * endDistance);
+        vertices[vertexIndex].c = color;
+        vertices[vertexIndex + 1].c = color;
+    }
+
+    g_dashedLineBuff->SetValidVertices(verticesCount);
+    g_dashedLineBuff->SetValidIndices(verticesCount);
+
+    g_renDev->TextureBind(nullptr);
+    g_renDev->Lighting(false);
+    g_renDev->StateApply(nullptr);
+    g_renDev->VerticesDraw(g_dashedLineBuff);
+}
+
+void nsGizmos::DrawDashedRect(const nsRect &rect,
+                              const nsColor &c1, const nsColor &c2, const float dashLength) {
+    const nsVec2 min = {rect.minX(), rect.minY()};
+    const nsVec2 max = {rect.maxX(), rect.maxY()};
+
+    DrawDashedLine(min, {max.x, min.y}, c1, c2, dashLength);
+    DrawDashedLine({max.x, min.y}, max, c1, c2, dashLength);
+    DrawDashedLine(max, {min.x, max.y}, c1, c2, dashLength);
+    DrawDashedLine({min.x, max.y}, min, c1, c2, dashLength);
 }
 
 #define CIRCLE_SEGMENTS 40
