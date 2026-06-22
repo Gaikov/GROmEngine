@@ -11,4 +11,7 @@
 #include "AndroidPlatform/AndroidKeyCodes.h"
 #endif
 
+#define NS_POINTER_PRIMARY 0
+#define NS_POINTER_SECONDARY 1
+
 #endif //_GROM_KEYCODES_H

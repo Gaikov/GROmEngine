@@ -11,7 +11,9 @@ nsVisualObject2d *nsVisualPolygonBuilder::CreateDefault(nsVisualCreationContext2
 }
 
 bool nsVisualPolygonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisualCreationContext2d *context) {
-    nsVisualBuilder2d::Parse(ss, o, context);
+    if (!nsVisualBuilder2d::Parse(ss, o, context)) {
+        return false;
+    }
 
     auto polygon = Cast<nsVisualPolygon>(o);
     if (!polygon) {
@@ -29,6 +31,25 @@ bool nsVisualPolygonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVi
             ps_var_2f(ss, v);
             polygon->points.emplace_back(v[0], v[1]);
         } while (ps_var_next(ss));
+    }
+
+    return true;
+}
+
+bool nsVisualPolygonBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o,
+                                            nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
+        return false;
+    }
+
+    const auto polygon = Cast<nsVisualPolygon>(o);
+    if (!polygon) {
+        return false;
+    }
+
+    saver.VarFloat4("color", polygon->color, nsColor());
+    for (const auto &point: polygon->points) {
+        saver.PrintVar("point", "%f %f", point.x, point.y);
     }
 
     return true;

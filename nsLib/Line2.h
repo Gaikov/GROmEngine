@@ -20,6 +20,7 @@ public:
 	float	PointOffset( const nsVec2 &point );
 	bool	PointInsideLine( const nsVec2 &point );
 	float	ClosestPoint( const nsVec2 &point, nsVec2 &res );
+	float	ClosestPointOnSegment( const nsVec2 &point, nsVec2 &res );
 };
 
 //-----------------------------------------------------
@@ -39,7 +40,10 @@ inline void nsLine2::FromPoints( const nsVec2 &p1, const nsVec2 &p2 )
 	v2 = p2;
 	ray = p2 - p1;
 	length = ray.Length();
-	ray /= length;
+	if ( length > 0 )
+		ray /= length;
+	else
+		ray = nsVec2( 0, 0 );
 	norm = ray.GetLeft();
 	dist = -norm.Dot( p1 );
 }
@@ -73,5 +77,21 @@ inline float nsLine2::ClosestPoint( const nsVec2 &point, nsVec2 &res )
 	return dot;	//отклонение от начальной точкм линии
 }
 
+//-----------------------------------------------------
+// nsLine2::ClosestPointOnSegment:
+//-----------------------------------------------------
+inline float nsLine2::ClosestPointOnSegment( const nsVec2 &point, nsVec2 &res )
+{
+	if ( length <= 0 )
+	{
+		res = v1;
+		return 0;
+	}
+
+	nsVec2	toPoint = point - v1;
+	float	dot = nsMath::Clamp( ray.Dot( toPoint ), 0, length );
+	res = v1 + ray * dot;
+	return dot;
+}
 
 #endif
