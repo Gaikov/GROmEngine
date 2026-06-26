@@ -33,7 +33,7 @@ nsParticlesEffect *nsParticlesEffectHolder::CreateEffect(const char *path) {
 void nsParticlesEffectHolder::Loop() {
     nsVisualContainer2d::Loop();
 
-    for (auto p : _active) {
+    for (auto p : _active) { //TODO: use nsFastList
         if (!p->IsActive()) {
             _inactive.push_back(p);
         }
