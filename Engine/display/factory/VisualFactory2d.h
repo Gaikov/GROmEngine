@@ -22,6 +22,7 @@ public:
     bool Serialize(nsScriptSaver &saver, nsVisualObject2d *object);
 
     nsVisualBuilder2d* GetBuilder(const char *name) override;
+    const std::vector<std::string>& GetTypes() const { return _types; }
 
     template<class TBuilder>
     void RegisterBuilderWithName() {
@@ -48,6 +49,7 @@ public:
 
 private:
     std::map<std::string, nsVisualBuilder2d::sp_t>  _builders;
+    std::vector<std::string> _types;
     std::map<std::string, std::function<nsVisualObject2d*()>> _bindings;
     nsVisualBuilder2d::sp_t _defaultBuilder;
 };

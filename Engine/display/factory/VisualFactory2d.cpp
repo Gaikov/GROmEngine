@@ -52,6 +52,8 @@ void nsVisualFactory2d::RegisterBuilder(const char *name, nsVisualBuilder2d::sp_
     auto it = _builders.find(name);
     if (it != _builders.end()) {
         Log::Warning("overriding layout builder: %s", name);
+    } else {
+        _types.emplace_back(name);
     }
     _builders[name] = builder;
 }
