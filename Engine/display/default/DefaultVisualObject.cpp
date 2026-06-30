@@ -19,7 +19,7 @@ nsDefaultVisualObject::nsDefaultVisualObject() {
 void nsDefaultVisualObject::SetTagName(const char *tag) {
     _tagName = tag;
     const auto color = nsStr::GetBrightColor(tag);
-    _sprite.color.FromRGBA(std::stoul(color, nullptr, 16));
+    _sprite.color.FromHex(color);
 }
 
 const std::string & nsDefaultVisualObject::GetTagName() const {
