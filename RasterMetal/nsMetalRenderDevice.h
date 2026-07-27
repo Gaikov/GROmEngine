@@ -10,6 +10,7 @@
 #include "nsMetalRenderState.h"
 #include "nsMetalStencilState.h"
 #include "nsMetalRenderTexture.h"
+#include "nsMetalDisplayModes.h"
 #include "nsLib/color.h"
 
 #import <Metal/Metal.h>
@@ -90,20 +91,22 @@ private:
     std::map<nsMetalRenderState*, uint> _stateRefs;
 
     nsMetalRenderState         *_defaultState    = nullptr;
-    nsMetalRenderState         *_currentState    = nullptr;
-    nsMetalStencilState        *_currentStencil  = nullptr;
-    nsMetalRenderTexture       *_currentRenderTexture = nullptr;
+	nsMetalRenderState         *_currentState    = nullptr;
+	nsMetalStencilState        *_currentStencil  = nullptr;
+	nsMetalRenderTexture       *_currentRenderTexture = nullptr;
+	nsMetalDisplayModes        _displayModes;
 
-    nsMatrix _projMatrix;
-    nsMatrix _viewMatrix;
-    nsColor  _currentColor = nsColor::white;
-    rasterConfig_t _config = {32, 800, 600};
+	nsMatrix _projMatrix;
+	nsMatrix _viewMatrix;
+	nsColor  _currentColor = nsColor::white;
 	uint _pendingClearFlags = CLR_ALL;
 	uint _frameIndex = 0;
 	bool _queryRestart = false;
 
 	bool BeginEncoder();
 	void EndEncoder();
+	bool ApplyDisplayMode();
+	void ApplyVSync();
 	void RestartResources();
 	void EnsureDepthStencilTexture(int width, int height);
     MTLRenderPassDescriptor *CreatePassDescriptor(id<MTLTexture> colorTexture,

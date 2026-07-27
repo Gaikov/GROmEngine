@@ -16,6 +16,8 @@
 #include <GLFW/glfw3.h>
 extern "C" id glfwGetCocoaWindow(GLFWwindow* window);
 
+void DestroyMetalRenderDevice(nsMetalRenderDevice *device);
+
 @interface nsMetalView : MTKView
 @end
 
@@ -28,9 +30,7 @@ extern "C" id glfwGetCocoaWindow(GLFWwindow* window);
 nsMetalRenderDevice::nsMetalRenderDevice()
     : _projMatrix(1), _viewMatrix(1) {}
 
-nsMetalRenderDevice::~nsMetalRenderDevice() {
-    Release();
-}
+nsMetalRenderDevice::~nsMetalRenderDevice() = default;
 
 bool nsMetalRenderDevice::Init(void *wnd) {
     Log::Info("*****************************************");
@@ -46,6 +46,16 @@ bool nsMetalRenderDevice::Init(void *wnd) {
 	Log::Info("Metal device: %s", [[_device name] UTF8String]);
 
 	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) { _queryRestart = true; });
+	r_vsync->AddHandler(nsVar::NSVAR_CHANGED, [this](const nsBaseEvent*) {
+	    ApplyVSync();
+	});
+
+	if (!_displayModes.Init()) {
+	    return false;
+	}
+	if (!ApplyDisplayMode()) {
+	    return false;
+	}
 
 	_commandQueue = [_device newCommandQueue];
 	_passDescriptor = [[MTLRenderPassDescriptor alloc] init];
@@ -70,6 +80,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
             layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
             layer.framebufferOnly = NO;
             layer.opaque = YES;
+            ApplyVSync();
             [view addSubview:_mtkView positioned:NSWindowAbove relativeTo:nil];
         }
     }
@@ -97,6 +108,8 @@ bool nsMetalRenderDevice::Init(void *wnd) {
 void nsMetalRenderDevice::Release() {
     EndEncoder();
     _commandBuffer = nil;
+    _currentDrawable = nil;
+    _depthStencilTexture = nil;
     _passDescriptor = nil;
 
     _currentState = nullptr;
@@ -106,8 +119,6 @@ void nsMetalRenderDevice::Release() {
     _stateRefs.clear();
     delete _defaultState; _defaultState = nullptr;
 
-    delete _programs; _programs = nullptr;
-    delete _textures; _textures = nullptr;
     delete _quadBuff; _quadBuff = nullptr;
 
 	for (auto vb : _allocatedVBS) delete vb;
@@ -115,9 +126,15 @@ void nsMetalRenderDevice::Release() {
 	for (auto rt : _allocatedRenderTextures) delete rt;
 	_allocatedRenderTextures.clear();
 
+    delete _programs; _programs = nullptr;
+    delete _textures; _textures = nullptr;
+
     _commandQueue = nil;
+    [_mtkView removeFromSuperview];
     _mtkView = nil;
     _device = nil;
+
+    DestroyMetalRenderDevice(this);
 }
 
 void nsMetalRenderDevice::InvalidateResources() {
@@ -125,6 +142,7 @@ void nsMetalRenderDevice::InvalidateResources() {
 }
 
 void nsMetalRenderDevice::RestartResources() {
+	ApplyDisplayMode();
 	_currentState = nullptr;
 	if (_defaultState) {
 	    _defaultState->Invalidate();
@@ -142,10 +160,13 @@ void nsMetalRenderDevice::RestartResources() {
 	}
 }
 void nsMetalRenderDevice::GetDisplayInfo(DisplayInfo &info) {
-    info.modes.push_back({static_cast<int>(_config.currWidth), static_cast<int>(_config.currHeight)});
+    auto &modes = _displayModes.GetModes();
+    for (auto &mode : modes) {
+        info.modes.push_back({mode.width, mode.height});
+    }
 }
 const rasterConfig_t* nsMetalRenderDevice::GetCurrentConfig() {
-    return &_config;
+    return &_displayModes.GetConfig();
 }
 void nsMetalRenderDevice::SetColor(const float c[4]) {
     _currentColor = nsColor(c[0], c[1], c[2], c[3]);
@@ -178,9 +199,8 @@ bool nsMetalRenderDevice::BeginEncoder() {
         return false;
     }
 
-    _config.currWidth = (uint)_currentDrawable.texture.width;
-    _config.currHeight = (uint)_currentDrawable.texture.height;
-    EnsureDepthStencilTexture(_config.currWidth, _config.currHeight);
+	EnsureDepthStencilTexture((int)_currentDrawable.texture.width,
+	                          (int)_currentDrawable.texture.height);
 
 	MTLRenderPassDescriptor *passDesc = CreatePassDescriptor(_currentDrawable.texture, _depthStencilTexture);
 	{
@@ -202,6 +222,25 @@ bool nsMetalRenderDevice::BeginEncoder() {
 
 void nsMetalRenderDevice::EndEncoder() {
     if (_encoder) { [_encoder endEncoding]; _encoder = nil; }
+}
+
+bool nsMetalRenderDevice::ApplyDisplayMode() {
+    EndEncoder();
+    _currentDrawable = nil;
+    _commandBuffer = nil;
+    _depthStencilTexture = nil;
+    const bool result = _displayModes.ApplyCurrentMode();
+    ApplyVSync();
+    return result;
+}
+
+void nsMetalRenderDevice::ApplyVSync() {
+    if (!_mtkView || !_mtkView.layer) {
+        return;
+    }
+
+    auto layer = (CAMetalLayer *)_mtkView.layer;
+    layer.displaySyncEnabled = r_vsync->Bool() ? YES : NO;
 }
 
 bool nsMetalRenderDevice::BeginScene() {

@@ -17,6 +17,11 @@ else ()
             env/desktop/DesktopEnv.cpp
             env/desktop/DesktopEnvLinux.cpp
     )
+    if (APPLE)
+        list(APPEND env-sources
+                env/desktop/DesktopFrameApple.mm
+        )
+    endif ()
 endif ()
 
 set(sources

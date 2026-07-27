@@ -12,3 +12,9 @@ IRenDevice *GetRenDevice() {
     }
     return g_shared;
 }
+
+void DestroyMetalRenderDevice(nsMetalRenderDevice *device) {
+    assert(device == g_shared);
+    g_shared = nullptr;
+    delete device;
+}

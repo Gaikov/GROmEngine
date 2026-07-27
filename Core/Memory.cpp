@@ -2,6 +2,7 @@
 #include "sys.h"
 #include "nsLib/log.h"
 #include "nsLib/StrTools.h"
+#include <atomic>
 #include <cstdlib>
 
 static thread_local bool g_inLoop = false;
@@ -172,14 +173,14 @@ void mem_free( void *data )
 
 #else
 
-static int g_allocatedBlocks = 0;
+static std::atomic<int> g_allocatedBlocks = 0;
 
 void *mem_malloc(uint size, const char *file, int line)
 {
 	if (g_inLoop && g_loopAllocationScope == 0) {
 		g_loopAllocations++;
 	}
-    g_allocatedBlocks ++;
+    g_allocatedBlocks.fetch_add(1, std::memory_order_relaxed);
 	auto data = malloc(size);
 	memset(data, 0, size);
 	return data;
@@ -198,7 +199,7 @@ void mem_free(void *data)
 {
 	if (data)
 	{
-        g_allocatedBlocks --;
+        g_allocatedBlocks.fetch_sub(1, std::memory_order_relaxed);
 		free(data);
 	}
 }
@@ -253,7 +254,8 @@ void mem_report()
 		Sys_Message("Memory leaks detected!");
 	}
 
-    if (g_allocatedBlocks != 0) {
-        printf("WARNING: Leaked mem blocks: %i\n", g_allocatedBlocks);
+    const int allocatedBlocks = g_allocatedBlocks.load(std::memory_order_relaxed);
+    if (allocatedBlocks != 0) {
+        printf("WARNING: Live mem blocks at report time: %i\n", allocatedBlocks);
     }
 }

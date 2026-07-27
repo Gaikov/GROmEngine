@@ -20,7 +20,10 @@ std::string TextureCacheKey(const char *id, int flags) {
 nsMetalTexturesCache::nsMetalTexturesCache(id<MTLDevice> device)
     : _device(device) {}
 
-nsMetalTexturesCache::~nsMetalTexturesCache() = default;
+nsMetalTexturesCache::~nsMetalTexturesCache() {
+    _current = nullptr;
+    ReleaseAll();
+}
 
 nsMetalTexture* nsMetalTexturesCache::AllocateResource(const char *id, int param) {
     return nsMetalTexture::Load(_device, id, param);

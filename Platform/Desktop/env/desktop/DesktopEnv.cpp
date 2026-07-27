@@ -7,6 +7,10 @@
 #include "DesktopCommon.h"
 #include "env/Env.h"
 
+#ifdef __APPLE__
+void DesktopRunFrame();
+#endif
+
 bool nsEnv::Init() {
     return true;
 }
@@ -14,8 +18,12 @@ bool nsEnv::Init() {
 
 void nsEnv::MainLoop() {
     while (!glfwWindowShouldClose(_wnd) && !Sys_IsExit()) {
+#ifdef __APPLE__
+        DesktopRunFrame();
+#else
         nsEngine::MainLoop();
         glfwPollEvents();
+#endif
     }
 }
 
