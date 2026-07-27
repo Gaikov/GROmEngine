@@ -2,8 +2,9 @@
 // Created by Roman on 4/12/2024.
 //
 
-#include <GLES/gl.h>
 #include "GLNativeContext.h"
+#include <EGL/eglext.h>
+#include <GLES3/gl3.h>
 #include "nsLib/log.h"
 
 GLNativeContext::GLNativeContext(EGLNativeWindowType win) :
@@ -28,77 +29,110 @@ void GLNativeContext::BeginRender() {
 }
 
 void GLNativeContext::SwapBuffers() {
-    // Present the rendered image. This is an implicit glFlush.
-    auto swapResult = eglSwapBuffers(_display, _surface);
-    assert(swapResult == EGL_TRUE);
+    if (_display != EGL_NO_DISPLAY && _surface != EGL_NO_SURFACE) {
+        eglSwapBuffers(_display, _surface);
+    }
 }
 
 bool GLNativeContext::Init() {
-    // Choose your render attributes
     constexpr EGLint attribs[] = {
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-            EGL_BLUE_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
             EGL_RED_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
             EGL_DEPTH_SIZE, 24,
+            EGL_STENCIL_SIZE, 8,
             EGL_NONE
     };
 
-    // The default display is probably what you want on Android
-    auto display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    eglInitialize(display, nullptr, nullptr);
+    _display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (_display == EGL_NO_DISPLAY) {
+        Log::Error("Failed to get EGL display: 0x%x", eglGetError());
+        return false;
+    }
 
-    // figure out how many configs there are
-    EGLint numConfigs;
-    eglChooseConfig(display, attribs, nullptr, 0, &numConfigs);
+    if (eglInitialize(_display, nullptr, nullptr) != EGL_TRUE) {
+        Log::Error("Failed to initialize EGL: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
 
-    // get the list of configurations
+    if (eglBindAPI(EGL_OPENGL_ES_API) != EGL_TRUE) {
+        Log::Error("Failed to bind OpenGL ES API: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
+
+    EGLint numConfigs = 0;
+    if (eglChooseConfig(_display, attribs, nullptr, 0, &numConfigs) != EGL_TRUE ||
+        numConfigs <= 0) {
+        Log::Error("No EGL config supports OpenGL ES 3: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
+
     std::unique_ptr<EGLConfig[]> supportedConfigs(new EGLConfig[numConfigs]);
-    eglChooseConfig(display, attribs, supportedConfigs.get(), numConfigs, &numConfigs);
+    if (eglChooseConfig(_display, attribs, supportedConfigs.get(), numConfigs, &numConfigs) != EGL_TRUE) {
+        Log::Error("Failed to query EGL configs: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
 
-    // Find a config we like.
-    // Could likely just grab the first if we don't care about anything else in the config.
-    // Otherwise hook in your own heuristic
-    auto config = *std::find_if(
+    auto configIt = std::find_if(
             supportedConfigs.get(),
             supportedConfigs.get() + numConfigs,
-            [&display](const EGLConfig &config) {
-                EGLint red, green, blue, depth;
-                if (eglGetConfigAttrib(display, config, EGL_RED_SIZE, &red)
-                    && eglGetConfigAttrib(display, config, EGL_GREEN_SIZE, &green)
-                    && eglGetConfigAttrib(display, config, EGL_BLUE_SIZE, &blue)
-                    && eglGetConfigAttrib(display, config, EGL_DEPTH_SIZE, &depth)) {
-
-                    Log::Info("Found config with %i:%i:%i, %i", red, green, blue, depth);
-                    return red == 8 && green == 8 && blue == 8 && depth == 24;
-                }
-                return false;
+            [this](const EGLConfig &config) {
+                EGLint red = 0;
+                EGLint green = 0;
+                EGLint blue = 0;
+                EGLint depth = 0;
+                EGLint stencil = 0;
+                eglGetConfigAttrib(_display, config, EGL_RED_SIZE, &red);
+                eglGetConfigAttrib(_display, config, EGL_GREEN_SIZE, &green);
+                eglGetConfigAttrib(_display, config, EGL_BLUE_SIZE, &blue);
+                eglGetConfigAttrib(_display, config, EGL_DEPTH_SIZE, &depth);
+                eglGetConfigAttrib(_display, config, EGL_STENCIL_SIZE, &stencil);
+                return red == 8 && green == 8 && blue == 8 &&
+                       depth >= 24 && stencil >= 8;
             });
 
-    Log::Info("Found %i configs", numConfigs);
+    if (configIt == supportedConfigs.get() + numConfigs) {
+        Log::Error("No compatible RGBA8 depth/stencil EGL config found");
+        Release();
+        return false;
+    }
+    const EGLConfig config = *configIt;
 
-    // create the proper window surface
-    EGLint format;
-    eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format);
-    EGLSurface surface = eglCreateWindowSurface(display, config, _win, nullptr);
+    _surface = eglCreateWindowSurface(_display, config, _win, nullptr);
+    if (_surface == EGL_NO_SURFACE) {
+        Log::Error("Failed to create EGL window surface: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
 
-    // Create a GLES 1 context
-    EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 1, EGL_NONE};
-    auto context = eglCreateContext(display, config, nullptr, contextAttribs);
+    constexpr EGLint contextAttribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 3,
+            EGL_NONE
+    };
+    context_ = eglCreateContext(_display, config, EGL_NO_CONTEXT, contextAttribs);
+    if (context_ == EGL_NO_CONTEXT) {
+        Log::Error("Failed to create OpenGL ES 3 context: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
 
-    // get some window metrics
-    auto madeCurrent = eglMakeCurrent(display, surface, surface, context);
-    assert(madeCurrent);
+    if (eglMakeCurrent(_display, _surface, _surface, context_) != EGL_TRUE) {
+        Log::Error("Failed to activate OpenGL ES 3 context: 0x%x", eglGetError());
+        Release();
+        return false;
+    }
 
-    _display = display;
-    _surface = surface;
-    context_ = context;
-
-    // make width and height invalid so it gets updated the first frame in @a updateRenderArea()
     width_ = -1;
     height_ = -1;
 
+    Log::Info("OpenGL ES 3 EGL context initialized");
     return true;
 }
 
@@ -120,7 +154,6 @@ EGLint GLNativeContext::GetSurfaceHeight() {
 
 void GLNativeContext::Release() {
     if (_display != EGL_NO_DISPLAY) {
-        //Log::Info("...releasing EGL context");
         eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (context_ != EGL_NO_CONTEXT) {
             eglDestroyContext(_display, context_);
@@ -133,4 +166,6 @@ void GLNativeContext::Release() {
         eglTerminate(_display);
         _display = EGL_NO_DISPLAY;
     }
+    width_ = 0;
+    height_ = 0;
 }

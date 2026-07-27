@@ -19,6 +19,10 @@ Platform *App_GetPlatform() {
     return g_platform;
 }
 
+Platform::ProcAddr AndroidPlatform::GetProcAddr(const char *name) {
+    return reinterpret_cast<ProcAddr>(eglGetProcAddress(name));
+}
+
 bool AndroidPlatform::Create(JNIEnv *jenv, JavaVM *vm, AAssetManager *assetManager,
                              const char *internalDataPath) {
     assert(g_platform == nullptr);
@@ -209,5 +213,4 @@ void AndroidPlatform::OpenUrl(const char *url) {
 const char *AndroidPlatform::GetDomainName() {
     return "Android";
 }
-
 

@@ -68,6 +68,8 @@ public:
 
     bool IsMobile() override;
 
+    ProcAddr GetProcAddr(const char *name) override;
+
     void SwapBuffers() override;
 
     IDataWriter *InternalWrite(const char *fileName) override;
