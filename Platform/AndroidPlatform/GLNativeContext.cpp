@@ -7,6 +7,7 @@
 #include <GLES3/gl3.h>
 #include <swappy/swappyGL.h>
 #include "Core/Config.h"
+#include "Core/Memory.h"
 #include "Engine/RenDevice.h"
 #include "nsLib/log.h"
 
@@ -55,9 +56,13 @@ bool GLNativeContext::SwapBuffers() {
     }
 
     const bool useSwappy = vsync && SwappyGL_isEnabled();
-    const bool result = useSwappy
-            ? SwappyGL_swap(_display, _surface)
-            : eglSwapBuffers(_display, _surface) == EGL_TRUE;
+    bool result;
+    if (useSwappy) {
+        nsMemoryLoopAllocScope swappyAllocationScope;
+        result = SwappyGL_swap(_display, _surface);
+    } else {
+        result = eglSwapBuffers(_display, _surface) == EGL_TRUE;
+    }
     if (!result) {
         const EGLint error = eglGetError();
         _needsRecreation = IsSurfaceLost(error);
