@@ -17,7 +17,9 @@ public:
 
     void SetKeyPressed(int key, bool pressed);
 
-    bool IsKeyPressed(int key) { return _pressed[key]; }
+    bool IsKeyPressed(int key) {
+        return key >= 0 && key < KEYBOARD_MAX_KEYS && _pressed[key];
+    }
 
 private:
     void SetName(const char *name, int key);

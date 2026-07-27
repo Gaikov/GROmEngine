@@ -11,16 +11,15 @@ class JavaObject {
 public:
     typedef nsSmartPtr<JavaObject> sp_t;
 
-    JavaObject(jobject object, JNIEnv *env, JavaVM *vm);
-    jmethodID BeginMethod(const char *name, const char *sig);
-    void EndMethod();
+    JavaObject(jobject object, JavaVM *vm);
+    ~JavaObject();
 
-    JNIEnv* GetEnv() { return _env; }
-    jobject GetObject() { return _object; }
+    bool CallBoolean(const char *name, bool &result) const;
+    bool CallVoidString(const char *name, const char *value) const;
+    bool CallVoidStrings(const char *name, const char *first, const char *second) const;
 
 private:
     jobject _object;
-    JNIEnv *_env;
     JavaVM *_vm;
 };
 

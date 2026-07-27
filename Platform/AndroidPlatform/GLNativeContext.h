@@ -16,10 +16,11 @@ public:
 
     void BeginRender();
 
-    void SwapBuffers();
+    bool SwapBuffers();
+    bool NeedsRecreation() const { return _needsRecreation; }
 
-    EGLint GetSurfaceWidth();
-    EGLint GetSurfaceHeight();
+    EGLint GetSurfaceWidth() const;
+    EGLint GetSurfaceHeight() const;
 
 private:
     EGLNativeWindowType _win;
@@ -28,6 +29,8 @@ private:
     EGLContext context_;
     EGLint width_;
     EGLint height_;
+    int _appliedSwapInterval = -1;
+    mutable bool _needsRecreation = false;
 };
 
 

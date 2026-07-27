@@ -298,14 +298,22 @@ AndroidKeyboard::AndroidKeyboard() {
 }
 
 const char *AndroidKeyboard::GetName(int key) {
+    if (key < 0 || key >= KEYBOARD_MAX_KEYS) {
+        return _names[AKEYCODE_UNKNOWN];
+    }
     return _names[key];
 }
 
 void AndroidKeyboard::SetName(const char *name, int key) {
+    if (key < 0 || key >= KEYBOARD_MAX_KEYS) {
+        return;
+    }
     _names[key] = name;
     _names[key].ToLower();
 }
 
 void AndroidKeyboard::SetKeyPressed(int key, bool pressed) {
-    _pressed[key] = pressed;
+    if (key >= 0 && key < KEYBOARD_MAX_KEYS) {
+        _pressed[key] = pressed;
+    }
 }

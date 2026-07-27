@@ -40,6 +40,17 @@ if ((NOT WEB_ASM) AND (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux"))
     include_directories(
         ThirdParty/openal-soft/include
     )
+    if (CMAKE_SYSTEM_NAME STREQUAL Android)
+        set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_TESTS OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_INSTALL OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_INSTALL_CONFIG OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_INSTALL_HRTF_DATA OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_INSTALL_AMBDEC_PRESETS OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_INSTALL_EXAMPLES OFF CACHE BOOL "" FORCE)
+        set(ALSOFT_INSTALL_UTILS OFF CACHE BOOL "" FORCE)
+    endif ()
     add_subdirectory(ThirdParty/openal-soft)
 endif()
 
@@ -92,4 +103,3 @@ add_dependencies(${SOUND_LIB} SoundBase)
 add_dependencies(${RASTER_LIB} Core)
 add_dependencies(ImageDecoder Core)
 add_dependencies(Engine Core ${SOUND_LIB} ${RASTER_LIB} ${PLATFORM})
-

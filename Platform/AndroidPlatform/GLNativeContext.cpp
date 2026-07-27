@@ -5,7 +5,18 @@
 #include "GLNativeContext.h"
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
+#include <swappy/swappyGL.h>
+#include "Core/Config.h"
+#include "Engine/RenDevice.h"
 #include "nsLib/log.h"
+
+namespace {
+bool IsSurfaceLost(EGLint error) {
+    return error == EGL_BAD_SURFACE ||
+           error == EGL_BAD_NATIVE_WINDOW ||
+           error == EGL_CONTEXT_LOST;
+}
+}
 
 GLNativeContext::GLNativeContext(EGLNativeWindowType win) :
         _win(win),
@@ -28,10 +39,31 @@ void GLNativeContext::BeginRender() {
     }
 }
 
-void GLNativeContext::SwapBuffers() {
-    if (_display != EGL_NO_DISPLAY && _surface != EGL_NO_SURFACE) {
-        eglSwapBuffers(_display, _surface);
+bool GLNativeContext::SwapBuffers() {
+    if (_display == EGL_NO_DISPLAY || _surface == EGL_NO_SURFACE) {
+        return false;
     }
+
+    const bool vsync = !r_vsync || r_vsync->Bool();
+    const int requestedInterval = vsync ? 1 : 0;
+    if (_appliedSwapInterval != requestedInterval) {
+        if (eglSwapInterval(_display, requestedInterval) != EGL_TRUE) {
+            Log::Warning("Failed to set EGL swap interval: 0x%x", eglGetError());
+        } else {
+            _appliedSwapInterval = requestedInterval;
+        }
+    }
+
+    const bool useSwappy = vsync && SwappyGL_isEnabled();
+    const bool result = useSwappy
+            ? SwappyGL_swap(_display, _surface)
+            : eglSwapBuffers(_display, _surface) == EGL_TRUE;
+    if (!result) {
+        const EGLint error = eglGetError();
+        _needsRecreation = IsSurfaceLost(error);
+        Log::Warning("Failed to swap EGL buffers: 0x%x", error);
+    }
+    return result;
 }
 
 bool GLNativeContext::Init() {
@@ -131,24 +163,39 @@ bool GLNativeContext::Init() {
 
     width_ = -1;
     height_ = -1;
+    _appliedSwapInterval = -1;
+    _needsRecreation = false;
+    SwappyGL_setWindow(_win);
 
     Log::Info("OpenGL ES 3 EGL context initialized");
     return true;
 }
 
-EGLint GLNativeContext::GetSurfaceWidth() {
-    assert(_display && _surface);
-
-    EGLint width;
-    eglQuerySurface(_display, _surface, EGL_WIDTH, &width);
+EGLint GLNativeContext::GetSurfaceWidth() const {
+    if (_display == EGL_NO_DISPLAY || _surface == EGL_NO_SURFACE) {
+        return 0;
+    }
+    EGLint width = 0;
+    if (eglQuerySurface(_display, _surface, EGL_WIDTH, &width) != EGL_TRUE) {
+        const EGLint error = eglGetError();
+        _needsRecreation = IsSurfaceLost(error);
+        Log::Warning("Failed to query EGL surface width: 0x%x", error);
+        return 0;
+    }
     return width;
 }
 
-EGLint GLNativeContext::GetSurfaceHeight() {
-    assert(_display && _surface);
-
-    EGLint height;
-    eglQuerySurface(_display, _surface, EGL_HEIGHT, &height);
+EGLint GLNativeContext::GetSurfaceHeight() const {
+    if (_display == EGL_NO_DISPLAY || _surface == EGL_NO_SURFACE) {
+        return 0;
+    }
+    EGLint height = 0;
+    if (eglQuerySurface(_display, _surface, EGL_HEIGHT, &height) != EGL_TRUE) {
+        const EGLint error = eglGetError();
+        _needsRecreation = IsSurfaceLost(error);
+        Log::Warning("Failed to query EGL surface height: 0x%x", error);
+        return 0;
+    }
     return height;
 }
 
@@ -168,4 +215,6 @@ void GLNativeContext::Release() {
     }
     width_ = 0;
     height_ = 0;
+    _appliedSwapInterval = -1;
+    _needsRecreation = false;
 }

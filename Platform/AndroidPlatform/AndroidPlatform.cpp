@@ -5,7 +5,6 @@
 #include "AndroidPlatform.h"
 #include "AndroidAssetReader.h"
 #include "nsLib/log.h"
-#include "AndroidImagesDecoder.h"
 #include "Core/Package.h"
 #include "Core/FileReader.h"
 #include "Core/FileWriter.h"
@@ -57,8 +56,9 @@ bool AndroidPlatform::Init() {
 }
 
 void AndroidPlatform::Release() {
-    delete g_platform;
-    g_platform = nullptr;
+    _activity = nullptr;
+    _softInput = nullptr;
+    _glContext = nullptr;
 }
 
 const nsArgs &AndroidPlatform::GetArgs() {
@@ -86,7 +86,9 @@ const char *AndroidPlatform::GetKeyName(int key) {
 }
 
 unsigned int AndroidPlatform::GetTime() {
-    return std::chrono::system_clock::now().time_since_epoch().count() / 1000;
+    using namespace std::chrono;
+    return static_cast<unsigned int>(
+            duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());
 }
 
 void AndroidPlatform::Minimize() {
@@ -161,11 +163,9 @@ bool AndroidPlatform::ShowInterstitialAd() {
         return false;
     }
 
-    auto method = _activity->BeginMethod("showInterstitialAd", "()Z");
-    if (method) {
-        auto res = _activity->GetEnv()->CallBooleanMethod(_activity->GetObject(), method);
-        _activity->EndMethod();
-        return res;
+    bool result = false;
+    if (_activity->CallBoolean("showInterstitialAd", result)) {
+        return result;
     }
 
     Log::Warning("Failed to call ads!");
@@ -173,7 +173,9 @@ bool AndroidPlatform::ShowInterstitialAd() {
 }
 
 void AndroidPlatform::MessagePopup(const char *caption, const char *message) {
-    //TODO: android message popup
+    if (!_activity || !_activity->CallVoidStrings("messageBox", caption, message)) {
+        Log::Warning("Failed to show an Android message popup");
+    }
 }
 
 IDataWriter *AndroidPlatform::InternalWrite(const char *fileName) {
@@ -197,13 +199,7 @@ void AndroidPlatform::OpenUrl(const char *url) {
         return;
     }
 
-    auto method = _activity->BeginMethod("openUrl", "(Ljava/lang/String;)V");
-    if (method) {
-        auto env = _activity->GetEnv();
-        auto javaUrl = env->NewStringUTF(url);
-        env->CallVoidMethod(_activity->GetObject(), method, javaUrl);
-        env->DeleteLocalRef(javaUrl);
-        _activity->EndMethod();
+    if (_activity->CallVoidString("openUrl", url)) {
         return;
     }
 
@@ -213,4 +209,3 @@ void AndroidPlatform::OpenUrl(const char *url) {
 const char *AndroidPlatform::GetDomainName() {
     return "Android";
 }
-
