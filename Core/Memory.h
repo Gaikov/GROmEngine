@@ -5,16 +5,17 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <new>
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 //	������ �� ������ ����������/������������� 
 //  � �������������/������������ ���������� �������
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 
-void*	mem_malloc( uint size, const char *file, int line );
-void*	mem_realloc( void *data, uint size, const char *file, int line );
+void*	mem_malloc( size_t size, const char *file, int line );
+void*	mem_realloc( void *data, size_t size, const char *file, int line );
 void	mem_free( void *data );
-void	mem_report( uint &userAlloc, uint &heapAlloc );
+void	mem_report( size_t &userAlloc, size_t &heapAlloc );
 char*	mem_strdup( const char *str, const char *file, int line );
 void    mem_report();
 
@@ -31,8 +32,25 @@ inline void MemZero( T &mem )
 
 void* operator new ( size_t size );
 void* operator new[] ( size_t size );
+void* operator new ( size_t size, std::align_val_t alignment );
+void* operator new[] ( size_t size, std::align_val_t alignment );
+void* operator new ( size_t size, const std::nothrow_t& ) noexcept;
+void* operator new[] ( size_t size, const std::nothrow_t& ) noexcept;
+void* operator new ( size_t size, std::align_val_t alignment, const std::nothrow_t& ) noexcept;
+void* operator new[] ( size_t size, std::align_val_t alignment, const std::nothrow_t& ) noexcept;
+
 void operator delete( void* p ) noexcept;
 void operator delete [] ( void* p ) noexcept;
+void operator delete( void* p, size_t size ) noexcept;
+void operator delete [] ( void* p, size_t size ) noexcept;
+void operator delete( void* p, std::align_val_t alignment ) noexcept;
+void operator delete [] ( void* p, std::align_val_t alignment ) noexcept;
+void operator delete( void* p, size_t size, std::align_val_t alignment ) noexcept;
+void operator delete [] ( void* p, size_t size, std::align_val_t alignment ) noexcept;
+void operator delete( void* p, const std::nothrow_t& ) noexcept;
+void operator delete [] ( void* p, const std::nothrow_t& ) noexcept;
+void operator delete( void* p, std::align_val_t alignment, const std::nothrow_t& ) noexcept;
+void operator delete [] ( void* p, std::align_val_t alignment, const std::nothrow_t& ) noexcept;
 
 
 class nsMemory final {
@@ -41,6 +59,7 @@ public:
 	static void EndLoop();
 	static void PushLoopAllocationsScope();
 	static void PopLoopAllocationsScope();
+	static int LiveAllocations();
 };
 
 class nsMemoryLoopAllocScope final {
