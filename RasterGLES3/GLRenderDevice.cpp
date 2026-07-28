@@ -177,7 +177,7 @@ void GLRenderDevice::TextureRelease(ITexture *texture)
 
 void GLRenderDevice::TextureBind(ITexture *texture) {
 	const auto t = dynamic_cast<nsGLBaseTexture *>(texture);
-	if (_textures.BindTexture(t)) {
+	if (_textures.BindTexture(t) && _textures.HasBoundTexture()) {
 		_shaders.ApplyTextureParams();
 	}
 	_shaders.programs.SetTextureBound(_textures.HasBoundTexture());
@@ -213,6 +213,9 @@ void GLRenderDevice::StateApply(IRenState *state)
 {
 	auto shader = dynamic_cast<GLShader *>(state);
 	_shaders.Apply(shader);
+	if (_textures.HasBoundTexture()) {
+		_shaders.ApplyTextureParams();
+	}
 }
 
 void GLRenderDevice::ClearScene(uint flags)
@@ -509,6 +512,5 @@ void GLRenderDevice::StencilRelease(IStencilState *state) {
 void GLRenderDevice::StencilApply(IStencilState *state) {
     _stencils.Apply(dynamic_cast<nsGLStencilState*>(state));
 }
-
 
 

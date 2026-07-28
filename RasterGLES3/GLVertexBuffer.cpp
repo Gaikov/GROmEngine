@@ -100,7 +100,7 @@ void GLVertexBuffer::ReleaseGLObjects() {
 }
 
 void GLVertexBuffer::Draw() {
-    if (!_vao) {
+    if (!_vbo || !_ebo) {
         InitGLObjects();
     }
 

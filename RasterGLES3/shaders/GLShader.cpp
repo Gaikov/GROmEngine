@@ -105,8 +105,6 @@ void GLShader::ForceApply()
 
 	GLUtils::SetState(GL_CULL_FACE, m_cullMode);
 
-	ApplyTextureParams();
-
 	GL_CHECK_R("GLShader::ForceApply",)
 }
 
@@ -142,11 +140,6 @@ void GLShader::Apply( GLShader *prev )
 
 	if ( m_cullMode != prev->m_cullMode )
 		GLUtils::SetState(GL_CULL_FACE, m_cullMode);
-
-	if ( m_texCoordU != prev->m_texCoordU )
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordU);
-	if ( m_texCoordV != prev->m_texCoordV )
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordV);
 
 	GL_CHECK_R("GLShader::Apply",)
 }

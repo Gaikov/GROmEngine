@@ -4,6 +4,7 @@
 
 #include "GLTexturesCache.h"
 #include "GLTexture.h"
+#include "GLUtils.h"
 #include <string>
 
 namespace {
@@ -61,6 +62,11 @@ bool GLTexturesCache::BindTexture(nsGLBaseTexture *t)
 		{
 			_current->Bind();
 		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+			GL_CHECK_R("glBindTexture", false)
+		}
         return true;
 	}
 	return false;
@@ -88,4 +94,3 @@ void GLTexturesCache::UnloadFromGPU() const {
         t->UnloadFromGPU();
     }
 }
-
