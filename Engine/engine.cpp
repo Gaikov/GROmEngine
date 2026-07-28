@@ -25,6 +25,7 @@
 #include "debug/policies/FastMemDebugDraw.h"
 #include "renderer/particles/factory/ParticlesManager.h"
 #include "renderer/font/FontsCache.h"
+#include "renderer/sprites/SpriteDesc.h"
 #include "display/factory/VisualFactory2d.h"
 #include "display/pool/LayoutsPool.h"
 #include "display/pool/VisualsPoolDebugDraw.h"
@@ -48,6 +49,7 @@ extern void pause_f( int argc, const char *argv[] );
 //---------------------------------------------------------
 bool nsEngine::Init()
 {
+	nsMemory::StartTracking();
 	IGameApp	*app = App_GetGame();
 
 	g_frameTime = 0;
@@ -144,11 +146,15 @@ void nsEngine::Release(bool failed)
     nsEngineContext::Release();
 	nsConsole::Release();
     nsFontsCache::Release();
+	nsSpriteDesc::ReleaseRenderBuffer();
 	nsRenDevice::Release();
 	nsSoundDevice::Release();
 
     App_GetPlatform()->Release();
 	nsCore::Release();
+
+	nsMemory::StopTracking();
+	mem_report();
 }
 
 //---------------------------------------------------------
@@ -346,4 +352,3 @@ void nsEngine::OnActivateApp(bool active) {
         g_cfg->SaveConfig();
     }
 }
-

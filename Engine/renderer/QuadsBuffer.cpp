@@ -15,6 +15,13 @@ nsQuadsBuffer::nsQuadsBuffer(IRenDevice *dev, const uint maxQuads, const bool us
     _numQuads = 0;
 }
 
+nsQuadsBuffer::~nsQuadsBuffer() {
+    if (_vb) {
+        _dev->VerticesRelease(_vb);
+        _vb = nullptr;
+    }
+}
+
 bool nsQuadsBuffer::AddQuad(const nsVec2 &p,
                             const nsVec2 &pivot,
                             const nsVec2 &size,

@@ -15,6 +15,7 @@ public:
     virtual ~nsEventDispatcher() = default;
     int AddHandler(int eventId, const tEventHandler &handler);
     void RemoveHandler(int eventId, int handlerId);
+    void ClearHandlers();
     void Emmit(const nsBaseEvent &event);
 
 private:

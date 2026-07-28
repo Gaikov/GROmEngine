@@ -9,6 +9,11 @@
 
 nsQuadsBuffer* nsSpriteDesc::_buff = nullptr;
 
+void nsSpriteDesc::ReleaseRenderBuffer() {
+    delete _buff;
+    _buff = nullptr;
+}
+
 nsSpriteDesc& nsSpriteDesc::ResetSize() {
     if (tex) {
         int w, h;

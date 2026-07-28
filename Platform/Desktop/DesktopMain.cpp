@@ -8,7 +8,6 @@
 #include "Engine/RenDevice.h"
 #include "Core/Var.h"
 #include "Engine/display/VisualObject2d.h"
-#include "Core/Memory.h"
 #include "env/Env.h"
 
 static DesktopPlatform g_desktop;
@@ -31,7 +30,6 @@ void onExit() {
     nsEnv::Destroy();
 
     nsVisualObject2d::LeaksCheck();
-    mem_report();
 }
 
 int main(int argc, char *argv[]) {

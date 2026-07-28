@@ -40,6 +40,7 @@ void nsPackage::Release() {
         }
         m_packs.clear();
     }
+    ClearHandlers();
 }
 
 //---------------------------------------------------------

@@ -40,9 +40,21 @@ public:
 
 	int allocations = -1;
 };
+
+class MemoryTest : public testing::Test {
+protected:
+	void SetUp() override {
+		nsMemory::StopTracking();
+		nsMemory::StartTracking();
+	}
+
+	void TearDown() override {
+		nsMemory::StopTracking();
+	}
+};
 }
 
-TEST(MemoryTest, TracksOrdinaryScalarAndArrayAllocations) {
+TEST_F(MemoryTest, TracksOrdinaryScalarAndArrayAllocations) {
 	const int scalarBefore = nsMemory::LiveAllocations();
 	void *scalar = ::operator new(37);
 	const int scalarAllocated = nsMemory::LiveAllocations();
@@ -65,7 +77,7 @@ TEST(MemoryTest, TracksOrdinaryScalarAndArrayAllocations) {
 	EXPECT_TRUE(arrayZeroed);
 }
 
-TEST(MemoryTest, TracksNothrowAllocations) {
+TEST_F(MemoryTest, TracksNothrowAllocations) {
 	const int scalarBefore = nsMemory::LiveAllocations();
 	void *scalar = ::operator new(41, std::nothrow);
 	const int scalarAllocated = nsMemory::LiveAllocations();
@@ -86,7 +98,7 @@ TEST(MemoryTest, TracksNothrowAllocations) {
 	EXPECT_EQ(arrayFreed, arrayBefore);
 }
 
-TEST(MemoryTest, TracksAlignedAndSizedAlignedAllocations) {
+TEST_F(MemoryTest, TracksAlignedAndSizedAlignedAllocations) {
 	const auto alignment64 = std::align_val_t(64);
 	const int scalarBefore = nsMemory::LiveAllocations();
 	void *scalar = ::operator new(117, alignment64);
@@ -115,7 +127,7 @@ TEST(MemoryTest, TracksAlignedAndSizedAlignedAllocations) {
 	EXPECT_EQ(arrayFreed, arrayBefore);
 }
 
-TEST(MemoryTest, TracksAlignedNothrowAllocations) {
+TEST_F(MemoryTest, TracksAlignedNothrowAllocations) {
 	const auto alignment = std::align_val_t(128);
 	const int before = nsMemory::LiveAllocations();
 	void *data = ::operator new(91, alignment, std::nothrow);
@@ -130,7 +142,7 @@ TEST(MemoryTest, TracksAlignedNothrowAllocations) {
 	EXPECT_EQ(freed, before);
 }
 
-TEST(MemoryTest, SupportsZeroSizeAllocations) {
+TEST_F(MemoryTest, SupportsZeroSizeAllocations) {
 	const int before = nsMemory::LiveAllocations();
 	void *data = ::operator new(0);
 	const int allocated = nsMemory::LiveAllocations();
@@ -142,7 +154,7 @@ TEST(MemoryTest, SupportsZeroSizeAllocations) {
 	EXPECT_EQ(freed, before);
 }
 
-TEST(MemoryTest, ReleasesMemoryWhenConstructorsThrow) {
+TEST_F(MemoryTest, ReleasesMemoryWhenConstructorsThrow) {
 	const int scalarBefore = nsMemory::LiveAllocations();
 	bool scalarThrew = false;
 	try {
@@ -167,7 +179,7 @@ TEST(MemoryTest, ReleasesMemoryWhenConstructorsThrow) {
 	EXPECT_EQ(alignedAfter, alignedBefore);
 }
 
-TEST(MemoryTest, MaintainsCounterAcrossThreads) {
+TEST_F(MemoryTest, MaintainsCounterAcrossThreads) {
 	{
 		std::thread warmup([]() {});
 		warmup.join();
@@ -197,7 +209,7 @@ TEST(MemoryTest, MaintainsCounterAcrossThreads) {
 	EXPECT_EQ(after, before);
 }
 
-TEST(MemoryTest, CountsOrdinaryAndAlignedFrameAllocations) {
+TEST_F(MemoryTest, CountsOrdinaryAndAlignedFrameAllocations) {
 	AllocationWarningListener listener;
 	Log::Init();
 	Log::Shared()->AddPolicy(&listener);
@@ -213,4 +225,89 @@ TEST(MemoryTest, CountsOrdinaryAndAlignedFrameAllocations) {
 	Log::Shared()->RemovePolicy(&listener);
 	Log::Release();
 	EXPECT_EQ(listener.allocations, 2);
+}
+
+TEST_F(MemoryTest, IgnoresAllocationsCreatedBeforeTracking) {
+	nsMemory::StopTracking();
+	void *data = ::operator new(47);
+	const int beforeStart = nsMemory::LiveAllocations();
+
+	nsMemory::StartTracking();
+	const int afterStart = nsMemory::LiveAllocations();
+	::operator delete(data);
+	const int afterFree = nsMemory::LiveAllocations();
+
+	EXPECT_EQ(beforeStart, 0);
+	EXPECT_EQ(afterStart, 0);
+	EXPECT_EQ(afterFree, 0);
+}
+
+TEST_F(MemoryTest, KeepsTrackingSessionsIsolated) {
+	void *firstSession = ::operator new(53);
+	const int firstAllocated = nsMemory::LiveAllocations();
+	nsMemory::StopTracking();
+
+	nsMemory::StartTracking();
+	const int secondStarted = nsMemory::LiveAllocations();
+	::operator delete(firstSession);
+	const int oldBlockFreed = nsMemory::LiveAllocations();
+
+	void *secondSession = ::operator new(59);
+	const int secondAllocated = nsMemory::LiveAllocations();
+	::operator delete(secondSession);
+	const int secondFreed = nsMemory::LiveAllocations();
+
+	EXPECT_EQ(firstAllocated, 1);
+	EXPECT_EQ(secondStarted, 0);
+	EXPECT_EQ(oldBlockFreed, 0);
+	EXPECT_EQ(secondAllocated, 1);
+	EXPECT_EQ(secondFreed, 0);
+}
+
+TEST_F(MemoryTest, PreservesCompletedSessionAcrossReport) {
+	void *tracked = ::operator new(61);
+	const int allocated = nsMemory::LiveAllocations();
+	nsMemory::StopTracking();
+
+	mem_report();
+	const int afterReport = nsMemory::LiveAllocations();
+	void *afterStop = ::operator new(67);
+	const int afterUntrackedAllocation = nsMemory::LiveAllocations();
+	::operator delete(afterStop);
+	const int afterUntrackedFree = nsMemory::LiveAllocations();
+	::operator delete(tracked);
+	const int afterTrackedFree = nsMemory::LiveAllocations();
+
+	EXPECT_EQ(allocated, 1);
+	EXPECT_EQ(afterReport, 1);
+	EXPECT_EQ(afterUntrackedAllocation, 1);
+	EXPECT_EQ(afterUntrackedFree, 1);
+	EXPECT_EQ(afterTrackedFree, 0);
+}
+
+TEST_F(MemoryTest, ReallocPreservesDataAlignmentAndZeroFill) {
+	const int before = nsMemory::LiveAllocations();
+	auto *data = static_cast<unsigned char *>(mem_malloc(16, __FILE__, __LINE__));
+	for (size_t i = 0; i < 16; ++i) {
+		data[i] = static_cast<unsigned char>(i + 1);
+	}
+
+	auto *resized = static_cast<unsigned char *>(
+			mem_realloc(data, 64, __FILE__, __LINE__));
+	const int afterRealloc = nsMemory::LiveAllocations();
+	bool preserved = true;
+	for (size_t i = 0; i < 16; ++i) {
+		preserved = preserved && resized[i] == static_cast<unsigned char>(i + 1);
+	}
+	const bool extensionZeroed = IsZeroed(resized + 16, 48);
+	const bool aligned =
+			reinterpret_cast<uintptr_t>(resized) % alignof(std::max_align_t) == 0;
+	mem_free(resized);
+	const int afterFree = nsMemory::LiveAllocations();
+
+	EXPECT_TRUE(preserved);
+	EXPECT_TRUE(extensionZeroed);
+	EXPECT_TRUE(aligned);
+	EXPECT_EQ(afterRealloc, before + 1);
+	EXPECT_EQ(afterFree, before);
 }

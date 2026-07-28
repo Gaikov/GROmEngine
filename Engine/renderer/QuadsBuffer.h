@@ -14,6 +14,7 @@ struct IVertexBuffer;
 class nsQuadsBuffer {
 public:
     nsQuadsBuffer(IRenDevice *dev, uint maxQuads, bool useColors = false);
+    ~nsQuadsBuffer();
 
     bool AddQuad(const nsVec2 &pos, const nsVec2 &pivot, const nsVec2 &size, const nsColor &c, const nsVec2 &uvStart, const nsVec2 &uvEnd, float angle = 0);
 

@@ -13,6 +13,10 @@ void nsEventDispatcher::RemoveHandler(int eventId, int handlerId) {
     GetHandlers(eventId).erase(handlerId);
 }
 
+void nsEventDispatcher::ClearHandlers() {
+    _handlers.clear();
+}
+
 nsEventDispatcher::tHandlersList &nsEventDispatcher::GetHandlers(int eventId) {
     return _handlers[eventId];
 }

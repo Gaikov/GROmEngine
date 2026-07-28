@@ -37,6 +37,7 @@ struct nsSpriteDesc
 
     void Draw(IRenDevice *dev) const;
     void Parse(script_state_t *ss, nsVisualAssetsContext *assets, const char *name = nullptr);
+    static void ReleaseRenderBuffer();
 
 private:
     static nsQuadsBuffer    *_buff;
