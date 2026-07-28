@@ -19,6 +19,9 @@ public:
     bool IsMobile();
     void PrepareInput();
     void PrepareDesktopInput();
+#ifdef WEB_ASM
+    static bool IsKeyPressed(int key);
+#endif
     const char* GetDomainName() const {
         return _domainName.c_str();
     }

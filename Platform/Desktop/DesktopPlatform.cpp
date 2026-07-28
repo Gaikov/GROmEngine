@@ -94,7 +94,11 @@ void DesktopPlatform::GetClientSize(int &width, int &height) {
 }
 
 bool DesktopPlatform::IsKeyPressed(int key) {
+#ifdef WEB_ASM
+    return nsEnv::IsKeyPressed(key);
+#else
     return glfwGetKey(_wnd, key) == GLFW_PRESS;
+#endif
 }
 
 void DesktopPlatform::GetCursorPos(int &x, int &y) {

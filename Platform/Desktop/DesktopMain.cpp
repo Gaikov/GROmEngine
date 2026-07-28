@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
             nsEngine::OnActivateApp(focused);
         });
 
+#ifndef WEB_ASM
         glfwSetKeyCallback(wnd,
                            [](GLFWwindow *window, const int key, int scancode, const int action, const int mods) -> void {
                                if (action == GLFW_PRESS) {
@@ -74,6 +75,7 @@ int main(int argc, char *argv[]) {
         glfwSetCharCallback(wnd, [](GLFWwindow *window, unsigned int codepoint) -> void {
             nsEngine::OnCharDown((char) codepoint);
         });
+#endif
 
         nsEnv::Shared()->PrepareInput();
 

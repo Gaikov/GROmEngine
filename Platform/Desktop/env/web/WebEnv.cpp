@@ -4,15 +4,53 @@
 
 #include "env/Env.h"
 #include "Engine/engine.h"
+#include "Platform/Desktop/DesktopKeyCodes.h"
+#include <array>
 #include <emscripten/emscripten.h>
 #include <emscripten/console.h>
 #include <emscripten/html5.h>
 #include "nsLib/log.h"
 
+namespace {
+	std::array<bool, KEYBOARD_MAX_KEYS> g_keyStates{};
+
+	bool IsValidKey(int key) {
+		return key >= 0 && key < static_cast<int>(g_keyStates.size());
+	}
+}
+
 extern "C" {
 	void nsEngine_OnActivateApp(bool active) {
 		nsEngine::OnActivateApp(active);
 	}
+
+	void nsEngine_OnKeyDown(int key, bool repeat, int mods) {
+		if (!IsValidKey(key)) {
+			return;
+		}
+
+		g_keyStates[key] = true;
+		nsEngine::OnKeyDown(key, repeat, mods);
+	}
+
+	void nsEngine_OnKeyUp(int key, int mods) {
+		if (!IsValidKey(key)) {
+			return;
+		}
+
+		g_keyStates[key] = false;
+		nsEngine::OnKeyUp(key, mods);
+	}
+
+	void nsEngine_OnCharDown(int ch) {
+		if (ch >= 0 && ch <= 0x7f) {
+			nsEngine::OnCharDown(static_cast<char>(ch));
+		}
+	}
+}
+
+bool nsEnv::IsKeyPressed(int key) {
+	return IsValidKey(key) && g_keyStates[key];
 }
 
 EM_JS(int, GetCanvasWidth, (), {
