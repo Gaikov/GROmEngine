@@ -8,6 +8,22 @@
 static std::vector<int> mouseButtons;
 nsEnv *nsEnv::_shared = nullptr;
 
+void nsEnv::WindowToClientCoordinates(double &x, double &y) const {
+    float scaleX;
+    float scaleY;
+    glfwGetWindowContentScale(_wnd, &scaleX, &scaleY);
+    x *= scaleX;
+    y *= scaleY;
+}
+
+void nsEnv::ClientToWindowCoordinates(double &x, double &y) const {
+    float scaleX;
+    float scaleY;
+    glfwGetWindowContentScale(_wnd, &scaleX, &scaleY);
+    x /= scaleX;
+    y /= scaleY;
+}
+
 bool nsEnv::Create() {
     if (!_shared) {
         _shared = new nsEnv();
@@ -30,6 +46,7 @@ void nsEnv::PrepareDesktopInput() {
     });
 
     glfwSetCursorPosCallback(_wnd, [](GLFWwindow *window, double xpos, double ypos) -> void {
+        nsEnv::Shared()->WindowToClientCoordinates(xpos, ypos);
         if (!mouseButtons.empty()) {
             for (auto button: mouseButtons) {
                 nsEngine::OnPointerMove(button, (int) xpos, (int) ypos);
@@ -42,6 +59,7 @@ void nsEnv::PrepareDesktopInput() {
     glfwSetMouseButtonCallback(_wnd, [](GLFWwindow *window, int button, int action, int mods) -> void {
         double x, y;
         glfwGetCursorPos(window, &x, &y);
+        nsEnv::Shared()->WindowToClientCoordinates(x, y);
         if (action == GLFW_PRESS) {
             mouseButtons.push_back(button);
             nsEngine::OnPointerDown(button, (int) x, (int) y);

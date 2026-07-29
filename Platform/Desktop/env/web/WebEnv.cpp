@@ -110,11 +110,10 @@ void nsEnv::OpenUrl(const char *url) {
 }
 
 void nsEnv::MainLoop() {
-	glfwSetWindowSize(_wnd, GetCanvasWidth(), GetCanvasHeight());
 	emscripten_set_main_loop(Loop, 0, true);
 }
 
-void nsEnv::GetClientSize(int &width, int &height) {
+void nsEnv::GetClientSize(int &width, int &height) const {
 	width = GetCanvasWidth();
 	height = GetCanvasHeight();
 }

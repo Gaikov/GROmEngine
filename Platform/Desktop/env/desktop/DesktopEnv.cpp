@@ -27,7 +27,7 @@ void nsEnv::MainLoop() {
     }
 }
 
-void nsEnv::GetClientSize(int &width, int &height) {
+void nsEnv::GetClientSize(int &width, int &height) const {
     glfwGetFramebufferSize(_wnd, &width, &height);
 }
 

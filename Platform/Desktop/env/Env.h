@@ -12,13 +12,15 @@ class nsEnv final {
 public:
     bool Init();
     GLFWwindow* CreateGameWindow();
-    void GetClientSize(int &width, int &height);
+    void GetClientSize(int &width, int &height) const;
     void MessagePopup(const char *title, const char *message);
     void OpenUrl(const char *url);
     void MainLoop();
     bool IsMobile();
     void PrepareInput();
     void PrepareDesktopInput();
+    void WindowToClientCoordinates(double &x, double &y) const;
+    void ClientToWindowCoordinates(double &x, double &y) const;
 #ifdef WEB_ASM
     static bool IsKeyPressed(int key);
 #endif

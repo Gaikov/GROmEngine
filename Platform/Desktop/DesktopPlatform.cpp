@@ -37,6 +37,10 @@ bool DesktopPlatform::Init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
+#ifdef WEB_ASM
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+#endif
+
     _wnd = nsEnv::Shared()->CreateGameWindow();
     if (!_wnd) {
         Sys_FatalError("Could not create game window!");
@@ -104,6 +108,7 @@ bool DesktopPlatform::IsKeyPressed(int key) {
 void DesktopPlatform::GetCursorPos(int &x, int &y) {
     double mouseX, mouseY;
     glfwGetCursorPos(_wnd, &mouseX, &mouseY);
+    nsEnv::Shared()->WindowToClientCoordinates(mouseX, mouseY);
     x = (int) mouseX;
     y = (int) mouseY;
 }
@@ -113,7 +118,10 @@ void DesktopPlatform::ShowCursor(bool show) {
 }
 
 void DesktopPlatform::SetCursorPos(int x, int y) {
-    glfwSetCursorPos(_wnd, x, y);
+    double windowX = x;
+    double windowY = y;
+    nsEnv::Shared()->ClientToWindowCoordinates(windowX, windowY);
+    glfwSetCursorPos(_wnd, windowX, windowY);
 }
 
 void *DesktopPlatform::GetWindowHandler() {
