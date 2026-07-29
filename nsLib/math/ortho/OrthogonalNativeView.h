@@ -9,7 +9,7 @@
 
 class nsOrthogonalNativeView : public nsOrthogonalView {
 public:
-    void SetScreenSize(float width, float height);
+    void SetScreenSize(float width, float height) override;
     const nsMatrix &GetViewMatrix() override;
     nsVec2 ScreenToTarget(float x, float y) override;
 

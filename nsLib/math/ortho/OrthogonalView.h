@@ -10,5 +10,6 @@
 
 class nsOrthogonalView : public IPointerTransform {
 public:
+    virtual void SetScreenSize(float width, float height) = 0;
     virtual const nsMatrix& GetViewMatrix() = 0;
 };

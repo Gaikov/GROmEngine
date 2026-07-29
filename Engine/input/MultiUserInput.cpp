@@ -77,5 +77,7 @@ void nsMultiUserInput::AddInput(IUserInput *input) {
 }
 
 void nsMultiUserInput::OnPointerCancel(int pointerId) {
-
+    for (auto ui : GetInteractiveItems()) {
+        ui->OnPointerCancel(pointerId);
+    }
 }

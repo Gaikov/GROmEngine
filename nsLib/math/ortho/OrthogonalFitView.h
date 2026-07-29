@@ -13,7 +13,7 @@ class nsOrthogonalFitView : public nsOrthogonalView {
 public:
     nsOrthogonalFitView();
 
-    void SetScreenSize(float width, float height);
+    void SetScreenSize(float width, float height) override;
     void SetTargetSize(float width, float height);
     const nsMatrix& GetViewMatrix() override;
     nsVec2 ScreenToTarget(float x, float y) override;
