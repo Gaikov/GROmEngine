@@ -4,26 +4,17 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-#include "Engine/UserInput.h"
+#include "nsImGUIBackend.h"
 
-class nsImGUI_gles3 : public IUserInput {
+class nsImGUI_gles3 final : public nsImGUIBackend {
 public:
-    virtual ~nsImGUI_gles3() = default;
-    virtual bool Init(void *window);
-    virtual void Shutdown();
-
-    virtual void StartFrame();
-    virtual void EndFrame();
-
-    bool OnPointerUp(float x, float y, int pointerId) override;
-    bool OnPointerDown(float x, float y, int pointerId) override;
-    bool OnPointerMove(float x, float y, int pointerId) override;
-    void OnPointerCancel(int pointerId) override;
-    void OnKeyUp(int key, int mods) override;
-    void OnKeyDown(int key, bool rept, int mods) override;
-    void OnChar(char ch) override;
-    bool OnMouseWheel(float delta) override;
+protected:
+    bool BackendInit(void *window) override;
+    void BackendShutdown() override;
+    void BackendStartFrame() override;
+    void BackendRenderDrawData(ImDrawData *drawData) override;
 
 private:
-    void ShowDockSpace();
+    bool _glfwInitialized = false;
+    bool _rendererInitialized = false;
 };

@@ -6,137 +6,40 @@
 
 #include <GLFW/glfw3.h>
 
-#include "implot.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "nsLib/log.h"
 
-ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
-
-static bool initialized = false;
-
-bool nsImGUI_gles3::Init(void *window) {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImPlot::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
-            | ImGuiConfigFlags_DockingEnable;
-
-    ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window), false);
-    ImGui_ImplOpenGL3_Init("#version 300 es");
-    initialized = true;
-    return true;
-}
-
-void nsImGUI_gles3::Shutdown() {
-    if (!initialized) {
-        Log::Warning("ImGUI was not initialized");
-        return;
+bool nsImGUI_gles3::BackendInit(void *window) {
+    _glfwInitialized = ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window), false);
+    if (!_glfwInitialized) {
+        return false;
     }
-    // Очистка
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImPlot::DestroyContext();
-    ImGui::DestroyContext();
-    initialized = false;
+
+    _rendererInitialized = ImGui_ImplOpenGL3_Init("#version 300 es");
+    return _rendererInitialized;
 }
 
-void nsImGUI_gles3::StartFrame() {
-    // Начинаем новый кадр ImGui
+void nsImGUI_gles3::BackendShutdown() {
+    if (_rendererInitialized) {
+        ImGui_ImplOpenGL3_Shutdown();
+        _rendererInitialized = false;
+    }
+
+    if (_glfwInitialized) {
+        ImGui_ImplGlfw_Shutdown();
+        _glfwInitialized = false;
+    }
+}
+
+void nsImGUI_gles3::BackendStartFrame() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ShowDockSpace();
 }
 
-void nsImGUI_gles3::EndFrame() {
-    // Рендеринг
-    ImGui::Render();
-
-    // Рендерим ImGui
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+void nsImGUI_gles3::BackendRenderDrawData(ImDrawData *drawData) {
+    ImGui_ImplOpenGL3_RenderDrawData(drawData);
 }
 
-bool nsImGUI_gles3::OnPointerUp(float x, float y, int pointerId) {
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddMouseButtonEvent(pointerId, false);
-    return io.WantCaptureMouse;
-}
-
-bool nsImGUI_gles3::OnPointerDown(float x, float y, int pointerId) {
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddMouseButtonEvent(pointerId, true);
-    return io.WantCaptureMouse;
-}
-
-bool nsImGUI_gles3::OnPointerMove(float x, float y, int pointerId) {
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddMousePosEvent(x, y);
-    return io.WantCaptureMouse;
-}
-
-void nsImGUI_gles3::OnPointerCancel(int pointerId) {
-}
-
-void nsImGUI_gles3::OnKeyUp(const int key, const int mods) {
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(key, 0), false);
-
-    io.AddKeyEvent(ImGuiMod_Ctrl, (mods & GLFW_MOD_CONTROL) != 0);
-    io.AddKeyEvent(ImGuiMod_Shift, (mods & GLFW_MOD_SHIFT) != 0);
-    io.AddKeyEvent(ImGuiMod_Alt, (mods & GLFW_MOD_ALT) != 0);
-    io.AddKeyEvent(ImGuiMod_Super, (mods & GLFW_MOD_SUPER) != 0);
-}
-
-void nsImGUI_gles3::OnKeyDown(const int key, const bool rept, const int mods) {
-    if (rept) {
-        return;
-    }
-
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(key, 0), true);
-
-    io.AddKeyEvent(ImGuiMod_Ctrl, (mods & GLFW_MOD_CONTROL) != 0);
-    io.AddKeyEvent(ImGuiMod_Shift, (mods & GLFW_MOD_SHIFT) != 0);
-    io.AddKeyEvent(ImGuiMod_Alt, (mods & GLFW_MOD_ALT) != 0);
-    io.AddKeyEvent(ImGuiMod_Super, (mods & GLFW_MOD_SUPER) != 0);
-}
-
-void nsImGUI_gles3::OnChar(char ch) {
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddInputCharacter(ch);
-}
-
-bool nsImGUI_gles3::OnMouseWheel(float delta) {
-    ImGuiIO &io = ImGui::GetIO();
-    io.AddMouseWheelEvent(0, delta);
-    return io.WantCaptureMouse;
-}
-
-void nsImGUI_gles3::ShowDockSpace() {
-
-    const ImGuiViewport *viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(viewport->WorkSize);
-    ImGui::SetNextWindowViewport(viewport->ID);
-
-    constexpr ImGuiWindowFlags window_flags =
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoDocking |
-            ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoNavFocus |
-            ImGuiWindowFlags_NoBackground;
-
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::Begin("DockSpace Demo", nullptr, window_flags);
-
-    const ImGuiID spaceId = ImGui::GetID("MyDockSpace");
-    ImGui::DockSpace(spaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
-
-    ImGui::End();
-    ImGui::PopStyleVar();
+std::unique_ptr<nsImGUIBackend> CreateImGUIBackend() {
+    return std::make_unique<nsImGUI_gles3>();
 }

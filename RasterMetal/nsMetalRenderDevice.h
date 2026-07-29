@@ -16,6 +16,13 @@
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
 
+struct nsMetalFrameContext {
+    __unsafe_unretained id<MTLDevice> device = nil;
+    __unsafe_unretained MTLRenderPassDescriptor *renderPassDescriptor = nil;
+    __unsafe_unretained id<MTLCommandBuffer> commandBuffer = nil;
+    __unsafe_unretained id<MTLRenderCommandEncoder> commandEncoder = nil;
+};
+
 class nsMetalRenderDevice : public IRenDevice {
 public:
     nsMetalRenderDevice();
@@ -70,6 +77,9 @@ public:
 
     IRenderTexture* RenderTextureCreate(int width, int height, texfmt_t fmt) override;
     void RenderTextureBind(IRenderTexture *rt) override;
+
+    id<MTLDevice> GetMetalDevice() const { return _device; }
+    bool GetActiveFrameContext(nsMetalFrameContext &context) const;
 
 private:
     id<MTLDevice>               _device          = nil;

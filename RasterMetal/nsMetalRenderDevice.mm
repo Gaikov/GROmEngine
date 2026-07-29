@@ -656,6 +656,19 @@ void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
     }
 }
 
+bool nsMetalRenderDevice::GetActiveFrameContext(nsMetalFrameContext &context) const {
+    context = {};
+    if (!_device || !_passDescriptor || !_commandBuffer || !_encoder) {
+        return false;
+    }
+
+    context.device = _device;
+    context.renderPassDescriptor = _passDescriptor;
+    context.commandBuffer = _commandBuffer;
+    context.commandEncoder = _encoder;
+    return true;
+}
+
 void nsMetalRenderDevice::EnsureDepthStencilTexture(int width, int height) {
 	if (_depthStencilTexture &&
 	    _depthStencilTexture.width == width &&

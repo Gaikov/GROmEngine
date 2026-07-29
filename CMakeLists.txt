@@ -85,6 +85,10 @@ if (NOT NO_NETWORKING)
     add_subdirectory(Networking)
 endif()
 
+if (NOT ANDROID)
+    add_subdirectory(ThirdParty/imgui)
+endif()
+
 if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_subdirectory(nsLib_unit)
     add_dependencies(nsLib_unit nsLib)
@@ -92,7 +96,6 @@ if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_dependencies(Core_unit Core)
     add_subdirectory(Tools)
     add_subdirectory(TestsApp)
-    add_subdirectory(ThirdParty/imgui)
 
     add_dependencies(functional_tests Engine)
 endif()

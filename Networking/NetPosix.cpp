@@ -3,6 +3,7 @@
 //
 
 #include <csignal>
+#include <unistd.h>
 
 #include "Net.h"
 #include "nsLib/log.h"
