@@ -327,6 +327,13 @@ void nsEngine::OnPointerUp(int pointerId, int clientX, int clientY) {
     }
 }
 
+void nsEngine::OnPointerCancel(int pointerId) {
+    auto ui = GetActiveInput();
+    if (ui) {
+        ui->OnPointerCancel(pointerId);
+    }
+}
+
 
 
 void nsEngine::OnCharDown(char ch) {

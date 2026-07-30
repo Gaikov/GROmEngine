@@ -128,15 +128,31 @@ bool nsEnv::IsMobile() {
 }
 
 EM_BOOL touch_callback(int eventType, const EmscriptenTouchEvent *touchEvent, void *userData) {
-  	auto r = GetPixelRatio();
+	auto r = GetPixelRatio();
 	for (int i = 0; i < touchEvent->numTouches; i++) {
 		const EmscriptenTouchPoint *touch = &touchEvent->touches[i];
-		if (eventType == EMSCRIPTEN_EVENT_TOUCHSTART) {
-			nsEngine::OnPointerDown(touch->identifier, float(touch->targetX * r), float(touch->targetY * r));
-		} else if (eventType == EMSCRIPTEN_EVENT_TOUCHMOVE) {
-			nsEngine::OnPointerMove(touch->identifier, float(touch->targetX * r), float(touch->targetY * r));
-		} else {
-			nsEngine::OnPointerUp(touch->identifier, float(touch->targetX * r), float(touch->targetY * r));
+		if (!touch->isChanged) {
+			continue;
+		}
+
+		const float x = float(touch->targetX * r);
+		const float y = float(touch->targetY * r);
+
+		switch (eventType) {
+			case EMSCRIPTEN_EVENT_TOUCHSTART:
+				nsEngine::OnPointerDown(touch->identifier, x, y);
+				break;
+			case EMSCRIPTEN_EVENT_TOUCHMOVE:
+				nsEngine::OnPointerMove(touch->identifier, x, y);
+				break;
+			case EMSCRIPTEN_EVENT_TOUCHEND:
+				nsEngine::OnPointerUp(touch->identifier, x, y);
+				break;
+			case EMSCRIPTEN_EVENT_TOUCHCANCEL:
+				nsEngine::OnPointerCancel(touch->identifier);
+				break;
+			default:
+				break;
 		}
 	}
 

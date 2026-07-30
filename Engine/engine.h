@@ -23,6 +23,7 @@ struct nsEngine
     static void OnPointerMove(int pointerId, int clientX, int clientY);
     static void OnPointerDown(int pointerId, int clientX, int clientY);
     static void OnPointerUp(int pointerId, int clientX, int clientY);
+    static void OnPointerCancel(int pointerId);
 };
 
 #endif //_engine_H_
