@@ -8,6 +8,8 @@
 #include "nsMetalProgramsCache.h"
 #include "nsLib/StrTools.h"
 
+#include <array>
+
 #import <Metal/Metal.h>
 
 class nsMetalRenderState : public IRenState {
@@ -39,7 +41,9 @@ private:
     nsMetalProgramsCache &_programs;
     id<MTLDevice> _device = nil;
 
-    id<MTLRenderPipelineState> _pipelineState = nil;
+    static constexpr size_t COLOR_WRITE_MASK_VARIANTS = 16;
+
+    std::array<id<MTLRenderPipelineState>, COLOR_WRITE_MASK_VARIANTS> _pipelineStates{};
     id<MTLDepthStencilState>   _depthStencilState = nil;
     id<MTLSamplerState>        _samplerState = nil;
 
@@ -58,5 +62,8 @@ private:
     MTLSamplerAddressMode _texCoordV = MTLSamplerAddressModeRepeat;
 
     bool Parse(class script_state_t *ss);
-    bool CreatePipeline();
+    bool EnsureResources();
+    bool CreatePipelineState(MTLColorWriteMask mask);
+    bool CreateCommonStates();
+    id<MTLRenderPipelineState> GetPipelineState() const;
 };

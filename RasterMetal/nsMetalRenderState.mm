@@ -33,7 +33,7 @@ bool nsMetalRenderState::InitDefault() {
     _fileName = "";
     _program = _programs.GetProgram(nsMetalProgramsCache::DEFAULT_VERTEX_SHADER,
                                     nsMetalProgramsCache::DEFAULT_FRAGMENT_SHADER);
-    return _program && CreatePipeline();
+    return _program && EnsureResources();
 }
 
 bool nsMetalRenderState::Load(const char *fileName) {
@@ -84,11 +84,14 @@ bool nsMetalRenderState::Parse(script_state_t *ss) {
         ? MTLSamplerAddressModeClampToEdge
         : MTLSamplerAddressModeRepeat;
 
-    return CreatePipeline();
+    return EnsureResources();
 }
 
-bool nsMetalRenderState::CreatePipeline() {
+bool nsMetalRenderState::CreatePipelineState(MTLColorWriteMask mask) {
     if (!_program) return false;
+    const auto index = static_cast<size_t>(mask) & (COLOR_WRITE_MASK_VARIANTS - 1);
+    if (_pipelineStates[index]) return true;
+
     auto vertexFunc = _program->GetVertexFunction();
     auto fragmentFunc = _program->GetFragmentFunction();
     if (!vertexFunc || !fragmentFunc) return false;
@@ -97,7 +100,7 @@ bool nsMetalRenderState::CreatePipeline() {
     desc.vertexFunction = vertexFunc;
     desc.fragmentFunction = fragmentFunc;
     desc.colorAttachments[0].pixelFormat = MTLPixelFormatBGRA8Unorm;
-    desc.colorAttachments[0].writeMask = _colorWriteMask;
+    desc.colorAttachments[0].writeMask = mask;
     desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     desc.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 
@@ -130,50 +133,75 @@ bool nsMetalRenderState::CreatePipeline() {
     desc.vertexDescriptor = vertexDesc;
 
     NSError *error = nil;
-    _pipelineState = [_device newRenderPipelineStateWithDescriptor:desc error:&error];
-    if (!_pipelineState) {
+    _pipelineStates[index] = [_device newRenderPipelineStateWithDescriptor:desc error:&error];
+    if (!_pipelineStates[index]) {
         Log::Error("Metal: failed to create pipeline state: %s",
                    [[error localizedDescription] UTF8String]);
         return false;
     }
 
-    MTLDepthStencilDescriptor *dsDesc = [[MTLDepthStencilDescriptor alloc] init];
-    dsDesc.depthCompareFunction = _zEnable ? MTLCompareFunctionLessEqual : MTLCompareFunctionAlways;
-    dsDesc.depthWriteEnabled = _zEnable && _zWrite;
-    _depthStencilState = [_device newDepthStencilStateWithDescriptor:dsDesc];
+    return true;
+}
 
-    MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
-    samplerDesc.minFilter = MTLSamplerMinMagFilterLinear;
-    samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
-    samplerDesc.sAddressMode = _texCoordU;
-    samplerDesc.tAddressMode = _texCoordV;
-    _samplerState = [_device newSamplerStateWithDescriptor:samplerDesc];
+bool nsMetalRenderState::CreateCommonStates() {
+    if (!_depthStencilState) {
+        MTLDepthStencilDescriptor *dsDesc = [[MTLDepthStencilDescriptor alloc] init];
+        dsDesc.depthCompareFunction = _zEnable ? MTLCompareFunctionLessEqual : MTLCompareFunctionAlways;
+        dsDesc.depthWriteEnabled = _zEnable && _zWrite;
+        _depthStencilState = [_device newDepthStencilStateWithDescriptor:dsDesc];
+        if (!_depthStencilState) return false;
+    }
+
+    if (!_samplerState) {
+        MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
+        samplerDesc.minFilter = MTLSamplerMinMagFilterLinear;
+        samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
+        samplerDesc.sAddressMode = _texCoordU;
+        samplerDesc.tAddressMode = _texCoordV;
+        _samplerState = [_device newSamplerStateWithDescriptor:samplerDesc];
+        if (!_samplerState) return false;
+    }
 
     return true;
 }
 
+bool nsMetalRenderState::EnsureResources() {
+    return CreatePipelineState(_colorWriteMask) && CreateCommonStates();
+}
+
+id<MTLRenderPipelineState> nsMetalRenderState::GetPipelineState() const {
+    const auto index = static_cast<size_t>(_colorWriteMask) & (COLOR_WRITE_MASK_VARIANTS - 1);
+    return _pipelineStates[index];
+}
+
 void nsMetalRenderState::Invalidate() {
-    _pipelineState = nil;
+    _pipelineStates.fill(nil);
     _depthStencilState = nil;
     _samplerState = nil;
 }
 
 void nsMetalRenderState::SetColorWriteMask(MTLColorWriteMask mask) {
-    if (_colorWriteMask == mask) return;
     _colorWriteMask = mask;
-    CreatePipeline();
 }
 
 void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
                                 nsMetalProgramsCache &programs,
-	                                nsMetalRenderState *prev) {
-    if (!_pipelineState || !_depthStencilState || !_samplerState) {
-        if (!CreatePipeline()) return;
+                                nsMetalRenderState *prev) {
+    if (!EnsureResources()) {
+        return;
+    }
+
+    const auto pipelineState = GetPipelineState();
+    if (!pipelineState) {
+        return;
+    }
+    if (!prev || !prev->GetPipelineState() ||
+        !prev->_depthStencilState || !prev->_samplerState) {
         prev = nullptr;
     }
 
     if (!prev) {
-        [encoder setRenderPipelineState:_pipelineState];
+        [encoder setRenderPipelineState:pipelineState];
         if (_depthStencilState) [encoder setDepthStencilState:_depthStencilState];
         [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
         if (_samplerState) [encoder setFragmentSamplerState:_samplerState atIndex:0];
@@ -181,8 +209,8 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
         return;
     }
 
-    if (_pipelineState != prev->_pipelineState) {
-        [encoder setRenderPipelineState:_pipelineState];
+    if (pipelineState != prev->GetPipelineState()) {
+        [encoder setRenderPipelineState:pipelineState];
     }
     if (_depthStencilState != prev->_depthStencilState) {
         [encoder setDepthStencilState:_depthStencilState];

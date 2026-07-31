@@ -39,6 +39,7 @@ nsMetalStencilState *nsMetalStencilState::Load(id<MTLDevice> device, const char 
 }
 
 bool nsMetalStencilState::Reload() {
+    Invalidate();
     nsParseFile pf;
     auto ss = pf.BeginFile(_fileName);
     if (!ss) {
@@ -71,7 +72,10 @@ void nsMetalStencilState::SetStencilRef(byte value) {
     _funcRef = value;
 }
 
-void nsMetalStencilState::Rebuild(bool zEnable, bool zWrite) {
+id<MTLDepthStencilState> nsMetalStencilState::GetOrCreateState(bool zEnable, bool zWrite) {
+    const size_t index = (zEnable ? 2 : 0) | (zEnable && zWrite ? 1 : 0);
+    if (_states[index]) return _states[index];
+
     MTLDepthStencilDescriptor *desc = [[MTLDepthStencilDescriptor alloc] init];
     desc.depthCompareFunction = zEnable ? MTLCompareFunctionLessEqual : MTLCompareFunctionAlways;
     desc.depthWriteEnabled = zEnable && zWrite;
@@ -88,13 +92,18 @@ void nsMetalStencilState::Rebuild(bool zEnable, bool zWrite) {
         desc.backFaceStencil = stencil;
     }
 
-    _state = [_device newDepthStencilStateWithDescriptor:desc];
+    _states[index] = [_device newDepthStencilStateWithDescriptor:desc];
+    return _states[index];
+}
+
+void nsMetalStencilState::Invalidate() {
+    _states.fill(nil);
 }
 
 void nsMetalStencilState::Apply(id<MTLRenderCommandEncoder> encoder, bool zEnable, bool zWrite) {
-    Rebuild(zEnable, zWrite);
-    if (_state) {
-        [encoder setDepthStencilState:_state];
+    auto state = GetOrCreateState(zEnable, zWrite);
+    if (state) {
+        [encoder setDepthStencilState:state];
     }
     [encoder setStencilReferenceValue:_funcRef];
 }

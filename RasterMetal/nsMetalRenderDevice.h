@@ -97,6 +97,7 @@ private:
 
 	std::vector<nsMetalVertexBuffer*> _allocatedVBS;
 	std::vector<nsMetalRenderTexture*> _allocatedRenderTextures;
+	std::vector<nsMetalStencilState*> _allocatedStencilStates;
 	std::map<std::string, nsMetalRenderState*> _stateCache;
     std::map<nsMetalRenderState*, uint> _stateRefs;
 

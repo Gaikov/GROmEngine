@@ -125,6 +125,8 @@ void nsMetalRenderDevice::Release() {
 	_allocatedVBS.clear();
 	for (auto rt : _allocatedRenderTextures) delete rt;
 	_allocatedRenderTextures.clear();
+	for (auto state : _allocatedStencilStates) delete state;
+	_allocatedStencilStates.clear();
 
     delete _programs; _programs = nullptr;
     delete _textures; _textures = nullptr;
@@ -157,6 +159,9 @@ void nsMetalRenderDevice::RestartResources() {
 	}
 	for (auto rt : _allocatedRenderTextures) {
 	    rt->Invalidate();
+	}
+	for (auto state : _allocatedStencilStates) {
+	    state->Invalidate();
 	}
 }
 void nsMetalRenderDevice::GetDisplayInfo(DisplayInfo &info) {
@@ -581,25 +586,37 @@ IStencilState* nsMetalRenderDevice::StencilLoad(const char *fileName) {
     if (!fileName) return nullptr;
 
     std::string fallback = fileName;
+    nsMetalStencilState *state = nullptr;
     const std::string ggss = ".ggss";
     if (fallback.size() >= ggss.size() &&
         fallback.compare(fallback.size() - ggss.size(), ggss.size(), ggss) == 0) {
         fallback.replace(fallback.size() - ggss.size(), ggss.size(), ".ggrs");
         if (!nsFilePath::Exists(fileName) && nsFilePath::Exists(fallback.c_str())) {
-            return nsMetalStencilState::Load(_device, fallback.c_str());
+            state = nsMetalStencilState::Load(_device, fallback.c_str());
         }
     }
 
-    auto state = nsMetalStencilState::Load(_device, fileName);
-    if (state) return state;
-
-    if (fallback != fileName) {
-        return nsMetalStencilState::Load(_device, fallback.c_str());
+    if (!state) {
+        state = nsMetalStencilState::Load(_device, fileName);
     }
-    return nullptr;
+
+    if (!state && fallback != fileName) {
+        state = nsMetalStencilState::Load(_device, fallback.c_str());
+    }
+    if (state) {
+        _allocatedStencilStates.push_back(state);
+    }
+    return state;
 }
 void nsMetalRenderDevice::StencilRelease(IStencilState *state) {
-    delete dynamic_cast<nsMetalStencilState*>(state);
+    auto metalState = dynamic_cast<nsMetalStencilState*>(state);
+    auto it = std::find(_allocatedStencilStates.begin(), _allocatedStencilStates.end(), metalState);
+    if (it == _allocatedStencilStates.end()) return;
+    if (_currentStencil == metalState) {
+        _currentStencil = nullptr;
+    }
+    _allocatedStencilStates.erase(it);
+    delete metalState;
 }
 void nsMetalRenderDevice::StencilApply(IStencilState *state) {
     _currentStencil = dynamic_cast<nsMetalStencilState*>(state);

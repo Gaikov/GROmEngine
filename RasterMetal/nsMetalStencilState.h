@@ -6,6 +6,8 @@
 #include "Engine/RenDevice.h"
 #include "nsLib/StrTools.h"
 
+#include <array>
+
 #import <Metal/Metal.h>
 
 class nsMetalStencilState : public IStencilState {
@@ -16,6 +18,7 @@ public:
     const char *GetPath() const { return _fileName; }
     void SetStencilRef(byte value) override;
     void Apply(id<MTLRenderCommandEncoder> encoder, bool zEnable, bool zWrite);
+    void Invalidate();
     MTLColorWriteMask GetColorWriteMask() const { return _colorWriteMask; }
 
 private:
@@ -30,8 +33,8 @@ private:
     uint32_t _funcMask = 0xff;
     uint32_t _stencilMask = 0xff;
     MTLColorWriteMask _colorWriteMask = MTLColorWriteMaskAll;
-    id<MTLDepthStencilState> _state = nil;
+    std::array<id<MTLDepthStencilState>, 4> _states{};
 
     bool Reload();
-    void Rebuild(bool zEnable, bool zWrite);
+    id<MTLDepthStencilState> GetOrCreateState(bool zEnable, bool zWrite);
 };
