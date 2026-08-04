@@ -13,7 +13,7 @@ else()
     find_package(OpenGL)
 endif()
 
-file(GLOB_RECURSE sources "*.cpp" "*.c" "*.h")
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "*.cpp" "*.c" "*.h")
 
 include_directories(
         ./

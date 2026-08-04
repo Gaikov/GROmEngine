@@ -34,4 +34,14 @@ if (GLUtils::HasError(funcName)) { \
 
 #endif
 
+// Android drivers may synchronize on glGetError. Define GROM_GL_HOT_CHECKS when
+// full per-draw validation is needed during a focused debugging session.
+#if defined(DEBUG) && (!defined(ANDROID) || defined(GROM_GL_HOT_CHECKS))
+#define GL_CHECK_HOT(funcName) GL_CHECK(funcName)
+#define GL_CHECK_HOT_R(funcName, retValue) GL_CHECK_R(funcName, retValue)
+#else
+#define GL_CHECK_HOT(funcName)
+#define GL_CHECK_HOT_R(funcName, retValue)
+#endif
+
 #endif //SDLTEST_GLUTILS_H

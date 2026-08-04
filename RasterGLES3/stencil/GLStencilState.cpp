@@ -70,23 +70,23 @@ bool nsGLStencilState::Reload() {
 void nsGLStencilState::Apply(nsGLStencilState *prev) const {
     if (prev->_enabled != _enabled) {
         GLUtils::SetState(GL_STENCIL_TEST, _enabled);
-        GL_CHECK_R("GL_STENCIL_TEST",)
+        GL_CHECK_HOT_R("GL_STENCIL_TEST",)
     }
 
     if (_opFail != prev->_opFail || _opZFail != prev->_opZFail || _opZPass != prev->_opZPass) {
         glStencilOp(_opFail, _opZFail, _opZPass);
-        GL_CHECK_R("glStencilOp",)
+        GL_CHECK_HOT_R("glStencilOp",)
     }
 
     if (_refChanged || _func != prev->_func || _funcRef != prev->_funcRef || _funcMask != prev->_funcMask) {
         _refChanged = false;
         glStencilFunc(_func, _funcRef, _funcMask);
-        GL_CHECK_R("glStencilFunc",)
+        GL_CHECK_HOT_R("glStencilFunc",)
     }
 
     if (_stencilMask != prev->_stencilMask) {
         glStencilMask(_stencilMask);
-        GL_CHECK_R("glStencilMask",)
+        GL_CHECK_HOT_R("glStencilMask",)
     }
 
     if (_writeRed != prev->_writeRed
@@ -94,26 +94,26 @@ void nsGLStencilState::Apply(nsGLStencilState *prev) const {
         || _writeGreen != prev->_writeGreen
         || _writeAlpha != prev->_writeAlpha) {
         glColorMask(_writeRed, _writeGreen, _writeBlue, _writeAlpha);
-        GL_CHECK_R("glColorMask",)
+        GL_CHECK_HOT_R("glColorMask",)
     }
 }
 
 void nsGLStencilState::ForceApply() const {
     GLUtils::SetState(GL_STENCIL_TEST, _enabled);
-    GL_CHECK_R("GL_STENCIL_TEST",)
+    GL_CHECK_HOT_R("GL_STENCIL_TEST",)
 
     glStencilOp(_opFail, _opZFail, _opZPass);
-    GL_CHECK_R("glStencilOp",)
+    GL_CHECK_HOT_R("glStencilOp",)
 
     _refChanged = false;
     glStencilFunc(_func, _funcRef, _funcMask);
-    GL_CHECK_R("glStencilFunc",)
+    GL_CHECK_HOT_R("glStencilFunc",)
 
     glStencilMask(_stencilMask);
-    GL_CHECK_R("glStencilMask",)
+    GL_CHECK_HOT_R("glStencilMask",)
 
     glColorMask(_writeRed, _writeGreen, _writeBlue, _writeAlpha);
-    GL_CHECK_R("glColorMask",)
+    GL_CHECK_HOT_R("glColorMask",)
 }
 
 void nsGLStencilState::SetStencilRef(byte value) {

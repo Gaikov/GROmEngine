@@ -30,6 +30,7 @@ private:
     EGLint width_;
     EGLint height_;
     int _appliedSwapInterval = -1;
+    bool _swappyConfigured = false;
     mutable bool _needsRecreation = false;
 };
 

@@ -32,6 +32,7 @@ extern	nsVar	*r_brightness;
 extern	nsVar	*r_width;
 extern	nsVar	*r_height;
 extern	nsVar	*r_refresh;
+extern  nsVar   *r_render_stats;
 extern	nsVar	*r_fov;//*/
 
 //texture format GetTexture

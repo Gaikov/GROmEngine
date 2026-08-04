@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(Core)
 
-file(GLOB_RECURSE sources "*.cpp" "*.c" "*.h")
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "*.cpp" "*.c" "*.h")
 
 include_directories(
         ./

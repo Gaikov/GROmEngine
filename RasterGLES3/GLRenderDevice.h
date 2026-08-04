@@ -13,6 +13,8 @@
 #include "renderTexture/GLRenderTexturesCache.h"
 #include "stencil/GLStencilManager.h"
 
+#include <cstdint>
+
 class GLVertexBuffer;
 
 class GLRenderDevice : public IRenDevice
@@ -77,12 +79,16 @@ private:
 
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
+	GLuint           _samplers[4] = {};
+	GLuint           _boundSampler = 0;
+	std::uint64_t    _frameSerial = 0;
 
 private:
 	void ApplyProjectionMatrix();
 	void DrawQuad(vbVertex_t v[4]);
 	bool PrepareOpenGL();
 	void CleanupOpenGL();
+	void InitSamplers();
+	void ReleaseSamplers();
+	void ApplySampler();
 };
-
-

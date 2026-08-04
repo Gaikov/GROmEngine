@@ -18,7 +18,7 @@ public:
 	void Release();
 	void Apply(GLShader *s);
 
-	void ApplyTextureParams() const;
+	unsigned int GetSamplerIndex() const;
 
 protected:
 	GLShader *AllocateResource(const char *id, int param) override;

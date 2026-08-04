@@ -65,7 +65,7 @@ bool GLTexturesCache::BindTexture(nsGLBaseTexture *t)
 		else
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
-			GL_CHECK_R("glBindTexture", false)
+			GL_CHECK_HOT_R("glBindTexture", false)
 		}
         return true;
 	}

@@ -45,7 +45,7 @@ bool nsGLRenderTexture::BindTarget() {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    GL_CHECK_R("glBindFramebuffer", false);
+    GL_CHECK_HOT_R("glBindFramebuffer", false);
     glViewport(0, 0, _width, _height);
 
     return true;
@@ -60,7 +60,7 @@ bool nsGLRenderTexture::Bind() {
     }
 
     glBindTexture(GL_TEXTURE_2D, _texture);
-    GL_CHECK_R("glBindTexture", false);
+    GL_CHECK_HOT_R("glBindTexture", false);
 
     return true;
 }

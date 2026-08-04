@@ -96,7 +96,7 @@ bool GLTexture::Bind()
     UploadToGPU();
 
 	glBindTexture(GL_TEXTURE_2D, _glTexture);
-	GL_CHECK("glBindTexture")
+	GL_CHECK_HOT("glBindTexture")
 
 	return true;
 }
@@ -154,4 +154,3 @@ bool GLTexture::EnsureBitmapData() {
     }
     return _bmData.get();
 }
-

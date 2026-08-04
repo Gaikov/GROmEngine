@@ -63,7 +63,6 @@ void GLShadersManager::Apply(GLShader *s)
 	}
 }
 
-void GLShadersManager::ApplyTextureParams() const {
-	_boundShader->ApplyTextureParams();
+unsigned int GLShadersManager::GetSamplerIndex() const {
+	return _boundShader ? _boundShader->GetSamplerIndex() : 0;
 }
-

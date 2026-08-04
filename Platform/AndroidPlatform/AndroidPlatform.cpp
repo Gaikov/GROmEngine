@@ -8,11 +8,14 @@
 #include "Core/Package.h"
 #include "Core/FileReader.h"
 #include "Core/FileWriter.h"
+#include "Core/Config.h"
+#include "Core/time/Time.h"
 #include "Engine/input/SoftInputEmpty.h"
 #include "Engine/input/soft/SoftInputKeyboard.h"
 
 static nsArgs g_args;
 static AndroidPlatform *g_platform = nullptr;
+nsVar *r_frame_pacing = nullptr;
 
 Platform *App_GetPlatform() {
     return g_platform;
@@ -52,10 +55,12 @@ AndroidPlatform::AndroidPlatform() :
 }
 
 bool AndroidPlatform::Init() {
+    r_frame_pacing = g_cfg->RegVar("r_frame_pacing", "1", 0);
     return true;
 }
 
 void AndroidPlatform::Release() {
+    r_frame_pacing = nullptr;
     _activity = nullptr;
     _softInput = nullptr;
     _glContext = nullptr;
@@ -86,9 +91,7 @@ const char *AndroidPlatform::GetKeyName(int key) {
 }
 
 unsigned int AndroidPlatform::GetTime() {
-    using namespace std::chrono;
-    return static_cast<unsigned int>(
-            duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count());
+    return static_cast<unsigned int>(nsTime::GetTimeMS());
 }
 
 void AndroidPlatform::Minimize() {

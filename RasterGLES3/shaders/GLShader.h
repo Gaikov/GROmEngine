@@ -22,7 +22,7 @@ public:
 
 	void		ForceApply();
 	void		Apply( GLShader *prev );
-	void        ApplyTextureParams() const;
+	unsigned int GetSamplerIndex() const;
 
 	bool        IsAlphaTest() override { return m_alphaTest != 0; }
 	float		GetAlphaCutoff() const { return m_alphaRef; }

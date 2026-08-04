@@ -19,6 +19,7 @@ nsVar	*r_brightness = nullptr;
 nsVar	*r_width = nullptr;
 nsVar	*r_height = nullptr;
 nsVar	*r_refresh = nullptr;
+nsVar   *r_render_stats = nullptr;
 nsVar   *r_draw_particles = nullptr;
 
 extern IRenDevice* GetRenDevice();
@@ -44,6 +45,7 @@ bool nsRenDevice::RegVars()
 	r_width = g_cfg->RegVar( "r_width", "640", GVF_SAVABLE );
 	r_height = g_cfg->RegVar( "r_height", "480", GVF_SAVABLE );
 	r_refresh = g_cfg->RegVar( "r_refresh", "0", GVF_SAVABLE );
+    r_render_stats = g_cfg->RegVar("r_render_stats", "0", 0);
     r_draw_particles = g_cfg->RegVar("r_draw_particles", "1", 0);
 
 	return true;
@@ -126,4 +128,3 @@ void nsRenDevice::Landscape_f(int argc, const char **argv) {
     r_width->SetValue(width);
     g_cfg->ExecLine("r_restart");
 }
-

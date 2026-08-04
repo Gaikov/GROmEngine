@@ -105,7 +105,7 @@ void GLShader::ForceApply()
 
 	GLUtils::SetState(GL_CULL_FACE, m_cullMode);
 
-	GL_CHECK_R("GLShader::ForceApply",)
+	GL_CHECK_HOT_R("GLShader::ForceApply",)
 }
 
 //---------------------------------------------------------
@@ -141,7 +141,7 @@ void GLShader::Apply( GLShader *prev )
 	if ( m_cullMode != prev->m_cullMode )
 		GLUtils::SetState(GL_CULL_FACE, m_cullMode);
 
-	GL_CHECK_R("GLShader::Apply",)
+	GL_CHECK_HOT_R("GLShader::Apply",)
 }
 
 //---------------------------------------------------------
@@ -188,8 +188,7 @@ bool GLShader::Parse( script_state_t *ss )
 	return true;
 }
 
-void GLShader::ApplyTextureParams() const {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_texCoordU);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_texCoordV);
-    GL_CHECK_R("glTexParameteri",)
+unsigned int GLShader::GetSamplerIndex() const {
+    return (m_texCoordU == GL_CLAMP_TO_EDGE ? 1u : 0u) |
+           (m_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u);
 }

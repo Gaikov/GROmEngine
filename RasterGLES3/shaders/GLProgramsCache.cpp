@@ -4,8 +4,18 @@
 
 #include "GLProgramsCache.h"
 
+#include <cstring>
+
+namespace {
+bool MatricesEqual(const nsMatrix &left, const float *right) {
+    return std::memcmp(static_cast<const float *>(left), right, sizeof(nsMatrix)) == 0;
+}
+}
+
 nsGLProgramsCache::nsGLProgramsCache() {
     _textureMatrix.Identity();
+    _projView.Identity();
+    _model.Identity();
 }
 
 nsGLProgram * nsGLProgramsCache::GetProgram(const char *vertexShaderPath, const char *fragmentShaderPath) {
@@ -54,28 +64,33 @@ void nsGLProgramsCache::Bind(nsGLProgram *program, bool force) {
 }
 
 void nsGLProgramsCache::SetTextureBound(const bool hasBound) {
+    if (_textureBound == hasBound) return;
     _textureBound = hasBound;
-    _currentProgram->SetHasTexture(_textureBound);
+    if (_currentProgram) _currentProgram->SetHasTexture(_textureBound);
 }
 
 void nsGLProgramsCache::SetTextureMatrix(const nsMatrix &m) {
+    if (MatricesEqual(_textureMatrix, m)) return;
     _textureMatrix = m;
-    _currentProgram->SetTextureMatrix(_textureMatrix);
+    if (_currentProgram) _currentProgram->SetTextureMatrix(_textureMatrix);
 }
 
 void nsGLProgramsCache::SetAlphaCutoff(const float alphaRef) {
+    if (_alphaCutoff == alphaRef) return;
     _alphaCutoff = alphaRef;
-    _currentProgram->SetAlphaCutoff(_alphaCutoff);
+    if (_currentProgram) _currentProgram->SetAlphaCutoff(_alphaCutoff);
 }
 
 void nsGLProgramsCache::SetProjViewMatrix(const float *m) {
+    if (MatricesEqual(_projView, m)) return;
     _projView = m;
-    _currentProgram->SetProjView(_projView);
+    if (_currentProgram) _currentProgram->SetProjView(_projView);
 }
 
 void nsGLProgramsCache::SetModelMatrix(const float *m) {
+    if (MatricesEqual(_model, m)) return;
     _model = m;
-    _currentProgram->SetModel(_model);
+    if (_currentProgram) _currentProgram->SetModel(_model);
 }
 
 void nsGLProgramsCache::Release() {
@@ -98,4 +113,3 @@ bool nsGLProgramsCache::Init() {
     Bind(nullptr, true);
     return true;
 }
-

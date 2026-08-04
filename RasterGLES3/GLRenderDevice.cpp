@@ -7,6 +7,7 @@
 #include "GLVertexBuffer.h"
 #include "GLUtils.h"
 #include "Core/Config.h"
+#include "Core/RenderStats.h"
 
 static GLRenderDevice *g_shared = nullptr;
 
@@ -87,6 +88,7 @@ bool GLRenderDevice::PrepareOpenGL() {
 	}
 
 	_shaders.programs.Bind(nullptr, true);
+	InitSamplers();
 
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0, 0, 0, 0);
@@ -95,6 +97,7 @@ bool GLRenderDevice::PrepareOpenGL() {
 }
 
 void GLRenderDevice::CleanupOpenGL() {
+	ReleaseSamplers();
 	_shaders.Apply(nullptr);
 	_textures.BindTexture(nullptr);
 	_shaders.programs.Bind(nullptr, true);
@@ -177,10 +180,9 @@ void GLRenderDevice::TextureRelease(ITexture *texture)
 
 void GLRenderDevice::TextureBind(ITexture *texture) {
 	const auto t = dynamic_cast<nsGLBaseTexture *>(texture);
-	if (_textures.BindTexture(t) && _textures.HasBoundTexture()) {
-		_shaders.ApplyTextureParams();
-	}
+	_textures.BindTexture(t);
 	_shaders.programs.SetTextureBound(_textures.HasBoundTexture());
+	ApplySampler();
 }
 
 void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
@@ -213,9 +215,7 @@ void GLRenderDevice::StateApply(IRenState *state)
 {
 	auto shader = dynamic_cast<GLShader *>(state);
 	_shaders.Apply(shader);
-	if (_textures.HasBoundTexture()) {
-		_shaders.ApplyTextureParams();
-	}
+	ApplySampler();
 }
 
 void GLRenderDevice::ClearScene(uint flags)
@@ -235,7 +235,7 @@ void GLRenderDevice::ClearScene(uint flags)
         glBits |= GL_STENCIL_BUFFER_BIT;
     }
 	glClear(glBits);
-	GL_CHECK_R("glClear",)
+	GL_CHECK_HOT_R("glClear",)
 }
 
 bool GLRenderDevice::BeginScene()
@@ -253,6 +253,7 @@ bool GLRenderDevice::BeginScene()
 	int w, h;
 	App_GetPlatform()->GetClientSize(w, h);
 	glViewport(0, 0, w, h);
+	++_frameSerial;
 
 	return true;
 }
@@ -324,7 +325,7 @@ void GLRenderDevice::DrawLinedSprite(float x1, float y1, float x2, float y2, flo
 }
 
 IVertexBuffer *GLRenderDevice::VerticesCreate(uint vertsCount, uint indexCount, bool dynamic, bool useColors) {
-	const auto vb = new GLVertexBuffer(&_textures, vertsCount, indexCount, useColors);
+	const auto vb = new GLVertexBuffer(&_textures, vertsCount, indexCount, dynamic, useColors);
 	_allocatedVBS.push_back(vb);
 	return vb;
 }
@@ -344,7 +345,7 @@ void GLRenderDevice::VerticesDraw(IVertexBuffer *vb)
 {
 	const auto glvb = dynamic_cast<GLVertexBuffer *>(vb);
 	glvb->UseColor(_currentColor);
-	glvb->Draw();
+	glvb->Draw(_frameSerial);
 }
 
 void GLRenderDevice::DrawSprite3D(const nsVec3 &pos, float width, float height, float angle)
@@ -480,17 +481,53 @@ void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 	}
 
 	_quadBuff->UseColor(_currentColor);
-	_quadBuff->Draw();
+	_quadBuff->Draw(_frameSerial);
 }
 
 void GLRenderDevice::InvalidateResources() {
     _queryRestart = true;
-    _textures.UnloadFromGPU();
+	_textures.UnloadFromGPU();
 	_renderTextures.UnloadFromGPU();
 	for (const auto vb : _allocatedVBS) {
 		vb->Invalidate();
 	}
 	_shaders.programs.Invalidate();
+	ReleaseSamplers();
+}
+
+void GLRenderDevice::InitSamplers() {
+	if (_samplers[0]) return;
+
+	glGenSamplers(4, _samplers);
+	for (unsigned int index = 0; index < 4; ++index) {
+		const GLint wrapU = (index & 1u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		const GLint wrapV = (index & 2u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		glSamplerParameteri(_samplers[index], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glSamplerParameteri(_samplers[index], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_S, wrapU);
+		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_T, wrapV);
+	}
+	_boundSampler = 0;
+}
+
+void GLRenderDevice::ReleaseSamplers() {
+	if (_samplers[0]) {
+		glBindSampler(0, 0);
+		glDeleteSamplers(4, _samplers);
+		for (auto &sampler : _samplers) sampler = 0;
+	}
+	_boundSampler = 0;
+}
+
+void GLRenderDevice::ApplySampler() {
+	const GLuint sampler = _textures.HasBoundTexture()
+		? _samplers[_shaders.GetSamplerIndex()]
+		: 0;
+	if (_boundSampler == sampler) return;
+
+	glBindSampler(0, sampler);
+	_boundSampler = sampler;
+	nsRenderStats::AddSamplerBind();
 }
 
 IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {
@@ -512,5 +549,3 @@ void GLRenderDevice::StencilRelease(IStencilState *state) {
 void GLRenderDevice::StencilApply(IStencilState *state) {
     _stencils.Apply(dynamic_cast<nsGLStencilState*>(state));
 }
-
-

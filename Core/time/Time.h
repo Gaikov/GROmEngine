@@ -9,4 +9,5 @@
 class nsTime {
 public:
     static uint64_t GetTimeMS();
+    static uint64_t GetTimeUS();
 };

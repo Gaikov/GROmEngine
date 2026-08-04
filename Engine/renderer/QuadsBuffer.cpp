@@ -12,6 +12,17 @@ nsQuadsBuffer::nsQuadsBuffer(IRenDevice *dev, const uint maxQuads, const bool us
     const uint numIndexes = maxQuads * 6;
 
     _vb = dev->VerticesCreate(numVerts, numIndexes, true, useColors);
+    auto indices = _vb->GetWriteIndices();
+    for (uint quad = 0; quad < maxQuads; ++quad) {
+        const uint vertex = quad * 4;
+        const uint index = quad * 6;
+        indices[index + 0] = static_cast<word>(vertex + 0);
+        indices[index + 1] = static_cast<word>(vertex + 1);
+        indices[index + 2] = static_cast<word>(vertex + 2);
+        indices[index + 3] = static_cast<word>(vertex + 0);
+        indices[index + 4] = static_cast<word>(vertex + 2);
+        indices[index + 5] = static_cast<word>(vertex + 3);
+    }
     _numQuads = 0;
 }
 
@@ -85,17 +96,6 @@ bool nsQuadsBuffer::AddQuad(const nsVec2 &p,
         v->c = color;
         v->tu = uv[i].x;
         v->tv = uv[i].y;
-    }
-
-    auto idx = _vb->GetWriteIndices();
-    auto ii = _numQuads * 6;
-
-    word indexes[] = {
-            0, 1, 2, 0, 2, 3
-    };
-
-    for (int i = 0; i < 6; i++) {
-        idx[ii + i] = indexes[i] + vi;
     }
 
     _numQuads++;

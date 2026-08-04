@@ -6,10 +6,15 @@
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include <swappy/swappyGL.h>
+#include <swappy/swappyGL_extra.h>
+#include <swappy/swappy_common.h>
 #include "Core/Config.h"
 #include "Core/Memory.h"
+#include "Core/RenderStats.h"
 #include "Engine/RenDevice.h"
 #include "nsLib/log.h"
+
+extern nsVar *r_frame_pacing;
 
 namespace {
 bool IsSurfaceLost(EGLint error) {
@@ -46,6 +51,15 @@ bool GLNativeContext::SwapBuffers() {
     }
 
     const bool vsync = !r_vsync || r_vsync->Bool();
+    const bool framePacing = !r_frame_pacing || r_frame_pacing->Bool();
+    const bool useSwappy = vsync && framePacing && SwappyGL_isEnabled();
+
+    if (useSwappy && !_swappyConfigured) {
+        SwappyGL_setAutoSwapInterval(false);
+        SwappyGL_setSwapIntervalNS(SWAPPY_SWAP_60FPS);
+        _swappyConfigured = true;
+    }
+
     const int requestedInterval = vsync ? 1 : 0;
     if (_appliedSwapInterval != requestedInterval) {
         if (eglSwapInterval(_display, requestedInterval) != EGL_TRUE) {
@@ -55,13 +69,14 @@ bool GLNativeContext::SwapBuffers() {
         }
     }
 
-    const bool useSwappy = vsync && SwappyGL_isEnabled();
     bool result;
     if (useSwappy) {
         nsMemoryLoopAllocScope swappyAllocationScope;
         result = SwappyGL_swap(_display, _surface);
+        nsRenderStats::SetSwapInterval(SwappyGL_getSwapIntervalNS());
     } else {
         result = eglSwapBuffers(_display, _surface) == EGL_TRUE;
+        nsRenderStats::SetSwapInterval(0);
     }
     if (!result) {
         const EGLint error = eglGetError();
@@ -169,6 +184,7 @@ bool GLNativeContext::Init() {
     width_ = -1;
     height_ = -1;
     _appliedSwapInterval = -1;
+    _swappyConfigured = false;
     _needsRecreation = false;
     SwappyGL_setWindow(_win);
 
@@ -221,5 +237,6 @@ void GLNativeContext::Release() {
     width_ = 0;
     height_ = 0;
     _appliedSwapInterval = -1;
+    _swappyConfigured = false;
     _needsRecreation = false;
 }

@@ -6,6 +6,7 @@
 
 #include "GLUtils.h"
 #include "Core/Package.h"
+#include "Core/RenderStats.h"
 
 nsGLProgram::nsGLProgram(nsGLSLCache &cache) : _codeCache(cache) {
 }
@@ -96,33 +97,39 @@ bool nsGLProgram::Bind() {
     }
 
     glUseProgram(_program);
-    GL_CHECK_R("glUseProgram", false);
+    nsRenderStats::AddProgramBind();
+    GL_CHECK_HOT_R("glUseProgram", false);
     return true;
 }
 
 void nsGLProgram::SetProjView(const float *matrix) const {
     glUniformMatrix4fv(_projView, 1, GL_FALSE, matrix);
-    GL_CHECK_R("glUniformMatrix4fv - SetProjView",);
+    nsRenderStats::AddUniformUpdate();
+    GL_CHECK_HOT_R("glUniformMatrix4fv - SetProjView",);
 }
 
 void nsGLProgram::SetModel(const float *matrix) const {
     glUniformMatrix4fv(_model, 1, GL_FALSE, matrix);
-    GL_CHECK_R("glUniformMatrix4fv - SetModel",);
+    nsRenderStats::AddUniformUpdate();
+    GL_CHECK_HOT_R("glUniformMatrix4fv - SetModel",);
 }
 
 void nsGLProgram::SetTextureMatrix(const float *matrix) const {
     glUniformMatrix4fv(_texMat, 1, GL_FALSE,  matrix);
-    GL_CHECK_R("glUniformMatrix4fv - SetTextureMatrix",);
+    nsRenderStats::AddUniformUpdate();
+    GL_CHECK_HOT_R("glUniformMatrix4fv - SetTextureMatrix",);
 }
 
 void nsGLProgram::SetAlphaCutoff(const float cutoff) const {
     glUniform1f(_alphaCutoff, cutoff);
-    GL_CHECK_R("glUniform1f - SetAlphaCutoff",);
+    nsRenderStats::AddUniformUpdate();
+    GL_CHECK_HOT_R("glUniform1f - SetAlphaCutoff",);
 }
 
 void nsGLProgram::SetHasTexture(const bool hasTexture) const {
     glUniform1i(_hasTexture, hasTexture ? 1 : 0);
-    GL_CHECK_R("glUniform1i - SetHasTexture",);
+    nsRenderStats::AddUniformUpdate();
+    GL_CHECK_HOT_R("glUniform1i - SetHasTexture",);
 }
 
 bool nsGLProgram::GetUniformLocation(const char *name, GLint &u) const {

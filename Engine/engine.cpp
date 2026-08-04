@@ -29,6 +29,7 @@
 #include "display/factory/VisualFactory2d.h"
 #include "display/pool/LayoutsPool.h"
 #include "display/pool/VisualsPoolDebugDraw.h"
+#include "Core/RenderStats.h"
 
 #define DEBUG_BUILD "Debug"
 
@@ -198,7 +199,7 @@ void nsEngine::MainLoop()
 		}
 	}
 
-
+	nsRenderStats::BeginFrame(r_render_stats && r_render_stats->Bool());
 	{
 		const float adjustedMs = (float)frametime + g_timeCarryMs;
 		auto count = int(adjustedMs / MIN_MS);
@@ -211,6 +212,7 @@ void nsEngine::MainLoop()
 			g_inp.Process();
 			game->Loop( g_frameTime );
 			nsSoundDevice::Shared()->Device()->Update();
+			nsRenderStats::AfterUpdateStep();
 		}
 		else
 		{
@@ -232,12 +234,15 @@ void nsEngine::MainLoop()
 				g_inp.Process();
 				game->Loop( g_frameTime );
                 nsSoundDevice::Shared()->Device()->Update();
+				nsRenderStats::AfterUpdateStep();
 			}
 		}
 	}
+	nsRenderStats::AfterUpdate();
 
 	prevTime = currtime;
 
+	nsRenderStats::BeforeRender();
 	if ( g_renDev->BeginScene() )
 	{
 		game->DrawWorld();
@@ -276,8 +281,12 @@ void nsEngine::MainLoop()
 #endif
 
         g_renDev->EndScene();
+		nsRenderStats::BeforeSwap();
         App_GetPlatform()->SwapBuffers();
+		nsRenderStats::AfterSwap();
 	}
+
+	nsRenderStats::FinishFrame();
 
 	nsMemory::EndLoop();
 }
