@@ -105,6 +105,7 @@ private:
 	nsMetalRenderState         *_currentState    = nullptr;
 	nsMetalStencilState        *_currentStencil  = nullptr;
 	nsMetalRenderTexture       *_currentRenderTexture = nullptr;
+	nsMetalRenderTexture       *_sampledRenderTexture = nullptr;
 	nsMetalDisplayModes        _displayModes;
 
 	nsMatrix _projMatrix;
