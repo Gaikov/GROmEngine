@@ -3,6 +3,7 @@
 //
 
 #include "SpriteDesc.h"
+#include "Core/ScriptSaver.h"
 #include "Engine/assets/VisualAssetsContext.h"
 #include "Core/ParserUtils.h"
 #include "RenManager.h"
@@ -112,4 +113,28 @@ void nsSpriteDesc::Parse(script_state_t *ss, nsVisualAssetsContext *assets, cons
     if (ps_var_begin(ss, "tilesY")) {
         tex2.y = ps_var_f(ss);
     }
+}
+
+void nsSpriteDesc::Save(nsScriptSaver &saver, const nsVisualAssetsContext *assets,
+                        const char *name) const {
+    if (name) {
+        if (saver.BlockBegin(name)) {
+            Save(saver, assets);
+            saver.BlockEnd();
+        }
+        return;
+    }
+
+    if (tex) {
+        const auto dev = nsRenDevice::Shared()->Device();
+        assets->SaveAssetPath(saver, "texture", dev->TextureGetPath(tex));
+    }
+
+    saver.VarFloat2("pivot", center, nsVec2());
+    saver.VarFloat2("size", size, nsVec2());
+    saver.VarFloat4("color", color, nsColor::white);
+    saver.VarBool("premultiplyAlpha", premultiplyAlpha, false);
+    saver.VarFloat2("tex1", tex1, nsVec2());
+    saver.VarFloat("tilesX", tex2.x, 1.0f);
+    saver.VarFloat("tilesY", tex2.y, 1.0f);
 }

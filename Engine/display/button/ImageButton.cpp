@@ -51,22 +51,30 @@ void nsImageButton::OnClick() {
     }
 }
 
-void nsImageButton::AlignText(nsAlign::Type hAlign, nsAlign::Type vAlign) {
+nsVec2 nsImageButton::ComputeAlignedTextPosition(nsAlign::Type hAlign,
+                                                  nsAlign::Type vAlign) const {
+    if (!font) {
+        return {};
+    }
+
     nsVec2 areaSize;
     if (up.tex) {
         int w, h;
         up.tex->GetSize(w, h);
-        areaSize = {(float) w, (float) h};
+        areaSize = {static_cast<float>(w), static_cast<float>(h)};
     }
 
-    if (font) {
-        float size[2];
-        font->GetSize(text, size);
+    float size[2];
+    font->GetSize(text, size);
 
-        labelPos = {
-                nsAlign::Compute(hAlign, size[0], areaSize.x),
-                nsAlign::Compute(vAlign, size[1], areaSize.y)
-        };
-    }
+    return {
+        nsAlign::Compute(hAlign, size[0], areaSize.x),
+        nsAlign::Compute(vAlign, size[1], areaSize.y)
+    };
 }
 
+void nsImageButton::AlignText(nsAlign::Type hAlign, nsAlign::Type vAlign) {
+    if (font) {
+        labelPos = ComputeAlignedTextPosition(hAlign, vAlign);
+    }
+}

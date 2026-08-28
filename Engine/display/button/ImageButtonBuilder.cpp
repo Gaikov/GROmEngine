@@ -9,6 +9,14 @@
 #include "Engine/assets/VisualAssetsContext.h"
 #include "renderer/font/FontsCache.h"
 
+namespace {
+bool HasLabel(const nsImageButton *button) {
+    const auto &color = button->textColor;
+    return button->font || !button->text.IsEmpty() || button->labelPos != nsVec2()
+           || color.r != 1 || color.g != 1 || color.b != 1 || color.a != 1;
+}
+}
+
 nsVisualObject2d *nsImageButtonBuilder::CreateDefault(nsVisualCreationContext2d *) {
     return new nsImageButton();
 }
@@ -51,4 +59,39 @@ bool nsImageButtonBuilder::Parse(script_state_t *ss, nsVisualObject2d *o, nsVisu
     return nsVisualBuilder2d::Parse(ss, o, context);
 }
 
+bool nsImageButtonBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o,
+                                          nsVisualCreationContext2d *context) {
+    if (!nsVisualBuilder2d::SerializeProps(saver, o, context)) {
+        return false;
+    }
 
+    const auto button = Cast<nsImageButton>(o);
+    if (!button) {
+        return false;
+    }
+
+    if (button->renState) {
+        const auto dev = nsRenDevice::Shared()->Device();
+        context->assetsContext->SaveAssetPath(saver, "renState", dev->StateGetPath(button->renState));
+    }
+
+    button->up.Save(saver, context->assetsContext.get(), "up");
+    button->over.Save(saver, context->assetsContext.get(), "over");
+    button->down.Save(saver, context->assetsContext.get(), "down");
+    button->disabled.Save(saver, context->assetsContext.get(), "disabled");
+
+    if (HasLabel(button) && saver.BlockBegin("label")) {
+        if (button->font) {
+            context->assetsContext->SaveAssetPath(saver, "font", button->font->GetPath());
+        }
+
+        saver.VarString("text", button->text);
+        saver.VarFloat4("color", button->textColor, nsColor::white);
+        const nsVec2 offset = button->labelPos
+                              - button->ComputeAlignedTextPosition(nsAlign::CENTER, nsAlign::CENTER);
+        saver.VarFloat2("offset", offset, nsVec2());
+        saver.BlockEnd();
+    }
+
+    return true;
+}

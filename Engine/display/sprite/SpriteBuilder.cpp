@@ -40,26 +40,10 @@ bool nsSpriteBuilder::SerializeProps(nsScriptSaver &saver, nsVisualObject2d *o, 
         return false;
     }
 
-    auto &desc = sprite->desc;
-
-    const auto dev = nsRenDevice::Shared()->Device();
-    if (desc.tex) {
-        context->assetsContext->SaveAssetPath(saver, "texture", dev->TextureGetPath(desc.tex));
-    }
-
-    saver.VarFloat2("pivot", desc.center, nsVec2());
-    saver.VarFloat2("size", desc.size, nsVec2());
-    saver.VarFloat4("color", desc.color, nsColor());
-    saver.VarBool("premultiplyAlpha", desc.premultiplyAlpha, false);
-
-    if (desc.tex1 != nsVec2()) {
-        saver.VarFloat2("tex1", desc.tex1, nsVec2());
-    }
-
-    saver.VarFloat("tilesX", desc.tex2.x, 1.0f);
-    saver.VarFloat("tilesY", desc.tex2.y, 1.0f);
+    sprite->desc.Save(saver, context->assetsContext.get());
 
     if (sprite->renState) {
+        const auto dev = nsRenDevice::Shared()->Device();
         context->assetsContext->SaveAssetPath(saver, "renState", dev->StateGetPath(sprite->renState));
     }
 

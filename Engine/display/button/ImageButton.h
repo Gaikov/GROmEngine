@@ -31,6 +31,8 @@ public:
     void Loop() override;
     void DrawContent(const nsVisualContext2d &context) override;
     bool HitTest(float x, float y) override;
+    [[nodiscard]] nsVec2 ComputeAlignedTextPosition(nsAlign::Type hAlign,
+                                                     nsAlign::Type vAlign) const;
     void AlignText(nsAlign::Type hAlign, nsAlign::Type vAlign);
 
 protected:

@@ -14,6 +14,7 @@
 
 struct script_state_t;
 class nsVisualAssetsContext;
+class nsScriptSaver;
 
 struct nsSpriteDesc
 {
@@ -37,6 +38,7 @@ struct nsSpriteDesc
 
     void Draw(IRenDevice *dev) const;
     void Parse(script_state_t *ss, nsVisualAssetsContext *assets, const char *name = nullptr);
+    void Save(nsScriptSaver &saver, const nsVisualAssetsContext *assets, const char *name = nullptr) const;
     static void ReleaseRenderBuffer();
 
 private:
