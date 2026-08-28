@@ -90,6 +90,11 @@ bool GLRenderDevice::PrepareOpenGL() {
 	_shaders.programs.Bind(nullptr, true);
 	InitSamplers();
 
+	_renderTextureBound = false;
+	glFrontFace(GL_CCW);
+	GL_CHECK_R("glFrontFace", false)
+	ApplyProjectionMatrix();
+
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0, 0, 0, 0);
 
@@ -266,6 +271,15 @@ void GLRenderDevice::EndScene()
 void GLRenderDevice::ApplyProjectionMatrix()
 {
 	nsMatrix projView = _viewMatrix * _projMatrix;
+	if (_renderTextureBound) {
+		// OpenGL framebuffers have a bottom-left origin, while engine textures
+		// use V=0 for the top row. Flip clip-space Y while writing so render
+		// textures have the same orientation as bitmap-backed textures.
+		nsMatrix flipY;
+		flipY.Identity();
+		flipY._22 = -1;
+		projView = projView * flipY;
+	}
 	_shaders.programs.SetProjViewMatrix(projView);
 }
 
@@ -486,6 +500,7 @@ void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 
 void GLRenderDevice::InvalidateResources() {
     _queryRestart = true;
+	_renderTextureBound = false;
 	_textures.UnloadFromGPU();
 	_renderTextures.UnloadFromGPU();
 	for (const auto vb : _allocatedVBS) {
@@ -535,7 +550,18 @@ IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int 
 }
 
 void GLRenderDevice::RenderTextureBind(IRenderTexture *rt) {
-	_renderTextures.Bind(dynamic_cast<nsGLRenderTexture *>(rt));
+	const auto target = dynamic_cast<nsGLRenderTexture *>(rt);
+	_renderTextures.Bind(target);
+	_renderTextureBound = target != nullptr;
+
+	// The clip-space Y flip reverses triangle winding. Keep the engine's
+	// front-face convention unchanged for render states with culling enabled.
+	glFrontFace(_renderTextureBound ? GL_CW : GL_CCW);
+	GL_CHECK_HOT_R("glFrontFace",)
+
+	// Binding a target changes the effective projection even when the caller
+	// keeps the same projection matrix across render passes.
+	ApplyProjectionMatrix();
 }
 
 IStencilState *GLRenderDevice::StencilLoad(const char *fileName) {

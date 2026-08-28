@@ -145,6 +145,7 @@ protected:
 };
 
 struct IRenderTexture : public ITexture {
+	// Same orientation as bitmap-backed textures: the top row is sampled at V=0.
 	virtual void EnsureSize(int width, int height) = 0;
 };
 

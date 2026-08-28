@@ -75,6 +75,7 @@ private:
 	GLLightManager   _light;
 	nsMatrix         _projMatrix;
 	nsMatrix         _viewMatrix;
+	bool             _renderTextureBound = false;
 	bool             _queryRestart = false;
 
 	nsColor          _currentColor;

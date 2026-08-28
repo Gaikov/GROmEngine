@@ -44,10 +44,7 @@ void nsRenderTextureTest::Draw() {
     _back.Draw(_device);
 
     _device->RenderTextureBind(_rt);
-
-
-    m.Identity();
-    m.SetOrthoRH(0, clientSize.x,  clientSize.y, 0, -1, 1);
+    m.SetOrthoDimRH(clientSize.x, clientSize.y);
     _device->LoadProjMatrix(m);
 
     _device->ClearScene(CLR_ALL);
