@@ -68,7 +68,7 @@ function(grom_configure_game_version)
         message(FATAL_ERROR "versionCode in ${VERSION_FILE} exceeds the Android limit 2100000000")
     endif ()
 
-    if (NOT GAME_VERSION_PRODUCT_NAME MATCHES "^[0-9A-Za-z][0-9A-Za-z ._+-]*$")
+    if (NOT GAME_VERSION_PRODUCT_NAME MATCHES "^[0-9A-Za-z][0-9A-Za-z ._+:-]*$")
         message(FATAL_ERROR "Invalid PRODUCT_NAME: ${GAME_VERSION_PRODUCT_NAME}")
     endif ()
 
