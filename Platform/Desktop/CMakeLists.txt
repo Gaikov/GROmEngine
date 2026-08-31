@@ -15,11 +15,15 @@ else ()
     find_package(glfw3 REQUIRED)
     set(env-sources
             env/desktop/DesktopEnv.cpp
-            env/desktop/DesktopEnvLinux.cpp
     )
     if (APPLE)
         list(APPEND env-sources
+                env/desktop/DesktopEnvApple.mm
                 env/desktop/DesktopFrameApple.mm
+        )
+    else ()
+        list(APPEND env-sources
+                env/desktop/DesktopEnvLinux.cpp
         )
     endif ()
 endif ()
@@ -44,3 +48,8 @@ add_library(Desktop
 target_link_libraries(Desktop
         glfw
 )
+
+if (APPLE)
+    find_library(APPKIT_FRAMEWORK AppKit)
+    target_link_libraries(Desktop ${APPKIT_FRAMEWORK})
+endif ()
