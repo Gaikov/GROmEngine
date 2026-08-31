@@ -1,0 +1,9 @@
+#pragma once
+
+namespace GameVersion {
+
+inline constexpr char Name[] = "@VERSION_NAME@";
+inline constexpr int Code = @VERSION_CODE@;
+inline constexpr char Display[] = "@GAME_VERSION_PRODUCT_NAME@ @VERSION_NAME@";
+
+} // namespace GameVersion
