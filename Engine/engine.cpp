@@ -164,6 +164,7 @@ void nsEngine::Release(bool failed)
 #define		MIN_FPS	60
 #define		MIN_SEC (1.0f / MIN_FPS)
 #define		MIN_MS (MIN_SEC * 1000.0f)
+#define     MAX_UPDATE_STEPS 4
 
 void GetElapsedTime( uint &res, dword &currtime )
 {
@@ -216,9 +217,9 @@ void nsEngine::MainLoop()
 		}
 		else
 		{
-			if ( count > MIN_FPS )
+			if ( count > MAX_UPDATE_STEPS )
 			{
-				count = MIN_FPS;
+				count = MAX_UPDATE_STEPS;
 				g_timeCarryMs = 0.0f;
 			}
 			else
@@ -356,6 +357,7 @@ void nsEngine::OnActivateApp(bool active) {
     //SDL_CaptureMouse(SDL_FALSE);
 
     prevTime = App_GetPlatform()->GetTime();
+    g_timeCarryMs = 0.0f;
     g_inp.OnActivateApp(active);
     nsSoundDevice::Shared()->Device()->OnActivate(active);
     App_GetGame()->OnActivate(active);
