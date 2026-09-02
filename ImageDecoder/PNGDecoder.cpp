@@ -23,11 +23,11 @@ nsBitmapData::tSP PNGDecoder::Decode(nsFile *file) {
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING,
                                              nullptr,
                                              [](png_struct *png, const char *error) {
-                                                 Log::Error(error);
+                                                 Log::Error("%s", error);
 
                                              },
                                              [](png_struct *png, const char *warning) {
-                                                 Log::Warning(warning);
+                                                 Log::Warning("%s", warning);
                                              });
     if (!png) {
         Log::Error("Can't create PNG struct");

@@ -67,7 +67,7 @@ void nsMatrix2::LogInfo() {
             cell.Format("%f ", j);
             row += cell;
         }
-        Log::Info(row);
+        Log::Info("%s", row.AsChar());
     }
 
 }

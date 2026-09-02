@@ -19,4 +19,11 @@
 #include <cstdint>
 #include <string_view>
 
+#if defined(__GNUC__) || defined(__clang__)
+#define NS_PRINTF_FORMAT(formatIndex, firstArgIndex) \
+    __attribute__((format(printf, formatIndex, firstArgIndex)))
+#else
+#define NS_PRINTF_FORMAT(formatIndex, firstArgIndex)
+#endif
+
 #endif

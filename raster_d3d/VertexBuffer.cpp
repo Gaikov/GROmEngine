@@ -90,7 +90,7 @@ bool nsVertexBuffer::ReCreate( IDirect3DDevice8* dev, uint vertsCount, uint inde
 	catch ( char* error )
 	{
 		Release();
-		Sys_FatalError( error );
+		Sys_FatalError("%s", error);
 		return false;
 	}
 

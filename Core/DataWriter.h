@@ -7,6 +7,7 @@
 #define	_DataWriter_H_
 
 #include "nsLib/comm_types.h"
+#include "nsLib/headers.h"
 #include "SmartPtr.h"
 #include "Blob.h"
 
@@ -25,7 +26,7 @@ struct IDataWriter
 	typedef nsSmartPtr<IDataWriter>	sp_t;
 	
 	virtual ~IDataWriter() = default;
-	virtual bool        	Printf( const char *fmt, ... ) = 0;
+	virtual bool        	Printf( const char *fmt, ... ) NS_PRINTF_FORMAT(2, 3) = 0;
 	virtual bool			Write( const void *data, uint size ) = 0;
 	virtual bool			IsValid() = 0;
 	

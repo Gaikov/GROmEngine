@@ -51,10 +51,10 @@ void nsGLSLCode::Load() {
         return;
     }
 
-    Log::Info("...loading GLSL: %s", resourceName);
+    Log::Info("...loading GLSL: %s", resourceName.AsChar());
     const auto file = g_pack.LoadFile(resourceName);
     if (!file) {
-        Sys_FatalError("Failed to load shader file: %s", resourceName);
+        Sys_FatalError("Failed to load shader file: %s", resourceName.AsChar());
         return;
     }
 
@@ -84,13 +84,13 @@ void nsGLSLCode::Load() {
         GLsizei written = 0;
         glGetShaderInfoLog(_shader, logLen, &written, log.data());
         if (!log.empty()) {
-            Log::Info("Shader log [%s]:", resourceName);
-            Log::Info(log.c_str());
+            Log::Info("Shader log [%s]:", resourceName.AsChar());
+            Log::Info("%s", log.c_str());
         }
     }
 
     if (compiled != GL_TRUE) {
-        Log::Error("Shader compile failed: %s", resourceName);
+        Log::Error("Shader compile failed: %s", resourceName.AsChar());
         glDeleteShader(_shader);
         _shader = 0;
     }
@@ -98,7 +98,7 @@ void nsGLSLCode::Load() {
 
 void nsGLSLCode::Unload() {
     if (_shader) {
-        Log::Info("...unloading GLSL: %s", resourceName);
+        Log::Info("...unloading GLSL: %s", resourceName.AsChar());
         glDeleteShader(_shader);
         _shader = 0;
     }

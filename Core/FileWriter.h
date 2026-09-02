@@ -15,7 +15,7 @@ public:
 	explicit nsFileWriter( const char *fileName, const char *mode = "wb" );
     ~nsFileWriter() override;
 
-	bool        	Printf( const char *fmt, ... ) override;
+	bool        	Printf( const char *fmt, ... ) override NS_PRINTF_FORMAT(2, 3);
 	bool			Write( const void *data, uint size ) override;
 	bool			IsValid() override { return m_fp != nullptr; }
 	bool			Seek( long offset, int origin ) override;

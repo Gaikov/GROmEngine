@@ -8,6 +8,7 @@
 
 #include "FileWriter.h"
 #include "headers.h"
+#include "nsLib/headers.h"
 
 class nsScriptSaver
 {
@@ -21,12 +22,12 @@ public:
 
     bool            IsValid() const;
 
-	void        	Printf( const char *fmt, ... ) const;
+	void        	Printf( const char *fmt, ... ) const NS_PRINTF_FORMAT(2, 3);
 	void			Print(const char *line) const;
-	void			PrintVar(const char *name, const char *fmt, ...) const;
+	void			PrintVar(const char *name, const char *fmt, ...) const NS_PRINTF_FORMAT(3, 4);
 
 	void			VarName(const char *name) const;
-	void			VarValue(const char *fmt, ...) const;
+	void			VarValue(const char *fmt, ...) const NS_PRINTF_FORMAT(2, 3);
 	void			VarBool(const char *name, bool value, bool defValue) const;
 	void			VarInt(const char *name, int value, int defValue) const;
 	void			VarFloat(const char *name, float value, float defValue) const;

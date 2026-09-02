@@ -7,7 +7,7 @@
 //---------------------------------------------------------
 // str
 //---------------------------------------------------------
-const char*	StrPrintf( const char* fmt, ... );
+const char*	StrPrintf( const char* fmt, ... ) NS_PRINTF_FORMAT(1, 2);
 bool		StrEqual( const char* s1, const char *s2 );
 byte		StrHash( const char* str );
 const char*	StrTabs( int tabCount );
@@ -57,7 +57,7 @@ public:
 	
 	void				operator += ( const char* str );
 	
-	void        		Format( const char *fmt, ... );
+	void        		Format( const char *fmt, ... ) NS_PRINTF_FORMAT(2, 3);
 	inline char*		AsChar() { return m_str; }
 	void				CopyFrom( const char* str, int length );	//���������� �����������
 	void				Append( char ch );

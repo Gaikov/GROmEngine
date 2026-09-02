@@ -20,15 +20,15 @@ struct ILogListener
 	virtual void LogPrint(LogLevel level, const char *str) = 0;
 };
 
-void LogPrintf(LogLevel prnLevel, const char *fmt, ...);
+void LogPrintf(LogLevel prnLevel, const char *fmt, ...) NS_PRINTF_FORMAT(2, 3);
 
 class Log : public nsSubSystem<Log>
 {
 public:
-	static void Info(const char *fmt, ...);
-	static void Warning(const char *fmt, ...);
-	static void Error(const char *fmt, ...);
-	static void Debug(const char *fmt, ...);
+	static void Info(const char *fmt, ...) NS_PRINTF_FORMAT(1, 2);
+	static void Warning(const char *fmt, ...) NS_PRINTF_FORMAT(1, 2);
+	static void Error(const char *fmt, ...) NS_PRINTF_FORMAT(1, 2);
+	static void Debug(const char *fmt, ...) NS_PRINTF_FORMAT(1, 2);
 
 public:
 	void Print(LogLevel level, const char *msg);

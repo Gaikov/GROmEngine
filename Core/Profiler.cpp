@@ -12,5 +12,5 @@ nsProfilerSample::nsProfilerSample(const char *message) : _message(message) {
 
 nsProfilerSample::~nsProfilerSample() {
     const auto delta = nsTime::GetTimeMS() - _startTime;
-    Log::Info("%s: %i", _message, delta);
+    Log::Info("%s: %llu", _message, static_cast<unsigned long long>(delta));
 }

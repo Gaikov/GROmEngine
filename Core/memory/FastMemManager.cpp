@@ -13,7 +13,7 @@ void * nsFastMemManager::Alloc(size_t size) const {
     const auto poolIndex = GetPoolIndex(size);
     char *block;
     if (poolIndex < 0) {
-        Log::Warning("Allocating big size block: %i", size);
+        Log::Warning("Allocating big size block: %zu", size);
         block = static_cast<char *>(my_malloc(size));
     } else {
         block = static_cast<char *>(_pools[poolIndex]->AllocateObject());
@@ -31,7 +31,7 @@ bool nsFastMemManager::Free(void *ptr) const {
     char *block = static_cast<char *>(ptr) - sizeof(BlockHeader);
     const auto header = reinterpret_cast<BlockHeader *>(block);
     if (header->id != BLOCK_ID) {
-        Log::Error("Invalid memory block!", ptr);
+        Log::Error("Invalid memory block: %p", ptr);
         return false;
     }
 
@@ -42,7 +42,7 @@ bool nsFastMemManager::Free(void *ptr) const {
     }
 
     if (poolIndex < 0) {
-        Log::Warning("Freeing big size block: %i", header->size);
+        Log::Warning("Freeing big size block: %zu", header->size);
         my_free(block);
     } else {
         _pools[poolIndex]->RecycleObject(block);
@@ -53,7 +53,7 @@ bool nsFastMemManager::Free(void *ptr) const {
 void nsFastMemManager::Reserve(const size_t size, const int amount) const {
     auto poolIndex = GetPoolIndex(size);
     if (poolIndex < 0) {
-        Log::Warning("Can't reserve big size block: %i", size);
+        Log::Warning("Can't reserve big size block: %zu", size);
     } else {
         _pools[poolIndex]->Reserve(amount);
     }

@@ -2,9 +2,10 @@
 #define _OS_H_
 
 #include "headers.h"
+#include "nsLib/headers.h"
 
-void 	        Sys_FatalError( const char *fmt, ... );
-void 	        Sys_Message( const char *fmt, ... );
+void 	        Sys_FatalError( const char *fmt, ... ) NS_PRINTF_FORMAT(1, 2);
+void 	        Sys_Message( const char *fmt, ... ) NS_PRINTF_FORMAT(1, 2);
 void			Sys_Exit();
 bool			Sys_IsExit();	//������������� �����, ����� ������������ ��� ��������� ����� ����������
 double			Sys_CPUSpeed();

@@ -8,7 +8,7 @@
 
 class nsStringWriter : public IDataWriter {
 public:
-    bool Printf(const char *fmt, ...) override;
+    bool Printf(const char *fmt, ...) override NS_PRINTF_FORMAT(2, 3);
     bool Write(const void *data, uint size) override;
     bool IsValid() override;
     bool Seek(long offset, int origin) override;
