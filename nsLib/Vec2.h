@@ -232,7 +232,7 @@ float nsVec2::DistTo( const nsVec2 &v ) const
 const char*	nsVec2::ToStr() const
 {
 	static char str[64];
-	sprintf( str, "[%f %f]", x, y );
+	snprintf( str, sizeof(str), "[%f %f]", x, y );
 	return str;
 }
 

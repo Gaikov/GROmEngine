@@ -7,10 +7,11 @@
 const char* StrPrintf( const char* fmt, ... )
 {
 	static char str[1024];
+	str[0] = 0;
 
 	va_list	list;
 	va_start( list, fmt );
-	vsprintf( str, fmt, list );
+	vsnprintf( str, sizeof(str), fmt, list );
 	va_end( list );
 
 	return str;
@@ -257,9 +258,10 @@ void nsString::operator += ( const char* str )
 //---------------------------------------------------------
 void nsString::Format( const char *fmt, ... )
 {
+	m_str[0] = 0;
 	va_list	list;
 	va_start( list, fmt );
-	vsprintf( m_str, fmt, list );
+	vsnprintf( m_str, MAX_SIZE, fmt, list );
 	va_end( list );
 }
 

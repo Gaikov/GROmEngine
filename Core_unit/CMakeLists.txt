@@ -11,6 +11,7 @@ set(TESTS
         main.cpp
         args/ArgsTest.cpp
         CryptTest.cpp
+        buffer/StringWriterTest.cpp
         undo/UndoTest.cpp
         memory/FastMem.cpp
         memory/MemoryTest.cpp)

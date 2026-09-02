@@ -91,7 +91,7 @@ struct vec3_t
 inline char *vtos( vec3_t &v )
 {
 	static char	str[64];
-	sprintf( str, "(%f %f %f)", v.x, v.y, v.z );
+	snprintf( str, sizeof(str), "(%f %f %f)", v.x, v.y, v.z );
 	return str;
 }
 

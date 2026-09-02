@@ -4,15 +4,21 @@
 
 #include "StringWriter.h"
 
-static char out[1024];
-
 bool nsStringWriter::Printf(const char *fmt, ...) {
+	char out[1024] = {};
     va_list	list;
     va_start( list, fmt );
-    vsprintf( out, fmt, list );
+	const int formattedLength = vsnprintf(out, sizeof(out), fmt, list);
     va_end( list );
-    Write(out, strlen(out));
-    return true;
+	if (formattedLength < 0) {
+		return false;
+	}
+
+	const auto requestedLength = static_cast<size_t>(formattedLength);
+	const auto writtenLength = static_cast<uint>(requestedLength >= sizeof(out)
+		? sizeof(out) - 1
+		: requestedLength);
+	return writtenLength == 0 || Write(out, writtenLength);
 }
 
 bool nsStringWriter::Write(const void *data, const uint size) {

@@ -72,7 +72,7 @@ struct nsVec3
 	inline const char* ToStr() const
 	{
 		static char	str[64];
-		sprintf( str, "(%f %f %f)", x, y, z );
+		snprintf( str, sizeof(str), "(%f %f %f)", x, y, z );
 		return str;
 	}
 	

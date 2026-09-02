@@ -28,11 +28,11 @@ nsScriptSaver::~nsScriptSaver() {
 // nsScriptSaver::Printf:
 //---------------------------------------------------------
 void nsScriptSaver::Printf(const char *fmt, ...) const {
-    char msg[MAX_OUT_LEN];
+    char msg[MAX_OUT_LEN] = {};
 
     va_list list;
     va_start(list, fmt);
-    vsprintf(msg, fmt, list);
+    vsnprintf(msg, sizeof(msg), fmt, list);
     va_end(list);
 
     m_file->Printf("%s%s\n", StrTabs(m_tabCount), msg);
@@ -43,11 +43,11 @@ void nsScriptSaver::Print(const char *line) const {
 }
 
 void nsScriptSaver::PrintVar(const char *name, const char *fmt, ...) const {
-    char msg[MAX_OUT_LEN];
+    char msg[MAX_OUT_LEN] = {};
 
     va_list list;
     va_start(list, fmt);
-    vsprintf(msg, fmt, list);
+    vsnprintf(msg, sizeof(msg), fmt, list);
     va_end(list);
 
     m_file->Printf("%s$%s %s\n", StrTabs(m_tabCount), name, msg);
@@ -58,11 +58,11 @@ void nsScriptSaver::VarName(const char *name) const {
 }
 
 void nsScriptSaver::VarValue(const char *fmt, ...) const {
-    char msg[MAX_OUT_LEN];
+    char msg[MAX_OUT_LEN] = {};
 
     va_list list;
     va_start(list, fmt);
-    vsprintf(msg, fmt, list);
+    vsnprintf(msg, sizeof(msg), fmt, list);
     va_end(list);
 
     m_file->Printf("%s\n", msg);

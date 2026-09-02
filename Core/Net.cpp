@@ -35,7 +35,7 @@ char*	HTTP_ConvURLParam( const char* param )
 	for ( int i = 0; i < len; i++ )
 	{
 		unsigned int	ch = (unsigned char)param[i];
-		sprintf( outChar, "%c%02X", p, ch );
+		snprintf( outChar, 4, "%c%02X", p, ch );
 		outChar += 3;
 	}
 

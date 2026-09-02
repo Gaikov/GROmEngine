@@ -17,10 +17,10 @@
 void  Sys_FatalError( const char *fmt, ... )
 {
 	va_list	list;
-	char	msg[MAX_MSG];
+	char	msg[MAX_MSG] = {};
 	
 	va_start( list, fmt );
-	vsprintf( msg, fmt, list );
+	vsnprintf( msg, sizeof(msg), fmt, list );
 	va_end( list );
 
 	nsString	cap;
@@ -37,10 +37,10 @@ void  Sys_FatalError( const char *fmt, ... )
 void  Sys_Message( const char *fmt, ... )
 {
 	va_list	list;
-	char	msg[MAX_MSG];
+	char	msg[MAX_MSG] = {};
 	
 	va_start( list, fmt );
-	vsprintf( msg, fmt, list );
+	vsnprintf( msg, sizeof(msg), fmt, list );
 	va_end( list );
 
 	nsString	cap;
@@ -108,7 +108,7 @@ std::string Sys_OSName()
 		break;
 	case VER_PLATFORM_WIN32_NT:
 		name = "Windows NT";
-		sprintf( ver, " ver %i.%i", oi.dwMajorVersion, oi.dwMinorVersion );
+		snprintf( ver, sizeof(ver), " ver %i.%i", oi.dwMajorVersion, oi.dwMinorVersion );
 		break;
 	default:
 		name = "Unknown";
@@ -284,5 +284,4 @@ void nsCriticalSection::Leave()
 {
 
 }
-
 

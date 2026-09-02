@@ -22,17 +22,25 @@ void Time_SecSplit( float sec, int &h, int &m, int &s )
 //---------------------------------------------------------
 // TimeFormat:
 //---------------------------------------------------------
-void Time_Format( char *desc, float sec, bool fillZero )
+void Time_Format( char *desc, const std::size_t descSize, float sec, bool fillZero )
 {
-	if ( !desc ) return;
+	if ( !desc || descSize == 0 ) return;
 
 	int	h, m, s;
 	Time_SecSplit( sec, h, m, s );
 	
 	if ( fillZero || h > 0 )
-		sprintf( desc, "%i:%02i:%02i", h, m, s );
+		snprintf( desc, descSize, "%i:%02i:%02i", h, m, s );
 	else
-		sprintf( desc, "%i:%02i", m, s );
+		snprintf( desc, descSize, "%i:%02i", m, s );
+}
+
+//---------------------------------------------------------
+// TimeFormat compatibility overload:
+//---------------------------------------------------------
+void Time_Format( char *desc, float sec, bool fillZero )
+{
+	Time_Format( desc, TIME_FORMAT_BUFFER_SIZE, sec, fillZero );
 }
 
 //---------------------------------------------------------
@@ -41,7 +49,6 @@ void Time_Format( char *desc, float sec, bool fillZero )
 const char* Time_Format( float sec, bool fillZero )
 {
 	static nsString str;
-	Time_Format( str.AsChar(), sec, fillZero );
+	Time_Format( str.AsChar(), nsString::MAX_SIZE, sec, fillZero );
 	return str;
 }
-
