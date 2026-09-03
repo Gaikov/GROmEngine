@@ -74,13 +74,13 @@ void StrReplace( char *str, char chFind, char chReplace )
 //---------------------------------------------------------
 // StrCopy: 
 //---------------------------------------------------------
-void StrCopy( char *str, const char *from, int maxSize )
+void StrCopy( char *str, const char *from, int targetMaxSize )
 {
-	if ( !str || !from ) return;
+	if ( !str || !from || targetMaxSize <= 0 ) return;
 
-	int	len = strlen( from );
-	if ( maxSize > 0 )
-		len = len > maxSize - 1 ? maxSize - 1 : len;
+	int	len = (int)strlen( from );
+	if ( len > targetMaxSize - 1 )
+		len = targetMaxSize - 1;
 
 	strncpy( str, from, len );
 	str[len] = 0;

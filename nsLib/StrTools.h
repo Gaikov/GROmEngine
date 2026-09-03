@@ -12,7 +12,7 @@ bool		StrEqual( const char* s1, const char *s2 );
 byte		StrHash( const char* str );
 const char*	StrTabs( int tabCount );
 void		StrReplace( char *str, char chFind, char chReplace );
-void		StrCopy( char *str, const char *from, int maxSize = 0 );
+void		StrCopy( char *str, const char *from, int targetMaxSize );
 int			StrLineCount( const char* str, int len );
 const char* StrSkipChars( const char* str, const char* charSet );	//������� ������ ��������� ������� �������� ��� � ������ charSet
 bool		StrCheck( const char* str );
