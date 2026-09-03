@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "display/VisualObject2d.h"
+#include "Engine/display/VisualObject2d.h"
 #include "BaseLayout.h"
 
 class nsLayoutUpdater final {
