@@ -31,6 +31,7 @@
 #include "display/pool/VisualsPoolDebugDraw.h"
 #include "Core/RenderStats.h"
 #include "Http/HttpClient.h"
+#include "Share/ShareService.h"
 
 #define DEBUG_BUILD "Debug"
 
@@ -72,6 +73,7 @@ bool nsEngine::Init()
 
     if (!App_GetPlatform()->Init()) return false;
     if (!nsHttpClient::Init()) return false;
+    if (!nsShareService::Init()) return false;
 
     nsSoundDevice::Init();
     if (!nsRenDevice::Init()) return false;
@@ -141,6 +143,7 @@ void nsEngine::Release(bool failed)
 
 	g_inp.Release();
 	App_GetGame()->Release();
+	nsShareService::Release();
 	nsHttpClient::Release();
 
 	nsDebugDrawManager::Release();
@@ -185,6 +188,7 @@ void nsEngine::MainLoop()
 {
 	nsMemory::BeginLoop();
 	if (auto *http = nsHttpClient::Shared()) http->Update();
+	if (auto *share = nsShareService::Shared()) share->Update();
 	IGameApp	*game = App_GetGame();
 
 	dword	currtime = 0;

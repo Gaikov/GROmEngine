@@ -58,6 +58,7 @@ add_subdirectory(nsLib)
 add_subdirectory(Core)
 add_subdirectory(Http)
 add_subdirectory(Analytics)
+add_subdirectory(Share)
 add_subdirectory(ImageDecoder)
 add_subdirectory(SoundBase)
 add_subdirectory(${SOUND_LIB})
@@ -80,6 +81,7 @@ set(ENGINE_LIBS
         Core
         Http
         Analytics
+        Share
         nsLib
 )
 
@@ -102,6 +104,8 @@ if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_dependencies(Http_unit Http)
     add_subdirectory(Analytics_unit)
     add_dependencies(Analytics_unit Analytics Http Core)
+    add_subdirectory(Share_unit)
+    add_dependencies(Share_unit Share)
     add_subdirectory(Tools)
     add_subdirectory(TestsApp)
 
@@ -111,8 +115,9 @@ endif()
 add_dependencies(Core nsLib)
 add_dependencies(Http nsLib)
 add_dependencies(Analytics Core Http)
+add_dependencies(Share nsLib ${PLATFORM})
 add_dependencies(SoundBase Core)
 add_dependencies(${SOUND_LIB} SoundBase)
 add_dependencies(${RASTER_LIB} Core)
 add_dependencies(ImageDecoder Core)
-add_dependencies(Engine Core ${SOUND_LIB} ${RASTER_LIB} ${PLATFORM})
+add_dependencies(Engine Core Share ${SOUND_LIB} ${RASTER_LIB} ${PLATFORM})
