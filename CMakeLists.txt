@@ -56,6 +56,8 @@ endif()
 
 add_subdirectory(nsLib)
 add_subdirectory(Core)
+add_subdirectory(Http)
+add_subdirectory(Analytics)
 add_subdirectory(ImageDecoder)
 add_subdirectory(SoundBase)
 add_subdirectory(${SOUND_LIB})
@@ -76,6 +78,8 @@ set(ENGINE_LIBS
         ${SOUND_LIB}
         SoundBase
         Core
+        Http
+        Analytics
         nsLib
 )
 
@@ -94,6 +98,10 @@ if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_dependencies(nsLib_unit nsLib)
     add_subdirectory(Core_unit)
     add_dependencies(Core_unit Core)
+    add_subdirectory(Http_unit)
+    add_dependencies(Http_unit Http)
+    add_subdirectory(Analytics_unit)
+    add_dependencies(Analytics_unit Analytics Http Core)
     add_subdirectory(Tools)
     add_subdirectory(TestsApp)
 
@@ -101,6 +109,8 @@ if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
 endif()
 
 add_dependencies(Core nsLib)
+add_dependencies(Http nsLib)
+add_dependencies(Analytics Core Http)
 add_dependencies(SoundBase Core)
 add_dependencies(${SOUND_LIB} SoundBase)
 add_dependencies(${RASTER_LIB} Core)
