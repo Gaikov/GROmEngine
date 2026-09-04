@@ -223,6 +223,7 @@ bool nsMetalRenderDevice::BeginEncoder() {
         0.0, 1.0
     };
     [_encoder setViewport:viewport];
+    [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
     return true;
 }
@@ -297,6 +298,7 @@ void nsMetalRenderDevice::ClearScene(uint flags) {
 	}
     MTLViewport viewport = {0.0, 0.0, (double)color.width, (double)color.height, 0.0, 1.0};
     [_encoder setViewport:viewport];
+    [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     if (_currentState) {
         _currentState->Apply(_encoder, *_programs, nullptr);
         if (_currentStencil) {
@@ -678,6 +680,7 @@ void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
 	}
     MTLViewport viewport = {0.0, 0.0, (double)color.width, (double)color.height, 0.0, 1.0};
     [_encoder setViewport:viewport];
+    [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     if (_currentState) {
         _currentState->Apply(_encoder, *_programs, nullptr);
     }
