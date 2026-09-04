@@ -114,6 +114,63 @@ bool JavaObject::CallBoolean(const char *name, bool &result) const {
     return !ClearJavaException(env, name);
 }
 
+bool JavaObject::CallBooleanStringArray(
+        const char *name, const char *value,
+        const std::vector<std::string> &values, bool &result) const {
+    ScopedJniEnv scopedEnv(_vm);
+    JNIEnv *env = scopedEnv.Get();
+    if (!env || !_object) {
+        return false;
+    }
+
+    const jmethodID method = FindMethod(
+            env, _object, name, "(Ljava/lang/String;[Ljava/lang/String;)Z");
+    if (!method) {
+        return false;
+    }
+
+    jstring javaValue = env->NewStringUTF(value ? value : "");
+    jclass stringClass = env->FindClass("java/lang/String");
+    if (!javaValue || !stringClass || ClearJavaException(env, name)) {
+        if (javaValue) env->DeleteLocalRef(javaValue);
+        if (stringClass) env->DeleteLocalRef(stringClass);
+        return false;
+    }
+
+    jobjectArray javaValues = env->NewObjectArray(
+            static_cast<jsize>(values.size()), stringClass, nullptr);
+    if (!javaValues || ClearJavaException(env, name)) {
+        env->DeleteLocalRef(javaValue);
+        env->DeleteLocalRef(stringClass);
+        return false;
+    }
+
+    bool valid = true;
+    for (jsize i = 0; i < static_cast<jsize>(values.size()); ++i) {
+        jstring item = env->NewStringUTF(values[static_cast<size_t>(i)].c_str());
+        if (!item || ClearJavaException(env, name)) {
+            valid = false;
+            break;
+        }
+        env->SetObjectArrayElement(javaValues, i, item);
+        env->DeleteLocalRef(item);
+        if (ClearJavaException(env, name)) {
+            valid = false;
+            break;
+        }
+    }
+
+    if (valid) {
+        result = env->CallBooleanMethod(_object, method, javaValue, javaValues) == JNI_TRUE;
+        valid = !ClearJavaException(env, name);
+    }
+
+    env->DeleteLocalRef(javaValues);
+    env->DeleteLocalRef(javaValue);
+    env->DeleteLocalRef(stringClass);
+    return valid;
+}
+
 bool JavaObject::CallVoidString(const char *name, const char *value) const {
     ScopedJniEnv scopedEnv(_vm);
     JNIEnv *env = scopedEnv.Get();

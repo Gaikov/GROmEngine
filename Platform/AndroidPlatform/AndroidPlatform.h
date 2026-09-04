@@ -11,6 +11,8 @@
 #include "GLNativeContext.h"
 #include "AndroidCommon.h"
 #include "JavaObject.h"
+#include <string>
+#include <vector>
 
 class AndroidPlatform : public Platform {
 public:
@@ -80,6 +82,9 @@ public:
     ISoftInput *GetSoftInput() override;
 
     void OpenUrl(const char *url) override;
+
+    bool HandlePlatformCommand(const char *command,
+                               const std::vector<std::string> &params);
 
     const char *GetDomainName() override;
 

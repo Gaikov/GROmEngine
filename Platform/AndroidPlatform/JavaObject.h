@@ -6,6 +6,8 @@
 #define _GROM_ANDROIDJAVAENV_H
 
 #include "AndroidCommon.h"
+#include <string>
+#include <vector>
 
 class JavaObject {
 public:
@@ -15,6 +17,9 @@ public:
     ~JavaObject();
 
     bool CallBoolean(const char *name, bool &result) const;
+    bool CallBooleanStringArray(const char *name, const char *value,
+                                const std::vector<std::string> &values,
+                                bool &result) const;
     bool CallVoidString(const char *name, const char *value) const;
     bool CallVoidStrings(const char *name, const char *first, const char *second) const;
 

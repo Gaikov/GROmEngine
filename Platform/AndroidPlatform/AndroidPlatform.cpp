@@ -209,6 +209,23 @@ void AndroidPlatform::OpenUrl(const char *url) {
     Log::Warning("Failed to open url!");
 }
 
+bool AndroidPlatform::HandlePlatformCommand(
+        const char *command, const std::vector<std::string> &params) {
+    if (!_activity) {
+        Log::Warning("Activity object is not initialized for command '%s'!", command);
+        return false;
+    }
+
+    bool accepted = false;
+    if (_activity->CallBooleanStringArray(
+            "handlePlatformCommand", command, params, accepted)) {
+        return accepted;
+    }
+
+    Log::Warning("Failed to dispatch platform command '%s'!", command);
+    return false;
+}
+
 const char *AndroidPlatform::GetDomainName() {
     return "Android";
 }
