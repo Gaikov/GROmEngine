@@ -292,10 +292,10 @@ void nsFont::Draw(const char *str, float pos[], float scale[], const float color
 			{
 				if ( prev_tex != c->tex )
 				{
-					g_renDev->TextureBind( c->tex );
-					prev_tex = c->tex;
 					_renBuffer->Draw();
 					_renBuffer->Clear();
+					g_renDev->TextureBind( c->tex );
+					prev_tex = c->tex;
 				}
 
 				float	outX = x;
@@ -358,10 +358,10 @@ void nsFont::DrawFX( const char *str, float pos[2], float scale[2], const float 
 			{
 				if ( prev_tex != c->tex )
 				{
-					g_renDev->TextureBind( c->tex );
-					prev_tex = c->tex;
 					_renBuffer->Draw();
 					_renBuffer->Clear();
+					g_renDev->TextureBind( c->tex );
+					prev_tex = c->tex;
 				}
 
 				float	cx = x + c->r.size[0] * scale[0] * 0.5f;
@@ -438,10 +438,10 @@ void nsFont::DrawAlphaFX( const char *str, float pos[2], float scale[2], const f
 			{
 				if ( prev_tex != c->tex )
 				{
-					g_renDev->TextureBind( c->tex );
-					prev_tex = c->tex;
 					_renBuffer->Draw();
 					_renBuffer->Clear();
+					g_renDev->TextureBind( c->tex );
+					prev_tex = c->tex;
 				}
 
 				if ( lerp >= 1 )
