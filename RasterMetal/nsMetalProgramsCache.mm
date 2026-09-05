@@ -10,6 +10,19 @@ nsMetalProgramsCache::~nsMetalProgramsCache() {
     Release();
 }
 
+std::string nsMetalProgramsCache::ResolveShaderPath(const std::string &path, bool isVertex) {
+    constexpr const char *platformToken = "{platform}";
+    const auto pos = path.find(platformToken);
+    if (pos == std::string::npos) {
+        return path;
+    }
+
+    std::string result = path;
+    result.replace(pos, strlen(platformToken), "metal");
+    result += ".metal";
+    return result;
+}
+
 bool nsMetalProgramsCache::Init() {
     _textureMatrix.Identity();
     _projView.Identity();

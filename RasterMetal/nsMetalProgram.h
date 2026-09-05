@@ -6,8 +6,10 @@
 #include <Metal/Metal.h>
 #include "nsMetalConfig.h"
 #include "nsLib/matrix4.h"
+#include "Engine/RenDevice.h"
 #include <string>
 #include <vector>
+#include <map>
 
 class nsMetalShaderLibrary;
 
@@ -20,6 +22,29 @@ struct MetalUniforms {
     int   hasTexture;
     int   hasVertexColor;
     float padding;
+    float userParams[64];
+};
+
+class nsMetalProgram;
+
+class nsMetalUniform : public IShaderUniform {
+public:
+    nsMetalUniform(nsMetalProgram *program, const char *name);
+
+    void SetFloat(float value) override;
+    void SetFloat3(const float value[3]) override;
+    void SetFloat4(const float value[4]) override;
+
+    void ResolveAndApply();
+
+private:
+    void Set(const float *value, int count);
+
+    nsMetalProgram *_program;
+    std::string     _name;
+    float          *_fieldPtr = nullptr;
+    float           _value[4] = {};
+    int             _count    = 0;
 };
 
 class nsMetalProgram {
@@ -46,6 +71,11 @@ public:
     bool Bind(id<MTLRenderCommandEncoder> encoder);
     void UploadUniforms(id<MTLRenderCommandEncoder> encoder, uint frameIndex);
 
+    IShaderUniform *GetUniform(const char *name);
+    bool FindUniformOffset(const char *name, size_t &offset);
+    MetalUniforms *GetUniforms() { return &_uniforms; }
+    void ResolveUserUniforms();
+
 private:
     id<MTLDevice>               _device            = nil;
     id<MTLRenderPipelineState>  _pipelineState     = nil;
@@ -58,6 +88,9 @@ private:
     nsMetalShaderLibrary       *_shaderLibrary     = nullptr;
     id<MTLFunction>             _vertexFunction    = nil;
     id<MTLFunction>             _fragmentFunction  = nil;
+
+    std::map<std::string, size_t>       _uniformOffsets;
+    std::map<std::string, IShaderUniform*> _userUniforms;
 
     bool EnsureUniformBuffer(uint frameSlot, uint uniformSlot);
     bool EnsureLoaded();

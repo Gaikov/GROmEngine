@@ -8,7 +8,6 @@
 #include "GLCommon.h"
 #include "GLTexturesCache.h"
 #include "shaders/GLShadersManager.h"
-#include "GLLightManager.h"
 #include "GLDisplayModes.h"
 #include "renderTexture/GLRenderTexturesCache.h"
 #include "stencil/GLStencilManager.h"
@@ -50,10 +49,6 @@ public:
 	void DrawSprite3D(const nsVec3 &pos, float width, float height, float angle) override;
 	void DrawChar3D(const rchar_t *ch, const nsVec3 &pos, float sx, float sy) override;
 	void DrawPlaneSprite(const nsVec3 &p1, const nsVec3 &p2, float width, uint wrap_count) override;
-	void Lighting(bool enable) override;
-	void LightEnable(int source, const nsVec3 &dir, const float *c) override;
-	void LightDisable(int source) override;
-	void SetLightAmbient(const float *c) override;
 
     IStencilState *StencilLoad(const char *fileName) override;
     void StencilRelease(IStencilState *state) override;
@@ -72,7 +67,6 @@ private:
 	GLVertexBuffer   *_quadBuff;
 	GLShadersManager _shaders;
     nsGLStencilManager _stencils;
-	GLLightManager   _light;
 	nsMatrix         _projMatrix;
 	nsMatrix         _viewMatrix;
 	bool             _renderTextureBound = false;

@@ -27,6 +27,8 @@ public:
 
     nsMetalProgram* GetDefaultProgram() const { return _defaultProgram; }
 
+    static std::string ResolveShaderPath(const std::string &path, bool isVertex);
+
     static constexpr auto DEFAULT_VERTEX_SHADER = "default/rs/metal/default.metal";
     static constexpr auto DEFAULT_FRAGMENT_SHADER = "default/rs/metal/default.metal";
 

@@ -466,26 +466,6 @@ GLRenderDevice::DrawPlaneSprite(const nsVec3 &p1, const nsVec3 &p2, float width,
 	DrawQuad(v);
 }
 
-void GLRenderDevice::Lighting(bool enable)
-{
-	_light.Lighting(enable);
-}
-
-void GLRenderDevice::LightEnable(int source, const nsVec3 &dir, const float *c)
-{
-	_light.LightEnable(source, dir, c);
-}
-
-void GLRenderDevice::LightDisable(int source)
-{
-	_light.LightDisable(source);
-}
-
-void GLRenderDevice::SetLightAmbient(const float *c)
-{
-	_light.SetLightAmbient(c);
-}
-
 void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 {
 	vbVertex_t *drawVerts = _quadBuff->GetWriteVertices();

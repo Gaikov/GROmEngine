@@ -340,7 +340,6 @@ void RX_DrawSpriteLT(float x, float y, float w, float h, float tu1, float tv1, f
 void RX_DrawRect(float const x1, float const y1, float const x2, float const y2, const nsColor &c) {
 	g_renDev->TextureBind(nullptr);
 
-	g_renDev->Lighting(false);
 	RX_DrawLine(nsVec3(x1, y1, 0), nsVec3(x2, y1, 0), c);
 	RX_DrawLine(nsVec3(x1, y2, 0), nsVec3(x2, y2, 0), c);
 	RX_DrawLine(nsVec3(x2, y1, 0), nsVec3(x2, y2, 0), c);
@@ -349,7 +348,6 @@ void RX_DrawRect(float const x1, float const y1, float const x2, float const y2,
 
 void nsGizmos::DrawCross(const nsVec2 &pos, float size, const nsColor &color) {
     g_renDev->TextureBind(nullptr);
-    g_renDev->Lighting(false);
 
     size /= 2;
 
@@ -403,7 +401,6 @@ void nsGizmos::DrawDashedLine(const nsVec2 &p1, const nsVec2 &p2,
     g_dashedLineBuff->SetValidIndices(verticesCount);
 
     g_renDev->TextureBind(nullptr);
-    g_renDev->Lighting(false);
     g_renDev->StateApply(nullptr);
     g_renDev->VerticesDraw(g_dashedLineBuff);
 }

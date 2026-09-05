@@ -18,6 +18,19 @@ nsGLProgramsCache::nsGLProgramsCache() {
     _model.Identity();
 }
 
+std::string nsGLProgramsCache::ResolveShaderPath(const std::string &path, bool isVertex) {
+    constexpr const char *platformToken = "{platform}";
+    const auto pos = path.find(platformToken);
+    if (pos == std::string::npos) {
+        return path;
+    }
+
+    std::string result = path;
+    result.replace(pos, strlen(platformToken), "gles3");
+    result += isVertex ? ".vert" : ".frag";
+    return result;
+}
+
 nsGLProgram * nsGLProgramsCache::GetProgram(const char *vertexShaderPath, const char *fragmentShaderPath) {
     if (!vertexShaderPath) {
         vertexShaderPath = DEFAULT_VERTEX_SHADER;

@@ -70,11 +70,6 @@ public:
     void StencilRelease(IStencilState *state) override;
     void StencilApply(IStencilState *state) override;
 
-    void Lighting(bool enable) override {}
-    void LightEnable(int source, const nsVec3 &dir, const float *c) override {}
-    void LightDisable(int source) override {}
-    void SetLightAmbient(const float *c) override {}
-
     IRenderTexture* RenderTextureCreate(int width, int height, texfmt_t fmt) override;
     void RenderTextureBind(IRenderTexture *rt) override;
 

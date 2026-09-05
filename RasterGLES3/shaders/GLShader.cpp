@@ -151,7 +151,9 @@ bool GLShader::Parse( script_state_t *ss )
 {
 	const std::string vs = ps_get_str( ss, "vs", nsGLProgramsCache::DEFAULT_VERTEX_SHADER);
 	const std::string fs = ps_get_str( ss, "fs", nsGLProgramsCache::DEFAULT_FRAGMENT_SHADER);
-	_program = _programs.GetProgram(vs.c_str(), fs.c_str());
+	_program = _programs.GetProgram(
+		nsGLProgramsCache::ResolveShaderPath(vs, true).c_str(),
+		nsGLProgramsCache::ResolveShaderPath(fs, false).c_str());
 	if (!_program) {
 		return false;
 	}
@@ -191,4 +193,8 @@ bool GLShader::Parse( script_state_t *ss )
 unsigned int GLShader::GetSamplerIndex() const {
     return (m_texCoordU == GL_CLAMP_TO_EDGE ? 1u : 0u) |
            (m_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u);
+}
+
+IShaderUniform *GLShader::GetUniform(const char *name) {
+    return _program ? _program->GetUniform(name) : nullptr;
 }

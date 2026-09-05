@@ -66,12 +66,27 @@ typedef struct
 rchar_t;
 
 //---------------------------------------------------------
+// IShaderUniform:
+//---------------------------------------------------------
+struct IShaderUniform
+{
+	virtual void SetFloat(float value) = 0;
+	virtual void SetFloat3(const float value[3]) = 0;
+	virtual void SetFloat4(const float value[4]) = 0;
+
+protected:
+	virtual ~IShaderUniform() = default;
+};
+
+//---------------------------------------------------------
 // IRenState: 
 //---------------------------------------------------------
 struct IRenState
 {
 	virtual bool IsAlphaTest() = 0;
 	virtual bool IsAlphaBlend() = 0;
+
+	virtual IShaderUniform *GetUniform(const char *name) = 0;
 
 protected:
 	virtual ~IRenState() = default;
@@ -220,12 +235,6 @@ struct IRenDevice
 	virtual void			DrawSprite3D( const nsVec3 &pos, float width, float height, float angle ) = 0;
 	virtual void			DrawChar3D( const rchar_t *ch, const nsVec3 &pos, float sx, float sy ) = 0;
 	virtual void			DrawPlaneSprite( const nsVec3& p1, const nsVec3& p2, float width, uint wrap_count ) = 0;
-
-	//������� 2-� ���������� �����, �������� ������ � 3D ������
-	virtual void			Lighting( bool enable ) = 0;
-	virtual void			LightEnable( int source, const nsVec3 &dir, const float c[4] ) = 0;
-	virtual void			LightDisable( int source ) = 0;
-	virtual void			SetLightAmbient( const float c[4] ) = 0;
 
 protected:
 	virtual ~IRenDevice() = default;

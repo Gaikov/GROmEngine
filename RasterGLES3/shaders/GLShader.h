@@ -24,8 +24,10 @@ public:
 	void		Apply( GLShader *prev );
 	unsigned int GetSamplerIndex() const;
 
-	bool        IsAlphaTest() override { return m_alphaTest != 0; }
-	float		GetAlphaCutoff() const { return m_alphaRef; }
+    bool        IsAlphaTest() override { return m_alphaTest != 0; }
+    float		GetAlphaCutoff() const { return m_alphaRef; }
+
+    IShaderUniform *GetUniform(const char *name) override;
 
 private:
 	bool		m_zEnable;

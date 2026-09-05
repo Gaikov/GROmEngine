@@ -7,6 +7,7 @@
 #include "GLUtils.h"
 #include "Core/Package.h"
 #include "Core/RenderStats.h"
+#include <cstring>
 
 nsGLProgram::nsGLProgram(nsGLSLCache &cache) : _codeCache(cache) {
 }
@@ -79,6 +80,8 @@ bool nsGLProgram::Load() {
     glUseProgram(_program);
     GL_CHECK_R("glUseProgram", false);
 
+    ResolveUserUniforms();
+
     return true;
 }
 
@@ -99,6 +102,9 @@ bool nsGLProgram::Bind() {
     glUseProgram(_program);
     nsRenderStats::AddProgramBind();
     GL_CHECK_HOT_R("glUseProgram", false);
+
+    ApplyUserUniforms();
+
     return true;
 }
 
@@ -139,4 +145,86 @@ bool nsGLProgram::GetUniformLocation(const char *name, GLint &u) const {
         return false;
     }
     return true;
+}
+
+nsGLProgram::~nsGLProgram() {
+    for (auto &it : _userUniforms) {
+        delete static_cast<GLUniform *>(it.second);
+    }
+    _userUniforms.clear();
+}
+
+IShaderUniform *nsGLProgram::GetUniform(const char *name) {
+    auto it = _userUniforms.find(name);
+    if (it != _userUniforms.end()) {
+        return it->second;
+    }
+
+    auto uniform = new GLUniform(this, name);
+    _userUniforms[name] = uniform;
+    return uniform;
+}
+
+void nsGLProgram::ResolveUserUniforms() {
+    for (auto &it : _userUniforms) {
+        static_cast<GLUniform *>(it.second)->ResolveAndApply();
+    }
+}
+
+void nsGLProgram::ApplyUserUniforms() {
+    for (auto &it : _userUniforms) {
+        static_cast<GLUniform *>(it.second)->Apply();
+    }
+}
+
+GLUniform::GLUniform(nsGLProgram *program, const char *name)
+    : _program(program), _name(name) {
+}
+
+void GLUniform::SetFloat(float value) {
+    Set(&value, 1);
+}
+
+void GLUniform::SetFloat3(const float value[3]) {
+    Set(value, 3);
+}
+
+void GLUniform::SetFloat4(const float value[4]) {
+    Set(value, 4);
+}
+
+void GLUniform::Set(const float *value, int count) {
+    memcpy(_value, value, sizeof(float) * count);
+    _count = count;
+
+    Apply();
+}
+
+void GLUniform::ResolveAndApply() {
+    _location = glGetUniformLocation(_program->GetGLProgram(), _name.c_str());
+    Apply();
+}
+
+void GLUniform::Apply() {
+    const GLuint program = _program->GetGLProgram();
+    if (!program || !_count) {
+        return;
+    }
+
+    GLint currentProgram = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    if (static_cast<GLuint>(currentProgram) != program) {
+        return;
+    }
+    if (_location < 0) {
+        _location = glGetUniformLocation(program, _name.c_str());
+        if (_location < 0) return;
+    }
+
+    switch (_count) {
+        case 1: glUniform1f(_location, _value[0]); break;
+        case 3: glUniform3fv(_location, 1, _value); break;
+        case 4: glUniform4fv(_location, 1, _value); break;
+        default: break;
+    }
 }

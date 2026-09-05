@@ -11,6 +11,8 @@ public:
     static constexpr auto DEFAULT_VERTEX_SHADER = "default/rs/gles3/vertex.vert";
     static constexpr auto DEFAULT_FRAGMENT_SHADER = "default/rs/gles3/pixel.frag";
 
+    static std::string ResolveShaderPath(const std::string &path, bool isVertex);
+
     nsGLProgramsCache();
 
     void Release();

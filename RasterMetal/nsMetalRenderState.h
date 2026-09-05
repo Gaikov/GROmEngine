@@ -24,6 +24,8 @@ public:
 
     bool IsAlphaTest() override { return _alphaTest; }
     bool IsAlphaBlend() override { return _alphaBlend; }
+
+    IShaderUniform *GetUniform(const char *name) override;
     float GetAlphaCutoff() const { return _alphaRef; }
     bool IsDepthEnabled() const { return _zEnable; }
     bool IsDepthWriteEnabled() const { return _zEnable && _zWrite; }

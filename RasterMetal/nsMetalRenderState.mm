@@ -52,7 +52,9 @@ bool nsMetalRenderState::Load(const char *fileName) {
 bool nsMetalRenderState::Parse(script_state_t *ss) {
     const std::string vs = ps_get_str(ss, "vs", nsMetalProgramsCache::DEFAULT_VERTEX_SHADER);
     const std::string fs = ps_get_str(ss, "fs", nsMetalProgramsCache::DEFAULT_FRAGMENT_SHADER);
-    _program = _programs.GetProgram(vs.c_str(), fs.c_str());
+    _program = _programs.GetProgram(
+        nsMetalProgramsCache::ResolveShaderPath(vs, true).c_str(),
+        nsMetalProgramsCache::ResolveShaderPath(fs, false).c_str());
     if (!_program) return false;
 
     _zEnable  = ps_get_f(ss, "z_enable", 1) != 0;
@@ -172,6 +174,10 @@ bool nsMetalRenderState::EnsureResources() {
 id<MTLRenderPipelineState> nsMetalRenderState::GetPipelineState() const {
     const auto index = static_cast<size_t>(_colorWriteMask) & (COLOR_WRITE_MASK_VARIANTS - 1);
     return _pipelineStates[index];
+}
+
+IShaderUniform *nsMetalRenderState::GetUniform(const char *name) {
+    return _program ? _program->GetUniform(name) : nullptr;
 }
 
 void nsMetalRenderState::Invalidate() {

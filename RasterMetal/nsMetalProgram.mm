@@ -21,6 +21,11 @@ nsMetalProgram::nsMetalProgram(id<MTLDevice> device) : _device(device) {
 }
 
 nsMetalProgram::~nsMetalProgram() {
+    for (auto &it : _userUniforms) {
+        delete static_cast<nsMetalUniform *>(it.second);
+    }
+    _userUniforms.clear();
+
     Unload();
     delete _shaderLibrary;
 }
@@ -78,13 +83,36 @@ bool nsMetalProgram::Load(const char *vertexShaderPath, const char *fragmentShad
     descriptor.vertexDescriptor = vertexDesc;
 
     NSError *error = nil;
+    MTLRenderPipelineReflection *reflection = nil;
     _pipelineState = [_device newRenderPipelineStateWithDescriptor:descriptor
+                                                          options:MTLPipelineOptionArgumentInfo
+                                                       reflection:&reflection
                                                             error:&error];
     if (!_pipelineState) {
         Log::Error("Metal: failed to create pipeline state: %s",
                    [[error localizedDescription] UTF8String]);
         return false;
     }
+
+    _uniformOffsets.clear();
+    if (reflection) {
+        auto extractOffsets = [this](NSArray<MTLArgument *> *arguments) {
+            for (MTLArgument *arg in arguments) {
+                if (arg.type == MTLArgumentTypeBuffer && arg.index == 1 && arg.bufferStructType) {
+                    for (MTLStructMember *member in arg.bufferStructType.members) {
+                        _uniformOffsets[member.name.UTF8String] = member.offset;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        };
+        if (!extractOffsets(reflection.fragmentArguments)) {
+            extractOffsets(reflection.vertexArguments);
+        }
+    }
+
+    ResolveUserUniforms();
 
     return true;
 }
@@ -195,4 +223,72 @@ void nsMetalProgram::UploadUniforms(id<MTLRenderCommandEncoder> encoder, uint fr
     memcpy([buffer contents], &_uniforms, sizeof(MetalUniforms));
     [encoder setVertexBuffer:buffer offset:0 atIndex:1];
     [encoder setFragmentBuffer:buffer offset:0 atIndex:1];
+}
+
+IShaderUniform *nsMetalProgram::GetUniform(const char *name) {
+    auto it = _userUniforms.find(name);
+    if (it != _userUniforms.end()) {
+        return it->second;
+    }
+
+    auto uniform = new nsMetalUniform(this, name);
+    _userUniforms[name] = uniform;
+    return uniform;
+}
+
+bool nsMetalProgram::FindUniformOffset(const char *name, size_t &offset) {
+    if (!EnsureLoaded()) return false;
+    auto it = _uniformOffsets.find(name);
+    if (it == _uniformOffsets.end()) return false;
+    offset = it->second;
+    return true;
+}
+
+void nsMetalProgram::ResolveUserUniforms() {
+    for (auto &it : _userUniforms) {
+        static_cast<nsMetalUniform *>(it.second)->ResolveAndApply();
+    }
+}
+
+nsMetalUniform::nsMetalUniform(nsMetalProgram *program, const char *name)
+    : _program(program), _name(name) {
+}
+
+void nsMetalUniform::SetFloat(float value) {
+    Set(&value, 1);
+}
+
+void nsMetalUniform::SetFloat3(const float value[3]) {
+    Set(value, 3);
+}
+
+void nsMetalUniform::SetFloat4(const float value[4]) {
+    Set(value, 4);
+}
+
+void nsMetalUniform::Set(const float *value, int count) {
+    memcpy(_value, value, sizeof(float) * count);
+    _count = count;
+
+    if (!_fieldPtr) {
+        ResolveAndApply();
+        return;
+    }
+
+    if (_fieldPtr) {
+        memcpy(_fieldPtr, value, sizeof(float) * count);
+    }
+}
+
+void nsMetalUniform::ResolveAndApply() {
+    size_t offset = 0;
+    _fieldPtr = nullptr;
+    if (!_program->FindUniformOffset(_name.c_str(), offset) ||
+        offset > sizeof(MetalUniforms) - sizeof(_value) || offset % alignof(float) != 0) {
+        return;
+    }
+    _fieldPtr = reinterpret_cast<float *>(reinterpret_cast<char *>(_program->GetUniforms()) + offset);
+    if (_count > 0) {
+        memcpy(_fieldPtr, _value, sizeof(float) * _count);
+    }
 }
