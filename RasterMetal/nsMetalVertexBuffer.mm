@@ -5,6 +5,7 @@
 #include "nsMetalVertexBuffer.h"
 #include "nsMetalTexturesCache.h"
 #include "Core/Memory.h"
+#include "Core/RenderStats.h"
 
 nsMetalVertexBuffer::nsMetalVertexBuffer(id<MTLDevice> device,
                                            nsMetalTexturesCache *cache,
@@ -40,6 +41,7 @@ void nsMetalVertexBuffer::InitBuffers() {
 void nsMetalVertexBuffer::ReleaseBuffers() {
 	for (uint i = 0; i < kMetalInFlightFrameSlots; ++i) {
 	    _vertexBuffers[i].clear();
+        _vertexVersions[i].clear();
 	    _indexBuffers[i].clear();
 	}
 }
@@ -56,6 +58,7 @@ bool nsMetalVertexBuffer::EnsureBuffers(uint frameSlot, uint drawSlot) {
                                                          options:MTLResourceStorageModeShared];
         if (!vertexBuffer || !indexBuffer) return false;
         vertexBuffers.push_back(vertexBuffer);
+        _vertexVersions[frameSlot].push_back(0);
         indexBuffers.push_back(indexBuffer);
     }
 
@@ -74,14 +77,18 @@ void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder, uint frameIn
     const auto drawSlot = _drawSlot++;
     if (!EnsureBuffers(frameSlot, drawSlot)) return;
 
-    const auto vertexBytes = sizeof(vbVertex_t) * _maxDrawVertices;
     const auto indexBytes = sizeof(unsigned short) * _maxDrawIndexes;
     id<MTLBuffer> vertexBuffer = _vertexBuffers[frameSlot][drawSlot];
     id<MTLBuffer> indexBuffer = _indexBuffers[frameSlot][drawSlot];
     if (!vertexBuffer || !indexBuffer) return;
 
-    memcpy([vertexBuffer contents], _verts, vertexBytes);
+    if (_vertexVersions[frameSlot][drawSlot] != _vertexVersion) {
+        memcpy([vertexBuffer contents], _verts, sizeof(vbVertex_t) * _maxDrawVertices);
+        nsRenderStats::AddVertexUpload(sizeof(vbVertex_t) * _maxDrawVertices);
+        _vertexVersions[frameSlot][drawSlot] = _vertexVersion;
+    }
     memcpy([indexBuffer contents], _indexes, indexBytes);
+    nsRenderStats::AddIndexUpload(indexBytes);
     [encoder setVertexBuffer:vertexBuffer offset:0 atIndex:0];
 
     MTLPrimitiveType mode;
@@ -91,6 +98,7 @@ void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder, uint frameIn
         default:           mode = MTLPrimitiveTypeTriangle;      break;
     }
 
+    nsRenderStats::AddDrawCall();
     [encoder drawIndexedPrimitives:mode
                        indexCount:_maxDrawIndexes
                         indexType:MTLIndexTypeUInt16
@@ -101,12 +109,14 @@ void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder, uint frameIn
 void nsMetalVertexBuffer::SetPos(int vertexIndex, float x, float y, float z) {
     if (vertexIndex < 0 || (uint)vertexIndex >= _numVertices) return;
     auto &v = _verts[vertexIndex];
+    ++_vertexVersion;
     v.v.x = x; v.v.y = y; v.v.z = z;
 }
 
 void nsMetalVertexBuffer::SetTex(int vertexIndex, float tu, float tv) {
     if (vertexIndex < 0 || (uint)vertexIndex >= _numVertices) return;
     auto &v = _verts[vertexIndex];
+    ++_vertexVersion;
     v.tu = tu; v.tv = tv;
 }
 
@@ -124,7 +134,9 @@ void nsMetalVertexBuffer::Invalidate() {
 }
 
 void nsMetalVertexBuffer::SetValidVertices(uint count) {
-    _maxDrawVertices = count <= _numVertices ? count : _numVertices;
+    count = std::min(count, _numVertices);
+    if (count > _maxDrawVertices) ++_vertexVersion;
+    _maxDrawVertices = count;
 }
 
 uint nsMetalVertexBuffer::GetValidVertices() {
@@ -156,6 +168,7 @@ vbVertex_t *nsMetalVertexBuffer::GetReadVertices() {
 }
 
 vbVertex_t *nsMetalVertexBuffer::GetWriteVertices() {
+    ++_vertexVersion;
     return _verts;
 }
 

@@ -204,7 +204,7 @@ void GLVertexBuffer::Draw(const std::uint64_t frameSerial) {
 
     if (m_indicesDirty) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        const auto idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * m_numIndexes);
+        const auto idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * m_maxDrawIndexes);
         if (idxSize > 0) glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, idxSize, m_indexes);
         nsRenderStats::AddIndexUpload(static_cast<std::size_t>(idxSize));
         m_indicesDirty = false;
@@ -251,6 +251,7 @@ uint GLVertexBuffer::GetValidVertices() {
 }
 
 void GLVertexBuffer::SetValidIndices(uint count) {
+    if (count > m_maxDrawIndexes) m_indicesDirty = true;
     m_maxDrawIndexes = count;
 }
 

@@ -65,17 +65,11 @@ bool nsGLProgram::Load() {
         return false;
     }
 
-    if (!GetUniformLocation("uTexMat", _texMat)) {
-        return false;
-    }
+    _texMat = glGetUniformLocation(_program, "uTexMat");
 
-    if (!GetUniformLocation("uAlphaCutoff", _alphaCutoff)) {
-        return false;
-    }
+    _alphaCutoff = glGetUniformLocation(_program, "uAlphaCutoff");
 
-    if (!GetUniformLocation("uHasTexture", _hasTexture)) {
-        return false;
-    }
+    _hasTexture = glGetUniformLocation(_program, "uHasTexture");
 
     glUseProgram(_program);
     GL_CHECK_R("glUseProgram", false);
@@ -121,18 +115,21 @@ void nsGLProgram::SetModel(const float *matrix) const {
 }
 
 void nsGLProgram::SetTextureMatrix(const float *matrix) const {
+    if (_texMat < 0) return;
     glUniformMatrix4fv(_texMat, 1, GL_FALSE,  matrix);
     nsRenderStats::AddUniformUpdate();
     GL_CHECK_HOT_R("glUniformMatrix4fv - SetTextureMatrix",);
 }
 
 void nsGLProgram::SetAlphaCutoff(const float cutoff) const {
+    if (_alphaCutoff < 0) return;
     glUniform1f(_alphaCutoff, cutoff);
     nsRenderStats::AddUniformUpdate();
     GL_CHECK_HOT_R("glUniform1f - SetAlphaCutoff",);
 }
 
 void nsGLProgram::SetHasTexture(const bool hasTexture) const {
+    if (_hasTexture < 0) return;
     glUniform1i(_hasTexture, hasTexture ? 1 : 0);
     nsRenderStats::AddUniformUpdate();
     GL_CHECK_HOT_R("glUniform1i - SetHasTexture",);

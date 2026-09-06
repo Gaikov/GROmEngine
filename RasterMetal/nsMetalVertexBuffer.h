@@ -56,6 +56,9 @@ private:
     std::vector<id<MTLBuffer>> _vertexBuffers[kMetalInFlightFrameSlots];
     std::vector<id<MTLBuffer>> _indexBuffers[kMetalInFlightFrameSlots];
 
+    std::vector<uint64_t> _vertexVersions[kMetalInFlightFrameSlots];
+    uint64_t _vertexVersion = 1;
+
     uint                    _maxDrawVertices  = 0;
     uint                    _maxDrawIndexes   = 0;
     uint                    _lastFrameIndex   = ~0u;
