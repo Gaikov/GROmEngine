@@ -87,5 +87,37 @@ function(grom_configure_game_version)
     target_include_directories("${GAME_VERSION_TARGET}" PRIVATE "${GENERATED_INCLUDE_DIR}")
     target_sources("${GAME_VERSION_TARGET}" PRIVATE "${GAME_VERSION_HEADER}")
 
+    if (WEB_ASM)
+        if (NOT CMAKE_PROJECT_NAME MATCHES "^[0-9A-Za-z][0-9A-Za-z._+-]*$")
+            message(FATAL_ERROR
+                    "Invalid CMake project name for WASM package: ${CMAKE_PROJECT_NAME}")
+        endif ()
+
+        get_target_property(WASM_OUTPUT_NAME "${GAME_VERSION_TARGET}" OUTPUT_NAME)
+        if (NOT WASM_OUTPUT_NAME)
+            set(WASM_OUTPUT_NAME "${GAME_VERSION_TARGET}")
+        endif ()
+
+        set(WASM_PACKAGE_NAME
+                "${CMAKE_PROJECT_NAME}-${VERSION_NAME}-${VERSION_CODE}.zip")
+
+        set(WASM_PACKAGE_TARGET "${TARGET_ID}_wasm_package")
+        add_custom_target(
+                "${WASM_PACKAGE_TARGET}"
+                ALL
+                COMMAND "${CMAKE_COMMAND}" -E chdir
+                        "$<TARGET_FILE_DIR:${GAME_VERSION_TARGET}>"
+                        "${CMAKE_COMMAND}" -E tar cf "${WASM_PACKAGE_NAME}"
+                        --format=zip
+                        "${WASM_OUTPUT_NAME}.html"
+                        "${WASM_OUTPUT_NAME}.js"
+                        "${WASM_OUTPUT_NAME}.wasm"
+                        "${WASM_OUTPUT_NAME}.data"
+                COMMENT "Creating WASM package ${WASM_PACKAGE_NAME}"
+                VERBATIM
+        )
+        add_dependencies("${WASM_PACKAGE_TARGET}" "${GAME_VERSION_TARGET}")
+    endif ()
+
     message(STATUS "${GAME_VERSION_PRODUCT_NAME} version: ${VERSION_NAME} (${VERSION_CODE})")
 endfunction()
