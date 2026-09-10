@@ -233,11 +233,29 @@ void DesktopPlatform::MessagePopup(const char *caption, const char *message) {
 }
 
 IDataWriter *DesktopPlatform::InternalWrite(const char *fileName) {
+#ifdef WEB_ASM
+    if (!fileName) {
+        return new nsFileWriter(nullptr);
+    }
+
+    const auto path = std::string("/internal/") + fileName;
+    return new nsFileWriter(path.c_str());
+#else
     return new nsFileWriter(fileName);
+#endif
 }
 
 IDataReader *DesktopPlatform::InternalRead(const char *fileName) {
+#ifdef WEB_ASM
+    if (!fileName) {
+        return new nsFileReader(nullptr);
+    }
+
+    const auto path = std::string("/internal/") + fileName;
+    return new nsFileReader(path.c_str());
+#else
     return new nsFileReader(fileName);
+#endif
 }
 
 ISoftInput *DesktopPlatform::GetSoftInput() {

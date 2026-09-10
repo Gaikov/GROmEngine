@@ -49,6 +49,21 @@ target_link_libraries(Desktop
         glfw
 )
 
+if (WEB_ASM)
+    set(WEB_INTERNAL_STORAGE_JS
+            "${CMAKE_CURRENT_SOURCE_DIR}/env/web/WebInternalStorage.js"
+    )
+
+    target_link_options(Desktop INTERFACE
+            -lidbfs.js
+            "SHELL:--pre-js ${WEB_INTERNAL_STORAGE_JS}"
+    )
+
+    set_property(TARGET Desktop APPEND PROPERTY
+            INTERFACE_LINK_DEPENDS "${WEB_INTERNAL_STORAGE_JS}"
+    )
+endif ()
+
 if (APPLE)
     find_library(APPKIT_FRAMEWORK AppKit)
     target_link_libraries(Desktop ${APPKIT_FRAMEWORK})
