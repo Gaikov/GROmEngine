@@ -13,7 +13,7 @@ nsLetterKeyButton::nsLetterKeyButton(const char letter, ISoftKeyHandler *handler
         _handler->OnChar(_letter);
     });
 
-    labelScale = {1, 1};
+    labelScale = {0.75f, 0.75f};
 }
 
 void nsLetterKeyButton::SetCaps(const bool upper) {
