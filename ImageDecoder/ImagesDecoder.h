@@ -16,6 +16,8 @@ public:
 
     ImagesDecoder();
 
+    bool Write(const nsBitmapData& bitmapData, const char* path, int quality = 95) const;
+
     nsBitmapData::tSP Decode(nsFile *file) const;
 
 private:

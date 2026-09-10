@@ -9,6 +9,8 @@
 
 class JPGDecoder : public IImageFormatDecoder {
 public:
+    bool SupportsExtension(const char *extension) const override;
+    bool Write(const nsBitmapData &bitmap, const char *path, int quality) const override;
     bool IsSupport(nsFile *file) override;
 
     nsBitmapData::tSP Decode(nsFile *file) override;

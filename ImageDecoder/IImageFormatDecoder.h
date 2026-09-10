@@ -14,6 +14,9 @@ class IImageFormatDecoder {
 public:
     virtual ~IImageFormatDecoder() = default;
 
+    virtual bool SupportsExtension(const char *extension) const = 0;
+    virtual bool Write(const nsBitmapData &bitmap, const char *path, int quality) const = 0;
+
     virtual bool IsSupport(nsFile *file) = 0;
     virtual nsBitmapData::tSP Decode(nsFile *file) = 0;
 };

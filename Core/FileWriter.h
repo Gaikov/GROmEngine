@@ -21,6 +21,8 @@ public:
 	bool			Seek( long offset, int origin ) override;
 	long			Tell() override;
 
+    bool Close();
+
 private:
 	FILE					*m_fp;
 };

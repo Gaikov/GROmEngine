@@ -68,3 +68,10 @@ long nsFileWriter::Tell()
 	return ftell( m_fp );
 }
 
+
+bool nsFileWriter::Close() {
+    if (!m_fp) return false;
+    FILE *file = m_fp;
+    m_fp = nullptr;
+    return fclose(file) == 0;
+}
