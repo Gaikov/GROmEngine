@@ -220,7 +220,11 @@ void nsInput::Process()
 			KeyPressed( &m_inKeys[i] );
 		}
 		else if ( m_kbPrev[i] )
-			KeyUp( &m_inKeys[i] );
+		{
+			if ( !m_awaitRelease[i] )
+				KeyUp( &m_inKeys[i] );
+			m_awaitRelease[i] = false;
+		}
 
 		m_kbPrev[i] = state;
 	}
@@ -261,9 +265,10 @@ void nsInput::ReleaseAllKeys()
 {
 	for ( int i = 0; i < KEYBOARD_MAX_KEYS; i++ )
 	{
-		if ( m_kbPrev[i] )
+		if ( m_kbPrev[i] && !m_awaitRelease[i] )
 			KeyUp( &m_inKeys[i] );
-		m_kbPrev[i] = false;
+		m_kbPrev[i] = IsKeyPressed( i );
+		m_awaitRelease[i] = m_kbPrev[i];
 	}
 
 	if ( m_joyUse && in_joy_use->Bool() )

@@ -76,6 +76,7 @@ public:
 private:
 	KeyBinding_t	m_inKeys[KEYBOARD_MAX_KEYS]{};
 	bool			m_kbPrev[KEYBOARD_MAX_KEYS]{};
+	bool			m_awaitRelease[KEYBOARD_MAX_KEYS]{};
 
 	bool			_cursorVisible = true;	//cursor state (hidden/visible)
     bool            _cursorInClient = false;
