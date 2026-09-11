@@ -208,7 +208,7 @@ bool nsConsole::OnInit()
 	auto renDev = nsRenDevice::Shared()->Device();
 
 	Log::Info( "init console" );
-	m_tex = renDev->TextureLoad( "default/console.jpg", false, TF_RGB );
+	m_tex = renDev->TextureLoad("default/console.jpg", TF_RGB);
 	_renState = renDev->StateLoad("default/rs/gui.ggrs");
 	con_line_step = g_cfg->RegVar( "con_line_step", "20.0", GVF_SAVABLE );
 	con_enable = g_cfg->RegVar( "con_enable", "1", 0 );

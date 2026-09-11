@@ -309,8 +309,7 @@ void nsMetalRenderDevice::ClearScene(uint flags) {
     }
 }
 
-ITexture* nsMetalRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t, int flags) {
-    if (mipmap) flags |= TLF_MIPMAP;
+ITexture* nsMetalRenderDevice::TextureLoad(const char *filename, texfmt_t, int flags) {
     return _textures->GetTexture(filename, flags);
 }
 

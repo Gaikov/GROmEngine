@@ -55,7 +55,7 @@ nsTexFrames* nsTexFrames::LoadFromEnum( const char *filesName, const char *ext, 
 		name.Format( "%s%s.%s", filesName, StrNumber( i, digitCount ), ext );
 		if ( !g_pack.IsExists( name ) )	break;
 
-		tex = g_renDev->TextureLoad( name, true, TF_RGBA );
+		tex = g_renDev->TextureLoad(name, TF_RGBA);
 		if ( !tex ) break;
 
 		AddToArray( &f->m_frame, f->m_frameCount, tex );

@@ -155,9 +155,8 @@ void GLRenderDevice::SetColor(const float *c)
 	_currentColor = c;
 }
 
-ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt, int flags)
+ITexture *GLRenderDevice::TextureLoad(const char *filename, texfmt_t fmt, int flags)
 {
-	if (mipmap) flags |= TLF_MIPMAP;
 	return _textures.GetTexture(filename, flags);
 }
 

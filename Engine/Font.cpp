@@ -60,7 +60,7 @@ bool nsFont::LoadGROmFont(const nsFilePath &filePath) {
 	{
 		do
 		{
-			ITexture *tex = g_renDev->TextureLoad( ps_var_str( ss ), false, TF_RGBA );
+			ITexture *tex = g_renDev->TextureLoad(ps_var_str( ss ), TF_RGBA);
 			if ( tex )
 				_pages.push_back(tex);
 		}
@@ -163,7 +163,7 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
             sscanf( page, "page id=%i file=\"%255[^\"]\"", &id, path.AsChar());
             if (!path.IsEmpty()) {
                 auto texPath = filePath.GetParent().ResolvePath(path);
-                _pages.push_back(_device->TextureLoad(texPath, false));
+                _pages.push_back(_device->TextureLoad(texPath));
             }
             page ++;
         }

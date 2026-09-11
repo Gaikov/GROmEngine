@@ -33,5 +33,5 @@ nsString nsVisualAssetsContext::RelativeAssetPath(const nsFilePath &path) const 
 ITexture *nsVisualAssetsContext::ParseTexture(script_state_t *ss, const char *name, int flags) const {
     const auto path = ParseAssetPath(ss, name);
     if (path.IsEmpty()) return nullptr;
-    return nsRenDevice::Shared()->Device()->TextureLoad(path, false, TF_RGBA, flags);
+    return nsRenDevice::Shared()->Device()->TextureLoad(path, TF_RGBA, flags);
 }

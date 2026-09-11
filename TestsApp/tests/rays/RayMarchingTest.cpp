@@ -14,7 +14,7 @@ bool nsRayMarchingTest::Init() {
     _lampsLayer = new nsVisualContainer2d();
 
     auto dev = nsRenDevice::Shared()->Device();
-    auto t = dev->TextureLoad("tests/dlight.jpg", false, TF_RGB);
+    auto t = dev->TextureLoad("tests/dlight.jpg", TF_RGB);
 
     CreateLight(t, 300, nsColor(1, 1, 0.8, 0.8));
     CreateLight(t, 500, nsColor(0, 1, 1, 0.8));

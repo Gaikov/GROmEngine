@@ -60,7 +60,7 @@ void nsSprite9SliceTest::CreateFromAtlas() {
 
     col->AddChild(MakeLabel("From code (Res_WindowBackNew):", _device));
 
-    auto tex = _device->TextureLoad("tests/atlas00.png", false);
+    auto tex = _device->TextureLoad("tests/atlas00.png");
     if (!tex) {
         Log::Error("Sprite9SliceTest: failed to load tests/atlas00.png");
         return;

@@ -78,7 +78,7 @@ void nsSpriteDesc::Parse(script_state_t *ss, nsVisualAssetsContext *assets, cons
             ps_block_end(ss);
         } else if (ps_var_begin(ss, name)) {
             const int flags = premultiplyAlpha ? TLF_PREMULTIPLY_ALPHA : TLF_NONE;
-            tex = nsRenDevice::Shared()->Device()->TextureLoad(assets->assetsPath.ResolvePath(ps_var_str(ss)), false, TF_RGBA, flags);
+            tex = nsRenDevice::Shared()->Device()->TextureLoad(assets->assetsPath.ResolvePath(ps_var_str(ss)), TF_RGBA, flags);
             ResetSize();
         }
         return;

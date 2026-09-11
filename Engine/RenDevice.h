@@ -192,7 +192,7 @@ struct IRenDevice
 	virtual void			SetColor( const float c[4] ) = 0;
 
 	//textures
-	virtual ITexture*		TextureLoad( const char *filename, bool mipmap = true, texfmt_t fmt = TF_RGBA, int flags = TLF_NONE ) = 0;
+	virtual ITexture*		TextureLoad( const char *filename, texfmt_t fmt = TF_RGBA, int flags = TLF_NONE ) = 0;
 	virtual const char*		TextureGetPath(ITexture *t) = 0;
 	virtual ITexture*		TextureGenerate( int width, int height, const void *data, texfmt_t fmt, bool mipmap ) = 0;
 	virtual void			TextureRelease( ITexture *texture ) = 0;

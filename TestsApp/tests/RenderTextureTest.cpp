@@ -17,11 +17,11 @@ bool nsRenderTextureTest::Init() {
     _rt = _device->RenderTextureCreate(BUFFER_WIDTH, BUFFER_HEIGHT);
     _rtSprite.tex = _rt;
 
-    _back.tex = _device->TextureLoad("tests/background.jpg", false, TF_RGB);
+    _back.tex = _device->TextureLoad("tests/background.jpg", TF_RGB);
     _back.ResetSize();
     _back.ComputeCenter();
 
-    _sprite.tex = _device->TextureLoad("tests/coords.png", false);
+    _sprite.tex = _device->TextureLoad("tests/coords.png");
     _sprite.ResetSize();
 
     return true;

@@ -7,7 +7,7 @@
 #include "Engine/RenAux.h"
 
 bool nsSprite9GridTest::Init() {
-    _sprite.SetTexture(g_renDev->TextureLoad("tests/frame9grid.png", false));
+    _sprite.SetTexture(g_renDev->TextureLoad("tests/frame9grid.png"));
     _sprite.SetGrid(25, 22, 25, 22);
     _sprite.SetGridWidth(10);
     _sprite.SetGridHeight(5);

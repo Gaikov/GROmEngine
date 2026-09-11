@@ -59,7 +59,7 @@ void nsMovieClipTest::CycleAnim() {
 //-----------------------------------------------------------------------------------
 bool nsMovieClipTest::Init() {
     auto guiState = _device->StateLoad("default/rs/gui.ggrs");
-    auto tex = _device->TextureLoad("tests/anim.jpg", false);
+    auto tex = _device->TextureLoad("tests/anim.jpg");
     if (!tex) {
         Log::Error("nsMovieClipTest: failed to load tests/anim.jpg");
         return false;

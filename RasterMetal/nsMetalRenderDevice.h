@@ -37,7 +37,7 @@ public:
 
     void SetColor(const float c[4]) override;
 
-    ITexture* TextureLoad(const char *filename, bool mipmap, texfmt_t fmt, int flags) override;
+    ITexture* TextureLoad(const char *filename, texfmt_t fmt, int flags) override;
     const char* TextureGetPath(ITexture *t) override;
     ITexture* TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap) override;
     void TextureRelease(ITexture *texture) override;
