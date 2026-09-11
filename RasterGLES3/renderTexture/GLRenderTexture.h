@@ -22,6 +22,7 @@ public:
     bool IsValid() const { return _fbo != 0; }
     void EnsureSize(int width, int height) override;
     uint64_t GetId() override { return _texture; }
+    bool IsMipmapped() const override { return false; }
 
 private:
     GLuint _fbo = 0;

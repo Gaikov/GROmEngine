@@ -6,14 +6,14 @@
 #include "ImageDecoder/BitmapLoader.h"
 #include "nsLib/log.h"
 
-nsMetalTexture::nsMetalTexture(id<MTLDevice> device, const char *id)
-    : _device(device), _id(id) {}
+nsMetalTexture::nsMetalTexture(id<MTLDevice> device, id<MTLCommandQueue> commandQueue, const char *id)
+    : _device(device), _commandQueue(commandQueue), _id(id) {}
 
 nsMetalTexture::~nsMetalTexture() {
     UnloadFromGPU();
 }
 
-nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, const char *filePath, int flags) {
+nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, id<MTLCommandQueue> commandQueue, const char *filePath, int flags) {
     Log::Info("...loading bitmap data: %s", filePath);
 
     const auto bmData = BitmapLoader::LoadFromFile(filePath);
@@ -22,7 +22,7 @@ nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, const char *filePath,
         return nullptr;
     }
 
-    auto texture = new nsMetalTexture(device, filePath);
+    auto texture = new nsMetalTexture(device, commandQueue, filePath);
     texture->_bmData = bmData;
     texture->_loadFlags = flags;
     if ((flags & TLF_PREMULTIPLY_ALPHA) != 0) {
@@ -32,9 +32,9 @@ nsMetalTexture* nsMetalTexture::Load(id<MTLDevice> device, const char *filePath,
     return texture;
 }
 
-nsMetalTexture* nsMetalTexture::Create(id<MTLDevice> device, const char *id, nsBitmapData::tSP data) {
+nsMetalTexture* nsMetalTexture::Create(id<MTLDevice> device, id<MTLCommandQueue> commandQueue, const char *id, nsBitmapData::tSP data) {
     if (!data) return nullptr;
-    auto texture = new nsMetalTexture(device, id);
+    auto texture = new nsMetalTexture(device, commandQueue, id);
     texture->_bmData = std::move(data);
     return texture;
 }
@@ -47,10 +47,12 @@ bool nsMetalTexture::UploadFromBitmap(nsBitmapData *bmData) {
     if (!bmData) return false;
     if (_texture) return true;
 
+    const bool mipmapped = (_loadFlags & TLF_MIPMAP) != 0;
+
     MTLTextureDescriptor *desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
                                                                                     width:bmData->GetWidth()
                                                                                    height:bmData->GetHeight()
-                                                                                mipmapped:NO];
+                                                                                mipmapped:mipmapped ? YES : NO];
     _texture = [_device newTextureWithDescriptor:desc];
     if (!_texture) {
         Log::Error("Metal: failed to create texture: %s", _id.c_str());
@@ -62,6 +64,14 @@ bool nsMetalTexture::UploadFromBitmap(nsBitmapData *bmData) {
                 mipmapLevel:0
                   withBytes:bmData->GetData()
                 bytesPerRow:bmData->GetWidth() * 4];
+
+    if (mipmapped && _commandQueue) {
+        id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+        id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
+        [blitEncoder generateMipmapsForTexture:_texture];
+        [blitEncoder endEncoding];
+        [commandBuffer commit];
+    }
 
     return true;
 }

@@ -10,11 +10,11 @@
 
 class nsMetalTexture : public ITexture {
 public:
-    static nsMetalTexture* Load(id<MTLDevice> device, const char *filePath, int flags);
-    static nsMetalTexture* Create(id<MTLDevice> device, const char *id, nsBitmapData::tSP data);
+    static nsMetalTexture* Load(id<MTLDevice> device, id<MTLCommandQueue> commandQueue, const char *filePath, int flags);
+    static nsMetalTexture* Create(id<MTLDevice> device, id<MTLCommandQueue> commandQueue, const char *id, nsBitmapData::tSP data);
     static void Free(nsMetalTexture *t);
 
-    nsMetalTexture(id<MTLDevice> device, const char *id);
+    nsMetalTexture(id<MTLDevice> device, id<MTLCommandQueue> commandQueue, const char *id);
     ~nsMetalTexture() override;
 
     bool UploadFromBitmap(nsBitmapData *bmData);
@@ -28,11 +28,12 @@ public:
     const char* GetPath();
 
 private:
-    id<MTLDevice>   _device     = nil;
-    id<MTLTexture>  _texture    = nil;
-    std::string     _id;
-    nsBitmapData::tSP _bmData;
-    int             _loadFlags  = 0;
+    id<MTLDevice>       _device        = nil;
+    id<MTLCommandQueue> _commandQueue  = nil;
+    id<MTLTexture>      _texture       = nil;
+    std::string         _id;
+    nsBitmapData::tSP   _bmData;
+    int                 _loadFlags     = 0;
 
     bool UploadToGPU();
 };

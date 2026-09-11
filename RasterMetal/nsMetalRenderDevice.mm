@@ -85,7 +85,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
         }
     }
 
-    _textures = new nsMetalTexturesCache(_device);
+    _textures = new nsMetalTexturesCache(_device, _commandQueue);
     _programs = new nsMetalProgramsCache(_device);
     if (!_programs->Init()) {
         return false;
@@ -309,7 +309,8 @@ void nsMetalRenderDevice::ClearScene(uint flags) {
     }
 }
 
-ITexture* nsMetalRenderDevice::TextureLoad(const char *filename, bool, texfmt_t, int flags) {
+ITexture* nsMetalRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t, int flags) {
+    if (mipmap) flags |= TLF_MIPMAP;
     return _textures->GetTexture(filename, flags);
 }
 

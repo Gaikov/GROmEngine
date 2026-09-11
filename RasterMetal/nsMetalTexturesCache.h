@@ -10,7 +10,7 @@
 
 class nsMetalTexturesCache : public ResourcesCache<nsMetalTexture, int> {
 public:
-    nsMetalTexturesCache(id<MTLDevice> device);
+    nsMetalTexturesCache(id<MTLDevice> device, id<MTLCommandQueue> commandQueue);
     ~nsMetalTexturesCache();
 
     nsMetalTexture* GetTexture(const char *id, int flags);
@@ -25,6 +25,7 @@ public:
 
 private:
     id<MTLDevice>       _device     = nil;
+    id<MTLCommandQueue> _commandQueue = nil;
     nsMetalTexture     *_current    = nullptr;
     int                 _bitmapId   = 0;
 

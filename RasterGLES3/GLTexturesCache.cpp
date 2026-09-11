@@ -9,11 +9,12 @@
 
 namespace {
 std::string TextureCacheKey(const char *id, int flags) {
-	if ((flags & TLF_PREMULTIPLY_ALPHA) == 0) {
+	if ((flags & (TLF_PREMULTIPLY_ALPHA | TLF_MIPMAP)) == 0) {
 		return id;
 	}
 	std::string key = id;
-	key += "#pma";
+	if (flags & TLF_PREMULTIPLY_ALPHA) key += "#pma";
+	if (flags & TLF_MIPMAP) key += "#mip";
 	return key;
 }
 }

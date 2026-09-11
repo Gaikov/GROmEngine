@@ -83,11 +83,20 @@ bool GLTexture::UploadToGPU() {
                  GL_RGBA, GL_UNSIGNED_BYTE, _bmData->GetData());
     GL_CHECK("glTexImage2D")
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    if (IsMipmapped()) {
+        glGenerateMipmap(GL_TEXTURE_2D);
+        GL_CHECK("glGenerateMipmap")
+    }
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, IsMipmapped() ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     GL_CHECK("glTexParameteri")
 
     return true;
+}
+
+bool GLTexture::IsMipmapped() const {
+    return (_loadFlags & TLF_MIPMAP) != 0;
 }
 
 

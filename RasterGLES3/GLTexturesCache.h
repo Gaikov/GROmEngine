@@ -20,6 +20,7 @@ public:
 
 	[[nodiscard]] bool HasBoundTexture() const { return _current; }
 	[[nodiscard]] nsGLBaseTexture *GetBoundTexture() const { return _current; }
+	[[nodiscard]] bool HasBoundMipmappedTexture() const { return _current && _current->IsMipmapped(); }
 
     void UnloadFromGPU() const;
 

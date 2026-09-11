@@ -9,4 +9,5 @@
 class nsGLBaseTexture : public ITexture {
 public:
     virtual bool Bind() = 0;
+    virtual bool IsMipmapped() const = 0;
 };

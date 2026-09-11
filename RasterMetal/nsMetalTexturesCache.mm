@@ -8,17 +8,18 @@
 
 namespace {
 std::string TextureCacheKey(const char *id, int flags) {
-    if ((flags & TLF_PREMULTIPLY_ALPHA) == 0) {
+    if ((flags & (TLF_PREMULTIPLY_ALPHA | TLF_MIPMAP)) == 0) {
         return id;
     }
     std::string key = id;
-    key += "#pma";
+    if (flags & TLF_PREMULTIPLY_ALPHA) key += "#pma";
+    if (flags & TLF_MIPMAP) key += "#mip";
     return key;
 }
 }
 
-nsMetalTexturesCache::nsMetalTexturesCache(id<MTLDevice> device)
-    : _device(device) {}
+nsMetalTexturesCache::nsMetalTexturesCache(id<MTLDevice> device, id<MTLCommandQueue> commandQueue)
+    : _device(device), _commandQueue(commandQueue) {}
 
 nsMetalTexturesCache::~nsMetalTexturesCache() {
     _current = nullptr;
@@ -26,7 +27,7 @@ nsMetalTexturesCache::~nsMetalTexturesCache() {
 }
 
 nsMetalTexture* nsMetalTexturesCache::AllocateResource(const char *id, int param) {
-    return nsMetalTexture::Load(_device, id, param);
+    return nsMetalTexture::Load(_device, _commandQueue, id, param);
 }
 
 void nsMetalTexturesCache::FreeResource(nsMetalTexture *item) {
@@ -74,7 +75,7 @@ void nsMetalTexturesCache::DumpKeys() const {
 nsMetalTexture* nsMetalTexturesCache::CreateFromBitmapData(nsBitmapData::tSP &data) {
     auto id = StrPrintf("bitmap_texture_%i", _bitmapId);
     _bitmapId++;
-    auto t = nsMetalTexture::Create(_device, id, data);
+    auto t = nsMetalTexture::Create(_device, _commandQueue, id, data);
     if (t) {
         AddToCache(id, t);
     }

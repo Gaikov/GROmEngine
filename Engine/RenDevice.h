@@ -46,7 +46,8 @@ texfmt_t;
 enum texLoadFlags_t
 {
 	TLF_NONE = 0,
-	TLF_PREMULTIPLY_ALPHA = 1 << 0
+	TLF_PREMULTIPLY_ALPHA = 1 << 0,
+	TLF_MIPMAP = 1 << 1
 };
 
 #define	CLR_ZBUFF	1u

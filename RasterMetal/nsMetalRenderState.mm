@@ -158,6 +158,7 @@ bool nsMetalRenderState::CreateCommonStates() {
         MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
         samplerDesc.minFilter = MTLSamplerMinMagFilterLinear;
         samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
+        samplerDesc.mipFilter = MTLSamplerMipFilterLinear;
         samplerDesc.sAddressMode = _texCoordU;
         samplerDesc.tAddressMode = _texCoordV;
         _samplerState = [_device newSamplerStateWithDescriptor:samplerDesc];

@@ -157,6 +157,7 @@ void GLRenderDevice::SetColor(const float *c)
 
 ITexture *GLRenderDevice::TextureLoad(const char *filename, bool mipmap, texfmt_t fmt, int flags)
 {
+	if (mipmap) flags |= TLF_MIPMAP;
 	return _textures.GetTexture(filename, flags);
 }
 
@@ -493,11 +494,12 @@ void GLRenderDevice::InvalidateResources() {
 void GLRenderDevice::InitSamplers() {
 	if (_samplers[0]) return;
 
-	glGenSamplers(4, _samplers);
-	for (unsigned int index = 0; index < 4; ++index) {
-		const GLint wrapU = (index & 1u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-		const GLint wrapV = (index & 2u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-		glSamplerParameteri(_samplers[index], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenSamplers(8, _samplers);
+	for (unsigned int index = 0; index < 8; ++index) {
+		const GLint wrapU = ((index / 2) & 1u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		const GLint wrapV = ((index / 2) & 2u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		const GLint minFilter = (index & 1u) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+		glSamplerParameteri(_samplers[index], GL_TEXTURE_MIN_FILTER, minFilter);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_S, wrapU);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_T, wrapV);
@@ -508,7 +510,7 @@ void GLRenderDevice::InitSamplers() {
 void GLRenderDevice::ReleaseSamplers() {
 	if (_samplers[0]) {
 		glBindSampler(0, 0);
-		glDeleteSamplers(4, _samplers);
+		glDeleteSamplers(8, _samplers);
 		for (auto &sampler : _samplers) sampler = 0;
 	}
 	_boundSampler = 0;
@@ -516,7 +518,7 @@ void GLRenderDevice::ReleaseSamplers() {
 
 void GLRenderDevice::ApplySampler() {
 	const GLuint sampler = _textures.HasBoundTexture()
-		? _samplers[_shaders.GetSamplerIndex()]
+		? _samplers[_shaders.GetSamplerIndex() * 2 + (_textures.HasBoundMipmappedTexture() ? 1 : 0)]
 		: 0;
 	if (_boundSampler == sampler) return;
 
