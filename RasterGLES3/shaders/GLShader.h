@@ -47,6 +47,7 @@ private:
 
 	GLint		m_texCoordU;
 	GLint		m_texCoordV;
+	bool		m_nearestFilter = false;
 
 	nsGLProgram	*_program = nullptr;
 	nsGLProgramsCache &_programs;

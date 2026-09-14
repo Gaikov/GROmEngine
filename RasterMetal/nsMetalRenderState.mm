@@ -85,6 +85,7 @@ bool nsMetalRenderState::Parse(script_state_t *ss) {
     _texCoordV = StrEqual(ps_get_str(ss, "tex_coord_v", "wrap"), "clamp")
         ? MTLSamplerAddressModeClampToEdge
         : MTLSamplerAddressModeRepeat;
+	_nearestFilter = StrEqual(ps_get_str(ss, "tex_filter", "linear"), "nearest");
 
     return EnsureResources();
 }
@@ -156,9 +157,12 @@ bool nsMetalRenderState::CreateCommonStates() {
 
     if (!_samplerState) {
         MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
-        samplerDesc.minFilter = MTLSamplerMinMagFilterLinear;
-        samplerDesc.magFilter = MTLSamplerMinMagFilterLinear;
-        samplerDesc.mipFilter = MTLSamplerMipFilterLinear;
+		const auto minMagFilter = _nearestFilter
+			? MTLSamplerMinMagFilterNearest
+			: MTLSamplerMinMagFilterLinear;
+		samplerDesc.minFilter = minMagFilter;
+		samplerDesc.magFilter = minMagFilter;
+		samplerDesc.mipFilter = _nearestFilter ? MTLSamplerMipFilterNearest : MTLSamplerMipFilterLinear;
         samplerDesc.sAddressMode = _texCoordU;
         samplerDesc.tAddressMode = _texCoordV;
         _samplerState = [_device newSamplerStateWithDescriptor:samplerDesc];

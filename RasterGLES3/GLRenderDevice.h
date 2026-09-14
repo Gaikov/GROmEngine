@@ -74,7 +74,7 @@ private:
 
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
-	GLuint           _samplers[8] = {};
+	GLuint           _samplers[16] = {};
 	GLuint           _boundSampler = 0;
 	std::uint64_t    _frameSerial = 0;
 

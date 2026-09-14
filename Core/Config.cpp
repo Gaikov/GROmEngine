@@ -247,28 +247,27 @@ const char* nsConfig::GetConfigValue( const char* varName, const char* cfgFileTe
 {
 	if ( !cfgFileText || !varName || !strlen( varName ) ) return nullptr;
 
-	static nsString	tmpLine;
-	const char			*line;
-
-	const char	*begin = strstr( cfgFileText, varName );
-	if ( !begin ) return nullptr;
-
-	const char	*end = strchr( begin, '\n' );
-	if ( !end )
-		line = begin;
-	else
+	static nsString tmpValue;
+	const char *begin = cfgFileText;
+	while ( *begin )
 	{
-		int len = end - begin;
-		tmpLine.CopyFrom( begin, len );
-		line = tmpLine.AsChar();
+		const char *end = strchr( begin, '\n' );
+		const int length = end ? static_cast<int>(end - begin) : static_cast<int>(strlen(begin));
+		nsString line;
+		line.CopyFrom( begin, length );
+
+		nsArgs args( line.AsChar() );
+		if ( args.ArgCount() >= 2 && StrEqual( args.Arg( 0 ), varName ) )
+		{
+			tmpValue = args.Arg( 1 );
+			return tmpValue;
+		}
+
+		if ( !end ) break;
+		begin = end + 1;
 	}
 
-	nsArgs	args( line );
-	if ( args.ArgCount() < 2
-		|| !StrEqual( args.Arg( 0 ), varName ) ) return nullptr;
-
-	tmpLine = args.Arg( 1 );
-	return tmpLine;
+	return nullptr;
 }
 
 //-----------------------------------------------------
@@ -436,4 +435,3 @@ float nsConfig::GetValue(const char *name)
 	}
 	return var->Value();
 }
-

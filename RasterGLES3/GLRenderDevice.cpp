@@ -493,13 +493,17 @@ void GLRenderDevice::InvalidateResources() {
 void GLRenderDevice::InitSamplers() {
 	if (_samplers[0]) return;
 
-	glGenSamplers(8, _samplers);
-	for (unsigned int index = 0; index < 8; ++index) {
-		const GLint wrapU = ((index / 2) & 1u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-		const GLint wrapV = ((index / 2) & 2u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-		const GLint minFilter = (index & 1u) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+	glGenSamplers(16, _samplers);
+	for (unsigned int index = 0; index < 16; ++index) {
+		const unsigned int state = index / 2;
+		const bool nearest = (state & 4u) != 0;
+		const GLint wrapU = (state & 1u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		const GLint wrapV = (state & 2u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+		const GLint minFilter = nearest
+			? ((index & 1u) ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)
+			: ((index & 1u) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_MIN_FILTER, minFilter);
-		glSamplerParameteri(_samplers[index], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glSamplerParameteri(_samplers[index], GL_TEXTURE_MAG_FILTER, nearest ? GL_NEAREST : GL_LINEAR);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_S, wrapU);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_T, wrapV);
 	}
@@ -509,7 +513,7 @@ void GLRenderDevice::InitSamplers() {
 void GLRenderDevice::ReleaseSamplers() {
 	if (_samplers[0]) {
 		glBindSampler(0, 0);
-		glDeleteSamplers(8, _samplers);
+		glDeleteSamplers(16, _samplers);
 		for (auto &sampler : _samplers) sampler = 0;
 	}
 	_boundSampler = 0;

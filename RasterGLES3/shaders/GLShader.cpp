@@ -186,13 +186,15 @@ bool GLShader::Parse( script_state_t *ss )
 
 	m_texCoordU = StrEqual( ps_get_str( ss, "tex_coord_u", "wrap" ), "clamp" ) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
 	m_texCoordV = StrEqual( ps_get_str( ss, "tex_coord_v", "wrap" ), "clamp" ) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+	m_nearestFilter = StrEqual(ps_get_str(ss, "tex_filter", "linear"), "nearest");
 
 	return true;
 }
 
 unsigned int GLShader::GetSamplerIndex() const {
     return (m_texCoordU == GL_CLAMP_TO_EDGE ? 1u : 0u) |
-           (m_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u);
+           (m_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u) |
+           (m_nearestFilter ? 4u : 0u);
 }
 
 IShaderUniform *GLShader::GetUniform(const char *name) {

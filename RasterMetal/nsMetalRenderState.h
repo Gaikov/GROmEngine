@@ -62,6 +62,7 @@ private:
     MTLColorWriteMask _colorWriteMask = MTLColorWriteMaskAll;
     MTLSamplerAddressMode _texCoordU = MTLSamplerAddressModeRepeat;
     MTLSamplerAddressMode _texCoordV = MTLSamplerAddressModeRepeat;
+	bool _nearestFilter = false;
 
     bool Parse(class script_state_t *ss);
     bool EnsureResources();
