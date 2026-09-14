@@ -86,7 +86,7 @@ Client/server packet architecture with Windows/POSIX socket abstraction. Exclude
 
 - **Header guards:** `#pragma once` everywhere (не `#ifndef`)
 - **Поля класса:** приватные/protected с префиксом `_` (например, `_children`, `_value`); публичные — без префикса (например, `x`, `y`, `id`)
-- **Методы:** PascalCase — `GetWidth()`, `AddChild()`, `IsValid()`
+- **Методы:** без префиксов, PascalCase — `GetWidth()`, `AddChild()`, `IsValid()`
 - **Классы:** `ns` префикс + PascalCase (`nsVec2`, `nsConfig`); интерфейсы — `I` префикс (`IRenDevice`)
 - **Отступы:** 4 пробела
 - **Скобки:** открывающая `{` всегда на той же строке — для функций, методов, `if/for/while/class/struct`
