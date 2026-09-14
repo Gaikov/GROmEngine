@@ -148,21 +148,13 @@ void nsInput::Release()
 		//joyReleaseCapture( 0 );
 	}
 
+	//UnbindKey frees memory and resets pointers, so a config save
+	//after release can't read freed bindings
 	for (auto & m_inKey : m_inKeys)
-		if ( m_inKey.type == IC_CMD && m_inKey.argv )
-		{
-			for ( int j = 0; j < m_inKey.argc; j++ )
-				my_free( m_inKey.argv[j] );
-			my_free( m_inKey.argv );
-		}
+		UnbindKey( &m_inKey );
 
-	for (auto & m_joyKey : m_joyKeys)
-		if ( m_joyKey.type == IC_CMD && m_joyKey.argv )
-		{
-			for ( int j = 0; j < m_joyKey.argc; j++ )
-				my_free( m_joyKey.argv[j] );
-			my_free( m_joyKey.argv );
-		}
+	for (auto &m_joyKey : m_joyKeys)
+		UnbindKey( &m_joyKey );
 }
 
 //---------------------------------------------------------
@@ -459,10 +451,19 @@ void nsInput::OnSaveConfig( IDataWriter *out )
 			out->Printf( "keycmd %s %s%s\n", key->keyname, key->inc ? "+": "", key->var->GetName() );
 		else if ( key->type == IC_CMD )
 		{
-			out->Printf( "keycmd %s %s%s", key->keyname, key->play ? "+": "", key->cmd->name );
-			for ( int j = 1; j < key->argc; j++ )
-				out->Printf( " %s", key->argv[j] );
-			out->Printf( "\n" );
+			//write only intact bindings, the corrupted one is replaced
+			//by the default from the config on next start
+			bool	valid = key->argv != nullptr;
+			for ( int j = 1; valid && j < key->argc; j++ )
+				valid = key->argv[j] != nullptr;
+
+			if ( valid )
+			{
+				out->Printf( "keycmd %s %s%s", key->keyname, key->play ? "+": "", key->cmd->name );
+				for ( int j = 1; j < key->argc; j++ )
+					out->Printf( " %s", key->argv[j] );
+				out->Printf( "\n" );
+			}
 		}
 	}
 }
