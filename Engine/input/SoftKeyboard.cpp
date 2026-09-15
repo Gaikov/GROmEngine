@@ -2,6 +2,8 @@
 // Created by Roman on 8/21/2024.
 //
 
+#include <unordered_set>
+
 #include "SoftKeyboard.h"
 #include "RenManager.h"
 #include "Engine/KeyCodes.h"
@@ -13,25 +15,43 @@
 #define k(keyCode, iconFile) new nsKeyCodeButton(keyCode, iconFile, this)
 
 class nsKeyboardLayout : public nsVGroupLayout {
+public:
+    void ClearPointers() {
+        _activePointers.clear();
+    }
+
 protected:
     bool OnPointerUp(float x, float y, int pointerId) override {
+        if (_activePointers.erase(pointerId) == 0) {
+            return true;
+        }
+
         nsVGroupLayout::OnPointerUp(x, y, pointerId);
 
         auto pos = origin.ToLocal({x, y});
         nsRect bounds = {0, 0, GetContentWidth(), GetContentHeight()};
         if (!bounds.IsInside(pos)) {
             visible = false;
+            ClearPointers();
         }
         return true;
     }
     bool OnPointerDown(float x, float y, int pointerId) override {
+        _activePointers.insert(pointerId);
         nsVGroupLayout::OnPointerDown(x, y, pointerId);
         return true;
+    }
+    void OnPointerCancel(int pointerId) override {
+        _activePointers.erase(pointerId);
+        nsVGroupLayout::OnPointerCancel(pointerId);
     }
     bool OnPointerMove(float x, float y, int pointerId) override {
         nsVGroupLayout::OnPointerMove(x, y, pointerId);
         return true;
     }
+
+private:
+    std::unordered_set<int> _activePointers;
 };
 
 nsVisualObject2d *nsSoftKeyboard::GetRoot() {
@@ -144,6 +164,9 @@ bool nsSoftKeyboard::IsActive() {
 }
 
 void nsSoftKeyboard::Activate(bool active) {
+    if (!active) {
+        static_cast<nsKeyboardLayout *>(_root)->ClearPointers();
+    }
     _root->visible = active;
 }
 
