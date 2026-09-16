@@ -299,6 +299,19 @@ int	nsString::Length() const
 }
 
 //---------------------------------------------------------
+// nsString::Hash:
+//---------------------------------------------------------
+size_t nsString::Hash() const noexcept {
+    auto *text = reinterpret_cast<const unsigned char *>(m_str);
+    size_t hash = 5381;
+    while (*text) {
+        hash = (hash * 33) ^ *text;
+        ++text;
+    }
+    return hash;
+}
+
+//---------------------------------------------------------
 // nsString::ToLower: 
 //---------------------------------------------------------
 void nsString::ToLower()

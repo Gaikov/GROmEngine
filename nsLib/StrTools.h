@@ -1,8 +1,8 @@
-#ifndef _STR_TOOLS_H_
-#define _STR_TOOLS_H_
+#pragma once
 
 #include "comm_types.h"
 #include "headers.h"
+#include <functional>
 
 //---------------------------------------------------------
 // str
@@ -62,6 +62,7 @@ public:
 	void				CopyFrom( const char* str, int length );	//���������� �����������
 	void				Append( char ch );
 	int					Length() const;
+	size_t                  Hash() const noexcept;
 	void				ToLower();
     void                ToUpper();
 	bool                IsEmpty() const { return Length() == 0; }
@@ -138,4 +139,11 @@ char& nsString::operator [] ( int idx )
 	return m_str[idx];
 }
 
-#endif
+namespace std {
+template<>
+struct hash<nsString> {
+    size_t operator()(const nsString &value) const noexcept {
+        return value.Hash();
+    }
+};
+}

@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <string>
+#include <unordered_map>
 
 TEST(String, ToLower) {
 
@@ -44,3 +45,16 @@ TEST(String, StrPrintfTruncatesAndTerminates) {
     ASSERT_EQ('\0', result[1023]);
 }
 
+TEST(String, HashSupportsUnorderedMap) {
+    const nsString first = "levels/level_orange.txt";
+    const nsString equal = "levels/level_orange.txt";
+    const nsString other = "levels/level_1.txt";
+
+    ASSERT_EQ(first.Hash(), equal.Hash());
+
+    std::unordered_map<nsString, int> values;
+    values.emplace(first, 42);
+
+    ASSERT_EQ(42, values.at(equal));
+    ASSERT_EQ(values.end(), values.find(other));
+}
