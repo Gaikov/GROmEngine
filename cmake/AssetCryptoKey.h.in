@@ -1,0 +1,19 @@
+#pragma once
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+
+#include "Core/AssetCrypto.h"
+
+namespace GameVersion {
+
+inline nsAssetCrypto::Key AssetEncryptionKey() {
+    constexpr std::array<std::uint8_t, PACK_KEY_SIZE> mask = {@ASSET_KEY_MASK_VALUES@};
+    constexpr std::array<std::uint8_t, PACK_KEY_SIZE> encrypted = {@ASSET_KEY_ENCRYPTED_VALUES@};
+    nsAssetCrypto::Key key = {};
+    for (std::size_t i = 0; i < key.size(); ++i) key[i] = mask[i] ^ encrypted[i];
+    return key;
+}
+
+} // namespace GameVersion

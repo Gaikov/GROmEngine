@@ -7,6 +7,6 @@
 
 #define PACKER_VERSION "1.3.0-dev.0"
 #define OPT_UNPACK "--unpack"
-#define OPT_PASS "--pass"
+#define OPT_KEY_FILE "--key-file"
 
 #endif //_GROM_OPTIONS_H

@@ -1,158 +1,188 @@
-//
-// Created by Roman on 5/16/2024.
-//
-
 #include "PackStrategy.h"
-#include "nsLib/log.h"
-#include "Core/FileWriter.h"
-#include "Core/FileReader.h"
+
+#include <algorithm>
+#include <cstring>
+#include <fstream>
+#include <limits>
+#include <system_error>
+
 #include "Options.h"
-#include "Core/Crypt.h"
+#include "nsLib/log.h"
+
+namespace fs = std::filesystem;
+
+namespace {
+
+bool Write(std::fstream &stream, const void *data, std::size_t size) {
+    if (!size) return true;
+    stream.write(static_cast<const char *>(data), static_cast<std::streamsize>(size));
+    return stream.good();
+}
+
+std::string Lower(std::string value) {
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return value;
+}
+
+} // namespace
 
 nsPackStrategy::nsPackStrategy(const Args &args) : _args(args) {
-
 }
 
 bool nsPackStrategy::Perform() {
     if (_args.Length() < 3) {
-        printf("Not enough params to pack data!");
+        Log::Error("Not enough parameters to pack data");
         return false;
     }
 
-    _pass = _args.GetByName(OPT_PASS);
-    if (!_pass.IsEmpty()) {
-        Log::Info("Use encryption with: %s", _pass.AsChar());
-    }
-
-    //enumerating
-    printf("Enumerating files...\n");
-    _fileList.clear();
-    nsFilePath inputFolder(_args.GetParam(1));
-    if (!inputFolder.IsFolder()) {
-        Log::Warning("Invalid input folder!");
+    const auto *keyFile = _args.GetByName(OPT_KEY_FILE);
+    if (!keyFile || !nsAssetCrypto::LoadKey(keyFile, _key)) {
+        Log::Error("Invalid or missing assetEncryptionKey in properties file");
         return false;
     }
 
-    nsFilePath::tList filesPaths;
-    inputFolder.ListingRecursive(filesPaths);
-
-    for (auto &file: filesPaths) {
-        char *path = const_cast<char*>(strstr(static_cast<const char*>(file), static_cast<const char*>(inputFolder)));
-        if (path) {
-            path += strlen(inputFolder) + 1;
-            packFileDesc_t desc;
-            strcpy(desc.filename, path);
-            _fileList.push_back(desc);
-        }
-    }
-
-    printf("Files: %i\n", (int) _fileList.size());
-
-    nsFilePath outputFile(_args.GetParam(2));
-    auto folder = outputFile.GetParent();
-    if (!folder.CreateFolders()) {
-        Log::Error("Can't create folders: %s", (const char *) folder);
+    const fs::path sourceFolder(_args.GetParam(1));
+    if (!fs::is_directory(sourceFolder)) {
+        Log::Error("Invalid input folder: %s", sourceFolder.string().c_str());
         return false;
     }
 
-    //packing
-    nsFileWriter packWriter(outputFile, "wb");
-    if (!packWriter.IsValid()) {
-        printf("ERROR: create file '%s'\n", (const char *) outputFile);
-        return false;
-    }
+    if (!Enumerate(sourceFolder)) return false;
+    return WriteArchive(fs::path(_args.GetParam(2)));
+}
 
-    //writeheaders
-    printf("Packing files...\n");
-    packHeader_t ph;
-    ph.version = PACK_VERSION;
-    ph.id[0] = 'P';
-    ph.id[1] = 'A';
-    ph.id[2] = 'C';
-    ph.id[3] = 'K';
-    ph.dir_size = _fileList.size() * sizeof(packFileDesc_t);
-    if (!packWriter.Write(&ph, sizeof(ph))) {
-        printf("ERROR: write pack header!\n");
-        return false;
-    }
-
-    if (!packWriter.Write(&_fileList[0], sizeof(packFileDesc_t) * _fileList.size())) {
-        printf("ERROR: write file directory!\n");
-        return false;
-    }
-
-    for (int i = 0; i < _fileList.size(); i++) {
-        auto &filePath = filesPaths[i];
-        auto &desc = _fileList[i];
-
-        //printf("packing: [%s] -> %s", (const char *) filePath, desc.filename);
-
-        desc.offset = packWriter.Tell();
-
-        auto data = ReadFile(filePath);
-        if (!data) return false;
-
-        desc.size = data->GetSize();
-
-        CodingFile(filePath, data);
-
-        if (!packWriter.Write(data->GetData(), desc.size)) {
-            printf("ERROR: write data!\n");
+bool nsPackStrategy::Enumerate(const fs::path &sourceFolder) {
+    _files.clear();
+    std::error_code error;
+    for (fs::recursive_directory_iterator it(sourceFolder, error), end; it != end; it.increment(error)) {
+        if (error) {
+            Log::Error("Can't enumerate assets: %s", error.message().c_str());
             return false;
         }
+        if (!it->is_regular_file()) continue;
+
+        const auto relative = fs::relative(it->path(), sourceFolder, error);
+        if (error || ShouldExclude(relative)) continue;
+
+        auto archivePath = relative.generic_string();
+        if (archivePath.size() >= PACK_MAX_PATH) {
+            Log::Error("Asset path exceeds %i bytes: %s", PACK_MAX_PATH - 1, archivePath.c_str());
+            return false;
+        }
+
+        const auto size = it->file_size(error);
+        if (error || size > std::numeric_limits<std::uint32_t>::max()) {
+            Log::Error("Invalid asset size: %s", archivePath.c_str());
+            return false;
+        }
+
+        sourceFile_t file;
+        file.absolutePath = it->path();
+        file.archivePath = archivePath;
+        strcpy(file.desc.filename, archivePath.c_str());
+        file.desc.size = static_cast<std::uint32_t>(size);
+        _files.push_back(std::move(file));
     }
 
-    //rewrite file dir
-    packWriter.Seek(sizeof(packHeader_t), SEEK_SET);
-
-    if (!packWriter.Write(&_fileList[0], sizeof(packFileDesc_t) * _fileList.size())) {
-        printf("ERROR: write file directory!\n");
-        return false;
-    }
-
-    packWriter.Seek(0, SEEK_END);
-    Log::Info("Total size: %i Mb", (int) packWriter.Tell() / 1024 / 1024);
-
-    printf("DONE!\n");
+    std::sort(_files.begin(), _files.end(), [](const auto &left, const auto &right) {
+        return left.archivePath < right.archivePath;
+    });
+    Log::Info("Packing %u files", static_cast<unsigned>(_files.size()));
     return true;
 }
 
-std::shared_ptr<nsFile> nsPackStrategy::ReadFile(const char *filename) {
-    nsFileReader reader(filename, "rb");
-
-    reader.Seek(0, SEEK_END);
-    auto file = std::make_shared<nsFile>(reader.Tell());
-
-    reader.Seek(0, SEEK_SET);
-    if (!reader.Read(file->GetData(), file->GetSize())) {
-        return nullptr;
+bool nsPackStrategy::WriteArchive(const fs::path &outputFile) {
+    std::error_code error;
+    fs::create_directories(outputFile.parent_path(), error);
+    if (error) {
+        Log::Error("Can't create output folder: %s", error.message().c_str());
+        return false;
     }
 
-    return file;
-}
-
-//---------------------------------------------------------
-// CodingText:
-//---------------------------------------------------------
-void nsPackStrategy::CodingText(unsigned char *data, unsigned int size) {
-    unsigned char hi, lo;
-    for (int i = 0; i < size; i++) {
-        lo = data[i] & 0x0F;
-        hi = data[i] & 0xF0;
-        data[i] = (lo << 4) | (hi >> 4);
+    auto temporaryFile = outputFile;
+    temporaryFile += ".tmp";
+    std::fstream output(temporaryFile, std::ios::binary | std::ios::in |
+                                      std::ios::out | std::ios::trunc);
+    if (!output) {
+        Log::Error("Can't create archive: %s", temporaryFile.string().c_str());
+        return false;
     }
-}
 
-void nsPackStrategy::CodingFile(const nsFilePath &filePath, std::shared_ptr<nsFile> &file) {
-    if (!_pass.IsEmpty()) {
-        nsCrypt::XorEncode(file->GetData(), (int)file->GetSize(), _pass);
-    } else {
-        auto ext = filePath.GetExtension();
-        ext.ToLower();
+    packHeader_t header = {};
+    memcpy(header.id, PACK_ID, sizeof(header.id));
+    header.version = PACK_VERSION;
+    header.filesCount = static_cast<std::uint32_t>(_files.size());
+    header.dirSize = header.filesCount * sizeof(packFileDesc_t);
 
-        if (ext == "txt") {
-            CodingText(file->GetData(), file->GetSize());
+    std::vector<packFileDesc_t> directory(header.filesCount);
+    if (!Write(output, &header, sizeof(header)) ||
+        !Write(output, directory.data(), header.dirSize)) return false;
+
+    for (auto i = 0U; i < _files.size(); ++i) {
+        auto &source = _files[i];
+        auto &desc = source.desc;
+        desc.offset = static_cast<std::uint64_t>(output.tellp());
+
+        std::vector<std::uint8_t> data(desc.size);
+        std::ifstream input(source.absolutePath, std::ios::binary);
+        if (!input || (desc.size && !input.read(reinterpret_cast<char *>(data.data()), desc.size))) {
+            Log::Error("Can't read asset: %s", source.archivePath.c_str());
+            return false;
         }
+
+        nsAssetCrypto::Nonce nonce;
+        nsAssetCrypto::Tag tag;
+        if (!nsAssetCrypto::GenerateNonce(nonce) ||
+            !nsAssetCrypto::Encrypt(data.data(), data.size(), _key, nonce,
+                                    nsAssetCrypto::FileAad(desc.filename, desc.size), tag)) {
+            Log::Error("Can't encrypt asset: %s", source.archivePath.c_str());
+            return false;
+        }
+        std::copy(nonce.begin(), nonce.end(), std::begin(desc.nonce));
+        std::copy(tag.begin(), tag.end(), std::begin(desc.tag));
+        if (!Write(output, data.data(), data.size())) return false;
+        directory[i] = desc;
     }
+
+    nsAssetCrypto::Nonce dirNonce;
+    nsAssetCrypto::Tag dirTag;
+    if (!nsAssetCrypto::GenerateNonce(dirNonce) ||
+        !nsAssetCrypto::Encrypt(directory.data(), header.dirSize, _key, dirNonce,
+                                nsAssetCrypto::DirectoryAad(header.filesCount), dirTag)) {
+        Log::Error("Can't encrypt archive directory");
+        return false;
+    }
+    std::copy(dirNonce.begin(), dirNonce.end(), std::begin(header.dirNonce));
+    std::copy(dirTag.begin(), dirTag.end(), std::begin(header.dirTag));
+
+    output.seekp(0);
+    if (!Write(output, &header, sizeof(header)) ||
+        !Write(output, directory.data(), header.dirSize)) return false;
+    output.close();
+    if (!output) return false;
+
+    fs::remove(outputFile, error);
+    error.clear();
+    fs::rename(temporaryFile, outputFile, error);
+    if (error) {
+        Log::Error("Can't publish archive: %s", error.message().c_str());
+        return false;
+    }
+    Log::Info("Archive created: %s", outputFile.string().c_str());
+    return true;
 }
 
+bool nsPackStrategy::ShouldExclude(const fs::path &relativePath) {
+    for (const auto &part : relativePath) {
+        const auto name = part.string();
+        if (!name.empty() && name[0] == '.') return true;
+    }
+
+    const auto name = Lower(relativePath.filename().string());
+    const auto extension = Lower(relativePath.extension().string());
+    if (extension == ".mis" || extension == ".log" || extension == ".txn" ||
+        extension == ".bak" || extension == ".tmp") return true;
+    if (name == "azangara.cfg" || name == "packs.sav" || name == "scores.dat") return true;
+    return name.size() >= 8 && name.ends_with(".tmp.jpg");
+}

@@ -6,16 +6,15 @@
 #include "Memory.h"
 
 nsFile::nsFile(uint size) {
-    assert(size != 0);
-    m_size = size;
-    m_data = (uchar *) malloc(size + 1);
-    memset(m_data, 0, size + 1);
+    _size = size;
+    _data = (uchar *) malloc(size + 1);
+    memset(_data, 0, size + 1);
 }
 
 nsFile::~nsFile() {
-    if (m_data) {
-        free(m_data);
+    if (_data) {
+        free(_data);
     }
-    m_data = nullptr;
-    m_size = 0;
+    _data = nullptr;
+    _size = 0;
 }

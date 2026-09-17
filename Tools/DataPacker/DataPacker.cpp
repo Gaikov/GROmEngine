@@ -18,8 +18,8 @@ IAppInfo *App_GetInfo() {
 void ShowHelp() {
     Log::Info("DataPacker v%s"\
         "GROm Games (c) 2002-2024\n\n"\
-        "usage to pack: DataPacker [directory] [outfile] [--pass [encoding phrase]]\n"\
-              "usage to unpack: DataPacker --unpack [packedfile] [outdirectory]\n", PACKER_VERSION
+        "usage to pack: DataPacker [directory] [outfile] --key-file [properties]\n"\
+              "usage to unpack: DataPacker --unpack [packedfile] [outdirectory] --key-file [properties]\n", PACKER_VERSION
     );
 }
 
@@ -32,12 +32,13 @@ int main(int argc, char *argv[]) {
 
     Args args(argc, argv);
     if (args.HasOption(OPT_UNPACK)) {
-        if (args.Length() < 4) {
+        const auto *keyFile = args.GetByName(OPT_KEY_FILE);
+        if (args.Length() < 4 || !keyFile) {
             printf("Not enough params to unpack data!");
             return -1;
         }
 
-        UnpackStrategy unPacker(args.GetParam(2), args.GetParam(3));
+        UnpackStrategy unPacker(args.GetParam(2), args.GetParam(3), keyFile);
         if (!unPacker.Perform()) {
             return -1;
         }
@@ -51,5 +52,3 @@ int main(int argc, char *argv[]) {
     Log::Release();
     return 0;
 }
-
-

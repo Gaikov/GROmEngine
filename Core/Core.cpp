@@ -30,6 +30,7 @@ bool nsCore::Init()
 		return false;
 	}
 
+	App_GetInfo()->ConfigurePackage(g_pack);
 	if (!g_pack.Init()) return false;
     if (!App_GetInfo()->Init()) {
         return false;

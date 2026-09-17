@@ -1,12 +1,11 @@
-//
-// Created by Roman on 5/16/2024.
-//
-
 #pragma once
-#include "StdAfx.h"
+
+#include <filesystem>
+#include <vector>
+
 #include "Args.h"
+#include "Core/AssetCrypto.h"
 #include "Core/PackArch.h"
-#include "Core/Blob.h"
 
 class nsPackStrategy {
 public:
@@ -14,16 +13,17 @@ public:
     bool Perform();
 
 private:
-    typedef std::vector<packFileDesc_t> file_list_t;
+    struct sourceFile_t {
+        std::filesystem::path absolutePath;
+        std::string archivePath;
+        packFileDesc_t desc = {};
+    };
 
-    file_list_t _fileList;
     const Args &_args;
-    nsString _pass;
+    nsAssetCrypto::Key _key = {};
+    std::vector<sourceFile_t> _files;
 
-private:
-    std::shared_ptr<nsFile> ReadFile(const char *filename);
-
-    void CodingText(unsigned char *data, unsigned int size);
-    void CodingFile(const nsFilePath &filePath, std::shared_ptr<nsFile> &file);
-
+    bool Enumerate(const std::filesystem::path &sourceFolder);
+    bool WriteArchive(const std::filesystem::path &outputFile);
+    static bool ShouldExclude(const std::filesystem::path &relativePath);
 };

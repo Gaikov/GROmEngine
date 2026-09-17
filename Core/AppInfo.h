@@ -8,12 +8,15 @@
 #include "DataWriter.h"
 #include "nsLib/utils/NoCopyable.h"
 
+class nsPackage;
+
 //---------------------------------------------------------
 // IAppInfo: ��������� ���������� ��� ���� (������) � ����������
 //---------------------------------------------------------
 class IAppInfo : public nsNoCopyable
 {
 public:
+	virtual void            ConfigurePackage(nsPackage &) {}
 	virtual bool            Init() { return true; }
 
 	virtual const char*		GetAppName() = 0;

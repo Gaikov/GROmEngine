@@ -15,6 +15,11 @@ bool checkPackHeader(const packHeader_t &header) {
         return false;
     }
 
+    if (header.reserved != 0 ||
+        header.dirSize != header.filesCount * sizeof(packFileDesc_t)) {
+        Log::Warning("Invalid pack directory size");
+        return false;
+    }
+
     return true;
 }
-

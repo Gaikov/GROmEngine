@@ -1,119 +1,78 @@
-﻿#include "StdAfx.h"
 #include "UnpackStrategy.h"
+
+#include <algorithm>
+#include <cstring>
+#include <fstream>
+#include <vector>
+
+#include "Core/AssetCrypto.h"
 #include "Core/PackArch.h"
+#include "nsLib/log.h"
 
-void DecodeText(unsigned char *data, unsigned int size)
-{
-	unsigned char	lo, hi;
-	for (unsigned int i = 0; i < size; i++, data++)
-	{
-		lo = (*data) & 0x0F;
-		hi = (*data) & 0xF0;
-		*data = (lo << 4) | (hi >> 4);
-	}
+namespace fs = std::filesystem;
+
+UnpackStrategy::UnpackStrategy(const char *packedFile, const char *targetFolder,
+                               const char *propertiesFile) :
+        _packedFile(packedFile), _targetFolder(targetFolder), _propertiesFile(propertiesFile) {
 }
 
-UnpackStrategy::UnpackStrategy(const char* packedFile, const char* targetFolder) :
-	_packetFile(packedFile), _targetFolder(targetFolder)
-{
-}
+bool UnpackStrategy::Perform() {
+    nsAssetCrypto::Key key;
+    if (!nsAssetCrypto::LoadKey(_propertiesFile.string().c_str(), key)) {
+        Log::Error("Invalid or missing assetEncryptionKey in properties file");
+        return false;
+    }
 
-bool UnpackStrategy::Perform()
-{
-	FILE* sourceFile = nullptr;
-	sourceFile = fopen(_packetFile, "rb");
-	if (!sourceFile)
-	{
-		printf("can't open packed file");
-		return false;
-	}
+    std::ifstream input(_packedFile, std::ios::binary);
+    packHeader_t header = {};
+    if (!input.read(reinterpret_cast<char *>(&header), sizeof(header)) || !checkPackHeader(header)) {
+        Log::Error("Invalid packed file format");
+        return false;
+    }
 
-	packHeader_t header;
-	int size = sizeof(header);
-	if (fread(&header, sizeof(header), 1, sourceFile) != 1)
-	{
-		printf("can't read packed file header");
-		return false;
-	}
+    std::vector<packFileDesc_t> files(header.filesCount);
+    if (header.dirSize && !input.read(reinterpret_cast<char *>(files.data()), header.dirSize)) return false;
 
-	if (!checkPackHeader(header))
-	{
-		printf("invalid packed file format");
-		return false;
-	}
+    nsAssetCrypto::Nonce dirNonce;
+    nsAssetCrypto::Tag dirTag;
+    std::copy(std::begin(header.dirNonce), std::end(header.dirNonce), dirNonce.begin());
+    std::copy(std::begin(header.dirTag), std::end(header.dirTag), dirTag.begin());
+    if (!nsAssetCrypto::Decrypt(files.data(), header.dirSize, key, dirNonce,
+                                nsAssetCrypto::DirectoryAad(header.filesCount), dirTag)) {
+        Log::Error("Archive directory authentication failed");
+        return false;
+    }
 
-	const auto numFiles = header.dir_size / sizeof(packFileDesc_t);
-	printf("%u files found...\n", numFiles);
-	std::vector<packFileDesc_t> files;
-	for (unsigned int i = 0; i < numFiles; i++)
-	{
-		packFileDesc_t fileDesc;
-		const auto descSize = sizeof(fileDesc);
-		const auto read = fread(&fileDesc, 1, sizeof(packFileDesc_t), sourceFile);
-		if (read != descSize)
-		{
-			printf("can't read files info\n");
-			return false;
-		}
+    for (const auto &file : files) {
+        if (!memchr(file.filename, '\0', sizeof(file.filename))) return false;
+        const fs::path relative(file.filename);
+        if (relative.is_absolute() || relative.string().find("..") != std::string::npos) {
+            Log::Error("Unsafe path in archive: %s", file.filename);
+            return false;
+        }
 
-		//printf("%s\n", fileDesc.filename);
-		files.push_back(fileDesc);
-	}
+        std::vector<std::uint8_t> data(file.size);
+        input.seekg(static_cast<std::streamoff>(file.offset));
+        if (file.size && !input.read(reinterpret_cast<char *>(data.data()), file.size)) return false;
 
-	nsFilePath folder(_targetFolder);
-	for (auto& file : files)
-	{
-		printf("unpacking: %s\n", file.filename);
-		if (fseek(sourceFile, file.offset, SEEK_SET))
-		{
-			printf("can't locate file");
-			return false;
-		}
+        nsAssetCrypto::Nonce nonce;
+        nsAssetCrypto::Tag tag;
+        std::copy(std::begin(file.nonce), std::end(file.nonce), nonce.begin());
+        std::copy(std::begin(file.tag), std::end(file.tag), tag.begin());
+        if (!nsAssetCrypto::Decrypt(data.data(), data.size(), key, nonce,
+                                    nsAssetCrypto::FileAad(file.filename, file.size), tag)) {
+            Log::Error("Asset authentication failed: %s", file.filename);
+            return false;
+        }
 
-		const auto data = malloc(file.size);
-		if (fread(data, 1, file.size, sourceFile) != file.size)
-		{
-			printf("can't read file");
-			return false;
-		}
-
-		nsFilePath filePath = folder.ResolvePath(file.filename);
-		nsFilePath parent = filePath.GetParent();
-		if (!parent.CreateFolders())
-		{
-			printf("can't create folders: %s\n", (const char*)parent);
-			return false;
-		}
-
-		WriteFile(filePath, data, file.size);
-
-		free(data);
-	}
-
-	return true;
-}
-
-bool UnpackStrategy::WriteFile(const nsFilePath &filePath, const void *data, unsigned int size)
-{
-	FILE *hfile = nullptr;
-	hfile = fopen(filePath, "w+b");
-	if (!hfile)
-	{
-		printf("can't create file\n");
-		return false;
-	}
-
-	if (filePath.CheckExtension("txt"))
-	{
-		printf("...decoding text file\n");
-		DecodeText((unsigned char*)(data), size);
-	}
-
-	if (fwrite(data, 1, size, hfile) != size)
-	{
-		printf("can't write data\n");
-		return false;
-	}
-	fclose(hfile);
+        const auto outputPath = _targetFolder / relative;
+        std::error_code error;
+        fs::create_directories(outputPath.parent_path(), error);
+        std::ofstream output(outputPath, std::ios::binary | std::ios::trunc);
+        if (!output || (file.size && !output.write(reinterpret_cast<char *>(data.data()), file.size))) {
+            Log::Error("Can't write unpacked asset: %s", outputPath.string().c_str());
+            return false;
+        }
+    }
     return true;
 }

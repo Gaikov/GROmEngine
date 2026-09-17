@@ -1,24 +1,14 @@
-﻿#ifndef __UnpackStrategy_H__
-#define __UnpackStrategy_H__
+#pragma once
 
-/*******************************************************\
-*
-* GROm Games (c) 2003-2019
-*
-\*******************************************************/
+#include <filesystem>
 
-class UnpackStrategy
-{
+class UnpackStrategy {
 public:
-	UnpackStrategy(const char* packedFile, const char* targetFolder);
-	virtual ~UnpackStrategy() = default;
-
-	bool Perform();
+    UnpackStrategy(const char *packedFile, const char *targetFolder, const char *propertiesFile);
+    bool Perform();
 
 private:
-	const char *_packetFile;
-	const char *_targetFolder;
-	bool WriteFile(const nsFilePath &filePath, const void *data, unsigned int size);
+    std::filesystem::path _packedFile;
+    std::filesystem::path _targetFolder;
+    std::filesystem::path _propertiesFile;
 };
-
-#endif

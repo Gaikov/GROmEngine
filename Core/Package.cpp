@@ -1,295 +1,216 @@
 #include "Package.h"
-#include "Memory.h"
-#include "nsLib/log.h"
-#include "StructUt.h"
-#include "nsLib/StrTools.h"
-#include <string>
+
 #include <algorithm>
-#include "nsLib/FilePath.h"
+#include <cstring>
+#include <string>
+
 #include "Engine/Platform.h"
-#include "Crypt.h"
+#include "Memory.h"
+#include "StructUt.h"
+#include "nsLib/FilePath.h"
+#include "nsLib/log.h"
 
 nsPackage g_pack;
 
-//---------------------------------------------------------
-// nsPackage::Init: 
-//---------------------------------------------------------
+namespace {
+
+bool StrInList(nsString *list, int count, const char *str) {
+    for (auto i = 0; i < count; ++i) {
+        if (list[i] == str) return true;
+    }
+    return false;
+}
+
+int FileCmp(const void *elem1, const void *elem2) {
+    const auto *s1 = static_cast<const nsString *>(elem1);
+    const auto *s2 = static_cast<const nsString *>(elem2);
+    return strcmp(*s1, *s2);
+}
+
+} // namespace
+
 bool nsPackage::Init() {
     nsString *list = nullptr;
     Log::Info("...enum packs");
-    int count = EnumDirFiles("./", "pak", &list);
-    if (!count)
+    const auto count = EnumDirFiles("./", "pak", &list);
+    if (!count) {
         Log::Warning("packs not found!");
-    else {
-        for (int i = 0; i < count; i++)
-            AddPack(list[i]);
-        my_free(list);
+        return !_loadPacked;
     }
-    return true;
+
+    auto result = true;
+    for (auto i = 0; i < count; ++i) result = AddPack(list[i]) && result;
+    my_free(list);
+    return result;
 }
 
-//---------------------------------------------------------
-// nsPackage::Release: 
-//---------------------------------------------------------
 void nsPackage::Release() {
-    if (!m_packs.empty()) {
-        Log::Info("...release packs");
-        for (auto &pack: m_packs) {
-            if (pack.files)
-                my_free(pack.files);
-        }
-        m_packs.clear();
-    }
+    if (!_packs.empty()) Log::Info("...release packs");
+    _packs.clear();
     ClearHandlers();
 }
 
-//---------------------------------------------------------
-// nsPackage::AddPack: 
-//---------------------------------------------------------
 bool nsPackage::AddPack(const char *fileName) {
     if (!fileName || !strlen(fileName)) return true;
-
     return InitPack(fileName);
 }
 
-//---------------------------------------------------------
-// nsPackage::LoadFile: 
-//---------------------------------------------------------
 nsFile *nsPackage::LoadFile(const char *fileName) {
     if (!fileName || !strlen(fileName)) return nullptr;
 
     nsFile *file = nullptr;
-
     if (!_loadPacked) {
         IDataReader::sp_t reader = App_GetPlatform()->FileRead(fileName);
         file = IDataReader::ReadBlob(reader);
     }
-
-    if (!file) {
-        file = LoadPackFile(fileName);
-    }
+    if (!file) file = LoadPackFile(fileName);
 
     const nsBaseEvent event(FILE_LOADED_EVENT);
     Emmit(event);
     return file;
 }
 
-//---------------------------------------------------------
-// nsPackage::ReleaseFile: 
-//---------------------------------------------------------
 void nsPackage::ReleaseFile(nsFile *file) {
     delete file;
 }
 
-//---------------------------------------------------------
-// nsPackage::IsExists: 
-//---------------------------------------------------------
 bool nsPackage::IsExists(const char *fileName) {
     if (!fileName || !strlen(fileName)) return false;
-
-    IDataReader::sp_t reader = App_GetPlatform()->FileRead(fileName);
-    if (reader && reader->IsValid()) {
-        return true;
-    } else {
-        for (int i = (int) m_packs.size() - 1; i >= 0; i--)
-            if (FindPackFile(fileName, i)) return true;
+    if (!_loadPacked) {
+        IDataReader::sp_t reader = App_GetPlatform()->FileRead(fileName);
+        if (reader && reader->IsValid()) return true;
     }
-
+    for (auto i = static_cast<int>(_packs.size()) - 1; i >= 0; --i) {
+        if (FindPackFile(fileName, i)) return true;
+    }
     return false;
 }
 
-//---------------------------------------------------------
-// nsPackage::EnumDirFiles: 
-//---------------------------------------------------------
-bool StrInList(nsString *list, int count, const char *str) {
-    for (int i = 0; i < count; i++)
-        if (list[i] == str) return true;
-    return false;
-}
-
-//---------------------------------------------------------
-int FileCmp(const void *elem1, const void *elem2) {
-    const auto *s1 = (const nsString *) elem1;
-    const auto *s2 = (const nsString *) elem2;
-    return strcmp(*s1, *s2);
-}
-
-//---------------------------------------------------------
 int nsPackage::EnumDirFiles(const char *dir, const char *type, nsString **list, bool withPacks) {
     *list = nullptr;
-    int count = 0;
-
+    auto count = 0;
     nsFilePath folder(dir);
     nsFilePath::tList files;
-
     App_GetPlatform()->FolderListing(folder, files);
-    for (auto &file: files) {
-        if (!file.IsFolder() && file.CheckExtension(type)) {
-            AddToArray(&*list, count, file.GetPath());
-        }
+    for (auto &file : files) {
+        if (!file.IsFolder() && file.CheckExtension(type)) AddToArray(&*list, count, file.GetPath());
     }
 
-    if (withPacks) //TODO: need to check (does not work maybe)
-    {
-        for (int p = (int) m_packs.size() - 1; p >= 0; p--) {
-            std::string cdir = dir;
-            std::transform(cdir.begin(), cdir.end(), cdir.begin(), ::tolower);
-
-            for (int i = 0; i < m_packs[p].count; i++) {
-                if (strncmp(cdir.c_str(), m_packs[p].files[i].filename, cdir.length()) == 0 &&
-                    !strchr(m_packs[p].files[i].filename + cdir.length(), '/') &&
-                    strstr(m_packs[p].files[i].filename, StrPrintf(".%s", type))) {
-                    nsString name(m_packs[p].files[i].filename + cdir.length());
-                    if (!StrInList(*list, count, name))
-                        AddToArray(&*list, count, name);
+    if (withPacks) {
+        for (auto p = static_cast<int>(_packs.size()) - 1; p >= 0; --p) {
+            std::string currentDir = dir;
+            std::transform(currentDir.begin(), currentDir.end(), currentDir.begin(), ::tolower);
+            for (const auto &file : _packs[p].files) {
+                if (strncmp(currentDir.c_str(), file.filename, currentDir.length()) == 0 &&
+                    !strchr(file.filename + currentDir.length(), '/') &&
+                    strstr(file.filename, StrPrintf(".%s", type))) {
+                    nsString name(file.filename + currentDir.length());
+                    if (!StrInList(*list, count, name)) AddToArray(&*list, count, name);
                 }
             }
         }
     }
-
-    if (count)
-        qsort(*list, count, sizeof(nsString), FileCmp);
-
+    if (count) qsort(*list, count, sizeof(nsString), FileCmp);
     return count;
 }
 
-//---------------------------------------------------------
-// nsPackage::InitPack: 
-//---------------------------------------------------------
 bool nsPackage::InitPack(const char *fileName) {
-    Log::Info("checking '%s'... ", fileName);
-    IDataReader::sp_t packReader = App_GetPlatform()->FileRead(fileName);
+    if (!_hasEncryptionKey) {
+        Log::Error("Asset encryption key is not configured");
+        return false;
+    }
 
-    unsigned int filesCount;
-    if (!packReader->IsValid()) {
+    IDataReader::sp_t reader = App_GetPlatform()->FileRead(fileName);
+    if (!reader || !reader->IsValid()) {
         Log::Warning("can't open pack file: %s", fileName);
         return false;
     }
 
-    packHeader_t ph;
-    if (!packReader->Read(&ph, sizeof(packHeader_t))) {
-        Log::Warning("Can't read pack header!");
+    packHeader_t header = {};
+    if (!reader->Read(&header, sizeof(header)) || !checkPackHeader(header)) return false;
+
+    std::vector<packFileDesc_t> files(header.filesCount);
+    if (header.dirSize && !reader->Read(files.data(), header.dirSize)) {
+        Log::Warning("Can't read encrypted pack directory");
         return false;
     }
 
-    if (!checkPackHeader(ph)) {
+    nsAssetCrypto::Nonce nonce;
+    nsAssetCrypto::Tag tag;
+    std::copy(std::begin(header.dirNonce), std::end(header.dirNonce), nonce.begin());
+    std::copy(std::begin(header.dirTag), std::end(header.dirTag), tag.begin());
+    if (!nsAssetCrypto::Decrypt(files.data(), header.dirSize, _encryptionKey, nonce,
+                                nsAssetCrypto::DirectoryAad(header.filesCount), tag)) {
+        Log::Error("Pack directory authentication failed: %s", fileName);
         return false;
     }
 
-    auto files = (packFileDesc_t *) my_malloc(ph.dir_size);
-    if (!files) {
-        Log::Error("allocate pack dir!");
-        return false;
+    for (const auto &file : files) {
+        if (!memchr(file.filename, '\0', sizeof(file.filename))) {
+            Log::Error("Invalid unterminated file name in pack: %s", fileName);
+            return false;
+        }
     }
 
-    if (!packReader->Read(files, ph.dir_size)) {
-        my_free(files);
-        Log::Warning("read pack dir!");
-        return false;
-    }
-
-    filesCount = ph.dir_size / sizeof(packFileDesc_t);
-    Log::Info("OK! (%i - files)", filesCount);
-
-    packDesc_t desc;
-    desc.packName = fileName;
-    desc.count = filesCount;
-    desc.files = files;
-    m_packs.push_back(desc);
-
+    packDesc_t pack;
+    pack.packName = fileName;
+    pack.files = std::move(files);
+    _packs.push_back(std::move(pack));
+    Log::Info("Pack OK (%u files)", header.filesCount);
     return true;
 }
 
-//---------------------------------------------------------
-// nsPackage::FindPackFile: 
-//---------------------------------------------------------
 packFileDesc_t *nsPackage::FindPackFile(const char *fileName, int pack) {
     if (!StrCheck(fileName)) return nullptr;
-
-    Log::Debug("searching file desc '%s'", fileName);
-    for (int i = 0; i < m_packs[pack].count; i++)
-        if (strcmp(m_packs[pack].files[i].filename, fileName) == 0) {
-            Log::Info("Found");
-            return &m_packs[pack].files[i];
-        }
-
+    for (auto &file : _packs[pack].files) {
+        if (strcmp(file.filename, fileName) == 0) return &file;
+    }
     return nullptr;
 }
 
-//---------------------------------------------------------
-// nsPackage::LoadPackFile: 
-//---------------------------------------------------------
 nsFile *nsPackage::LoadPackFile(const char *fileName) {
-    packFileDesc_t *fd = nullptr;
-    int packIndex;
-
-    for (int i = (int) m_packs.size() - 1; i >= 0; i--) {
-        fd = FindPackFile(fileName, i);
-        if (fd) {
+    packFileDesc_t *desc = nullptr;
+    auto packIndex = -1;
+    for (auto i = static_cast<int>(_packs.size()) - 1; i >= 0; --i) {
+        desc = FindPackFile(fileName, i);
+        if (desc) {
             packIndex = i;
             break;
         }
     }
-
-    if (!fd) {
+    if (!desc) {
         Log::Warning("file desc not found in packs '%s'!", fileName);
         return nullptr;
     }
 
-    IDataReader::sp_t packReader = App_GetPlatform()->FileRead(m_packs[packIndex].packName);
-    if (!packReader->IsValid()) {
-        return nullptr;
-    }
+    IDataReader::sp_t reader = App_GetPlatform()->FileRead(_packs[packIndex].packName);
+    if (!reader || !reader->IsValid()) return nullptr;
 
-    auto file = new nsFile(fd->size);
-    if (!file->GetData()) {
-        Log::Error("Can't allocate file '%s'!", fileName);
-        delete file;
-        return nullptr;
-    }
-
-    if (!packReader->Seek((long) fd->offset, SEEK_SET)) {
-        Log::Warning("Can't seek packed file '%s'!", fileName);
-        delete file;
-        return nullptr;
-    }
-
-    if (!packReader->Read(file->GetData(), file->GetSize())) {
+    auto file = new nsFile(desc->size);
+    if (!reader->Seek(static_cast<long>(desc->offset), SEEK_SET) ||
+        (desc->size && !reader->Read(file->GetData(), desc->size))) {
         Log::Warning("Can't read packed file '%s'", fileName);
         delete file;
         return nullptr;
     }
 
-    if (!_decryptionKey.IsEmpty()) {
-        nsCrypt::XorEncode(file->GetData(), file->GetSize(), _decryptionKey);
-    } else {
-        if (strstr(fileName, ".txt"))
-            DecodeFile(file);
+    nsAssetCrypto::Nonce nonce;
+    nsAssetCrypto::Tag tag;
+    std::copy(std::begin(desc->nonce), std::end(desc->nonce), nonce.begin());
+    std::copy(std::begin(desc->tag), std::end(desc->tag), tag.begin());
+    if (!nsAssetCrypto::Decrypt(file->GetData(), file->GetSize(), _encryptionKey, nonce,
+                                nsAssetCrypto::FileAad(desc->filename, desc->size), tag)) {
+        Log::Error("Packed file authentication failed: %s", fileName);
+        delete file;
+        return nullptr;
     }
-
-    file->GetData()[fd->size] = 0; //for parsing file as a string
+    file->GetData()[desc->size] = 0;
     return file;
 }
 
-//---------------------------------------------------------
-// nsPackage::DecodeFile: 
-//---------------------------------------------------------
-void nsPackage::DecodeFile(nsFile *file) {
-    if (!file || !file->GetData())
-        return;
-
-    uchar *data = file->GetData();
-    uchar lo, hi;
-    for (uint i = 0; i < file->GetSize(); i++, data++) {
-        lo = (*data) & 0x0F;
-        hi = (*data) & 0xF0;
-        *data = (lo << 4) | (hi >> 4);
-    }
-}
-
-void nsPackage::SetPassKey(const char *key) {
-    assert(strlen(key) < nsString::MAX_SIZE - 1);
-    _decryptionKey = key;
+void nsPackage::SetEncryptionKey(const nsAssetCrypto::Key &key) {
+    _encryptionKey = key;
+    _hasEncryptionKey = true;
 }
 
 void nsPackage::SetLoadPackedOnly(bool packed) {

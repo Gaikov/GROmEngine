@@ -39,6 +39,7 @@ function(grom_configure_game_version)
 
     set(VERSION_NAME_FOUND FALSE)
     set(VERSION_CODE_FOUND FALSE)
+    set(ASSET_KEY_FOUND FALSE)
     foreach (VERSION_LINE IN LISTS VERSION_LINES)
         if (VERSION_LINE MATCHES "^[ \t]*versionName[ \t]*=[ \t]*([^ \t#]+)[ \t]*$")
             if (VERSION_NAME_FOUND)
@@ -52,6 +53,12 @@ function(grom_configure_game_version)
             endif ()
             set(VERSION_CODE "${CMAKE_MATCH_1}")
             set(VERSION_CODE_FOUND TRUE)
+        elseif (VERSION_LINE MATCHES "^[ \t]*assetEncryptionKey[ \t]*=[ \t]*([^ \t#]+)[ \t]*$")
+            if (ASSET_KEY_FOUND)
+                message(FATAL_ERROR "Duplicate assetEncryptionKey in ${VERSION_FILE}")
+            endif ()
+            set(ASSET_ENCRYPTION_KEY "${CMAKE_MATCH_1}")
+            set(ASSET_KEY_FOUND TRUE)
         endif ()
     endforeach ()
 
@@ -66,6 +73,14 @@ function(grom_configure_game_version)
 
     if (VERSION_CODE GREATER 2100000000)
         message(FATAL_ERROR "versionCode in ${VERSION_FILE} exceeds the Android limit 2100000000")
+    endif ()
+
+    string(LENGTH "${ASSET_ENCRYPTION_KEY}" ASSET_KEY_LENGTH)
+    if (NOT ASSET_KEY_FOUND OR
+            NOT ASSET_ENCRYPTION_KEY MATCHES "^[0-9A-Fa-f]+$" OR
+            NOT ASSET_KEY_LENGTH EQUAL 64)
+        message(FATAL_ERROR
+                "Invalid or missing assetEncryptionKey in ${VERSION_FILE}; expected exactly 64 hex characters")
     endif ()
 
     if (NOT GAME_VERSION_PRODUCT_NAME MATCHES "^[0-9A-Za-z][0-9A-Za-z ._+:-]*$")
@@ -84,8 +99,29 @@ function(grom_configure_game_version)
             @ONLY
     )
 
+    string(RANDOM LENGTH 64 ALPHABET 0123456789abcdef ASSET_KEY_MASK_HEX)
+    set(ASSET_KEY_MASK_VALUES "")
+    set(ASSET_KEY_ENCRYPTED_VALUES "")
+    foreach (BYTE_INDEX RANGE 0 31)
+        math(EXPR HEX_INDEX "${BYTE_INDEX} * 2")
+        string(SUBSTRING "${ASSET_ENCRYPTION_KEY}" ${HEX_INDEX} 2 KEY_BYTE_HEX)
+        string(SUBSTRING "${ASSET_KEY_MASK_HEX}" ${HEX_INDEX} 2 MASK_BYTE_HEX)
+        math(EXPR KEY_BYTE "0x${KEY_BYTE_HEX}")
+        math(EXPR MASK_BYTE "0x${MASK_BYTE_HEX}")
+        math(EXPR ENCRYPTED_BYTE "${KEY_BYTE} ^ ${MASK_BYTE}")
+        string(APPEND ASSET_KEY_MASK_VALUES "${MASK_BYTE},")
+        string(APPEND ASSET_KEY_ENCRYPTED_VALUES "${ENCRYPTED_BYTE},")
+    endforeach ()
+
+    set(ASSET_KEY_HEADER "${GENERATED_INCLUDE_DIR}/AssetCryptoKey.h")
+    configure_file(
+            "${GAME_VERSION_MODULE_DIR}/AssetCryptoKey.h.in"
+            "${ASSET_KEY_HEADER}"
+            @ONLY
+    )
+
     target_include_directories("${GAME_VERSION_TARGET}" PRIVATE "${GENERATED_INCLUDE_DIR}")
-    target_sources("${GAME_VERSION_TARGET}" PRIVATE "${GAME_VERSION_HEADER}")
+    target_sources("${GAME_VERSION_TARGET}" PRIVATE "${GAME_VERSION_HEADER}" "${ASSET_KEY_HEADER}")
 
     if (WEB_ASM)
         if (NOT CMAKE_PROJECT_NAME MATCHES "^[0-9A-Za-z][0-9A-Za-z._+-]*$")

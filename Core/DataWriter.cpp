@@ -11,11 +11,6 @@ nsFile *IDataReader::ReadBlob(IDataReader *reader) {
 
     reader->Seek(0, SEEK_END);
     uint size = reader->Tell();
-    if (!size) {
-        Log::Warning("reader is empty");
-        return nullptr;
-    }
-
     reader->Seek(0, SEEK_SET);
     auto pFile = new nsFile(size);
     if (!pFile->GetData()) {
@@ -23,10 +18,10 @@ nsFile *IDataReader::ReadBlob(IDataReader *reader) {
         return nullptr;
     }
 
-    if (!reader->Read(pFile->GetData(), size)) {
+    if (size && !reader->Read(pFile->GetData(), size)) {
+        delete pFile;
         return nullptr;
     }
     pFile->GetData()[size] = 0;    //for file that will be used as a string
     return pFile;
 }
-
