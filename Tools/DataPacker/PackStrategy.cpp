@@ -76,6 +76,11 @@ bool nsPackStrategy::Enumerate(const fs::path &sourceFolder) {
             Log::Error("Invalid asset size: %s", archivePath.c_str());
             return false;
         }
+        //empty files can't be parsed by the engine and crash script loaders
+        if (size == 0) {
+            Log::Warning("Skipping empty file: %s", archivePath.c_str());
+            continue;
+        }
 
         sourceFile_t file;
         file.absolutePath = it->path();

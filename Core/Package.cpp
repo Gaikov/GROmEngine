@@ -65,6 +65,12 @@ nsFile *nsPackage::LoadFile(const char *fileName) {
     }
     if (!file) file = LoadPackFile(fileName);
 
+    //zero-length files can't be parsed by script loaders — report as missing
+    if (file && !file->GetSize()) {
+        ReleaseFile(file);
+        file = nullptr;
+    }
+
     const nsBaseEvent event(FILE_LOADED_EVENT);
     Emmit(event);
     return file;
@@ -180,6 +186,10 @@ nsFile *nsPackage::LoadPackFile(const char *fileName) {
     }
     if (!desc) {
         Log::Warning("file desc not found in packs '%s'!", fileName);
+        return nullptr;
+    }
+    if (!desc->size) {
+        Log::Warning("zero-length file in pack '%s'!", fileName);
         return nullptr;
     }
 
