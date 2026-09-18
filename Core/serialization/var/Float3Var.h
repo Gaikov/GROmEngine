@@ -1,21 +1,21 @@
 // Copyright (c) 2003-2026, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
-// file Float2Var.h
+// file Float3Var.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
 #include "SerializableVar.h"
-#include "nsLib/Vec2.h"
+#include "nsLib/Vec3.h"
 
-class nsFloat2Var : public nsSerializableVar<nsVec2>
+class nsFloat3Var : public nsSerializableVar<nsVec3>
 {
 public:
-    nsFloat2Var()
-        : nsFloat2Var( nsVec2::null ) {
+    nsFloat3Var()
+        : nsFloat3Var( nsVec3() ) {
     }
 
-    nsFloat2Var( const nsVec2 &defValue )
+    nsFloat3Var( const nsVec3 &defValue )
         : nsSerializableVar( defValue ) {
     }
 

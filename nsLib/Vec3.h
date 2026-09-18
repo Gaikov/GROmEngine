@@ -172,13 +172,18 @@ void nsVec3::FromVec2XY( const nsVec2 &v )
 }
 
 //---------------------------------------------------------
-// nsVec3::FromLerp: 
+// nsVec3::FromLerp:
 //---------------------------------------------------------
 void nsVec3::FromLerp( const nsVec3 &v1, const nsVec3 &v2, float t )
 {
 	x = v1.x + (v2.x - v1.x) * t;
 	y = v1.y + (v2.y - v1.y) * t;
 	z = v1.z + (v2.z - v1.z) * t;
+}
+
+inline bool operator != ( const nsVec3 &a, const nsVec3 &b )
+{
+	return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
 
