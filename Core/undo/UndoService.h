@@ -5,29 +5,53 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "nsLib/SubSystem.h"
-#include "nsLib/headers.h"
 #include "UndoRedoOperation.h"
 
 class nsUndoService : public nsSubSystem<nsUndoService> {
-protected:
-    void OnRelease() override;
-
 public:
-    void Push(nsUndoRedoOperation *op);
+    using StateId = std::uint64_t;
+
+    bool Push(std::unique_ptr<nsUndoRedoOperation> operation, const std::string &name = "Edit");
+    bool Push(nsUndoRedoOperation *operation, const std::string &name = "Edit");
+
     [[nodiscard]] bool HasUndo() const;
-    void Undo();
     [[nodiscard]] bool HasRedo() const;
+    [[nodiscard]] const std::string &GetUndoName() const;
+    [[nodiscard]] const std::string &GetRedoName() const;
+
+    void Undo();
     void Redo();
     void Clear();
 
-private:
-    typedef std::vector<nsUndoRedoOperation *> opsList_t;
+    void MarkClean();
+    [[nodiscard]] bool IsDirty() const;
+    [[nodiscard]] StateId GetCurrentStateId() const { return _currentStateId; }
+
+protected:
+    void OnRelease() override;
 
 private:
-    opsList_t _doneList;
-    opsList_t _unDoneList;
+    struct HistoryEntry {
+        std::unique_ptr<nsUndoRedoOperation> operation;
+        std::string name;
+        StateId beforeStateId = 0;
+        StateId afterStateId = 0;
+    };
 
-private:
-    void ClearUnDone();
+    using History = std::vector<HistoryEntry>;
+
+    void ClearUndone();
+    StateId NextStateId();
+
+    History _done;
+    History _undone;
+    StateId _nextStateId = 0;
+    StateId _currentStateId = 0;
+    StateId _cleanStateId = 0;
 };

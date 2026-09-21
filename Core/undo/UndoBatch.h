@@ -5,14 +5,18 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "nsLib/headers.h"
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "UndoRedoOperation.h"
 
 class nsUndoBatch : public nsUndoRedoOperation {
 public:
-    ~nsUndoBatch() override;
-
-    void Add(nsUndoRedoOperation *op);
+    void Add(std::unique_ptr<nsUndoRedoOperation> operation);
+    void Add(nsUndoRedoOperation *operation);
+    [[nodiscard]] bool IsEmpty() const { return _operations.empty(); }
+    [[nodiscard]] std::size_t GetCount() const { return _operations.size(); }
 
     void Init() override;
 
@@ -21,5 +25,5 @@ public:
     void Undo() override;
 
 private:
-    std::vector<nsUndoRedoOperation*> _list;
+    std::vector<std::unique_ptr<nsUndoRedoOperation>> _operations;
 };

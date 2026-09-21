@@ -22,10 +22,12 @@ public:
     }
 
     void Redo() override {
+        assert(_index >= 0 && _index <= static_cast<int>(_list.size()));
         _list.insert(_list.begin() + _index, _item);
     }
 
     void Undo() override {
+        assert(_index >= 0 && _index < static_cast<int>(_list.size()));
         _list.erase(_list.begin() + _index);
     }
 

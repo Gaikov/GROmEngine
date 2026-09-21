@@ -4,31 +4,35 @@
 
 #include "UndoBatch.h"
 
+#include <algorithm>
+#include <cassert>
+
 void nsUndoBatch::Init() {
-    for (auto op : _list) {
-        op->Init();
+    assert(!IsEmpty());
+    for (const auto &operation : _operations) {
+        operation->Init();
     }
 }
 
 void nsUndoBatch::Redo() {
-    for (auto op : _list) {
-        op->Redo();
+    for (const auto &operation : _operations) {
+        operation->Redo();
     }
 }
 
 void nsUndoBatch::Undo() {
-    for (auto it = _list.rbegin(); it != _list.rend(); it++) {
+    for (auto it = _operations.rbegin(); it != _operations.rend(); ++it) {
         (*it)->Undo();
     }
 }
 
-void nsUndoBatch::Add(nsUndoRedoOperation *op) {
-    assert(std::find(_list.begin(), _list.end(), op) == _list.end());
-    _list.push_back(op);
+void nsUndoBatch::Add(std::unique_ptr<nsUndoRedoOperation> operation) {
+    assert(operation);
+    if (operation) {
+        _operations.push_back(std::move(operation));
+    }
 }
 
-nsUndoBatch::~nsUndoBatch() {
-    for (auto op : _list) {
-        delete op;
-    }
+void nsUndoBatch::Add(nsUndoRedoOperation *operation) {
+    Add(std::unique_ptr<nsUndoRedoOperation>(operation));
 }

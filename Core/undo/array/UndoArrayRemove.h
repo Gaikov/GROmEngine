@@ -4,6 +4,7 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include <cassert>
 #include "Core/undo/UndoRedoOperation.h"
 #include "nsLib/structs/Array.h"
 
@@ -15,13 +16,16 @@ public:
 
     void Init() override {
         _index = _list.GetIndex(_item);
+        assert(_index >= 0 && _index < _list.Size());
         Redo();
     }
     void Redo() override {
+        assert(_index >= 0 && _index < _list.Size());
         _list.RemoveAt(_index);
     }
 
     void Undo() override {
+        assert(_index >= 0 && _index <= _list.Size());
         _list.Insert(_index, _item);
     }
 

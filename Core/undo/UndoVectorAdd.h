@@ -4,7 +4,7 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
-#include <algorithm>
+#include <cassert>
 #include <vector>
 
 #include "UndoRedoOperation.h"
@@ -23,10 +23,12 @@ public:
     }
 
     void Redo() override {
+        assert(_index >= 0 && _index <= static_cast<int>(_list.size()));
         _list.push_back(_item);
     }
 
     void Undo() override {
+        assert(_index >= 0 && _index < static_cast<int>(_list.size()));
         _list.erase(_list.begin() + _index);
     }
 
