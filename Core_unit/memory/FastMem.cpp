@@ -17,12 +17,14 @@ static void MemInit() {
 
 static void MemRelease() {
     nsFastMemManager::Release();
+    Log::Shared()->RemovePolicy(&out);
     Log::Release();
 }
 
 TEST(FastMem, PoolIndex) {
     ASSERT_TRUE(nsFastMemManager::GetPoolIndex(20) == 1);
-    ASSERT_TRUE(nsFastMemManager::GetPoolIndex(600) == -1);
+    ASSERT_TRUE(nsFastMemManager::GetPoolIndex(600) == 6);
+    ASSERT_TRUE(nsFastMemManager::GetPoolIndex(1025) == -1);
     ASSERT_TRUE(nsFastMemManager::GetPoolIndex(1) == 0);
     ASSERT_TRUE(nsFastMemManager::GetPoolIndex(50) == 2);
     ASSERT_TRUE(nsFastMemManager::GetPoolIndex(16) == 0);

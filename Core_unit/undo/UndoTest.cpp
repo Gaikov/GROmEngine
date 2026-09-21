@@ -18,6 +18,7 @@ static void UndoInit() {
 
 static void UndoRelease() {
     nsUndoService::Release();
+    Log::Shared()->RemovePolicy(&out);
     Log::Release();
 }
 
@@ -52,8 +53,7 @@ TEST(UndoService, UndoVectorInsert) {
     UndoInit();
     auto undo = nsUndoService::Shared();
 
-    auto    *list = new std::vector<int>();
-    std::vector<int> &v = *list;
+    std::vector<int> v;
     v.push_back(1);
     v.push_back(2);
 

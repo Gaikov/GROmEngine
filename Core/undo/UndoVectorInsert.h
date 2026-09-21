@@ -14,7 +14,7 @@ class nsUndoVectorInsert : public nsUndoRedoOperation {
 public:
     nsUndoVectorInsert(std::vector<TItem> &list, const int index, const TItem &item) :
             _list(list), _index(index), _item(item) {
-        assert(index < static_cast<int>(_list.size()));
+        assert(index >= 0 && index <= static_cast<int>(_list.size()));
     }
 
     void Init() override {

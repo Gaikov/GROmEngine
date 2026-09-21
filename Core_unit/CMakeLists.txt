@@ -24,3 +24,5 @@ target_link_libraries(Core_unit
         GTest::gtest
         GTest::gtest_main
 )
+
+add_test(NAME Core_unit COMMAND Core_unit)
