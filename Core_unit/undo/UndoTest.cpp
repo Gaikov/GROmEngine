@@ -6,6 +6,7 @@
 
 #include "Core/debug/LogStdOut.h"
 #include "Core/undo/UndoBatch.h"
+#include "Core/undo/UndoPropertyChange.h"
 #include "Core/undo/UndoService.h"
 #include "Core/undo/UndoVarChange.h"
 #include "Core/undo/UndoVectorAdd.h"
@@ -15,6 +16,10 @@
 #include "Core/undo/UndoVectorSet.h"
 #include "Core/undo/array/UndoArrayAdd.h"
 #include "Core/undo/array/UndoArrayRemove.h"
+#include "Core/undo/array/UndoArrayInsert.h"
+#include "Core/undo/array/UndoArrayRemoveAt.h"
+#include "Core/undo/array/UndoArraySet.h"
+#include "Core/serialization/var/IntVar.h"
 #include "nsLib/log.h"
 
 namespace {
@@ -130,18 +135,46 @@ TEST_F(UndoFixture, ArrayOperationsRestoreOriginalOrder) {
     EXPECT_EQ(values[1], 2);
 }
 
+TEST_F(UndoFixture, ArrayInsertSetAndRemoveAtRestoreOriginalOrder) {
+    auto undo = nsUndoService::Shared();
+    nsArray<int> values;
+    values.Add(1);
+    values.Add(3);
+    undo->Push(new nsUndoArrayInsert<int>(values, 1, 2));
+    undo->Push(new nsUndoArraySet<int>(values, 0, 10));
+    undo->Push(new nsUndoArrayRemoveAt<int>(values, 2));
+    ASSERT_EQ(values.Size(), 2);
+    EXPECT_EQ(values[0], 10);
+    EXPECT_EQ(values[1], 2);
+    while (undo->HasUndo()) undo->Undo();
+    ASSERT_EQ(values.Size(), 2);
+    EXPECT_EQ(values[0], 1);
+    EXPECT_EQ(values[1], 3);
+}
+
 TEST_F(UndoFixture, BatchReportsCountAndAppliesAsOneEntry) {
     auto value = 0;
     auto other = 0;
+    nsIntVar property = 3;
+    nsArray<int> values;
+    values.Add( 7 );
     auto batch = std::make_unique<nsUndoBatch>();
     EXPECT_TRUE(batch->IsEmpty());
     batch->Add(std::make_unique<nsUndoVarChange<int>>(value, 1));
     batch->Add(new nsUndoVarChange<int>(other, 2));
-    EXPECT_EQ(batch->GetCount(), 2u);
+    batch->Add( std::make_unique<nsUndoPropertyChange<int>>( property, 4 ) );
+    batch->Add( std::make_unique<nsUndoArrayInsert<int>>( values, 1, 8 ) );
+    EXPECT_EQ(batch->GetCount(), 4u);
     nsUndoService::Shared()->Push(std::move(batch), "Batch edit");
     EXPECT_EQ(value, 1);
     EXPECT_EQ(other, 2);
+    EXPECT_EQ( property.GetValue(), 4 );
+    ASSERT_EQ( values.Size(), 2 );
+    EXPECT_EQ( values[1], 8 );
     nsUndoService::Shared()->Undo();
     EXPECT_EQ(value, 0);
     EXPECT_EQ(other, 0);
+    EXPECT_EQ( property.GetValue(), 3 );
+    ASSERT_EQ( values.Size(), 1 );
+    EXPECT_EQ( values[0], 7 );
 }

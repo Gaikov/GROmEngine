@@ -45,6 +45,11 @@ public:
         Emmit(nsArrayEvent());
     }
 
+    void Set(int index, const TItem &item) {
+        _items[index] = item;
+        Emmit(nsArrayEvent());
+    }
+
     void Clear() {
         _items.clear();
         Emmit(nsArrayEvent());

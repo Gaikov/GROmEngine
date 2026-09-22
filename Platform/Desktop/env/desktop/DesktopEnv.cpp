@@ -4,6 +4,7 @@
 
 #include "Core/sys.h"
 #include "Engine/engine.h"
+#include "Engine/GameApp.h"
 #include "DesktopCommon.h"
 #include "env/Env.h"
 
@@ -17,7 +18,11 @@ bool nsEnv::Init() {
 
 
 void nsEnv::MainLoop() {
-    while (!glfwWindowShouldClose(_wnd) && !Sys_IsExit()) {
+    while (!Sys_IsExit()) {
+        if (glfwWindowShouldClose(_wnd)) {
+            glfwSetWindowShouldClose(_wnd, GLFW_FALSE);
+            App_GetGame()->OnExitRequested();
+        }
 #ifdef __APPLE__
         DesktopRunFrame();
 #else

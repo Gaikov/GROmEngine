@@ -20,6 +20,7 @@ public:
 
 	virtual void		OnActivate( bool active ) = 0;
 	virtual void		OnPause( bool paused ) = 0;
+	virtual void        OnExitRequested();
 	
 	virtual int			GetWindowIcon() = 0;
 	virtual IUserInput*	GetUserInput() = 0;

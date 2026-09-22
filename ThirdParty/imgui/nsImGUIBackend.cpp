@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "implot.h"
+#include "imgui_internal.h"
 #include "nsLib/log.h"
 
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
@@ -141,6 +142,13 @@ void nsImGUIBackend::ShowDockSpace() {
 
     const ImGuiID spaceId = ImGui::GetID("MyDockSpace");
     ImGui::DockSpace(spaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    if ( const auto node = ImGui::DockBuilderGetCentralNode( spaceId ) ) {
+        _workspaceRect = { node->Pos.x, node->Pos.y, node->Size.x, node->Size.y };
+    } else {
+        _workspaceRect = { viewport->WorkPos.x, viewport->WorkPos.y,
+                           viewport->WorkSize.x, viewport->WorkSize.y };
+    }
 
     ImGui::End();
     ImGui::PopStyleVar();

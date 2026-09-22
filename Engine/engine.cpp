@@ -9,6 +9,7 @@
 #include "nsLib/matrix4.h"
 #include "Core/Core.h"
 #include "Core/Config.h"
+#include "Core/sys.h"
 #include "nsLib/log.h"
 #include "GameApp.h"
 #include "RenManager.h"
@@ -46,6 +47,11 @@ nsVar	*com_time_scale = nullptr;
 nsVar	*r_drawfps = nullptr;
 
 extern void pause_f( int argc, const char *argv[] );
+
+void IGameApp::OnExitRequested()
+{
+    Sys_Exit();
+}
 
 //---------------------------------------------------------
 // nsEngine::Init: 

@@ -5,6 +5,7 @@
 #include "Core/serialization/SerializableGroup.h"
 #include "Core/serialization/SerializeUtils.h"
 #include "Core/serialization/var/FloatVar.h"
+#include "Core/serialization/var/IntVar.h"
 #include "Core/serialization/var/StringVar.h"
 
 namespace {
@@ -37,4 +38,21 @@ TEST( SerializeUtils, SerializeToStringClearsResultOnFailure ) {
     std::string result = "stale";
     EXPECT_FALSE( nsSerializeUtils::SerializeToString( model, result ) );
     EXPECT_TRUE( result.empty() );
+}
+
+TEST( SerializeUtils, IntVarRoundTripThroughSerializableGroup ) {
+    nsSerializableGroup source;
+    nsIntVar sourceValue = -13;
+    source.AddItem( "value", &sourceValue );
+    std::string markup;
+    ASSERT_TRUE( nsSerializeUtils::SerializeToString( source, markup ) );
+
+    nsSerializableGroup destination;
+    nsIntVar destinationValue = 0;
+    destination.AddItem( "value", &destinationValue );
+    auto state = ps_begin( markup.data() );
+    ASSERT_NE( state, nullptr );
+    EXPECT_TRUE( destination.Deserialize( state ) );
+    ps_end( state );
+    EXPECT_EQ( destinationValue.GetValue(), -13 );
 }
