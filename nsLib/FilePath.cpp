@@ -3,6 +3,8 @@
 //
 
 #include "FilePath.h"
+#include <algorithm>
+#include <cctype>
 #include <sys/stat.h>
 #include <filesystem>
 
@@ -132,6 +134,16 @@ nsFilePath nsFilePath::ResolvePath(const char *relative) const
 	return {path};
 }
 
+nsFilePath nsFilePath::WithSuffix(const char *suffix) const
+{
+	nsString path = _path;
+	if (suffix)
+	{
+		path += suffix;
+	}
+	return path.AsChar();
+}
+
 nsString nsFilePath::GetRelativePath(const nsFilePath &path) const {
 	const fs::path base = static_cast<const char *>(_path);
 	const fs::path target = static_cast<const char *>(path._path);
@@ -236,12 +248,140 @@ bool nsFilePath::Exists(const char *path)
 	return stat(path, &s) == 0;
 }
 
+bool nsFilePath::RemoveIfExists() const
+{
+	try
+	{
+		return !IsExists() || Remove();
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+bool nsFilePath::RenameTo(const nsFilePath &destination) const
+{
+	if (IsEmpty() || destination.IsEmpty() || destination.IsExists())
+	{
+		return false;
+	}
+
+	try
+	{
+		std::error_code error;
+		fs::rename(fs::path(AsChar()), fs::path(destination.AsChar()), error);
+		return !error;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+bool nsFilePath::GetCanonical(nsFilePath &result) const
+{
+	if (IsEmpty())
+	{
+		return false;
+	}
+
+	try
+	{
+		std::error_code error;
+		auto path = fs::path(AsChar());
+		if (!path.is_absolute())
+		{
+			path = fs::absolute(path, error);
+			if (error)
+			{
+				return false;
+			}
+		}
+
+		path = fs::weakly_canonical(path, error);
+		if (error)
+		{
+			return false;
+		}
+
+		const auto value = path.lexically_normal().generic_string();
+		if (value.empty())
+		{
+			return false;
+		}
+		result = nsFilePath(value.c_str());
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
+bool nsFilePath::IsWithin(const nsFilePath &root, const bool caseInsensitive) const
+{
+	if (IsEmpty() || root.IsEmpty())
+	{
+		return false;
+	}
+
+	const auto comparable = [caseInsensitive](std::string value) {
+		if (caseInsensitive)
+		{
+			std::transform(value.begin(), value.end(), value.begin(), [](const unsigned char c) {
+				return (char)std::tolower(c);
+			});
+		}
+		return value;
+	};
+
+	try
+	{
+		const fs::path rootPath(root.AsChar());
+		const fs::path candidatePath(AsChar());
+		auto rootIt = rootPath.begin();
+		auto candidateIt = candidatePath.begin();
+		for (; rootIt != rootPath.end(); ++rootIt, ++candidateIt)
+		{
+			if (candidateIt == candidatePath.end()
+				|| comparable(rootIt->generic_string()) != comparable(candidateIt->generic_string()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
 bool nsFilePath::IsAbsolute(const char *path) {
     if (!StrCheck(path)) {
         return false;
     }
 
     return (strlen(path) > 2 && path[1] == ':') || path[0] == '/';
+}
+
+bool nsFilePath::CreateParentFolders() const
+{
+	try
+	{
+		const auto parent = fs::path(AsChar()).parent_path();
+		if (parent.empty())
+		{
+			return true;
+		}
+		std::error_code error;
+		return fs::create_directories(parent, error) || !error;
+	}
+	catch (...)
+	{
+		return false;
+	}
 }
 
 bool nsFilePath::ListingRecursive(nsFilePath::tList &result) const {
@@ -280,5 +420,3 @@ nsString nsFilePath::GetName() const {
 	}
 	return "";
 }
-
-

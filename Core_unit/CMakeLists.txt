@@ -12,6 +12,7 @@ set(TESTS
         args/ArgsTest.cpp
         CryptTest.cpp
         buffer/StringWriterTest.cpp
+        serialization/SerializeUtilsTest.cpp
         undo/UndoTest.cpp
         memory/FastMem.cpp
         memory/MemoryTest.cpp)

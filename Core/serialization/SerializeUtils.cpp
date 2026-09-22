@@ -4,6 +4,9 @@
 
 #include "SerializeUtils.h"
 
+#include <memory>
+
+#include "Core/buffer/StringWriter.h"
 #include "SerializableGroup.h"
 #include "var/ArrayVar.h"
 
@@ -43,4 +46,15 @@ bool nsSerializeUtils::DeserializeVar(script_state_t *ss, const char *name, nsSe
         }
     }
     return res;
+}
+
+bool nsSerializeUtils::SerializeToString(nsSerializable &model, std::string &result) {
+    result.clear();
+    auto writer = std::make_shared<nsStringWriter>();
+    nsScriptSaver saver(writer);
+    if (!model.Serialize(saver)) {
+        return false;
+    }
+    result = writer->GetBuffer();
+    return true;
 }

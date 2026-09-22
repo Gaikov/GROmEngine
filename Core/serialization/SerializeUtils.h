@@ -4,6 +4,8 @@
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #pragma once
+#include <string>
+
 #include "Serializable.h"
 #include "Core/ScriptSaver.h"
 
@@ -11,5 +13,6 @@ class nsSerializeUtils final {
 public:
     static bool SerializeVar(nsScriptSaver &ss, const char *name, nsSerializable *var);
     static bool DeserializeVar(script_state_t *ss, const char *name, nsSerializable *var);
+    static bool SerializeToString(nsSerializable &model, std::string &result);
 
 };

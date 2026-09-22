@@ -28,15 +28,21 @@ public:
 	bool Listing(tList &result) const;
     bool ListingRecursive(tList &result) const;
 	nsFilePath ResolvePath(const char *relative) const;
+	nsFilePath WithSuffix(const char *suffix) const;
 	nsString GetRelativePath(const nsFilePath &path) const;
 	bool CheckExtension(const char *ext) const;
 	bool IsFolder() const;
 	bool IsExists() const;
 	bool Remove() const;
+	bool RemoveIfExists() const;
+	bool RenameTo(const nsFilePath &destination) const;
+	bool GetCanonical(nsFilePath &result) const;
+	bool IsWithin(const nsFilePath &root, bool caseInsensitive) const;
 
 	nsFilePath GetParent() const;
 	nsFilePath ToAbsolute() const;
 	bool CreateFolders() const;
+	bool CreateParentFolders() const;
 
 	const nsString &GetPath() const
 	{ return _path; }
@@ -55,4 +61,3 @@ public:
 private:
 	nsString _path;
 };
-

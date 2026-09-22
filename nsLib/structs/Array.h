@@ -50,7 +50,7 @@ public:
         Emmit(nsArrayEvent());
     }
 
-    int Size() {
+    int Size() const {
         return _items.size();
     }
 

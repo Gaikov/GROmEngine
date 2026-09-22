@@ -28,7 +28,14 @@ public:
     };
 
     TItem* GetItem(const int index) {
+        if ( index < 0 || index >= Size() ) return nullptr;
         auto &item = GetItems()[index];
         return dynamic_cast<TItem*>(item.get());
+    }
+
+    const TItem *GetItem(const int index) const {
+        if ( index < 0 || index >= Size() ) return nullptr;
+        const auto &item = GetItems()[index];
+        return dynamic_cast<const TItem *>(item.get());
     }
 };
