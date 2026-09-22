@@ -5,6 +5,10 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include <functional>
+#include <map>
+#include <string>
+
 #include "nsLib/SubSystem.h"
 #include "ClassMapping.h"
 #include "nsLib/log.h"
@@ -35,7 +39,8 @@ public:
     }
 
 private:
-    std::map<std::string, nsClassMapping>   _mapping;
+    // Transparent lookup avoids a temporary std::string allocation in Locate().
+    std::map<std::string, nsClassMapping, std::less<>> _mapping;
 };
 
 template <class TClass> TClass* Locate() {

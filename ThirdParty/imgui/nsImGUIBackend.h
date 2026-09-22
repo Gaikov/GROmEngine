@@ -5,7 +5,6 @@
 
 #include "Engine/UserInput.h"
 #include "imgui.h"
-#include "nsLib/math/Rect.h"
 
 class nsImGUIBackend : public IUserInput {
 public:
@@ -16,7 +15,6 @@ public:
 
     void StartFrame();
     void EndFrame();
-    [[nodiscard]] const nsRect &GetWorkspaceRect() const { return _workspaceRect; }
 
     bool OnPointerUp(float x, float y, int pointerId) override;
     bool OnPointerDown(float x, float y, int pointerId) override;
@@ -38,7 +36,6 @@ private:
 
 private:
     bool _initialized = false;
-    nsRect _workspaceRect;
 };
 
 std::unique_ptr<nsImGUIBackend> CreateImGUIBackend();
