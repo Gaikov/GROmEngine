@@ -74,3 +74,42 @@ TEST( SerializeUtils, MissingScalarArrayDoesNotCreateDefaultItem ) {
     ASSERT_TRUE( nsSerializeUtils::SerializeToString( model, canonical ) );
     EXPECT_TRUE( canonical.empty() );
 }
+
+TEST( SerializeUtils, CloneCreatesIndependentCanonicalCopy ) {
+    nsSerializableGroup source;
+    nsIntVar sourceValue = 7;
+    nsArrayVar<nsStringVar> sourceItems;
+    source.AddItem( "value", &sourceValue );
+    source.AddItem( "item", &sourceItems );
+    sourceItems.Add( std::make_shared<nsStringVar>( "first" ) );
+
+    nsSerializableGroup destination;
+    nsIntVar destinationValue = -1;
+    nsArrayVar<nsStringVar> destinationItems;
+    destination.AddItem( "value", &destinationValue );
+    destination.AddItem( "item", &destinationItems );
+    ASSERT_TRUE( nsSerializeUtils::Clone( source, destination ) );
+
+    std::string sourceMarkup;
+    std::string destinationMarkup;
+    ASSERT_TRUE( nsSerializeUtils::SerializeToString( source, sourceMarkup ) );
+    ASSERT_TRUE( nsSerializeUtils::SerializeToString( destination, destinationMarkup ) );
+    EXPECT_EQ( sourceMarkup, destinationMarkup );
+
+    destinationValue = 9;
+    ASSERT_NE( destinationItems.GetItem( 0 ), nullptr );
+    destinationItems.GetItem( 0 )->SetValue( "changed" );
+    EXPECT_EQ( sourceValue.GetValue(), 7 );
+    EXPECT_EQ( sourceItems.GetItem( 0 )->GetValue(), "first" );
+}
+
+TEST( SerializeUtils, CloneFailureLeavesDestinationDefault ) {
+    FailingSerializable source;
+    nsSerializableGroup destination;
+    nsIntVar value = 3;
+    destination.AddItem( "value", &value );
+    value = 9;
+
+    EXPECT_FALSE( nsSerializeUtils::Clone( source, destination ) );
+    EXPECT_EQ( value.GetValue(), 3 );
+}

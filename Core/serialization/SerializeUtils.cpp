@@ -58,3 +58,16 @@ bool nsSerializeUtils::SerializeToString(nsSerializable &model, std::string &res
     result = writer->GetBuffer();
     return true;
 }
+
+bool nsSerializeUtils::Clone( nsSerializable &source, nsSerializable &destination ) {
+    destination.ResetDefault();
+    std::string markup;
+    if ( !SerializeToString( source, markup ) ) return false;
+
+    const auto state = ps_begin( markup.data() );
+    if ( !state ) return false;
+    const auto result = destination.Deserialize( state );
+    ps_end( state );
+    if ( !result ) destination.ResetDefault();
+    return result;
+}
