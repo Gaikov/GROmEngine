@@ -38,7 +38,9 @@ bool nsBaseArrayVar::Deserialize(script_state_t *ss) {
             return true;
         }
     } else {
-        ps_var_begin(ss, serializationName.c_str());
+        if (!ps_var_begin(ss, serializationName.c_str())) {
+            return true;
+        }
     }
 
     bool res = true;

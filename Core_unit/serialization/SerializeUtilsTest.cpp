@@ -5,6 +5,7 @@
 #include "Core/serialization/SerializableGroup.h"
 #include "Core/serialization/SerializeUtils.h"
 #include "Core/serialization/var/FloatVar.h"
+#include "Core/serialization/var/ArrayVar.h"
 #include "Core/serialization/var/IntVar.h"
 #include "Core/serialization/var/StringVar.h"
 
@@ -55,4 +56,21 @@ TEST( SerializeUtils, IntVarRoundTripThroughSerializableGroup ) {
     EXPECT_TRUE( destination.Deserialize( state ) );
     ps_end( state );
     EXPECT_EQ( destinationValue.GetValue(), -13 );
+}
+
+TEST( SerializeUtils, MissingScalarArrayDoesNotCreateDefaultItem ) {
+    nsSerializableGroup model;
+    nsArrayVar<nsStringVar> items;
+    model.AddItem( "item", &items );
+
+    std::string markup = "$other \"value\"\n";
+    auto state = ps_begin( markup.data() );
+    ASSERT_NE( state, nullptr );
+    EXPECT_TRUE( model.Deserialize( state ) );
+    ps_end( state );
+
+    EXPECT_EQ( items.Size(), 0 );
+    std::string canonical;
+    ASSERT_TRUE( nsSerializeUtils::SerializeToString( model, canonical ) );
+    EXPECT_TRUE( canonical.empty() );
 }
