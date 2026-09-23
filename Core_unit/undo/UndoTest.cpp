@@ -8,6 +8,7 @@
 #include "Core/undo/UndoBatch.h"
 #include "Core/undo/UndoPropertyChange.h"
 #include "Core/undo/UndoService.h"
+#include "Core/undo/UndoUtils.h"
 #include "Core/undo/UndoVarChange.h"
 #include "Core/undo/UndoVectorAdd.h"
 #include "Core/undo/UndoVectorInsert.h"
@@ -177,4 +178,19 @@ TEST_F(UndoFixture, BatchReportsCountAndAppliesAsOneEntry) {
     EXPECT_EQ( property.GetValue(), 3 );
     ASSERT_EQ( values.Size(), 1 );
     EXPECT_EQ( values[0], 7 );
+}
+
+TEST_F(UndoFixture, UndoUtilsAddsOnlyChangedProperties) {
+    nsIntVar property = 3;
+    auto batch = std::make_unique<nsUndoBatch>();
+
+    EXPECT_FALSE( nsUndoUtils::AddPropertyChange( *batch, property, 3 ) );
+    EXPECT_TRUE( batch->IsEmpty() );
+    EXPECT_TRUE( nsUndoUtils::AddPropertyChange( *batch, property, 4 ) );
+    EXPECT_EQ( batch->GetCount(), 1u );
+
+    nsUndoService::Shared()->Push( std::move( batch ), "Property edit" );
+    EXPECT_EQ( property.GetValue(), 4 );
+    nsUndoService::Shared()->Undo();
+    EXPECT_EQ( property.GetValue(), 3 );
 }
