@@ -2,8 +2,7 @@
 // Created by Roman on 4/2/2024.
 //
 
-#ifndef __GROM_ANDROIDKEYCODES_H
-#define __GROM_ANDROIDKEYCODES_H
+#pragma once
 
 #include <android/keycodes.h>
 
@@ -37,6 +36,7 @@
 #define NS_KEY_Q AKEYCODE_Q
 #define NS_KEY_A AKEYCODE_A
 #define NS_KEY_LSHIFT AKEYCODE_SHIFT_LEFT
+#define NS_KEY_RSHIFT AKEYCODE_SHIFT_RIGHT
 #define NS_KEY_0 AKEYCODE_0
 #define NS_KEY_1 AKEYCODE_1
 #define NS_KEY_2 AKEYCODE_2
@@ -45,5 +45,3 @@
 #define NS_KEY_9 AKEYCODE_9
 
 #define KEYBOARD_MAX_KEYS (AKEYCODE_PROFILE_SWITCH+1)
-
-#endif //__GROM_ANDROIDKEYCODES_H
