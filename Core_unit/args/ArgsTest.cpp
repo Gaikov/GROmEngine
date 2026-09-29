@@ -19,5 +19,21 @@ TEST(Args, ArgsConstructFromArray) {
     ASSERT_TRUE(!args.HasArg("arg10"));
 }
 
+TEST( Args, GetsNamedValue ) {
+    const char *argv[] = { "app", "--level", "levels/one.txt" };
+    nsArgs args;
+    args.FromArgs( 3, argv );
+
+    EXPECT_STREQ( "levels/one.txt", args.GetValue( "--level" ) );
+    EXPECT_EQ( nullptr, args.GetValue( "--missing" ) );
+}
+
+TEST( Args, RepeatedNamedValueUsesFirstOccurrence ) {
+    const char *argv[] = { "app", "--level", "first.txt", "--level", "second.txt" };
+    nsArgs args;
+    args.FromArgs( 5, argv );
+
+    EXPECT_STREQ( "first.txt", args.GetValue( "--level" ) );
+}
 
 

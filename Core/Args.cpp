@@ -11,20 +11,12 @@
 //---------------------------------------------------------
 // nsArgs::nsArgs:
 //---------------------------------------------------------
-nsArgs::nsArgs() :
-	m_argCount( 0 ),
-	m_args( nullptr )
-{
-
-}
+nsArgs::nsArgs() = default;
 
 //---------------------------------------------------------
 // nsArgs::nsArgs:
 //---------------------------------------------------------
-nsArgs::nsArgs( const char* line ) :
-	m_argCount( 0 ),
-	m_args( nullptr )
-{
+nsArgs::nsArgs( const char *line ) {
 	FromLine( line );
 }
 
@@ -41,16 +33,16 @@ nsArgs::~nsArgs()
 //---------------------------------------------------------
 int nsArgs::ArgCount() const
 {
-	return m_argCount;
+	return _argCount;
 }
 
 //---------------------------------------------------------
 // nsArgs::Arg:
 //---------------------------------------------------------
-const char*	nsArgs::Arg( int idx ) const
+const char *nsArgs::Arg( int idx ) const
 {
-	if ( idx < 0 || idx >= m_argCount ) return nullptr;
-	return m_args[idx];
+	if ( idx < 0 || idx >= _argCount ) return nullptr;
+	return _args[idx];
 }
 
 //---------------------------------------------------------
@@ -58,18 +50,19 @@ const char*	nsArgs::Arg( int idx ) const
 //---------------------------------------------------------
 const char** nsArgs::GetArgs() const
 {
-	return (const char**)m_args;
+	return const_cast<const char **>( _args );
 }
 
 //---------------------------------------------------------
 // nsArgs::FromArgs:
 //---------------------------------------------------------
-void nsArgs::FromArgs( int argc, const char* argv[] )
+void nsArgs::FromArgs( int argc, const char *argv[] )
 {
+	Free();
 	for ( int i = 0; i < argc; i++ )
 	{
 		char	*arg = my_strdup( argv[i] );
-		AddToArray( &m_args, m_argCount, arg );
+		AddToArray( &_args, _argCount, arg );
 	}
 }
 
@@ -128,7 +121,7 @@ void nsArgs::FromLine( const char *line )
 	for ( int i = 0; i < count; i++ )
 	{
 		if ( params[i].whole )
-			AddToArray( &m_args, m_argCount, params[i].str );
+			AddToArray( &_args, _argCount, params[i].str );
 		else
 		{
 			AddFromLine( params[i].str );
@@ -155,7 +148,7 @@ void nsArgs::AddFromLine( const char* line )
 		char	*arg = (char*)my_malloc( len + 1 );
 		strncpy( arg, token, len );
 		arg[len] = 0;
-		AddToArray( &m_args, m_argCount, arg );
+		AddToArray( &_args, _argCount, arg );
 
 		token = StrToken( nullptr, " \t\n\r", len );
 	}
@@ -166,21 +159,21 @@ void nsArgs::AddFromLine( const char* line )
 //---------------------------------------------------------
 void nsArgs::Free()
 {
-	if ( m_args )
+	if ( _args )
 	{
-		for ( int i = 0; i < m_argCount; i++ )
-			my_free( m_args[i] );
-		my_free( m_args );
-		m_args = nullptr;
-		m_argCount = 0;
+		for ( int i = 0; i < _argCount; i++ )
+			my_free( _args[i] );
+		my_free( _args );
+		_args = nullptr;
+		_argCount = 0;
 	}	
 }
 
-bool nsArgs::HasArg(const char *value) const
+bool nsArgs::HasArg( const char *value ) const
 {
-	for (int i = 0; i < m_argCount; i++)
+	for (int i = 0; i < _argCount; i++)
 	{
-		if (StrEqual(value, m_args[i]))
+		if (StrEqual(value, _args[i]))
 		{
 			return true;
 		}
@@ -193,5 +186,15 @@ void nsArgs::Clear() {
 	Free();
 }
 
+//---------------------------------------------------------
+// nsArgs::GetValue: value following the first named arg.
+//---------------------------------------------------------
+const char *nsArgs::GetValue( const char *name ) const {
+	if ( !name || !*name ) return nullptr;
+	for ( auto i = 0; i + 1 < _argCount; ++i ) {
+		if ( StrEqual( name, _args[i] ) ) return _args[i + 1];
+	}
+	return nullptr;
+}
 
 

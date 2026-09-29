@@ -3,8 +3,7 @@
 // file Console.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_Console_H_
-#define	_Console_H_
+#pragma once
 
 #include "TextBuffer.h"
 #include "nsLib/StrTools.h"
@@ -12,8 +11,8 @@
 #include "nsLib/color.h"
 #include "nsLib/EditString.h"
 #include "nsLib/log.h"
-#include "UserInput.h"
-#include "RenDevice.h"
+#include "Engine/UserInput.h"
+#include "Engine/RenDevice.h"
 
 class nsConsole : public IUserInput, public ILogListener, public nsSubSystem<nsConsole>
 {
@@ -84,6 +83,3 @@ private:
     static  void clear_f(int argc, const char *argv[]);
 	void	ClearUnsafe();
 };
-
-
-#endif //_Console_H_

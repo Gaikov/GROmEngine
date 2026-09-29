@@ -319,6 +319,32 @@ bool nsFilePath::GetCanonical(nsFilePath &result) const
 	}
 }
 
+bool nsFilePath::GetModificationTime(std::int64_t &result) const
+{
+	result = 0;
+	if (IsEmpty())
+	{
+		return false;
+	}
+
+	try
+	{
+		std::error_code error;
+		const auto time = fs::last_write_time(fs::path(AsChar()), error);
+		if (error)
+		{
+			return false;
+		}
+
+		result = static_cast<std::int64_t>(time.time_since_epoch().count());
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
 bool nsFilePath::IsWithin(const nsFilePath &root, const bool caseInsensitive) const
 {
 	if (IsEmpty() || root.IsEmpty())

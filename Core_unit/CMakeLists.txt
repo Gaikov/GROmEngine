@@ -10,6 +10,7 @@ set(TESTS
         parser/ParserUtils.cpp
         main.cpp
         args/ArgsTest.cpp
+        file/FilePathTest.cpp
         CryptTest.cpp
         buffer/StringWriterTest.cpp
         serialization/SerializeUtilsTest.cpp

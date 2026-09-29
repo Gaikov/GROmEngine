@@ -3,6 +3,9 @@
 //
 
 #pragma once
+
+#include <cstdint>
+
 #include "StrTools.h"
 
 class nsFilePath
@@ -37,6 +40,7 @@ public:
 	bool RemoveIfExists() const;
 	bool RenameTo(const nsFilePath &destination) const;
 	bool GetCanonical(nsFilePath &result) const;
+	bool GetModificationTime(std::int64_t &result) const;
 	bool IsWithin(const nsFilePath &root, bool caseInsensitive) const;
 
 	nsFilePath GetParent() const;

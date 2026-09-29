@@ -3,31 +3,28 @@
 // file Args.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_Args_H_
-#define	_Args_H_
+#pragma once
 
-class nsArgs
-{
+class nsArgs {
 public:
 	nsArgs();
-	explicit nsArgs( const char* line );
+	explicit nsArgs( const char *line );
 	virtual ~nsArgs();
 
-	int					ArgCount() const;
-	const char*			Arg( int idx ) const;
-	const char**		GetArgs() const;
-	void				FromArgs( int argc, const char* argv[] );
-	void				FromLine( const char *line );
-	bool                HasArg(const char *value) const;
-	void                Clear();
+	[[nodiscard]] int ArgCount() const;
+	[[nodiscard]] const char *Arg( int index ) const;
+	[[nodiscard]] const char **GetArgs() const;
+	[[nodiscard]] bool HasArg( const char *value ) const;
+	[[nodiscard]] const char *GetValue( const char *name ) const;
+
+	void FromArgs( int count, const char *args[] );
+	void FromLine( const char *line );
+	void Clear();
 
 private:
-	int					m_argCount;
-	char**				m_args;
+	void AddFromLine( const char *line );
+	void Free();
 
-private:
-	void				AddFromLine( const char* line );
-	void				Free();
+	int _argCount = 0;
+	char **_args = nullptr;
 };
-
-#endif	//_Args_H_
