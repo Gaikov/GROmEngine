@@ -64,6 +64,20 @@ void nsImGUIBackend::EndFrame() {
     BackendRenderDrawData(ImGui::GetDrawData());
 }
 
+void nsImGUIBackend::OnActivate( const bool active ) {
+    if ( !_initialized ) {
+        return;
+    }
+
+    ImGuiIO &io = ImGui::GetIO();
+    if ( !active ) {
+        io.ClearEventsQueue();
+        io.ClearInputKeys();
+        io.ClearInputMouse();
+    }
+    io.AddFocusEvent( active );
+}
+
 bool nsImGUIBackend::OnPointerUp(float x, float y, int pointerId) {
     ImGuiIO &io = ImGui::GetIO();
     io.AddMouseButtonEvent(pointerId, false);
@@ -83,6 +97,7 @@ bool nsImGUIBackend::OnPointerMove(float x, float y, int pointerId) {
 }
 
 void nsImGUIBackend::OnPointerCancel(int pointerId) {
+    ImGui::GetIO().AddMouseButtonEvent( pointerId, false );
 }
 
 void nsImGUIBackend::OnKeyUp(const int key, const int mods) {

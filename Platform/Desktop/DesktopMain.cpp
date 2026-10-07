@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         });
 
         glfwSetWindowFocusCallback(wnd, [](GLFWwindow *window, int focused) {
-            nsEngine::OnActivateApp(focused);
+            nsEnv::Shared()->OnWindowFocusChanged( focused != 0 );
         });
 
 #ifndef WEB_ASM

@@ -72,3 +72,17 @@ void nsEnv::PrepareDesktopInput() {
         }
     });
 }
+
+//---------------------------------------------------------
+// nsEnv::OnWindowFocusChanged: cancel pointer captures before
+// notifying the application so missed releases cannot survive focus loss.
+//---------------------------------------------------------
+void nsEnv::OnWindowFocusChanged( const bool focused ) {
+    if ( !focused ) {
+        for ( const auto button : mouseButtons ) {
+            nsEngine::OnPointerCancel( button );
+        }
+        mouseButtons.clear();
+    }
+    nsEngine::OnActivateApp( focused );
+}

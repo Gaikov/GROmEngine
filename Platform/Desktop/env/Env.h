@@ -19,6 +19,7 @@ public:
     bool IsMobile();
     void PrepareInput();
     void PrepareDesktopInput();
+    void OnWindowFocusChanged( bool focused );
     void WindowToClientCoordinates(double &x, double &y) const;
     void ClientToWindowCoordinates(double &x, double &y) const;
 #ifdef WEB_ASM

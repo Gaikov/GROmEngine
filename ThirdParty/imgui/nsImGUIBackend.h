@@ -15,6 +15,7 @@ public:
 
     void StartFrame();
     void EndFrame();
+    void OnActivate( bool active );
 
     bool OnPointerUp(float x, float y, int pointerId) override;
     bool OnPointerDown(float x, float y, int pointerId) override;
