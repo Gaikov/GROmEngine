@@ -8,7 +8,7 @@ function(grom_configure_game_version)
     cmake_parse_arguments(
             GAME_VERSION
             ""
-            "TARGET;PROPERTIES_FILE;ASSET_PROPERTIES_FILE;PRODUCT_NAME"
+            "TARGET;PROPERTIES_FILE;PRODUCT_NAME"
             ""
             ${ARGN}
     )
@@ -34,28 +34,12 @@ function(grom_configure_game_version)
         message(FATAL_ERROR "Game version file not found: ${VERSION_FILE}")
     endif ()
 
-    if (DEFINED GAME_VERSION_ASSET_PROPERTIES_FILE AND
-            NOT GAME_VERSION_ASSET_PROPERTIES_FILE STREQUAL "")
-        get_filename_component(
-                ASSET_PROPERTIES_FILE
-                "${GAME_VERSION_ASSET_PROPERTIES_FILE}"
-                ABSOLUTE
-                BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
-        )
-    else ()
-        set(ASSET_PROPERTIES_FILE "${VERSION_FILE}")
-    endif ()
-
-    if (NOT EXISTS "${ASSET_PROPERTIES_FILE}")
-        message(FATAL_ERROR "Asset properties file not found: ${ASSET_PROPERTIES_FILE}")
-    endif ()
-
-    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-            "${VERSION_FILE}" "${ASSET_PROPERTIES_FILE}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${VERSION_FILE}")
     file(STRINGS "${VERSION_FILE}" VERSION_LINES ENCODING UTF-8)
 
     set(VERSION_NAME_FOUND FALSE)
     set(VERSION_CODE_FOUND FALSE)
+    set(ASSET_KEY_FOUND FALSE)
     foreach (VERSION_LINE IN LISTS VERSION_LINES)
         if (VERSION_LINE MATCHES "^[ \t]*versionName[ \t]*=[ \t]*([^ \t#]+)[ \t]*$")
             if (VERSION_NAME_FOUND)
@@ -69,6 +53,12 @@ function(grom_configure_game_version)
             endif ()
             set(VERSION_CODE "${CMAKE_MATCH_1}")
             set(VERSION_CODE_FOUND TRUE)
+        elseif (VERSION_LINE MATCHES "^[ \t]*assetEncryptionKey[ \t]*=[ \t]*([^ \t#]+)[ \t]*$")
+            if (ASSET_KEY_FOUND)
+                message(FATAL_ERROR "Duplicate assetEncryptionKey in ${VERSION_FILE}")
+            endif ()
+            set(ASSET_ENCRYPTION_KEY "${CMAKE_MATCH_1}")
+            set(ASSET_KEY_FOUND TRUE)
         endif ()
     endforeach ()
 
@@ -85,26 +75,12 @@ function(grom_configure_game_version)
         message(FATAL_ERROR "versionCode in ${VERSION_FILE} exceeds the Android limit 2100000000")
     endif ()
 
-    file(STRINGS "${ASSET_PROPERTIES_FILE}" ASSET_PROPERTY_LINES ENCODING UTF-8)
-    set(ASSET_KEY_FOUND FALSE)
-    foreach (ASSET_PROPERTY_LINE IN LISTS ASSET_PROPERTY_LINES)
-        if (ASSET_PROPERTY_LINE MATCHES
-                "^[ \t]*assetEncryptionKey[ \t]*=[ \t]*([^ \t#]+)[ \t]*$")
-            if (ASSET_KEY_FOUND)
-                message(FATAL_ERROR
-                        "Duplicate assetEncryptionKey in ${ASSET_PROPERTIES_FILE}")
-            endif ()
-            set(ASSET_ENCRYPTION_KEY "${CMAKE_MATCH_1}")
-            set(ASSET_KEY_FOUND TRUE)
-        endif ()
-    endforeach ()
-
     string(LENGTH "${ASSET_ENCRYPTION_KEY}" ASSET_KEY_LENGTH)
     if (NOT ASSET_KEY_FOUND OR
             NOT ASSET_ENCRYPTION_KEY MATCHES "^[0-9A-Fa-f]+$" OR
             NOT ASSET_KEY_LENGTH EQUAL 64)
         message(FATAL_ERROR
-                "Invalid or missing assetEncryptionKey in ${ASSET_PROPERTIES_FILE}; expected exactly 64 hex characters")
+                "Invalid or missing assetEncryptionKey in ${VERSION_FILE}; expected exactly 64 hex characters")
     endif ()
 
     if (NOT GAME_VERSION_PRODUCT_NAME MATCHES "^[0-9A-Za-z][0-9A-Za-z ._+:-]*$")
