@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(ImageDecoder)
 
-file(GLOB sources
+file(GLOB sources CONFIGURE_DEPENDS
         "*.cpp"
 )
 

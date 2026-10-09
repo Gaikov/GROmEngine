@@ -6,6 +6,8 @@
 #include "nsLib/log.h"
 #include "PNGDecoder.h"
 #include "JPGDecoder.h"
+#include "BMPDecoder.h"
+#include "TGADecoder.h"
 
 nsBitmapData::tSP ImagesDecoder::Decode(nsFile *file) const {
 
@@ -22,6 +24,8 @@ nsBitmapData::tSP ImagesDecoder::Decode(nsFile *file) const {
 ImagesDecoder::ImagesDecoder() {
     _decoders.push_back(new PNGDecoder());
     _decoders.push_back(new JPGDecoder());
+    _decoders.push_back(new BMPDecoder());
+    _decoders.push_back(new TGADecoder());
 }
 
 ImagesDecoder::~ImagesDecoder() {
