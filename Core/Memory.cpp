@@ -6,9 +6,12 @@
 #include <cstdlib>
 #include <limits>
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #if defined(_MSC_VER)
 #include <intrin.h>
-#include <windows.h>
 #define MEMORY_CALLER_ADDRESS _ReturnAddress()
 #elif defined(__GNUC__) || defined(__clang__)
 #define MEMORY_CALLER_ADDRESS __builtin_return_address(0)
