@@ -63,6 +63,7 @@ bool nsSerializeUtils::Clone( nsSerializable &source, nsSerializable &destinatio
     destination.ResetDefault();
     std::string markup;
     if ( !SerializeToString( source, markup ) ) return false;
+    if ( markup.empty() ) return true;
 
     const auto state = ps_begin( markup.data() );
     if ( !state ) return false;

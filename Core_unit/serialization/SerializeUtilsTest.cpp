@@ -103,6 +103,20 @@ TEST( SerializeUtils, CloneCreatesIndependentCanonicalCopy ) {
     EXPECT_EQ( sourceItems.GetItem( 0 )->GetValue(), "first" );
 }
 
+TEST( SerializeUtils, CloneAcceptsEmptyCanonicalSerialization ) {
+    nsSerializableGroup source;
+    nsArrayVar<nsStringVar> sourceItems;
+    source.AddItem( "item", &sourceItems );
+
+    nsSerializableGroup destination;
+    nsArrayVar<nsStringVar> destinationItems;
+    destination.AddItem( "item", &destinationItems );
+    destinationItems.Add( std::make_shared<nsStringVar>( "stale" ) );
+
+    ASSERT_TRUE( nsSerializeUtils::Clone( source, destination ) );
+    EXPECT_EQ( 0, destinationItems.Size() );
+}
+
 TEST( SerializeUtils, CloneFailureLeavesDestinationDefault ) {
     FailingSerializable source;
     nsSerializableGroup destination;
