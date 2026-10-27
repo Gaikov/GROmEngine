@@ -9,6 +9,30 @@
 #define FRAME_BUFFER_EXT_NAME "GL_framebuffer_object"
 #define FRAME_BUFFER_EXT_NAME_DESK "GL_ARB_framebuffer_object"
 
+namespace {
+// Uploading a sampled render texture must preserve the destination of the current draw pass.
+class nsGLFramebufferBindingScope final {
+public:
+    nsGLFramebufferBindingScope() {
+        glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &_read);
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &_draw);
+        glGetIntegerv(GL_RENDERBUFFER_BINDING, &_renderbuffer);
+    }
+    ~nsGLFramebufferBindingScope() {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, _read);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _draw);
+        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+    }
+    nsGLFramebufferBindingScope(const nsGLFramebufferBindingScope &) = delete;
+    nsGLFramebufferBindingScope &operator=(const nsGLFramebufferBindingScope &) = delete;
+
+private:
+    GLint _read = 0;
+    GLint _draw = 0;
+    GLint _renderbuffer = 0;
+};
+}
+
 bool nsGLRenderTexture::InitGLExtensionsFBO() {
     Log::Info("Init GL extension: %s", FRAME_BUFFER_EXT_NAME);
 
@@ -78,6 +102,8 @@ void nsGLRenderTexture::EnsureSize(const int width, const int height) {
 
 bool nsGLRenderTexture::UploadToGPU() {
     UnloadFromGPU();
+    const nsGLTextureBindingScope binding;
+    const nsGLFramebufferBindingScope framebufferBinding;
 
     // texture
     glGenTextures(1, &_texture);
@@ -116,6 +142,7 @@ bool nsGLRenderTexture::UploadToGPU() {
 }
 
 void nsGLRenderTexture::UnloadFromGPU() {
+    ++_bindingVersion;
     if (_fbo) {
         Log::Info("...release render texture: %ix%i", _width, _height);
 

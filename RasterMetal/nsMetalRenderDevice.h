@@ -41,7 +41,7 @@ public:
     const char* TextureGetPath(ITexture *t) override;
     ITexture* TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap) override;
     void TextureRelease(ITexture *texture) override;
-    void TextureBind(ITexture *texture) override;
+    void TextureBind(ITexture *texture, unsigned slot = 0) override;
     void TextureTranform(const float *offs2, const float *scale2) override;
 
     IRenState* StateLoad(const char *fileName) override;
@@ -100,7 +100,7 @@ private:
 	nsMetalRenderState         *_currentState    = nullptr;
 	nsMetalStencilState        *_currentStencil  = nullptr;
 	nsMetalRenderTexture       *_currentRenderTexture = nullptr;
-	nsMetalRenderTexture       *_sampledRenderTexture = nullptr;
+	nsMetalRenderTexture       *_sampledRenderTextures[2] = {};
 	nsMetalDisplayModes        _displayModes;
 
 	nsMatrix _projMatrix;

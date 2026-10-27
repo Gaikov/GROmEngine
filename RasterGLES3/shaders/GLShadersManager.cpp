@@ -20,6 +20,7 @@ GLShader *GLShadersManager::AllocateResource(const char *id, int param) {
 
 void GLShadersManager::FreeResource(GLShader *item)
 {
+    if (_boundShader == item) Apply(nullptr);
 	delete item;
 }
 

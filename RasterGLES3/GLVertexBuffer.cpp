@@ -214,7 +214,7 @@ void GLVertexBuffer::Draw(const std::uint64_t frameSerial) {
     }
 
     // Enable/disable attributes depending on state
-    if (_texturesCache->HasBoundTexture()) {
+    if (_texturesCache->HasBoundTexture() || _texturesCache->HasBoundTexture(1)) {
         glEnableVertexAttribArray(ATTR_TEX);
     } else {
         glDisableVertexAttribArray(ATTR_TEX);

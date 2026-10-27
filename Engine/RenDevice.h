@@ -3,8 +3,7 @@
 // file RenDevice.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_RenDevice_H_
-#define	_RenDevice_H_
+#pragma once
 
 #include "nsLib/matrix4.h"
 #include "nsLib/comm_types.h"
@@ -196,7 +195,7 @@ struct IRenDevice
 	virtual const char*		TextureGetPath(ITexture *t) = 0;
 	virtual ITexture*		TextureGenerate( int width, int height, const void *data, texfmt_t fmt, bool mipmap ) = 0;
 	virtual void			TextureRelease( ITexture *texture ) = 0;
-	virtual void			TextureBind( ITexture *texture ) = 0;
+	virtual void			TextureBind(ITexture *texture, unsigned slot = 0) = 0;
 	virtual void			TextureTranform( const float *offs2, const float *scale2 ) = 0; //in
 
 	virtual IRenderTexture* RenderTextureCreate(int width, int height, texfmt_t = TF_RGBA) = 0;
@@ -240,5 +239,3 @@ struct IRenDevice
 protected:
 	virtual ~IRenDevice() = default;
 };
-
-#endif //_RenDevice_H_

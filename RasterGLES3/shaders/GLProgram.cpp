@@ -74,6 +74,11 @@ bool nsGLProgram::Load() {
     glUseProgram(_program);
     GL_CHECK_R("glUseProgram", false);
 
+    for (auto slot = 0; slot < 2; ++slot) {
+        const auto location = glGetUniformLocation(_program, slot == 0 ? "uTexture0" : "uTexture1");
+        if (location >= 0) glUniform1i(location, slot);
+    }
+
     ResolveUserUniforms();
 
     return true;

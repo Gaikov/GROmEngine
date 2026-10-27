@@ -600,8 +600,10 @@ void CRenderState::TextureRelease( ITexture *texture )
 //---------------------------------------------------------
 // CRenderState::TextureBind: 
 //---------------------------------------------------------
-void CRenderState::TextureBind( ITexture *texture )
+void CRenderState::TextureBind(ITexture *texture, unsigned slot)
 {
+    assert(slot == 0 || !texture);
+    if (slot != 0) return;
 	if ( r_tex_enable->Value() )
 		tm.TextureBind( (nsTexture*)texture );
 	else

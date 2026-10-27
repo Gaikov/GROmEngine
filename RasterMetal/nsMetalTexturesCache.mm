@@ -22,7 +22,6 @@ nsMetalTexturesCache::nsMetalTexturesCache(id<MTLDevice> device, id<MTLCommandQu
     : _device(device), _commandQueue(commandQueue) {}
 
 nsMetalTexturesCache::~nsMetalTexturesCache() {
-    _current = nullptr;
     ReleaseAll();
 }
 
@@ -31,6 +30,9 @@ nsMetalTexture* nsMetalTexturesCache::AllocateResource(const char *id, int param
 }
 
 void nsMetalTexturesCache::FreeResource(nsMetalTexture *item) {
+    for (auto &texture : _current) {
+        if (texture == item) texture = nullptr;
+    }
     nsMetalTexture::Free(item);
 }
 
@@ -54,14 +56,13 @@ nsMetalTexture* nsMetalTexturesCache::GetTexture(const char *id, int flags) {
     return item;
 }
 
-bool nsMetalTexturesCache::BindTexture(nsMetalTexture *t, id<MTLRenderCommandEncoder> encoder) {
-    _current = t;
-    if (_current) {
-        return _current->Bind(encoder, 0);
-    }
-    if (encoder) {
-        [encoder setFragmentTexture:nil atIndex:0];
-    }
+bool nsMetalTexturesCache::BindTexture(nsMetalTexture *t, id<MTLRenderCommandEncoder> encoder, unsigned slot) {
+    assert(slot < 2);
+    if (slot >= 2) return false;
+    _current[slot] = t;
+    if (!encoder) return true;
+    if (t) return t->Bind(encoder, slot);
+    [encoder setFragmentTexture:nil atIndex:slot];
     return true;
 }
 

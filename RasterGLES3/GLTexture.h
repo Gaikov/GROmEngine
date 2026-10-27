@@ -2,8 +2,7 @@
 // Created by Roman Gaikov on 2019-07-12.
 //
 
-#ifndef _GROM_GLTEXTURE_H
-#define _GROM_GLTEXTURE_H
+#pragma once
 
 #include "GLBaseTexture.h"
 #include "GLCommon.h"
@@ -38,7 +37,5 @@ private:
 	GLuint             _glTexture;
 	nsBitmapData::tSP _bmData;
 	int                _loadFlags = TLF_NONE;
+    bool _bitmapLoadFailed = false;
 };
-
-
-#endif //_GROM_GLTEXTURE_H

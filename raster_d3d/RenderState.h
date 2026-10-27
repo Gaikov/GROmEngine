@@ -1,5 +1,4 @@
-#ifndef _RENDERSTATE_H_
-#define _RENDERSTATE_H_
+#pragma once
 
 #include "Local.h"
 #include "D3d_enum.h"
@@ -75,7 +74,7 @@ public:
 	virtual ITexture*		TextureLoad( const char *filename, bool mipmap, texfmt_t fmt, int flags = TLF_NONE );
 	virtual ITexture*		TextureGenerate( int width, int height, const void *data, texfmt_t fmt, bool mipmap );
 	virtual void			TextureRelease( ITexture *tex );
-	virtual void			TextureBind( ITexture *tex );
+	virtual void			TextureBind(ITexture *tex, unsigned slot = 0);
 	virtual void			TextureTranform( const float *offs2, const float *scale2 ); //in 
 	
 	virtual IRenState*		StateLoad( const char *fileName );
@@ -125,5 +124,3 @@ public:
 };
 
 extern	CRenderState	rs;
-
-#endif

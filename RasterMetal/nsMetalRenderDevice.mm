@@ -115,7 +115,7 @@ void nsMetalRenderDevice::Release() {
     _currentState = nullptr;
     _currentStencil = nullptr;
     _currentRenderTexture = nullptr;
-    _sampledRenderTexture = nullptr;
+    for (auto &texture : _sampledRenderTextures) texture = nullptr;
     for (auto &it : _stateCache) delete it.second;
     _stateCache.clear();
     _stateRefs.clear();
@@ -326,26 +326,17 @@ void nsMetalRenderDevice::TextureRelease(ITexture *texture) {
     _textures->ReleaseResource(dynamic_cast<nsMetalTexture*>(texture));
 }
 
-void nsMetalRenderDevice::TextureBind(ITexture *texture) {
-    if (!_encoder) return;
+void nsMetalRenderDevice::TextureBind(ITexture *texture, unsigned slot) {
+    assert(slot < 2);
+    if (slot >= 2) return;
     auto tex = dynamic_cast<nsMetalTexture*>(texture);
-    if (tex) {
-        _sampledRenderTexture = nullptr;
-        _textures->BindTexture(tex, _encoder);
-        _programs->SetTextureBound(true);
-        return;
-    }
     auto renderTexture = dynamic_cast<nsMetalRenderTexture*>(texture);
-    if (renderTexture) {
-        _textures->BindTexture(nullptr, _encoder);
-        _sampledRenderTexture = renderTexture;
-        renderTexture->Bind(_encoder, 0);
-        _programs->SetTextureBound(true);
-        return;
+    _sampledRenderTextures[slot] = renderTexture;
+    _textures->BindTexture(tex, _encoder, slot);
+    if (renderTexture && _encoder) {
+        renderTexture->Bind(_encoder, slot);
     }
-    _sampledRenderTexture = nullptr;
-    _textures->BindTexture(nullptr, _encoder);
-    _programs->SetTextureBound(false);
+    if (slot == 0) _programs->SetTextureBound(tex || renderTexture);
 }
 
 void nsMetalRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
@@ -466,17 +457,21 @@ void nsMetalRenderDevice::VerticesDraw(IVertexBuffer *vb) {
     if (_currentStencil) {
         _currentStencil->Apply(_encoder, state->IsDepthEnabled(), state->IsDepthWriteEnabled());
     }
-    auto tex = _textures->GetBoundTexture();
-    if (tex) {
-        tex->Bind(_encoder, 0);
-    } else if (_sampledRenderTexture) {
-        _sampledRenderTexture->Bind(_encoder, 0);
+    for (auto slot = 0u; slot < 2; ++slot) {
+        auto tex = _textures->GetBoundTexture(slot);
+        if (tex) {
+            tex->Bind(_encoder, slot);
+        } else if (_sampledRenderTextures[slot]) {
+            _sampledRenderTextures[slot]->Bind(_encoder, slot);
+        } else {
+            [_encoder setFragmentTexture:nil atIndex:slot];
+        }
     }
     auto metalVB = dynamic_cast<nsMetalVertexBuffer*>(vb);
     if (metalVB) {
         metalVB->UseColor(_currentColor);
         program->SetColor(_currentColor);
-        program->SetHasTexture(tex != nullptr || _sampledRenderTexture != nullptr);
+        program->SetHasTexture(_textures->HasBoundTexture() || _sampledRenderTextures[0] != nullptr);
         program->SetHasVertexColor(metalVB->UsesColor());
         program->UploadUniforms(_encoder, _frameIndex);
         metalVB->Draw(_encoder, _frameIndex);

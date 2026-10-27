@@ -14,18 +14,21 @@ class GLTexturesCache : public ResourcesCache<GLTexture, int>
 public:
 	GLTexturesCache();
 	GLTexture *GetTexture(const char *id, int flags);
-	bool BindTexture(nsGLBaseTexture *t);
+	bool BindTexture(nsGLBaseTexture *t, unsigned slot = 0);
+    void ApplyBindings();
 	GLTexture *CreateFromBitmapData(nsBitmapData::tSP &data);
     void DumpKeys() const;
 
-	[[nodiscard]] bool HasBoundTexture() const { return _current; }
-	[[nodiscard]] nsGLBaseTexture *GetBoundTexture() const { return _current; }
-	[[nodiscard]] bool HasBoundMipmappedTexture() const { return _current && _current->IsMipmapped(); }
+	[[nodiscard]] bool HasBoundTexture(unsigned slot = 0) const { return _current[slot] != nullptr; }
+	[[nodiscard]] nsGLBaseTexture *GetBoundTexture(unsigned slot = 0) const { return _current[slot]; }
+	[[nodiscard]] bool HasBoundMipmappedTexture(unsigned slot = 0) const { return _current[slot] && _current[slot]->IsMipmapped(); }
 
-    void UnloadFromGPU() const;
+    void UnloadFromGPU();
 
 private:
-	nsGLBaseTexture		*_current;
+	nsGLBaseTexture *_current[2] = {};
+    unsigned _boundVersions[2] = {};
+    bool _bindingsValid[2] = {};
 	int					_bitmapId = 0;
 
 private:

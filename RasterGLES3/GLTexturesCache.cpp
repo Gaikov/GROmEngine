@@ -19,10 +19,7 @@ std::string TextureCacheKey(const char *id, int flags) {
 }
 }
 
-GLTexturesCache::GLTexturesCache() :
-		_current(nullptr)
-{
-}
+GLTexturesCache::GLTexturesCache() = default;
 
 GLTexture *GLTexturesCache::AllocateResource(const char *id, int param)
 {
@@ -31,6 +28,9 @@ GLTexture *GLTexturesCache::AllocateResource(const char *id, int param)
 
 void GLTexturesCache::FreeResource(GLTexture *item)
 {
+    for (auto slot = 0u; slot < 2; ++slot) {
+        if (_current[slot] == item) BindTexture(nullptr, slot);
+    }
 	GLTexture::Free(item);
 }
 
@@ -54,23 +54,25 @@ GLTexture *GLTexturesCache::GetTexture(const char *id, int flags) {
 	return item;
 }
 
-bool GLTexturesCache::BindTexture(nsGLBaseTexture *t)
-{
-	if (_current != t)
-	{
-		_current = t;
-		if (_current)
-		{
-			_current->Bind();
-		}
-		else
-		{
-			glBindTexture(GL_TEXTURE_2D, 0);
-			GL_CHECK_HOT_R("glBindTexture", false)
-		}
-        return true;
-	}
-	return false;
+bool GLTexturesCache::BindTexture(nsGLBaseTexture *t, unsigned slot) {
+    assert(slot < 2);
+    if (slot >= 2) return false;
+    // A cache hit only reads CPU state; Bind() uploads storage when the binding changes.
+    const auto version = t ? t->GetBindingVersion() : 0;
+    if (_bindingsValid[slot] && _current[slot] == t && _boundVersions[slot] == version) return false;
+    _current[slot] = t;
+    glActiveTexture(GL_TEXTURE0 + slot);
+    auto bound = true;
+    if (t) bound = t->Bind();
+    else glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+    _boundVersions[slot] = t ? t->GetBindingVersion() : 0;
+    _bindingsValid[slot] = bound;
+    return true;
+}
+
+void GLTexturesCache::ApplyBindings() {
+    for (auto slot = 0u; slot < 2; ++slot) BindTexture(_current[slot], slot);
 }
 
 GLTexture *GLTexturesCache::CreateFromBitmapData(nsBitmapData::tSP &data)
@@ -89,9 +91,10 @@ void GLTexturesCache::DumpKeys() const {
     }
 }
 
-void GLTexturesCache::UnloadFromGPU() const {
+void GLTexturesCache::UnloadFromGPU() {
     for (const auto& it : _cache) {
         auto t = it.second.item;
         t->UnloadFromGPU();
     }
+    for (auto &valid : _bindingsValid) valid = false;
 }

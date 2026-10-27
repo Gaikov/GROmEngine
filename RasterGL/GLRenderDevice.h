@@ -2,8 +2,7 @@
 // Created by Roman on 10/07/2019.
 //
 
-#ifndef TEST_GLRENDERDEVICE_H
-#define TEST_GLRENDERDEVICE_H
+#pragma once
 
 #include "GLCommon.h"
 #include "GLTexturesCache.h"
@@ -28,7 +27,7 @@ public:
 	ITexture *TextureLoad(const char *filename, bool mipmap = true, texfmt_t fmt = TF_RGBA, int flags = TLF_NONE) override;
 	ITexture *TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap) override;
 	void TextureRelease(ITexture *texture) override;
-	void TextureBind(ITexture *texture) override;
+	void TextureBind(ITexture *texture, unsigned slot = 0) override;
 	void TextureTranform(const float *offs2, const float *scale2) override;
 	IRenState *StateLoad(const char *fileName) override;
 	void StateRelease(IRenState *state) override;
@@ -83,5 +82,3 @@ private:
 	void CleanupOpenGL();
 
 };
-
-#endif //TEST_GLRENDERDEVICE_H

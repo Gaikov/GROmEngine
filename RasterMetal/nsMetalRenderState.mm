@@ -215,7 +215,10 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
         [encoder setRenderPipelineState:pipelineState];
         if (_depthStencilState) [encoder setDepthStencilState:_depthStencilState];
         [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
-        if (_samplerState) [encoder setFragmentSamplerState:_samplerState atIndex:0];
+        if (_samplerState) {
+            [encoder setFragmentSamplerState:_samplerState atIndex:0];
+            [encoder setFragmentSamplerState:_samplerState atIndex:1];
+        }
         programs.Bind(_program, true);
         return;
     }
@@ -231,6 +234,7 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
     }
     if (_samplerState != prev->_samplerState) {
         [encoder setFragmentSamplerState:_samplerState atIndex:0];
+        [encoder setFragmentSamplerState:_samplerState atIndex:1];
     }
     if (_program != prev->_program) {
         programs.Bind(_program, true);

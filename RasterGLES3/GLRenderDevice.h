@@ -29,7 +29,7 @@ public:
 	const char * TextureGetPath(ITexture *t) override;
 	ITexture *TextureGenerate(int width, int height, const void *data, texfmt_t fmt, bool mipmap) override;
 	void TextureRelease(ITexture *texture) override;
-	void TextureBind(ITexture *texture) override;
+	void TextureBind(ITexture *texture, unsigned slot = 0) override;
 	void TextureTranform(const float *offs2, const float *scale2) override;
 	IRenState *StateLoad(const char *fileName) override;
 	const char* StateGetPath(IRenState *state) override;
@@ -75,7 +75,7 @@ private:
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
 	GLuint           _samplers[16] = {};
-	GLuint           _boundSampler = 0;
+	GLuint           _boundSamplers[2] = {};
 	std::uint64_t    _frameSerial = 0;
 
 private:

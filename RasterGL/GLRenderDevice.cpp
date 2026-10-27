@@ -156,8 +156,10 @@ void GLRenderDevice::TextureRelease(ITexture *texture)
 	}
 }
 
-void GLRenderDevice::TextureBind(ITexture *texture)
+void GLRenderDevice::TextureBind(ITexture *texture, unsigned slot)
 {
+    assert(slot == 0 || !texture);
+    if (slot != 0) return;
 	auto t = dynamic_cast<nsGLBaseTexture *>(texture);
 	if (_textures.BindTexture(t))
 	{

@@ -72,6 +72,7 @@ bool GLTexture::UploadToGPU() {
 
     //Log::Info("...uploading to GPU: %s", _id.c_str());
 
+    const nsGLTextureBindingScope binding;
     glGenTextures(1, &_glTexture);
     GL_CHECK("glGenTextures")
 
@@ -145,6 +146,8 @@ GLTexture *GLTexture::Create(const char *id, nsBitmapData::tSP& data)
 }
 
 void GLTexture::UnloadFromGPU() {
+    ++_bindingVersion;
+    _bitmapLoadFailed = false;
     if (_glTexture) {
         glDeleteTextures(1, &_glTexture);
         _glTexture = 0;
@@ -155,9 +158,11 @@ bool GLTexture::EnsureBitmapData() {
     if (_bmData.get()) {
         return true;
     }
+    if (_bitmapLoadFailed) return false;
 
     Log::Debug("...loading bitmap data: %s", _id.c_str());
     _bmData = BitmapLoader::LoadFromFile(_id.c_str());
+    _bitmapLoadFailed = !_bmData;
     if (_bmData && (_loadFlags & TLF_PREMULTIPLY_ALPHA) != 0) {
         _bmData->PremultiplyAlpha();
     }

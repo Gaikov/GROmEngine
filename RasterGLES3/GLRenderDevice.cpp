@@ -105,6 +105,7 @@ void GLRenderDevice::CleanupOpenGL() {
 	ReleaseSamplers();
 	_shaders.Apply(nullptr);
 	_textures.BindTexture(nullptr);
+    _textures.BindTexture(nullptr, 1);
 	_shaders.programs.Bind(nullptr, true);
 }
 
@@ -183,11 +184,13 @@ void GLRenderDevice::TextureRelease(ITexture *texture)
 	}
 }
 
-void GLRenderDevice::TextureBind(ITexture *texture) {
-	const auto t = dynamic_cast<nsGLBaseTexture *>(texture);
-	_textures.BindTexture(t);
-	_shaders.programs.SetTextureBound(_textures.HasBoundTexture());
-	ApplySampler();
+void GLRenderDevice::TextureBind(ITexture *texture, unsigned slot) {
+    assert(slot < 2);
+    if (slot >= 2) return;
+    const auto t = dynamic_cast<nsGLBaseTexture *>(texture);
+    _textures.BindTexture(t, slot);
+    if (slot == 0) _shaders.programs.SetTextureBound(_textures.HasBoundTexture());
+    ApplySampler();
 }
 
 void GLRenderDevice::TextureTranform(const float *offs2, const float *scale2) {
@@ -357,6 +360,9 @@ void GLRenderDevice::VerticesRelease(IVertexBuffer *vb)
 
 void GLRenderDevice::VerticesDraw(IVertexBuffer *vb)
 {
+    _textures.ApplyBindings();
+    _shaders.programs.SetTextureBound(_textures.HasBoundTexture());
+    ApplySampler();
 	const auto glvb = dynamic_cast<GLVertexBuffer *>(vb);
 	glvb->UseColor(_currentColor);
 	glvb->Draw(_frameSerial);
@@ -468,6 +474,9 @@ GLRenderDevice::DrawPlaneSprite(const nsVec3 &p1, const nsVec3 &p2, float width,
 
 void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 {
+    _textures.ApplyBindings();
+    _shaders.programs.SetTextureBound(_textures.HasBoundTexture());
+    ApplySampler();
 	vbVertex_t *drawVerts = _quadBuff->GetWriteVertices();
 	for (int   i          = 0; i < 4; i++)
 	{
@@ -507,27 +516,29 @@ void GLRenderDevice::InitSamplers() {
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_S, wrapU);
 		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_T, wrapV);
 	}
-	_boundSampler = 0;
+    for (auto &sampler : _boundSamplers) sampler = 0;
 }
 
 void GLRenderDevice::ReleaseSamplers() {
 	if (_samplers[0]) {
 		glBindSampler(0, 0);
+        glBindSampler(1, 0);
 		glDeleteSamplers(16, _samplers);
 		for (auto &sampler : _samplers) sampler = 0;
 	}
-	_boundSampler = 0;
+    for (auto &sampler : _boundSamplers) sampler = 0;
 }
 
 void GLRenderDevice::ApplySampler() {
-	const GLuint sampler = _textures.HasBoundTexture()
-		? _samplers[_shaders.GetSamplerIndex() * 2 + (_textures.HasBoundMipmappedTexture() ? 1 : 0)]
-		: 0;
-	if (_boundSampler == sampler) return;
-
-	glBindSampler(0, sampler);
-	_boundSampler = sampler;
-	nsRenderStats::AddSamplerBind();
+    for (auto slot = 0u; slot < 2; ++slot) {
+        const GLuint sampler = _textures.HasBoundTexture(slot)
+            ? _samplers[_shaders.GetSamplerIndex() * 2 + (_textures.HasBoundMipmappedTexture(slot) ? 1 : 0)]
+            : 0;
+        if (_boundSamplers[slot] == sampler) continue;
+        glBindSampler(slot, sampler);
+        _boundSamplers[slot] = sampler;
+        nsRenderStats::AddSamplerBind();
+    }
 }
 
 IRenderTexture * GLRenderDevice::RenderTextureCreate(const int width, const int height, const texfmt_t fmt) {
