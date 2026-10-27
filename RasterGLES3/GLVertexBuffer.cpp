@@ -23,17 +23,17 @@ GLVertexBuffer::GLVertexBuffer(GLTexturesCache *cache,
     const bool dynamic,
     const bool useColor)
     : _texturesCache(cache),
-      m_numVertices(numVertices),
-      m_numIndexes(numIndexes),
-      m_useColor(useColor),
-      m_dynamic(dynamic),
+      _numVertices(numVertices),
+      _numIndexes(numIndexes),
+      _useColor(useColor),
+      _dynamic(dynamic),
       _primitiveMode(PM_TRIANGLES),
-      m_maxDrawVertices(0),
-      m_maxDrawIndexes(0) {
-    m_verts = new vbVertex_t[m_numVertices];
-    m_indexes = new unsigned short[m_numIndexes];
-    m_maxDrawIndexes = m_numIndexes;
-    m_maxDrawVertices = m_numVertices;
+      _maxDrawVertices(0),
+      _maxDrawIndexes(0) {
+    _verts = new vbVertex_t[_numVertices];
+    _indexes = new unsigned short[_numIndexes];
+    _maxDrawIndexes = _numIndexes;
+    _maxDrawVertices = _numVertices;
 
     InitGLObjects();
 }
@@ -41,8 +41,8 @@ GLVertexBuffer::GLVertexBuffer(GLTexturesCache *cache,
 GLVertexBuffer::~GLVertexBuffer() {
     ReleaseGLObjects();
 
-    delete[] m_verts;
-    delete[] m_indexes;
+    delete[] _verts;
+    delete[] _indexes;
 }
 
 void GLVertexBuffer::InitGLObjects() {
@@ -52,10 +52,10 @@ void GLVertexBuffer::InitGLObjects() {
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
 
-    if (!m_dynamic) {
+    if (!_dynamic) {
         glGenBuffers(1, &_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        const auto vertexCapacity = sizeof(vbVertex_t) * m_numVertices;
+        const auto vertexCapacity = sizeof(vbVertex_t) * _numVertices;
         glBufferData(GL_ARRAY_BUFFER,
                      static_cast<GLsizeiptr>(vertexCapacity),
                      nullptr,
@@ -66,19 +66,20 @@ void GLVertexBuffer::InitGLObjects() {
     // EBO
     glGenBuffers(1, &_ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-    const auto indexCapacity = sizeof(unsigned short) * m_numIndexes;
+    const auto indexCapacity = sizeof(unsigned short) * _numIndexes;
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  static_cast<GLsizeiptr>(indexCapacity),
                  nullptr,
                  GL_STATIC_DRAW);
     nsRenderStats::AddBufferStorageAllocation(indexCapacity);
 
-    if (!m_dynamic) SetupVertexAttributes();
+    if (!_dynamic) SetupVertexAttributes();
 
     // Unbind VAO to avoid accidental state changes
     glBindVertexArray(0);
-    m_verticesDirty = true;
-    m_indicesDirty = true;
+    _verticesDirty = true;
+    _indicesDirty = true;
+    _uploadedIndices = 0;
 }
 
 void GLVertexBuffer::SetupVertexAttributes() const {
@@ -124,16 +125,16 @@ void GLVertexBuffer::ReleaseGLObjects() {
         glDeleteBuffers(1, &_vbo);
         _vbo = 0;
     }
-    for (auto &frameBuffers : m_dynamicBuffers) {
+    for (auto &frameBuffers : _dynamicBuffers) {
         for (auto &buffer : frameBuffers) {
             if (buffer.id) glDeleteBuffers(1, &buffer.id);
             buffer.id = 0;
             buffer.capacity = 0;
         }
     }
-    m_currentDynamicBuffer = 0;
-    m_dynamicFrame = 0;
-    m_dynamicBufferIndex = 0;
+    _currentDynamicBuffer = 0;
+    _dynamicFrame = 0;
+    _dynamicBufferIndex = 0;
     if (_vao) {
         glDeleteVertexArrays(1, &_vao);
         _vao = 0;
@@ -147,20 +148,20 @@ std::size_t GLVertexBuffer::NextDynamicCapacity(const std::size_t required) {
 }
 
 GLuint GLVertexBuffer::UploadDynamicVertices(const std::uint64_t frameSerial) {
-    if (m_dynamicFrame != frameSerial) {
-        m_dynamicFrame = frameSerial;
-        m_dynamicBufferIndex = 0;
-        m_currentDynamicBuffer = 0;
+    if (_dynamicFrame != frameSerial) {
+        _dynamicFrame = frameSerial;
+        _dynamicBufferIndex = 0;
+        _currentDynamicBuffer = 0;
     }
 
-    if (!m_verticesDirty && m_currentDynamicBuffer) return m_currentDynamicBuffer;
+    if (!_verticesDirty && _currentDynamicBuffer) return _currentDynamicBuffer;
 
     const auto frameSlot = static_cast<std::size_t>(frameSerial % FRAME_SLOT_COUNT);
-    auto &buffers = m_dynamicBuffers[frameSlot];
-    if (m_dynamicBufferIndex >= buffers.size()) buffers.emplace_back();
-    auto &buffer = buffers[m_dynamicBufferIndex++];
+    auto &buffers = _dynamicBuffers[frameSlot];
+    if (_dynamicBufferIndex >= buffers.size()) buffers.emplace_back();
+    auto &buffer = buffers[_dynamicBufferIndex++];
 
-    const std::size_t vertexSize = sizeof(vbVertex_t) * m_maxDrawVertices;
+    const std::size_t vertexSize = sizeof(vbVertex_t) * _maxDrawVertices;
     if (!buffer.id) glGenBuffers(1, &buffer.id);
     glBindBuffer(GL_ARRAY_BUFFER, buffer.id);
     if (buffer.capacity < vertexSize) {
@@ -174,40 +175,42 @@ GLuint GLVertexBuffer::UploadDynamicVertices(const std::uint64_t frameSerial) {
     glBufferSubData(GL_ARRAY_BUFFER,
                     0,
                     static_cast<GLsizeiptr>(vertexSize),
-                    m_verts);
+                    _verts);
     nsRenderStats::AddVertexUpload(vertexSize);
     nsRenderStats::SetDynamicBufferHighWater(buffer.capacity);
 
-    m_verticesDirty = false;
-    m_currentDynamicBuffer = buffer.id;
+    _verticesDirty = false;
+    _currentDynamicBuffer = buffer.id;
     return buffer.id;
 }
 
 void GLVertexBuffer::Draw(const std::uint64_t frameSerial) {
-    if (!m_maxDrawVertices || !m_maxDrawIndexes) return;
-    if (!_vao || !_ebo || (!m_dynamic && !_vbo)) {
+    if (!_maxDrawVertices || !_maxDrawIndexes) return;
+    if (!_vao || !_ebo || (!_dynamic && !_vbo)) {
         InitGLObjects();
     }
 
     glBindVertexArray(_vao);
 
-    if (m_dynamic) {
+    if (_dynamic) {
         glBindBuffer(GL_ARRAY_BUFFER, UploadDynamicVertices(frameSerial));
         SetupVertexAttributes();
-    } else if (m_verticesDirty) {
+    } else if (_verticesDirty) {
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        const auto vertSize = static_cast<GLsizeiptr>(sizeof(vbVertex_t) * m_maxDrawVertices);
-        if (vertSize > 0) glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, m_verts);
+        const auto vertSize = static_cast<GLsizeiptr>(sizeof(vbVertex_t) * _maxDrawVertices);
+        if (vertSize > 0) glBufferSubData(GL_ARRAY_BUFFER, 0, vertSize, _verts);
         nsRenderStats::AddVertexUpload(static_cast<std::size_t>(vertSize));
-        m_verticesDirty = false;
+        _verticesDirty = false;
     }
 
-    if (m_indicesDirty) {
+    // Active range changes reuse the uploaded prefix until the CPU array changes.
+    if (_indicesDirty || _maxDrawIndexes > _uploadedIndices) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        const auto idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * m_maxDrawIndexes);
-        if (idxSize > 0) glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, idxSize, m_indexes);
+        const auto idxSize = static_cast<GLsizeiptr>(sizeof(unsigned short) * _maxDrawIndexes);
+        if (idxSize > 0) glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, idxSize, _indexes);
         nsRenderStats::AddIndexUpload(static_cast<std::size_t>(idxSize));
-        m_indicesDirty = false;
+        _indicesDirty = false;
+        _uploadedIndices = _maxDrawIndexes;
     }
 
     // Enable/disable attributes depending on state
@@ -217,7 +220,7 @@ void GLVertexBuffer::Draw(const std::uint64_t frameSerial) {
         glDisableVertexAttribArray(ATTR_TEX);
     }
 
-    if (m_useColor) {
+    if (_useColor) {
         glEnableVertexAttribArray(ATTR_COLOR);
     } else {
         glDisableVertexAttribArray(ATTR_COLOR);
@@ -227,7 +230,7 @@ void GLVertexBuffer::Draw(const std::uint64_t frameSerial) {
     constexpr GLenum modes[] = {GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_LINES};
     const auto mode = modes[_primitiveMode];
 
-    glDrawElements(mode, static_cast<GLsizei>(m_maxDrawIndexes), GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(mode, static_cast<GLsizei>(_maxDrawIndexes), GL_UNSIGNED_SHORT, nullptr);
     nsRenderStats::AddDrawCall();
     GL_CHECK_HOT_R("glDrawElements",);
 
@@ -236,27 +239,26 @@ void GLVertexBuffer::Draw(const std::uint64_t frameSerial) {
 
 
 void GLVertexBuffer::SetTex(int vertexIndex, float tu, float tv) {
-    vbVertex_t &v = m_verts[vertexIndex];
+    vbVertex_t &v = _verts[vertexIndex];
     v.tu = tu;
     v.tv = tv;
-    m_verticesDirty = true;
+    _verticesDirty = true;
 }
 
 void GLVertexBuffer::SetValidVertices(uint count) {
-    m_maxDrawVertices = count;
+    _maxDrawVertices = count;
 }
 
 uint GLVertexBuffer::GetValidVertices() {
-    return m_maxDrawVertices;
+    return _maxDrawVertices;
 }
 
 void GLVertexBuffer::SetValidIndices(uint count) {
-    if (count > m_maxDrawIndexes) m_indicesDirty = true;
-    m_maxDrawIndexes = count;
+    _maxDrawIndexes = std::min(count, _numIndexes);
 }
 
 uint GLVertexBuffer::GetValidIndices() {
-    return m_maxDrawIndexes;
+    return _maxDrawIndexes;
 }
 
 void GLVertexBuffer::SetPrimitiveMode(primitiveMode_t mode) {
@@ -264,42 +266,42 @@ void GLVertexBuffer::SetPrimitiveMode(primitiveMode_t mode) {
 }
 
 uint GLVertexBuffer::GetVerticesCount() {
-    return m_numVertices;
+    return _numVertices;
 }
 
 uint GLVertexBuffer::GetIndicesCount() {
-    return m_numIndexes;
+    return _numIndexes;
 }
 
 vbVertex_t *GLVertexBuffer::GetReadVertices() {
-    return m_verts;
+    return _verts;
 }
 
 vbVertex_t *GLVertexBuffer::GetWriteVertices() {
-    m_verticesDirty = true;
-    return m_verts;
+    _verticesDirty = true;
+    return _verts;
 }
 
 word *GLVertexBuffer::GetReadIndices() {
-    return m_indexes;
+    return _indexes;
 }
 
 word *GLVertexBuffer::GetWriteIndices() {
-    m_indicesDirty = true;
-    return m_indexes;
+    _indicesDirty = true;
+    return _indexes;
 }
 
 void GLVertexBuffer::SetPos(int vertexIndex, float x, float y, float z) {
-    vbVertex_t &v = m_verts[vertexIndex];
+    vbVertex_t &v = _verts[vertexIndex];
     v.v.x = x;
     v.v.y = y;
     v.v.z = z;
-    m_verticesDirty = true;
+    _verticesDirty = true;
 }
 
 void GLVertexBuffer::SetIndex(int index, unsigned short vertexIndex) {
-    m_indexes[index] = vertexIndex;
-    m_indicesDirty = true;
+    _indexes[index] = vertexIndex;
+    _indicesDirty = true;
 }
 
 void GLVertexBuffer::UseColor(const nsColor &color) {
@@ -308,6 +310,6 @@ void GLVertexBuffer::UseColor(const nsColor &color) {
 
 void GLVertexBuffer::Invalidate() {
     ReleaseGLObjects();
-    m_verticesDirty = true;
-    m_indicesDirty = true;
+    _verticesDirty = true;
+    _indicesDirty = true;
 }

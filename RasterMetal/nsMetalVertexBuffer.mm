@@ -7,6 +7,15 @@
 #include "Core/Memory.h"
 #include "Core/RenderStats.h"
 
+namespace {
+// Keep small submissions small and grow each reusable slot geometrically.
+size_t StreamingCapacity(size_t required, size_t maximum) {
+    auto capacity = size_t{256};
+    while (capacity < required) capacity *= 2;
+    return std::min(capacity, maximum);
+}
+}
+
 nsMetalVertexBuffer::nsMetalVertexBuffer(id<MTLDevice> device,
                                            nsMetalTexturesCache *cache,
                                            uint numVertices,
@@ -39,29 +48,46 @@ void nsMetalVertexBuffer::InitBuffers() {
 }
 
 void nsMetalVertexBuffer::ReleaseBuffers() {
-	for (uint i = 0; i < kMetalInFlightFrameSlots; ++i) {
-	    _vertexBuffers[i].clear();
+    for (uint i = 0; i < kMetalInFlightFrameSlots; ++i) {
+        _vertexBuffers[i].clear();
         _vertexVersions[i].clear();
-	    _indexBuffers[i].clear();
-	}
+        _indexBuffers[i].clear();
+    }
 }
 
 bool nsMetalVertexBuffer::EnsureBuffers(uint frameSlot, uint drawSlot) {
     auto &vertexBuffers = _vertexBuffers[frameSlot];
     auto &indexBuffers = _indexBuffers[frameSlot];
-
-	while (vertexBuffers.size() <= drawSlot) {
-	    nsMemoryLoopAllocScope metalAllocScope;
-	    id<MTLBuffer> vertexBuffer = [_device newBufferWithLength:sizeof(vbVertex_t) * _numVertices
-	                                                      options:MTLResourceStorageModeShared];
-        id<MTLBuffer> indexBuffer = [_device newBufferWithLength:sizeof(unsigned short) * _numIndexes
-                                                         options:MTLResourceStorageModeShared];
-        if (!vertexBuffer || !indexBuffer) return false;
-        vertexBuffers.push_back(vertexBuffer);
-        _vertexVersions[frameSlot].push_back(0);
-        indexBuffers.push_back(indexBuffer);
+    const auto vertexBytes = sizeof(vbVertex_t) * _maxDrawVertices;
+    const auto indexBytes = sizeof(unsigned short) * _maxDrawIndexes;
+    if (drawSlot < vertexBuffers.size() && vertexBuffers[drawSlot].length >= vertexBytes
+        && indexBuffers[drawSlot].length >= indexBytes) {
+        return true;
     }
 
+    nsMemoryLoopAllocScope metalAllocScope;
+    while (vertexBuffers.size() <= drawSlot) {
+        vertexBuffers.push_back(nil);
+        indexBuffers.push_back(nil);
+        _vertexVersions[frameSlot].push_back(0);
+    }
+    auto &vertexBuffer = vertexBuffers[drawSlot];
+    if (vertexBuffer.length < vertexBytes) {
+        const auto capacity = StreamingCapacity(vertexBytes, sizeof(vbVertex_t) * _numVertices);
+        auto replacement = [_device newBufferWithLength:capacity options:MTLResourceStorageModeShared];
+        if (!replacement) return false;
+        vertexBuffer = replacement;
+        _vertexVersions[frameSlot][drawSlot] = 0;
+        nsRenderStats::AddBufferStorageAllocation(capacity);
+    }
+    auto &indexBuffer = indexBuffers[drawSlot];
+    if (indexBuffer.length < indexBytes) {
+        const auto capacity = StreamingCapacity(indexBytes, sizeof(unsigned short) * _numIndexes);
+        auto replacement = [_device newBufferWithLength:capacity options:MTLResourceStorageModeShared];
+        if (!replacement) return false;
+        indexBuffer = replacement;
+        nsRenderStats::AddBufferStorageAllocation(capacity);
+    }
     return true;
 }
 
@@ -73,7 +99,7 @@ void nsMetalVertexBuffer::Draw(id<MTLRenderCommandEncoder> encoder, uint frameIn
         _drawSlot = 0;
     }
 
-	const auto frameSlot = frameIndex % kMetalInFlightFrameSlots;
+    const auto frameSlot = frameIndex % kMetalInFlightFrameSlots;
     const auto drawSlot = _drawSlot++;
     if (!EnsureBuffers(frameSlot, drawSlot)) return;
 
