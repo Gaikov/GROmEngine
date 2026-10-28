@@ -1,5 +1,8 @@
 #include "color.h"
 
+#include <algorithm>
+#include <cmath>
+
 const nsColor nsColor::white = nsColor( 1, 1, 1 );
 const nsColor nsColor::black = nsColor( 0, 0, 0 );
 const nsColor nsColor::red = nsColor( 1, 0, 0 );
@@ -9,6 +12,13 @@ const nsColor nsColor::yellow = nsColor( 1, 1, 0 );
 const nsColor nsColor::magenta = nsColor( 1, 0, 1 );
 const nsColor nsColor::gray = nsColor( 0.5, 0.5, 0.5 );
 const nsColor nsColor::darkGray = nsColor( 0.25, 0.25, 0.25 );
+
+//--- nsColor::Normalize: ---
+void nsColor::Normalize() {
+    for ( auto &value : color ) {
+        value = std::isnan( value ) ? 0.0f : std::clamp( value, 0.0f, 1.0f );
+    }
+}
 
 void nsColor::FromHex(const char *hex) {
     if (!hex) return;

@@ -1,5 +1,4 @@
-#ifndef _COLOR_H_
-#define _COLOR_H_
+#pragma once
 
 #include "headers.h"
 #include "comm_types.h"
@@ -98,6 +97,8 @@ struct nsColor
 	inline void operator *= ( const nsColor &other );
 
     void FromBytes(byte r, byte g, byte b, byte a = 255);
+    // Clamp each RGBA channel to [0, 1]; NaN becomes 0.
+    void Normalize();
 };
 
 //---------------------------------------------------------
@@ -138,6 +139,3 @@ inline nsColor operator * ( const nsColor &a, const nsColor &b ) {
 	res *= b;
 	return res;
 }
-
-
-#endif

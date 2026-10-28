@@ -2,8 +2,7 @@
 // Coding by Gaikov Roman (2007/04/21)
 // ParserUtils.h
 //------------------------------------------------------
-#ifndef _ParserUtils_H_
-#define _ParserUtils_H_
+#pragma once
 
 #include "nsLib/comm_types.h"
 #include "Core/Parser.h"
@@ -16,11 +15,9 @@ const char*	ParseStrP( script_state_t *ss, const char *name, const char *def = n
 nsString ParseString(script_state_t *ss, const char *name, const char *def = nullptr);
 float	ParseFloat( script_state_t *ss, const char *name, float def = 0 );
 bool	ParseColor( script_state_t *ss, const char *name, float c[4] );
-bool    ParseColorExt(script_state_t *ss, const char *name, nsColor &c);
-bool	ParseColorExt(script_state_t *ss, nsColor &c);
+bool ParseColorExt( script_state_t *ss, const char *name, nsColor &c, bool normalize = false );
+bool ParseColorExt( script_state_t *ss, nsColor &c, bool normalize = false );
 bool	ParseFloat2( script_state_t *ss, const char *name, float val[2], float defVal[2] = nullptr );
 bool	ParseFloat3( script_state_t *ss, const char *name, float val[3] );
 bool	ParseFloat4( script_state_t *ss, const char *name, float val[4] );
 bool    ParseBool( script_state_t *ss, const char *name, bool defValue);
-
-#endif

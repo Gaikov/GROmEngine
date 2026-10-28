@@ -117,35 +117,29 @@ bool ParseColor( script_state_t *ss, const char *name, float c[4] )
 	return true;
 }
 
-bool    ParseColorExt(script_state_t *ss, const char *name, nsColor &c) {
-	if (ps_var_begin(ss, name)) {
-		ParseColorExt(ss, c);
-	}
-	return false;
+bool ParseColorExt( script_state_t *ss, const char *name, nsColor &c, const bool normalize ) {
+    return ps_var_begin( ss, name ) && ParseColorExt( ss, c, normalize );
 }
 
-bool	ParseColorExt(script_state_t *ss, nsColor &c) {
-	if (const auto str = ps_var_str(ss)) {
-		std::string s = str;
-		if (s.size() == 6) {
-			s += "FF";
-		}
-
-		try {
-			const auto value = std::stoul(s, nullptr, 16);
-			c.FromRGBA(value);
-		} catch (...) {
-			return false;
-		}
-		return true;
-	}
-
-	float color[4];
-	if (ps_var_4f(ss, color)) {
-		c = color;
-		return true;
-	}
-	return false;
+bool ParseColorExt( script_state_t *ss, nsColor &c, const bool normalize ) {
+    auto parsed = c;
+    if ( const auto str = ps_var_str( ss ) ) {
+        std::string text = str;
+        if ( text.size() == 6 ) text += "FF";
+        try {
+            const auto value = std::stoul( text, nullptr, 16 );
+            parsed.FromRGBA( value );
+        } catch ( ... ) {
+            return false;
+        }
+    } else {
+        float values[4];
+        if ( !ps_var_4f( ss, values ) ) return false;
+        parsed = values;
+    }
+    if ( normalize ) parsed.Normalize();
+    c = parsed;
+    return true;
 }
 
 bool ParseBool(script_state_t *ss, const char *name, bool defValue) {
