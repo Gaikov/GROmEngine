@@ -7,6 +7,7 @@
 
 #include "Core/Config.h"
 #include "ImageDecoder/ImagesDecoder.h"
+#include "Platform.h"
 #include "RenManager.h"
 #include "nsLib/FilePath.h"
 #include "nsLib/log.h"
@@ -49,6 +50,10 @@ bool GetCaptureIndex(const nsFilePath &path, std::uint64_t &result) {
 //---------------------------------------------------------
 bool nsCaptureManager::OnInit() {
     g_cfg->RegCmd("capture_screen", CaptureScreen_f);
+    _captureInterval = g_cfg->RegVar("capture_interval", "0", 0);
+    _captureInterval->SetValue(0);
+    _trackedInterval = _captureInterval->Value();
+    _lastUpdateTime = App_GetPlatform()->GetTime();
     return true;
 }
 
@@ -69,7 +74,41 @@ void nsCaptureManager::RequestCapture() {
     }
 
     _captureRequested = true;
+    _elapsedSeconds = 0;
     Log::Info("Screen capture requested");
+}
+
+//---------------------------------------------------------
+// nsCaptureManager::Update:
+//---------------------------------------------------------
+void nsCaptureManager::Update() {
+    const auto currentTime = App_GetPlatform()->GetTime();
+    const auto elapsedMs = currentTime - _lastUpdateTime;
+    _lastUpdateTime = currentTime;
+
+    const auto interval = _captureInterval->Value();
+    if (interval <= 0) {
+        _trackedInterval = interval;
+        _elapsedSeconds = 0;
+        return;
+    }
+
+    if (interval != _trackedInterval) {
+        _trackedInterval = interval;
+        _elapsedSeconds = 0;
+        return;
+    }
+
+    _elapsedSeconds += static_cast<float>(elapsedMs) / 1000.0f;
+    if (_elapsedSeconds < interval) {
+        return;
+    }
+
+    _elapsedSeconds = 0;
+    if (!_captureRequested) {
+        _captureRequested = true;
+        Log::Info("Automatic screen capture requested");
+    }
 }
 
 //---------------------------------------------------------
@@ -128,6 +167,7 @@ void nsCaptureManager::ProcessCapture() {
         return;
     }
     _captureRequested = false;
+    _elapsedSeconds = 0;
 
     nsFilePath path("");
     if (!GetNextCapturePath(path)) {

@@ -257,6 +257,7 @@ void nsEngine::MainLoop()
 		}
 	}
 	nsRenderStats::AfterUpdate();
+	nsCaptureManager::Shared()->Update();
 
 	prevTime = currtime;
 
