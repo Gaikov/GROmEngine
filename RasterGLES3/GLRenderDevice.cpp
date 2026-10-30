@@ -115,6 +115,7 @@ void GLRenderDevice::Release() {
 	Log::Info("*****************************************");
 
 	CleanupOpenGL();
+	_sceneActive = false;
 
 	_shaders.Release();
 
@@ -262,13 +263,64 @@ bool GLRenderDevice::BeginScene()
 	App_GetPlatform()->GetClientSize(w, h);
 	glViewport(0, 0, w, h);
 	++_frameSerial;
+	_sceneActive = true;
 
 	return true;
+}
+
+//---------------------------------------------------------
+// GLRenderDevice::CaptureScreen:
+//---------------------------------------------------------
+nsBitmapData::tSP GLRenderDevice::CaptureScreen() {
+	if (!_sceneActive) {
+		return nullptr;
+	}
+
+	int width = 0;
+	int height = 0;
+	App_GetPlatform()->GetClientSize(width, height);
+	if (width <= 0 || height <= 0) {
+		return nullptr;
+	}
+
+	auto bitmap = nsBitmapData::Create(width, height);
+	GLint readFramebuffer = 0;
+	GLint packAlignment = 0;
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFramebuffer);
+	glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	while (glGetError() != GL_NO_ERROR) {}
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->GetWriteData());
+	const auto readError = glGetError();
+
+	glPixelStorei(GL_PACK_ALIGNMENT, packAlignment);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(readFramebuffer));
+	if (readError != GL_NO_ERROR) {
+		Log::Error("Unable to read screen pixels: GL error 0x%x", readError);
+		return nullptr;
+	}
+
+	auto pixels = bitmap->GetWriteData();
+	for (auto y = 0; y < height / 2; ++y) {
+		auto top = pixels + y * width;
+		auto bottom = pixels + (height - y - 1) * width;
+		for (auto x = 0; x < width; ++x) {
+			std::swap(top[x], bottom[x]);
+		}
+	}
+	for (auto index = 0; index < width * height; ++index) {
+		pixels[index].a = 255;
+	}
+
+	return bitmap;
 }
 
 void GLRenderDevice::EndScene()
 {
 	glFlush();
+	_sceneActive = false;
 }
 
 void GLRenderDevice::ApplyProjectionMatrix()

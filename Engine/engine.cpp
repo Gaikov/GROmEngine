@@ -33,6 +33,7 @@
 #include "Core/RenderStats.h"
 #include "Http/HttpClient.h"
 #include "Share/ShareService.h"
+#include "CaptureManager.h"
 
 #define DEBUG_BUILD "Debug"
 
@@ -83,6 +84,7 @@ bool nsEngine::Init()
 
     nsSoundDevice::Init();
     if (!nsRenDevice::Init()) return false;
+    if (!nsCaptureManager::Init()) return false;
     if (!nsFontsCache::Init()) return false;
 
 	g_inp.ShowCursor( false );
@@ -160,6 +162,7 @@ void nsEngine::Release(bool failed)
 	nsConsole::Release();
     nsFontsCache::Release();
 	nsSpriteDesc::ReleaseRenderBuffer();
+    nsCaptureManager::Release();
 	nsRenDevice::Release();
 	nsSoundDevice::Release();
 
@@ -295,6 +298,7 @@ void nsEngine::MainLoop()
         sysFont->Draw(DEBUG_BUILD, nsVec2(w - size[0] / 2 - 10, 10), nsVec2(0.5, 1), nsColor::white, 0);
 #endif
 
+        nsCaptureManager::Shared()->ProcessCapture();
         g_renDev->EndScene();
 		nsRenderStats::BeforeSwap();
         App_GetPlatform()->SwapBuffers();

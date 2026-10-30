@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Core/BitmapData.h"
 #include "nsLib/matrix4.h"
 #include "nsLib/comm_types.h"
 
@@ -214,6 +215,7 @@ struct IRenDevice
 	//scene functions
 	virtual void			ClearScene( uint flags ) = 0;
 	virtual bool			BeginScene() = 0;
+	virtual nsBitmapData::tSP CaptureScreen() = 0;
 	virtual	void			EndScene() = 0;
 
 	virtual void			LoadProjMatrix( const float m[16] ) = 0;

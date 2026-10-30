@@ -261,14 +261,92 @@ bool nsMetalRenderDevice::BeginScene() {
 	return BeginEncoder();
 }
 
+//---------------------------------------------------------
+// nsMetalRenderDevice::SubmitFrame:
+//---------------------------------------------------------
+void nsMetalRenderDevice::SubmitFrame() {
+    if (!_commandBuffer || !_currentDrawable) {
+        return;
+    }
+
+    [_commandBuffer presentDrawable:_currentDrawable];
+    [_commandBuffer commit];
+    _currentDrawable = nil;
+    _commandBuffer = nil;
+}
+
+//---------------------------------------------------------
+// nsMetalRenderDevice::CaptureScreen:
+//---------------------------------------------------------
+nsBitmapData::tSP nsMetalRenderDevice::CaptureScreen() {
+    if (!_commandBuffer || !_currentDrawable || !_encoder) {
+        return nullptr;
+    }
+
+    const auto texture = _currentDrawable.texture;
+    const auto width = texture.width;
+    const auto height = texture.height;
+    if (!width || !height || texture.pixelFormat != MTLPixelFormatBGRA8Unorm) {
+        return nullptr;
+    }
+
+    EndEncoder();
+
+    const auto alignment = [_device minimumLinearTextureAlignmentForPixelFormat:texture.pixelFormat];
+    const auto unalignedBytesPerRow = width * sizeof(nsPixel);
+    const auto bytesPerRow = ((unalignedBytesPerRow + alignment - 1) / alignment) * alignment;
+    const auto bufferLength = bytesPerRow * height;
+    const auto readbackBuffer = [_device newBufferWithLength:bufferLength
+                                                     options:MTLResourceStorageModeShared];
+    if (!readbackBuffer) {
+        Log::Error("Metal: unable to allocate screen capture buffer");
+        return nullptr;
+    }
+
+    const auto blitEncoder = [_commandBuffer blitCommandEncoder];
+    if (!blitEncoder) {
+        Log::Error("Metal: unable to create screen capture blit encoder");
+        return nullptr;
+    }
+
+    [blitEncoder copyFromTexture:texture
+                     sourceSlice:0
+                     sourceLevel:0
+                    sourceOrigin:MTLOriginMake(0, 0, 0)
+                      sourceSize:MTLSizeMake(width, height, 1)
+                        toBuffer:readbackBuffer
+               destinationOffset:0
+          destinationBytesPerRow:bytesPerRow
+        destinationBytesPerImage:bufferLength];
+    [blitEncoder endEncoding];
+
+    const auto completedCommandBuffer = _commandBuffer;
+    SubmitFrame();
+    [completedCommandBuffer waitUntilCompleted];
+    if (completedCommandBuffer.status != MTLCommandBufferStatusCompleted) {
+        const auto error = completedCommandBuffer.error;
+        Log::Error("Metal: screen capture failed: %s",
+                   error ? error.localizedDescription.UTF8String : "unknown command buffer error");
+        return nullptr;
+    }
+
+    auto bitmap = nsBitmapData::Create(static_cast<int>(width), static_cast<int>(height));
+    auto destination = bitmap->GetWriteData();
+    const auto source = static_cast<const unsigned char *>(readbackBuffer.contents);
+    for (auto y = NSUInteger(0); y < height; ++y) {
+        const auto row = source + y * bytesPerRow;
+        for (auto x = NSUInteger(0); x < width; ++x) {
+            const auto pixel = row + x * sizeof(nsPixel);
+            destination[y * width + x] = {pixel[2], pixel[1], pixel[0], 255};
+        }
+    }
+
+    return bitmap;
+}
+
 void nsMetalRenderDevice::EndScene() {
     EndEncoder();
-    if (_commandBuffer && _currentDrawable) {
-        [_commandBuffer presentDrawable:_currentDrawable];
-        [_commandBuffer commit];
-        _currentDrawable = nil;
-        _commandBuffer = nil;
-    }
+    SubmitFrame();
 }
 
 void nsMetalRenderDevice::ClearScene(uint flags) {

@@ -51,6 +51,7 @@ public:
 
     void ClearScene(uint flags) override;
     bool BeginScene() override;
+    nsBitmapData::tSP CaptureScreen() override;
     void EndScene() override;
 
     void LoadProjMatrix(const float *m) override;
@@ -112,6 +113,7 @@ private:
 
 	bool BeginEncoder();
 	void EndEncoder();
+	void SubmitFrame();
 	bool ApplyDisplayMode();
 	void ApplyVSync();
 	void RestartResources();

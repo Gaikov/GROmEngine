@@ -37,6 +37,7 @@ public:
 	void StateApply(IRenState *state) override;
 	void ClearScene(uint flags) override;
 	bool BeginScene() override;
+	nsBitmapData::tSP CaptureScreen() override;
 	void EndScene() override;
 	void LoadProjMatrix(const float *m) override;
 	void LoadViewMartix(const float *m) override;
@@ -70,6 +71,7 @@ private:
 	nsMatrix         _projMatrix;
 	nsMatrix         _viewMatrix;
 	bool             _renderTextureBound = false;
+	bool             _sceneActive = false;
 	bool             _queryRestart = false;
 
 	nsColor          _currentColor;
