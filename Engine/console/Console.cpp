@@ -212,6 +212,9 @@ bool nsConsole::OnInit()
 	_renState = renDev->StateLoad("default/rs/gui.ggrs");
 	con_line_step = g_cfg->RegVar( "con_line_step", "20.0", GVF_SAVABLE );
 	con_enable = g_cfg->RegVar( "con_enable", "1", 0 );
+#ifdef DEBUG
+    con_enable->SetValue(1);
+#endif
 	g_cfg->RegCmd( "exec", exec_f );
 		
 	return true;
