@@ -13,6 +13,8 @@
 #include "Engine/input/SoftInputEmpty.h"
 #include "Engine/input/soft/SoftInputKeyboard.h"
 
+#include <filesystem>
+
 static nsArgs g_args;
 static AndroidPlatform *g_platform = nullptr;
 nsVar *r_frame_pacing = nullptr;
@@ -133,7 +135,7 @@ IDataReader *AndroidPlatform::FileRead(const char *fileName) {
 }
 
 bool AndroidPlatform::FolderListing(const nsFilePath &folder, nsFilePath::tList &result) {
-    const char *path = folder.GetPath() == "./" ? "" : folder.GetPath();
+    const char *path = folder.GetPath() == "./" || folder.GetPath() == "." ? "" : folder.GetPath();
     auto dir = AAssetManager_openDir(_assetManager, path);
     if (!dir) {
         Log::Warning("can't open dir %s", (const char *) path);
@@ -182,14 +184,29 @@ void AndroidPlatform::MessagePopup(const char *caption, const char *message) {
 }
 
 IDataWriter *AndroidPlatform::InternalWrite(const char *fileName) {
-    std::string filePath = _internalDataPath + "/" + fileName;
-    return new nsFileWriter(filePath.c_str());
+    const auto path = GetInternalPath(fileName);
+    if (path.IsEmpty() || !path.CreateParentFolders()) return new nsFileWriter(nullptr);
+    return new nsFileWriter(path.AsChar());
 }
 
 IDataReader *AndroidPlatform::InternalRead(const char *fileName) {
-    std::string filePath = _internalDataPath + "/" + fileName;
-    Log::Info("...reading internal: %s", filePath.c_str());
-    return new nsFileReader(filePath.c_str());
+    const auto path = GetInternalPath(fileName);
+    return new nsFileReader(path.IsEmpty() ? nullptr : path.AsChar());
+}
+
+nsFilePath AndroidPlatform::GetInternalPath(const char *fileName) {
+    if (!StrCheck(fileName)) return nsFilePath("");
+    const nsFilePath name(fileName);
+    const auto relative = std::filesystem::path(name.AsChar());
+    if (relative.has_root_path() || nsFilePath::IsAbsolute(name)) return nsFilePath("");
+    for (const auto &part : relative) {
+        if (part == "..") return nsFilePath("");
+    }
+    nsFilePath root("");
+    nsFilePath path("");
+    if (!nsFilePath(_internalDataPath.c_str()).GetCanonical(root)
+        || !root.ResolvePath(name).GetCanonical(path) || !path.IsWithin(root, false)) return nsFilePath("");
+    return path;
 }
 
 ISoftInput *AndroidPlatform::GetSoftInput() {

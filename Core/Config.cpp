@@ -8,8 +8,8 @@
 
 nsConfig	*g_cfg = nullptr;
 
-ICfgWriter	*nsConfig::m_writers[CFG_MAX_WRITERS];
-int			nsConfig::m_writersCount = 0;
+ICfgWriter	*nsConfig::_writers[CFG_MAX_WRITERS];
+int			nsConfig::_writersCount = 0;
 
 nsVar		*gc_savevars = nullptr;
 nsVar		*developer = nullptr;
@@ -58,29 +58,29 @@ static void fpu_state_f( int argc, const char *argv[] )
 //  nsConfig::nsConfig:  
 //-----------------------------------------------------
 nsConfig::nsConfig() :
-        m_cfgFile(nullptr),
-        m_defFile(nullptr),
-        m_varList(nullptr) {
+        _cfgFile(nullptr),
+        _defFile(nullptr),
+        _varList(nullptr) {
 
     auto app = App_GetInfo();
     auto platform = App_GetPlatform();
 
     IDataReader::sp_t in = app->GetCfgReader();
     if (!in || !in->IsValid()) {
-        auto fileName = StrPrintf("%s.cfg", App_GetInfo()->GetAppName());
+        auto fileName = StrPrintf("%s.cfg", app->GetAppName());
         //try to load from internal app data storage
         in = platform->InternalRead(fileName);
         if (!in || !in->IsValid()) {
-            //try to load from app assets
-            in = platform->FileRead(fileName);
+            // Fall back to app assets, including pack files.
+            _cfgFile = g_pack.LoadFile(fileName);
         }
     }
 
     if (in && in->IsValid()) {
-        m_cfgFile = IDataReader::ReadBlob(in);
+        _cfgFile = IDataReader::ReadBlob(in);
     }
 
-    m_defFile = g_pack.LoadFile(app->GetDefCfgPath());
+    _defFile = g_pack.LoadFile(app->GetDefCfgPath());
 
     RegCmd("testcmd", testcmd_f);
     RegCmd("quit", quit_f);
@@ -96,27 +96,27 @@ nsConfig::nsConfig() :
 //---------------------------------------------------------
 nsConfig::~nsConfig()
 {
-	while ( m_varList )
+	while ( _varList )
 	{
-		nsVar *delVar = m_varList;
-		m_varList = m_varList->m_next;
+		nsVar *delVar = _varList;
+		_varList = _varList->m_next;
 		delete delVar;
 	}
 
 	cmdDesc_t	*cmd;
-	m_cmdHash.FetchBegin();
-	while ( (cmd = m_cmdHash.FetchNext()) )
+	_cmdHash.FetchBegin();
+	while ( (cmd = _cmdHash.FetchNext()) )
 	{
 		my_free( cmd->name );
 		delete cmd;
 	}
-	m_cmdHash.FetchEnd();
-	m_cmdHash.DeleteAllKeys();
+	_cmdHash.FetchEnd();
+	_cmdHash.DeleteAllKeys();
 
-	if ( m_cfgFile )
-		g_pack.ReleaseFile( m_cfgFile );
+	if ( _cfgFile )
+		g_pack.ReleaseFile( _cfgFile );
 
-	g_pack.ReleaseFile( m_defFile );
+	g_pack.ReleaseFile( _defFile );
 }
 
 //-----------------------------------------------------
@@ -148,10 +148,10 @@ void nsConfig::Release()
 void nsConfig::AddWriter( ICfgWriter *writer )
 {
 	if ( !writer 
-		|| m_writersCount >= CFG_MAX_WRITERS ) return;
+		|| _writersCount >= CFG_MAX_WRITERS ) return;
 
-	m_writers[ m_writersCount ] = writer;
-	m_writersCount ++;
+	_writers[ _writersCount ] = writer;
+	_writersCount ++;
 }
 
 //-----------------------------------------------------
@@ -171,10 +171,10 @@ void nsConfig::SaveConfig(const char *fileName, bool forceFile) {
         }
     }
 
-    for (int i = 0; i < m_writersCount; i++)
-        m_writers[i]->OnSaveConfig(out);
+    for (int i = 0; i < _writersCount; i++)
+        _writers[i]->OnSaveConfig(out);
 
-    for (nsVar *var = m_varList; var; var = var->m_next) {
+    for (nsVar *var = _varList; var; var = var->m_next) {
         if ((var->m_flags & GVF_SAVABLE || gc_savevars->Bool())
             && !(var->m_flags & GVF_INTERNAL))
             out->Printf("%s \"%s\"\n", var->GetName(), var->String());
@@ -194,11 +194,11 @@ const char* nsConfig::CompleteLine( const char* line )
 	const auto *var = FindVar(line);
 	if (var) return var->GetName();
 
-	cmdDesc_t *cmd = m_cmdHash.GetData(line);
+	cmdDesc_t *cmd = _cmdHash.GetData(line);
 	if (cmd) return cmd->name;
 
 	int refCount = 0;
-	for (var = m_varList; var; var = var->m_next) {
+	for (var = _varList; var; var = var->m_next) {
 		if (strstr(var->GetName(), line)) {
 			refCount++;
 			outLine = var->GetName();
@@ -207,15 +207,15 @@ const char* nsConfig::CompleteLine( const char* line )
 	}
 
 	//������� ������� �� ������� � �������
-	m_cmdHash.FetchBegin();
-	while ((cmd = m_cmdHash.FetchNext())) {
+	_cmdHash.FetchBegin();
+	while ((cmd = _cmdHash.FetchNext())) {
 		if (strstr(cmd->name, line)) {
 			refCount++;
 			outLine = cmd->name;
 			Log::Info(" %s", outLine);
 		}
 	}
-	m_cmdHash.FetchEnd();
+	_cmdHash.FetchEnd();
 
 	return refCount == 1 ? outLine : nullptr;
 }
@@ -225,8 +225,8 @@ const char* nsConfig::CompleteLine( const char* line )
 //---------------------------------------------------------
 const char* nsConfig::GetDefaultConfig()
 {
-	if ( m_defFile )
-		return (char*)m_defFile->GetData();
+	if ( _defFile )
+		return (char*)_defFile->GetData();
 	return nullptr;
 }
 
@@ -235,8 +235,8 @@ const char* nsConfig::GetDefaultConfig()
 //---------------------------------------------------------
 const char*	nsConfig::GetCurrentConfig()
 {
-	if ( m_cfgFile )
-		return (char*)m_cfgFile->GetData();
+	if ( _cfgFile )
+		return (char*)_cfgFile->GetData();
 	return nullptr;
 }
 
@@ -280,8 +280,8 @@ nsVar* nsConfig::RegVar( const char* varName, const char* defValue, uint flags )
 	if ( var ) return var;
 
 	var = new nsVar( varName, defValue, flags );
-	var->m_next = m_varList;
-	m_varList = var;
+	var->m_next = _varList;
+	_varList = var;
 	
 	if ( (flags & GVF_INTERNAL) ) return var;
 
@@ -303,7 +303,7 @@ nsVar* nsConfig::RegVar( const char* varName, const char* defValue, uint flags )
 //-----------------------------------------------------
 nsVar* nsConfig::FindVar( const char* varName )
 {
-	for ( nsVar *var = m_varList; var; var = var->m_next )
+	for ( nsVar *var = _varList; var; var = var->m_next )
 	{
 		if ( StrEqual( var->GetName(), varName ) )
 			return var;
@@ -318,13 +318,13 @@ void nsConfig::RegCmd( const char* name, const func_t& cmd )
 {
 	if ( !name || !cmd || !strlen( name ) ) return;
 
-	cmdDesc_t	*desc = m_cmdHash.GetData( name );
+	cmdDesc_t	*desc = _cmdHash.GetData( name );
 	if ( !desc )
 	{
 		desc = new cmdDesc_t;
 		desc->name = my_strdup( name );
 		desc->func = cmd;
-		m_cmdHash.SetData( name, desc );
+		_cmdHash.SetData( name, desc );
 	}
 }
 
@@ -351,7 +351,7 @@ bool nsConfig::ExecLine( const char* cmdLine )
 			var->SetString( args.Arg( 1 ) );
 		return true;
 	}
-	else if ( (cmd = m_cmdHash.GetData( args.Arg( 0 ))) )
+	else if ( (cmd = _cmdHash.GetData( args.Arg( 0 ))) )
 	{
 		cmd->func( args.ArgCount(), args.GetArgs() );
 		return true;

@@ -2,8 +2,7 @@
 // Created by Roman on 3/26/2024.
 //
 
-#ifndef _GROM_ENGINE_PLATFORM_H
-#define _GROM_ENGINE_PLATFORM_H
+#pragma once
 
 #include "Core/Args.h"
 #include "Core/DataWriter.h"
@@ -59,6 +58,9 @@ public:
     virtual bool FolderListing(const nsFilePath &folder, nsFilePath::tList &result) = 0;
     virtual IDataWriter* InternalWrite(const char *fileName) = 0;
     virtual IDataReader* InternalRead(const char *fileName) = 0;
+    virtual nsFilePath GetInternalPath(const char *fileName) { return nsFilePath(fileName); }
+    virtual nsFilePath GetUserFolderPath() const { return nsFilePath("."); }
+    virtual void ConfigureInternalStorage(const nsFilePath &root) {}
 
     //Renderer
     virtual ProcAddr GetProcAddr(const char *name) = 0;
@@ -66,5 +68,3 @@ public:
 };
 
 Platform *App_GetPlatform();
-
-#endif //_GROM_ENGINE_PLATFORM_H

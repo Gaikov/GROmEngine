@@ -5,8 +5,11 @@
 #include "AssetCrypto.h"
 #include "Blob.h"
 #include "PackArch.h"
+#include "nsLib/FilePath.h"
 #include "nsLib/StrTools.h"
 #include "nsLib/events/EventDispatcher.h"
+
+struct IDataReader;
 
 class nsPackage : public nsEventDispatcher {
 public:
@@ -14,6 +17,7 @@ public:
 
     bool Init();
     void Release();
+    bool ResolveFilePath(const char *fileName, nsFilePath &result) const;
     bool AddPack(const char *fileName);
     nsFile *LoadFile(const char *fileName);
     void ReleaseFile(nsFile *file);
@@ -21,7 +25,6 @@ public:
     int EnumDirFiles(const char *dir, const char *type, nsString **list, bool withPacks = false);
 
     void SetEncryptionKey(const nsAssetCrypto::Key &key);
-    void SetLoadPackedOnly(bool packed);
 
 private:
     struct packDesc_t {
@@ -32,10 +35,13 @@ private:
     std::vector<packDesc_t> _packs;
     nsAssetCrypto::Key _encryptionKey = {};
     bool _hasEncryptionKey = false;
-    bool _loadPacked = false;
 
     bool InitPack(const char *fileName);
-    packFileDesc_t *FindPackFile(const char *fileName, int pack);
+    bool GetLogicalPath(const char *fileName, nsString &result) const;
+    // Returns true for a selected loose source, including an unreadable one.
+    // The caller owns reader; nullptr with true blocks fallback.
+    bool OpenLooseFile(const char *logical, IDataReader *&reader) const;
+    const packFileDesc_t *FindPackFile(const char *fileName, int pack) const;
     nsFile *LoadPackFile(const char *fileName);
 };
 

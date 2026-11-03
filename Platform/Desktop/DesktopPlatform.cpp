@@ -13,6 +13,9 @@
 #include "Core/time/Time.h"
 #include "env/Env.h"
 
+#include <cstdlib>
+#include <filesystem>
+
 bool DesktopPlatform::Init() {
     Log::Info("##### Init Desktop #####");
 
@@ -233,29 +236,62 @@ void DesktopPlatform::MessagePopup(const char *caption, const char *message) {
 }
 
 IDataWriter *DesktopPlatform::InternalWrite(const char *fileName) {
-#ifdef WEB_ASM
-    if (!fileName) {
-        return new nsFileWriter(nullptr);
-    }
-
-    const auto path = std::string("/internal/") + fileName;
-    return new nsFileWriter(path.c_str());
-#else
-    return new nsFileWriter(fileName);
-#endif
+    const auto path = GetInternalPath(fileName);
+    if (path.IsEmpty() || !path.CreateParentFolders()) return new nsFileWriter(nullptr);
+    return new nsFileWriter(path.AsChar());
 }
 
 IDataReader *DesktopPlatform::InternalRead(const char *fileName) {
-#ifdef WEB_ASM
-    if (!fileName) {
-        return new nsFileReader(nullptr);
-    }
+    const auto path = GetInternalPath(fileName);
+    return new nsFileReader(path.IsEmpty() ? nullptr : path.AsChar());
+}
 
-    const auto path = std::string("/internal/") + fileName;
-    return new nsFileReader(path.c_str());
+nsFilePath DesktopPlatform::GetInternalPath(const char *fileName) {
+    if (!fileName || !*fileName) return nsFilePath("");
+#ifdef WEB_ASM
+    const auto root = _internalRoot.IsEmpty() ? nsFilePath("/internal") : _internalRoot;
 #else
-    return new nsFileReader(fileName);
+    if (_internalRoot.IsEmpty()) return nsFilePath(fileName);
+    const auto &root = _internalRoot;
 #endif
+    const nsFilePath normalizedName(fileName);
+    if (nsFilePath::IsAbsolute(normalizedName.AsChar())) return nsFilePath("");
+    const auto rawRelative = std::filesystem::path(normalizedName.AsChar());
+    if (rawRelative.has_root_path()) return nsFilePath("");
+    for (const auto &part : rawRelative) {
+        if (part == "..") return nsFilePath("");
+    }
+    const auto relative = rawRelative.lexically_normal();
+    if (relative.empty()) return nsFilePath("");
+    const auto path = root.ResolvePath(relative.generic_string().c_str());
+    nsFilePath canonicalRoot("");
+    nsFilePath canonicalPath("");
+    if (!root.GetCanonical(canonicalRoot) || !path.GetCanonical(canonicalPath)
+        || !canonicalPath.IsWithin(canonicalRoot,
+#ifdef _WIN32
+            true
+#else
+            false
+#endif
+        )) return nsFilePath("");
+    return relative == "." ? root : path;
+}
+
+nsFilePath DesktopPlatform::GetUserFolderPath() const {
+#ifdef WEB_ASM
+    return nsFilePath(".");
+#else
+#ifdef _WIN32
+    const auto *profile = std::getenv("USERPROFILE");
+#else
+    const auto *profile = std::getenv("HOME");
+#endif
+    return nsFilePath(profile ? profile : "");
+#endif
+}
+
+void DesktopPlatform::ConfigureInternalStorage(const nsFilePath &root) {
+    _internalRoot = root;
 }
 
 ISoftInput *DesktopPlatform::GetSoftInput() {

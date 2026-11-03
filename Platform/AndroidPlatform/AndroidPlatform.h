@@ -2,8 +2,7 @@
 // Created by Roman on 4/2/2024.
 //
 
-#ifndef _GROM_ANDROIDPLATFORM_H
-#define _GROM_ANDROIDPLATFORM_H
+#pragma once
 
 #include "Engine/Platform.h"
 #include "AndroidKeyboard.h"
@@ -77,6 +76,7 @@ public:
     IDataWriter *InternalWrite(const char *fileName) override;
 
     IDataReader *InternalRead(const char *fileName) override;
+    nsFilePath GetInternalPath(const char *fileName) override;
 
 
     ISoftInput *GetSoftInput() override;
@@ -102,6 +102,3 @@ private:
     int _screenWidth;
     int _screenHeight;
 };
-
-
-#endif //_GROM_ANDROIDPLATFORM_H

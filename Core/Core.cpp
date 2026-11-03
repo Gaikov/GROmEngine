@@ -12,15 +12,20 @@
 #include "debug/LogFile.h"
 #include "debug/LogStdOut.h"
 #include "memory/FastMemManager.h"
+#include "Engine/Platform.h"
 
 //---------------------------------------------------------
 // nsCore::Init: 
 //---------------------------------------------------------
 bool nsCore::Init()
 {
+	if (!App_GetInfo()->ConfigurePlatform(*App_GetPlatform())) return false;
 	Log::Init();
 	Log::Shared()->AddPolicy(new LogStdOut());
-	g_log.Open(StrPrintf("%s.log", App_GetInfo()->GetAppName()));
+	const auto logPath = App_GetPlatform()->GetInternalPath(
+        StrPrintf("%s.log", App_GetInfo()->GetAppName()));
+	if (!logPath.IsEmpty()) logPath.CreateParentFolders();
+	g_log.Open(logPath.AsChar());
 	Log::Info("*** Core Init ***");
 
 	Log::Info("OS Installed: %s", Sys_OSName().c_str());
@@ -49,6 +54,7 @@ void nsCore::Release()
 	Log::Info("*** Core Shutdown ***");
 
 	nsConfig::Release();
+	App_GetInfo()->Release();
 	g_pack.Release();
 
 	nsNamePool::Free();

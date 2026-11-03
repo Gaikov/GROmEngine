@@ -63,6 +63,12 @@ public:
 
     IDataReader *InternalRead(const char *fileName) override;
 
+    nsFilePath GetInternalPath(const char *fileName) override;
+
+    nsFilePath GetUserFolderPath() const override;
+
+    void ConfigureInternalStorage(const nsFilePath &root) override;
+
     ISoftInput *GetSoftInput() override;
 
     void OpenUrl(const char *url) override;
@@ -76,6 +82,7 @@ private:
     GLFWmonitor *_display = nullptr;
     ISoftInput::sp_t _softInput;
     nsVar   *_useSoftInput = nullptr;
+    nsFilePath _internalRoot = "";
 
     void UpdateSoftInput();
 };

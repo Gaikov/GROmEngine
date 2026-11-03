@@ -115,7 +115,7 @@ void nsCaptureManager::Update() {
 // nsCaptureManager::GetNextCapturePath:
 //---------------------------------------------------------
 bool nsCaptureManager::GetNextCapturePath(nsFilePath &result) const {
-    const nsFilePath folder(CaptureFolder);
+    const auto folder = App_GetPlatform()->GetInternalPath(CaptureFolder);
     if (!folder.CreateFolders()) {
         Log::Error("Unable to create screen capture folder: '%s'", folder.AsChar());
         return false;

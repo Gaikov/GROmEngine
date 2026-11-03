@@ -3,8 +3,7 @@
 // file Config.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_Config_H_
-#define	_Config_H_
+#pragma once
 
 #include "headers.h"
 #include "Var.h"
@@ -63,19 +62,19 @@ public:
 	float                   GetValue(const char *name);
 
 	void					RegCmd( const char* name, const func_t& cmd );
-	const cmdDesc_t*		FindCmd( const char* cmdName ) { return m_cmdHash.GetData( cmdName ); }
+	const cmdDesc_t*		FindCmd( const char* cmdName ) { return _cmdHash.GetData( cmdName ); }
 		
 	bool					ExecLine( const char* cmdLine );
 	bool					ExecFile( const char* fileName );
 
 private:
-	nsVar					*m_varList;
-	nsHashMap<cmdDesc_t>	m_cmdHash;
-	nsFile					*m_cfgFile;
-	nsFile					*m_defFile;
+    nsVar *_varList;
+    nsHashMap<cmdDesc_t> _cmdHash;
+    nsFile *_cfgFile;
+    nsFile *_defFile;
 
-	static ICfgWriter		*m_writers[CFG_MAX_WRITERS];
-	static int				m_writersCount;
+    static ICfgWriter *_writers[CFG_MAX_WRITERS];
+    static int _writersCount;
 
 	
 
@@ -87,5 +86,3 @@ private:
 };
 
 extern nsConfig	*g_cfg;
-
-#endif //_Config_H_

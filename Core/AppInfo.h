@@ -9,6 +9,7 @@
 #include "nsLib/utils/NoCopyable.h"
 
 class nsPackage;
+class Platform;
 
 //---------------------------------------------------------
 // IAppInfo: ��������� ���������� ��� ���� (������) � ����������
@@ -16,8 +17,10 @@ class nsPackage;
 class IAppInfo : public nsNoCopyable
 {
 public:
+	virtual bool            ConfigurePlatform(Platform &) { return true; }
 	virtual void            ConfigurePackage(nsPackage &) {}
 	virtual bool            Init() { return true; }
+	virtual void            Release() {}
 
 	virtual const char*		GetAppName() = 0;
 	

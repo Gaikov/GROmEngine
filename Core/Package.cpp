@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 #include "Engine/Platform.h"
@@ -27,17 +28,108 @@ int FileCmp(const void *elem1, const void *elem2) {
     return strcmp(*s1, *s2);
 }
 
+bool IsLogicalPath(const char *name) {
+    if (nsFilePath::IsAbsolute(name)) return false;
+    const auto path = std::filesystem::path(nsFilePath(name).AsChar());
+    if (path.has_root_path()) return false;
+    for (const auto &part : path) {
+        if (part == "..") return false;
+    }
+    return true;
+}
+
+#ifdef _WIN32
+constexpr auto CASE_INSENSITIVE_PATHS = true;
+#else
+constexpr auto CASE_INSENSITIVE_PATHS = false;
+#endif
+
 } // namespace
 
+//---------------------------------------------------------
+// nsPackage::GetLogicalPath: only Internal filesystem aliases become logical.
+//---------------------------------------------------------
+bool nsPackage::GetLogicalPath(const char *fileName, nsString &result) const {
+    if (!StrCheck(fileName)) return false;
+    result = fileName;
+    if (nsFilePath::IsAbsolute(fileName)) {
+        const auto internal = App_GetPlatform()->GetInternalPath(".");
+        nsFilePath root("");
+        nsFilePath canonical("");
+        if (!internal.IsEmpty() && internal.GetCanonical(root)
+            && nsFilePath(fileName).GetCanonical(canonical)) {
+            if (canonical.IsWithin(root, CASE_INSENSITIVE_PATHS)) {
+                result = root.GetRelativePath(canonical);
+            } else {
+                const nsFilePath lexical(std::filesystem::path(fileName).lexically_normal().generic_string().c_str());
+                const nsFilePath lexicalRoot(std::filesystem::path(internal.ToAbsolute().AsChar())
+                    .lexically_normal().generic_string().c_str());
+                // Validate escaped Internal aliases through the platform; unconfigured desktop storage stays native.
+                if ((lexical.IsWithin(lexicalRoot, CASE_INSENSITIVE_PATHS)
+                    || lexical.IsWithin(root, CASE_INSENSITIVE_PATHS))
+                    && App_GetPlatform()->GetInternalPath(root.GetRelativePath(canonical)).IsEmpty()) return false;
+            }
+        }
+    } else if (IsLogicalPath(fileName)) {
+        result = std::filesystem::path(nsFilePath(fileName).AsChar()).lexically_normal().generic_string();
+    }
+    return true;
+}
+
+//---------------------------------------------------------
+// nsPackage::ResolveFilePath: the winning native file, never a write target.
+//---------------------------------------------------------
+bool nsPackage::ResolveFilePath(const char *fileName, nsFilePath &result) const {
+    nsString logical;
+    if (!GetLogicalPath(fileName, logical)) return false;
+    if (IsLogicalPath(logical)) {
+        const auto internal = App_GetPlatform()->GetInternalPath(logical);
+        if (internal.IsEmpty()) return false;
+        if (internal.IsExists()) {
+            return !internal.IsFolder() && internal.GetCanonical(result);
+        }
+    }
+    const nsFilePath asset(logical);
+    return asset.IsExists() && !asset.IsFolder() && asset.GetCanonical(result);
+}
+
+//---------------------------------------------------------
+// nsPackage::OpenLooseFile: absence permits fallback, read errors do not.
+//---------------------------------------------------------
+bool nsPackage::OpenLooseFile(const char *logical, IDataReader *&reader) const {
+    reader = nullptr;
+    const auto internal = App_GetPlatform()->GetInternalPath(logical);
+    if (internal.IsEmpty()) return true;
+    if (internal.IsExists()) {
+        if (!internal.IsFolder()) reader = App_GetPlatform()->InternalRead(logical);
+        return true;
+    }
+    const nsFilePath asset(logical);
+    if (asset.IsFolder()) return true;
+    reader = App_GetPlatform()->FileRead(logical);
+    if (asset.IsExists() || (reader && reader->IsValid())) return true;
+    delete reader;
+    reader = nullptr;
+    return false;
+}
+
 bool nsPackage::Init() {
-    nsString *list = nullptr;
     Log::Info("...enum packs");
-    const auto count = EnumDirFiles("./", "pak", &list);
+    nsFilePath::tList files;
+    App_GetPlatform()->FolderListing(nsFilePath("./"), files);
+    nsString *list = nullptr;
+    auto count = 0;
+    for (const auto &file : files) {
+        if (!file.IsFolder() && file.CheckExtension("pak")) {
+            const auto name = file.GetName();
+            AddToArray(&list, count, name);
+        }
+    }
     if (!count) {
         Log::Warning("packs not found!");
-        return !_loadPacked;
+        return true;
     }
-
+    qsort(list, count, sizeof(nsString), FileCmp);
     auto result = true;
     for (auto i = 0; i < count; ++i) result = AddPack(list[i]) && result;
     my_free(list);
@@ -56,21 +148,24 @@ bool nsPackage::AddPack(const char *fileName) {
 }
 
 nsFile *nsPackage::LoadFile(const char *fileName) {
-    if (!fileName || !strlen(fileName)) return nullptr;
-
+    nsString logical;
+    if (!GetLogicalPath(fileName, logical)) return nullptr;
     nsFile *file = nullptr;
-    if (!_loadPacked) {
+    if (IsLogicalPath(logical)) {
+        IDataReader *reader = nullptr;
+        const auto found = OpenLooseFile(logical, reader);
+        IDataReader::sp_t owned(reader);
+        file = found ? IDataReader::ReadBlob(owned) : LoadPackFile(logical);
+    } else {
+        // Explicit filesystem paths retain standalone absolute/parent access.
         IDataReader::sp_t reader = App_GetPlatform()->FileRead(fileName);
         file = IDataReader::ReadBlob(reader);
     }
-    if (!file) file = LoadPackFile(fileName);
-
-    //zero-length files can't be parsed by script loaders — report as missing
+    // Script loaders reject an empty file, but it still shadows lower sources.
     if (file && !file->GetSize()) {
         ReleaseFile(file);
         file = nullptr;
     }
-
     const nsBaseEvent event(FILE_LOADED_EVENT);
     Emmit(event);
     return file;
@@ -81,38 +176,62 @@ void nsPackage::ReleaseFile(nsFile *file) {
 }
 
 bool nsPackage::IsExists(const char *fileName) {
-    if (!fileName || !strlen(fileName)) return false;
-    if (!_loadPacked) {
+    nsString logical;
+    if (!GetLogicalPath(fileName, logical)) return false;
+    if (!IsLogicalPath(logical)) {
         IDataReader::sp_t reader = App_GetPlatform()->FileRead(fileName);
-        if (reader && reader->IsValid()) return true;
+        return reader && reader->IsValid();
     }
+    IDataReader *reader = nullptr;
+    const auto found = OpenLooseFile(logical, reader);
+    IDataReader::sp_t owned(reader);
+    if (found) return owned && owned->IsValid();
     for (auto i = static_cast<int>(_packs.size()) - 1; i >= 0; --i) {
-        if (FindPackFile(fileName, i)) return true;
+        if (FindPackFile(logical, i)) return true;
     }
     return false;
 }
 
 int nsPackage::EnumDirFiles(const char *dir, const char *type, nsString **list, bool withPacks) {
     *list = nullptr;
+    nsString logical;
+    if (!GetLogicalPath(StrCheck(dir) ? dir : ".", logical) || !StrCheck(type)) return 0;
+    const auto virtualPaths = IsLogicalPath(logical);
     auto count = 0;
-    nsFilePath folder(dir);
-    nsFilePath::tList files;
-    App_GetPlatform()->FolderListing(folder, files);
-    for (auto &file : files) {
-        if (!file.IsFolder() && file.CheckExtension(type)) AddToArray(&*list, count, file.GetPath());
+    const auto appendFiles = [&](const nsFilePath::tList &files, bool internal) {
+        for (const auto &file : files) {
+            if (file.IsFolder() || !file.CheckExtension(type)) continue;
+            nsString path = file.GetPath();
+            if (virtualPaths) {
+                path = std::filesystem::path(nsFilePath(logical).ResolvePath(file.GetName()).AsChar())
+                    .lexically_normal().generic_string();
+            }
+            if (internal && App_GetPlatform()->GetInternalPath(path).IsEmpty()) continue;
+            if (!StrInList(*list, count, path)) AddToArray(&*list, count, path);
+        }
+    };
+    if (virtualPaths) {
+        const auto internal = App_GetPlatform()->GetInternalPath(logical);
+        if (internal.IsEmpty()) return 0;
+        nsFilePath::tList files;
+        internal.Listing(files); // Native data directory, including on Android.
+        appendFiles(files, true);
     }
-
-    if (withPacks) {
+    nsFilePath::tList files;
+    App_GetPlatform()->FolderListing(nsFilePath(logical), files);
+    appendFiles(files, false);
+    if (virtualPaths && withPacks) {
+        std::string prefix(logical.AsChar());
+        if (prefix == "." || prefix == "./") prefix.clear();
+        else if (!prefix.empty() && prefix.back() != '/') prefix += '/';
+        std::transform(prefix.begin(), prefix.end(), prefix.begin(), ::tolower);
         for (auto p = static_cast<int>(_packs.size()) - 1; p >= 0; --p) {
-            std::string currentDir = dir;
-            std::transform(currentDir.begin(), currentDir.end(), currentDir.begin(), ::tolower);
             for (const auto &file : _packs[p].files) {
-                if (strncmp(currentDir.c_str(), file.filename, currentDir.length()) == 0 &&
-                    !strchr(file.filename + currentDir.length(), '/') &&
-                    strstr(file.filename, StrPrintf(".%s", type))) {
-                    nsString name(file.filename + currentDir.length());
-                    if (!StrInList(*list, count, name)) AddToArray(&*list, count, name);
-                }
+                if (strncmp(prefix.c_str(), file.filename, prefix.size()) != 0
+                    || strchr(file.filename + prefix.size(), '/')
+                    || !nsFilePath(file.filename).CheckExtension(type)) continue;
+                const nsString name(file.filename);
+                if (!StrInList(*list, count, name)) AddToArray(&*list, count, name);
             }
         }
     }
@@ -166,7 +285,7 @@ bool nsPackage::InitPack(const char *fileName) {
     return true;
 }
 
-packFileDesc_t *nsPackage::FindPackFile(const char *fileName, int pack) {
+const packFileDesc_t *nsPackage::FindPackFile(const char *fileName, int pack) const {
     if (!StrCheck(fileName)) return nullptr;
     for (auto &file : _packs[pack].files) {
         if (strcmp(file.filename, fileName) == 0) return &file;
@@ -175,7 +294,7 @@ packFileDesc_t *nsPackage::FindPackFile(const char *fileName, int pack) {
 }
 
 nsFile *nsPackage::LoadPackFile(const char *fileName) {
-    packFileDesc_t *desc = nullptr;
+    const packFileDesc_t *desc = nullptr;
     auto packIndex = -1;
     for (auto i = static_cast<int>(_packs.size()) - 1; i >= 0; --i) {
         desc = FindPackFile(fileName, i);
@@ -221,8 +340,4 @@ nsFile *nsPackage::LoadPackFile(const char *fileName) {
 void nsPackage::SetEncryptionKey(const nsAssetCrypto::Key &key) {
     _encryptionKey = key;
     _hasEncryptionKey = true;
-}
-
-void nsPackage::SetLoadPackedOnly(bool packed) {
-    _loadPacked = packed;
 }
