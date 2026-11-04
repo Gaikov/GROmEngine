@@ -12,6 +12,8 @@ public:
 
     nsGLRenderTexture* Create(int width, int height, texfmt_t fmt);
     void Bind(nsGLRenderTexture *t);
+    IRenderTexture *GetCurrent() const { return _current; }
+    void Remove(nsGLRenderTexture *target);
     void Release();
     void UnloadFromGPU();
 

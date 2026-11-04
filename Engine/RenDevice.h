@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Core/BitmapData.h"
+#include "nsLib/color.h"
 #include "nsLib/matrix4.h"
 #include "nsLib/comm_types.h"
 
@@ -163,6 +164,8 @@ protected:
 struct IRenderTexture : public ITexture {
 	// Same orientation as bitmap-backed textures: the top row is sampled at V=0.
 	virtual void EnsureSize(int width, int height) = 0;
+	// Borrowed view; same dimensions/orientation as colour, raw depth in [0, 1].
+	virtual ITexture *GetDepthTexture() { return nullptr; }
 };
 
 //---------------------------------------------------------
@@ -201,6 +204,9 @@ struct IRenDevice
 
 	virtual IRenderTexture* RenderTextureCreate(int width, int height, texfmt_t = TF_RGBA) = 0;
 	virtual void			RenderTextureBind(IRenderTexture *rt) = 0;
+	virtual IRenderTexture *GetRenderTarget() const = 0;
+	// Releases an owned target and invalidates both colour/depth views.
+	virtual void RenderTextureRelease(IRenderTexture *target) = 0;
 
 	//render state
 	virtual const char*		StateGetPath(IRenState *state) = 0;
@@ -213,7 +219,7 @@ struct IRenDevice
     virtual void            StencilApply( IStencilState *state) = 0;
 
 	//scene functions
-	virtual void			ClearScene( uint flags ) = 0;
+    virtual void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) = 0;
 	virtual bool			BeginScene() = 0;
 	virtual nsBitmapData::tSP CaptureScreen() = 0;
 	virtual	void			EndScene() = 0;

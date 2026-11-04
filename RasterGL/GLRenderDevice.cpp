@@ -77,7 +77,6 @@ bool GLRenderDevice::PrepareOpenGL()
 	}
 
 	glDepthFunc(GL_LEQUAL);
-    glClearColor(0, 0, 0, 0);
 
 	return true;
 }
@@ -195,24 +194,21 @@ void GLRenderDevice::StateApply(IRenState *state)
 	_shaders.Apply(shader);
 }
 
-void GLRenderDevice::ClearScene(uint flags)
-{
-	GLbitfield glBits    = 0;
-
-	if (CLR_CBUFF & flags)
-	{
-		glBits |= GL_COLOR_BUFFER_BIT;
-	}
-	if (CLR_ZBUFF & flags)
-	{
-		glBits |= GL_DEPTH_BUFFER_BIT;
-		glDepthMask(GL_TRUE);
-	}
+void GLRenderDevice::ClearScene(uint flags, const nsColor &color) {
+    GLbitfield glBits = 0;
+    if (flags & CLR_CBUFF) {
+        glClearColor(color.r, color.g, color.b, color.a);
+        glBits |= GL_COLOR_BUFFER_BIT;
+    }
+    if (flags & CLR_ZBUFF) {
+        glBits |= GL_DEPTH_BUFFER_BIT;
+        glDepthMask(GL_TRUE);
+    }
     if (CLR_STENCIL & flags) {
         glBits |= GL_STENCIL_BUFFER_BIT;
     }
-	glClear(glBits);
-	GL_CHECK_R("glClear",)
+    glClear(glBits);
+    GL_CHECK_R("glClear",)
 }
 
 bool GLRenderDevice::BeginScene()

@@ -7,6 +7,7 @@
 #include "nsMetalTexture.h"
 
 #import <Metal/Metal.h>
+#include <memory>
 
 class nsMetalRenderTexture final : public IRenderTexture {
 public:
@@ -16,6 +17,7 @@ public:
     void EnsureSize(int width, int height) override;
     void GetSize(int &width, int &height) override;
     uint64_t GetId() override;
+    ITexture *GetDepthTexture() override { return _depthView.get(); }
 
     id<MTLTexture> GetColorTexture();
     id<MTLTexture> GetDepthStencilTexture();
@@ -23,6 +25,9 @@ public:
     void Invalidate();
 
 private:
+    explicit nsMetalRenderTexture(nsMetalRenderTexture *owner) : _depthOwner(owner) {}
+    nsMetalRenderTexture *_depthOwner = nullptr;
+    std::unique_ptr<nsMetalRenderTexture> _depthView;
     id<MTLDevice> _device = nil;
     id<MTLTexture> _colorTexture = nil;
     id<MTLTexture> _depthStencilTexture = nil;

@@ -35,7 +35,7 @@ public:
 	const char* StateGetPath(IRenState *state) override;
 	void StateRelease(IRenState *state) override;
 	void StateApply(IRenState *state) override;
-	void ClearScene(uint flags) override;
+    void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) override;
 	bool BeginScene() override;
 	nsBitmapData::tSP CaptureScreen() override;
 	void EndScene() override;
@@ -59,6 +59,8 @@ public:
 
 	IRenderTexture * RenderTextureCreate(int width, int height, texfmt_t) override;
 	void RenderTextureBind(IRenderTexture *rt) override;
+	IRenderTexture *GetRenderTarget() const override { return _renderTextures.GetCurrent(); }
+    void RenderTextureRelease(IRenderTexture *target) override;
 
 private:
 

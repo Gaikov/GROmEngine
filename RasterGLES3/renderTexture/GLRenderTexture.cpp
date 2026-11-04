@@ -116,10 +116,16 @@ bool nsGLRenderTexture::UploadToGPU() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // depth with stencil
-    glGenRenderbuffers(1, &_zstencil);
-    glBindRenderbuffer(GL_RENDERBUFFER, _zstencil);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _width, _height);
-    GL_CHECK_R("glRenderbufferStorage - GL_DEPTH24_STENCIL8", false);
+    glGenTextures(1, &_zstencil);
+    glBindTexture(GL_TEXTURE_2D, _zstencil);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, _width, _height, 0,
+        GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+    GL_CHECK_R("sampled depth storage", false);
 
     // frame buffer object
     glGenFramebuffers(1, &_fbo);
@@ -127,8 +133,8 @@ bool nsGLRenderTexture::UploadToGPU() {
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _zstencil);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _zstencil);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _zstencil, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, _zstencil, 0);
 
     // check status
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -143,6 +149,7 @@ bool nsGLRenderTexture::UploadToGPU() {
 
 void nsGLRenderTexture::UnloadFromGPU() {
     ++_bindingVersion;
+    _depthView.Invalidate();
     if (_fbo) {
         Log::Info("...release render texture: %ix%i", _width, _height);
 
@@ -150,7 +157,7 @@ void nsGLRenderTexture::UnloadFromGPU() {
         _fbo = 0;
     }
     if (_zstencil) {
-        glDeleteRenderbuffers(1, &_zstencil);
+        glDeleteTextures(1, &_zstencil);
         _zstencil = 0;
     }
     if (_texture) {
@@ -162,4 +169,10 @@ void nsGLRenderTexture::UnloadFromGPU() {
 void nsGLRenderTexture::GetSize(int &width, int &height) {
     width = _width;
     height = _height;
+}
+
+bool nsGLRenderTexture::nsDepthView::Bind() {
+    if (!_owner._fbo && !_owner.UploadToGPU()) return false;
+    glBindTexture(GL_TEXTURE_2D, _owner._zstencil);
+    return true;
 }

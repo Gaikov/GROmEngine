@@ -1,5 +1,4 @@
-#ifndef _MATRIX4_H_
-#define _MATRIX4_H_
+#pragma once
 
 #include "Vec3.h"
 #include "MathTools.h"
@@ -167,21 +166,22 @@ public:
 	inline operator const float*() const;
 
 	inline void Project( nsVec3 &v );
+
+    // Accepts an aliased result. On failure, result is unchanged.
+    [[nodiscard]] bool Inverse(nsMatrix &result) const;
 };
 
-inline nsMatrix& operator * ( const nsMatrix &a, const nsMatrix &b )
-{
-	static	nsMatrix	res;
-	for ( int i = 0; i < 4; i++ )
-		for ( int j = 0; j < 4; j++ )
-		{
-			float sum = 0;
-			for ( int k = 0; k < 4; k++ )
-				sum += a.m[i][k] * b.m[k][j];
-			res.m[i][j] = sum;
-		}
-
-	return res;
+inline nsMatrix operator*(const nsMatrix &a, const nsMatrix &b) {
+    nsMatrix result;
+    for (auto row = 0; row < 4; ++row) {
+        for (auto column = 0; column < 4; ++column) {
+            auto sum = 0.0f;
+            for (auto k = 0; k < 4; ++k)
+                sum += a.m[row][k] * b.m[k][column];
+            result.m[row][column] = sum;
+        }
+    }
+    return result;
 }
 
 inline void operator *= ( nsVec3 &v, const nsMatrix &m )
@@ -298,5 +298,3 @@ void nsMatrix::Project( nsVec3 &v )
 	res *= w;
 	v = res;
 }
-
-#endif

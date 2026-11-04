@@ -82,7 +82,7 @@ public:
 	virtual void			StateApply( IRenState *state );
 
 	//scene functions
-	virtual void			ClearScene( uint flags );
+    void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) override;
 	virtual bool			BeginScene();
 	virtual	void			EndScene();
 

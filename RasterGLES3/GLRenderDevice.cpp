@@ -96,7 +96,6 @@ bool GLRenderDevice::PrepareOpenGL() {
 	ApplyProjectionMatrix();
 
 	glDepthFunc(GL_LEQUAL);
-	glClearColor(0, 0, 0, 0);
 
 	return true;
 }
@@ -227,24 +226,21 @@ void GLRenderDevice::StateApply(IRenState *state)
 	ApplySampler();
 }
 
-void GLRenderDevice::ClearScene(uint flags)
-{
-	GLbitfield glBits    = 0;
-
-	if (CLR_CBUFF & flags)
-	{
-		glBits |= GL_COLOR_BUFFER_BIT;
-	}
-	if (CLR_ZBUFF & flags)
-	{
-		glBits |= GL_DEPTH_BUFFER_BIT;
-		glDepthMask(GL_TRUE);
-	}
+void GLRenderDevice::ClearScene(uint flags, const nsColor &color) {
+    GLbitfield glBits = 0;
+    if (flags & CLR_CBUFF) {
+        glClearColor(color.r, color.g, color.b, color.a);
+        glBits |= GL_COLOR_BUFFER_BIT;
+    }
+    if (flags & CLR_ZBUFF) {
+        glBits |= GL_DEPTH_BUFFER_BIT;
+        glDepthMask(GL_TRUE);
+    }
     if (CLR_STENCIL & flags) {
         glBits |= GL_STENCIL_BUFFER_BIT;
     }
-	glClear(glBits);
-	GL_CHECK_HOT_R("glClear",)
+    glClear(glBits);
+    GL_CHECK_HOT_R("glClear",)
 }
 
 bool GLRenderDevice::BeginScene()
@@ -610,6 +606,17 @@ void GLRenderDevice::RenderTextureBind(IRenderTexture *rt) {
 	// Binding a target changes the effective projection even when the caller
 	// keeps the same projection matrix across render passes.
 	ApplyProjectionMatrix();
+}
+
+void GLRenderDevice::RenderTextureRelease(IRenderTexture *target) {
+    if (!target) return;
+    if (GetRenderTarget() == target) RenderTextureBind(nullptr);
+    for (auto slot = 0u; slot < 2; ++slot) {
+        const auto bound = _textures.GetBoundTexture(slot);
+        if (bound == dynamic_cast<nsGLBaseTexture *>(target)
+            || bound == dynamic_cast<nsGLBaseTexture *>(target->GetDepthTexture())) TextureBind(nullptr, slot);
+    }
+    _renderTextures.Remove(dynamic_cast<nsGLRenderTexture *>(target));
 }
 
 IStencilState *GLRenderDevice::StencilLoad(const char *fileName) {

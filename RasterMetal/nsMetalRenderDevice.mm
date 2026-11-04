@@ -349,7 +349,10 @@ void nsMetalRenderDevice::EndScene() {
     SubmitFrame();
 }
 
-void nsMetalRenderDevice::ClearScene(uint flags) {
+void nsMetalRenderDevice::ClearScene(uint flags, const nsColor &clearColor) {
+    if (flags & CLR_CBUFF) {
+        _pendingClearColor = MTLClearColorMake(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    }
     _pendingClearFlags |= flags;
     if (!_encoder) {
         return;
@@ -772,6 +775,18 @@ bool nsMetalRenderDevice::GetActiveFrameContext(nsMetalFrameContext &context) co
     return true;
 }
 
+void nsMetalRenderDevice::RenderTextureRelease(IRenderTexture *target) {
+    if (!target) return;
+    const auto found = std::find(_allocatedRenderTextures.begin(), _allocatedRenderTextures.end(), target);
+    if (found == _allocatedRenderTextures.end()) return;
+    if (_currentRenderTexture == target) RenderTextureBind(nullptr);
+    for (auto slot = 0u; slot < 2; ++slot)
+        if (_sampledRenderTextures[slot] == target || _sampledRenderTextures[slot] == target->GetDepthTexture())
+            TextureBind(nullptr, slot);
+    _allocatedRenderTextures.erase(found);
+    delete static_cast<nsMetalRenderTexture *>(target);
+}
+
 void nsMetalRenderDevice::EnsureDepthStencilTexture(int width, int height) {
 	if (_depthStencilTexture &&
 	    _depthStencilTexture.width == width &&
@@ -796,7 +811,7 @@ MTLRenderPassDescriptor *nsMetalRenderDevice::CreatePassDescriptor(id<MTLTexture
         ? MTLLoadActionClear
         : MTLLoadActionLoad;
     passDesc.colorAttachments[0].storeAction = MTLStoreActionStore;
-    passDesc.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 0);
+    passDesc.colorAttachments[0].clearColor = _pendingClearColor;
 
     if (depthStencilTexture) {
         passDesc.depthAttachment.texture = depthStencilTexture;

@@ -3,6 +3,7 @@
 //
 
 #include "GLRenderTexturesCache.h"
+#include <algorithm>
 
 bool nsGLRenderTexturesCache::Init() {
     _hasFeature = nsGLRenderTexture::InitGLExtensionsFBO();
@@ -42,6 +43,14 @@ void nsGLRenderTexturesCache::Release() {
         delete t;
     }
     _textures.clear();
+}
+
+void nsGLRenderTexturesCache::Remove(nsGLRenderTexture *target) {
+    const auto found = std::find(_textures.begin(), _textures.end(), target);
+    if (found == _textures.end()) return;
+    if (_current == target) Bind(nullptr);
+    _textures.erase(found);
+    delete target;
 }
 
 void nsGLRenderTexturesCache::UnloadFromGPU() {

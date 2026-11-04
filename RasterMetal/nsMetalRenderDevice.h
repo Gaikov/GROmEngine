@@ -49,7 +49,7 @@ public:
     void StateRelease(IRenState *state) override;
     void StateApply(IRenState *state) override;
 
-    void ClearScene(uint flags) override;
+    void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) override;
     bool BeginScene() override;
     nsBitmapData::tSP CaptureScreen() override;
     void EndScene() override;
@@ -73,6 +73,8 @@ public:
 
     IRenderTexture* RenderTextureCreate(int width, int height, texfmt_t fmt) override;
     void RenderTextureBind(IRenderTexture *rt) override;
+    IRenderTexture *GetRenderTarget() const override { return _currentRenderTexture; }
+    void RenderTextureRelease(IRenderTexture *target) override;
 
     id<MTLDevice> GetMetalDevice() const { return _device; }
     bool GetActiveFrameContext(nsMetalFrameContext &context) const;
@@ -108,6 +110,7 @@ private:
 	nsMatrix _viewMatrix;
 	nsColor  _currentColor = nsColor::white;
 	uint _pendingClearFlags = CLR_ALL;
+    MTLClearColor _pendingClearColor = MTLClearColorMake(0, 0, 0, 0);
 	uint _frameIndex = 0;
 	bool _queryRestart = false;
 

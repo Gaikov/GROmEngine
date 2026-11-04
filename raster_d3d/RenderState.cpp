@@ -660,8 +660,7 @@ void CRenderState::StateApply( IRenState *state )
 //---------------------------------------------------------
 // CRenderState::ClearScene: 
 //---------------------------------------------------------
-void CRenderState::ClearScene( uint flags )
-{
+void CRenderState::ClearScene(uint flags, const nsColor &color) {
 	DWORD	f = 0;
 	
 	if ( flags & CLR_ZBUFF )
@@ -671,7 +670,7 @@ void CRenderState::ClearScene( uint flags )
 		f |= D3DCLEAR_TARGET;
 
 	HRESULT	hr;
-	hr = m_pdev->Clear( 0, NULL,  f, D3DCOLOR_XRGB(0,0,0), 1.0f, 0 );
+	hr = m_pdev->Clear( 0, NULL, f, D3DCOLOR_COLORVALUE(color.r, color.g, color.b, color.a), 1.0f, 0 );
 	if ( FAILED(hr) )
 		d3d_FatalError( "Clear", hr );	
 }

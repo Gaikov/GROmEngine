@@ -32,7 +32,7 @@ public:
 	IRenState *StateLoad(const char *fileName) override;
 	void StateRelease(IRenState *state) override;
 	void StateApply(IRenState *state) override;
-	void ClearScene(uint flags) override;
+    void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) override;
 	bool BeginScene() override;
 	void EndScene() override;
 	void LoadProjMatrix(const float *m) override;

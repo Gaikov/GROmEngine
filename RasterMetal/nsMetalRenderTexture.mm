@@ -7,6 +7,7 @@
 
 nsMetalRenderTexture::nsMetalRenderTexture(id<MTLDevice> device, int width, int height, texfmt_t fmt)
     : _device(device), _width(width), _height(height), _fmt(fmt) {
+    _depthView.reset(new nsMetalRenderTexture(this));
 }
 
 nsMetalRenderTexture::~nsMetalRenderTexture() {
@@ -29,7 +30,7 @@ bool nsMetalRenderTexture::Upload() {
                                                                                          width:_width
                                                                                         height:_height
                                                                                      mipmapped:NO];
-    depthDesc.usage = MTLTextureUsageRenderTarget;
+    depthDesc.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
     _depthStencilTexture = [_device newTextureWithDescriptor:depthDesc];
 
     if (!_colorTexture || !_depthStencilTexture) {
@@ -52,11 +53,13 @@ void nsMetalRenderTexture::EnsureSize(int width, int height) {
 }
 
 void nsMetalRenderTexture::GetSize(int &width, int &height) {
+    if (_depthOwner) { _depthOwner->GetSize(width, height); return; }
     width = _width;
     height = _height;
 }
 
 uint64_t nsMetalRenderTexture::GetId() {
+    if (_depthOwner) return reinterpret_cast<uint64_t>(_depthOwner->GetDepthStencilTexture());
     Upload();
     return reinterpret_cast<uint64_t>(_colorTexture);
 }
@@ -72,6 +75,11 @@ id<MTLTexture> nsMetalRenderTexture::GetDepthStencilTexture() {
 }
 
 bool nsMetalRenderTexture::Bind(id<MTLRenderCommandEncoder> encoder, int index) {
+    if (_depthOwner) {
+        auto texture = _depthOwner->GetDepthStencilTexture();
+        [encoder setFragmentTexture:texture atIndex:index];
+        return texture != nil;
+    }
     if (!Upload()) return false;
     [encoder setFragmentTexture:_colorTexture atIndex:index];
     return true;
