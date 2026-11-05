@@ -13,6 +13,7 @@
 #include "Core/time/Time.h"
 #include "env/Env.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 
@@ -54,6 +55,7 @@ bool DesktopPlatform::Init() {
 #endif
 
     _display = glfwGetPrimaryMonitor();
+    _firstDisplayMode = true;
 
     return true;
 }
@@ -158,8 +160,43 @@ void DesktopPlatform::GetDisplayModes(Platform::tDisplayModesList &result) {
     }
 }
 
+#if !defined(WEB_ASM)
+static bool FitStartupWindow(GLFWwindow *window, GLFWmonitor *display, int &width, int &height, int &x, int &y) {
+    if (!display || width <= 0 || height <= 0) return false;
+
+    int availableWidth, availableHeight;
+    glfwGetMonitorWorkarea(display, &x, &y, &availableWidth, &availableHeight);
+    if (availableWidth <= 0 || availableHeight <= 0) {
+        const auto *mode = glfwGetVideoMode(display);
+        if (!mode) return false;
+        glfwGetMonitorPos(display, &x, &y);
+        availableWidth = mode->width;
+        availableHeight = mode->height;
+    }
+
+    int left, top, right, bottom;
+    glfwGetWindowFrameSize(window, &left, &top, &right, &bottom);
+    availableWidth -= left + right;
+    availableHeight -= top + bottom;
+    if (availableWidth <= 0 || availableHeight <= 0
+        || (width <= availableWidth && height <= availableHeight)) return false;
+
+    const auto scale = std::min(static_cast<double>(availableWidth) / width,
+                                static_cast<double>(availableHeight) / height);
+    width = std::clamp(static_cast<int>(width * scale), 1, availableWidth);
+    height = std::clamp(static_cast<int>(height * scale), 1, availableHeight);
+    x += left + (availableWidth - width) / 2;
+    y += top + (availableHeight - height) / 2;
+    return true;
+}
+#endif
+
 bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, int bits, int frequency) {
 #if !defined(WEB_ASM)
+    int startupX = 0;
+    int startupY = 0;
+    const auto fitted = _firstDisplayMode && !fullScreen
+        && FitStartupWindow(_wnd, _display, width, height, startupX, startupY);
     glfwGetError(nullptr);
 
     Log::Info("Applying display mode: %ix%i...", width, height);
@@ -170,8 +207,9 @@ bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, i
         glfwSetWindowMonitor(_wnd, nullptr, 0, 0, width, height,0);
 
         if (_display) {
-            auto mode = glfwGetVideoMode(_display);
-            if (mode) {
+            if (fitted) {
+                glfwSetWindowPos(_wnd, startupX, startupY);
+            } else if (const auto *mode = glfwGetVideoMode(_display)) {
                 int posX = (mode->width - width) / 2;
                 int posY = (mode->height - height) / 2;
                 glfwSetWindowPos(_wnd, posX, posY);
@@ -189,6 +227,7 @@ bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, i
         Sys_Message("Can't apply display mode: %ix%i", width, height);
         return false;
     }
+    _firstDisplayMode = false;
 
 
     //glfwSwapInterval(r_vsync->Bool() ? 1 : 0);

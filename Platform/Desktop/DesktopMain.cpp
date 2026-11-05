@@ -1,6 +1,12 @@
 //
 // Created by Roman on 5/3/2024.
 //
+#include <cstdlib>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "DesktopPlatform.h"
 #include "nsLib/log.h"
 #include "Engine/engine.h"
@@ -23,8 +29,12 @@ Platform *App_GetPlatform() {
 
 static bool success = false;
 
-void onExit() {
-    printf("======== AtExit =======\n");
+static void Shutdown() {
+    static bool released = false;
+    if (released) return;
+    released = true;
+
+    printf("======== Shutdown =======\n");
 
     nsEngine::Release(!success);
     nsEnv::Destroy();
@@ -32,9 +42,10 @@ void onExit() {
     nsVisualObject2d::LeaksCheck();
 }
 
-int main(int argc, char *argv[]) {
-    std::atexit(onExit);
+static int RunDesktopApp(int argc, char *argv[]) {
+    std::atexit(Shutdown);
     if (!nsEnv::Create()) {
+        Shutdown();
         return -1;
     }
 
@@ -89,5 +100,17 @@ int main(int argc, char *argv[]) {
     }
 
     g_args.Clear();
+    // Release application integrations before process finalizers run.
+    Shutdown();
     return 0;
 }
+
+int main(int argc, char *argv[]) {
+    return RunDesktopApp(argc, argv);
+}
+
+#ifdef _WIN32
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+    return RunDesktopApp(__argc, __argv);
+}
+#endif

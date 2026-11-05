@@ -10,6 +10,7 @@
 
 #ifdef __APPLE__
 void DesktopRunFrame();
+void DesktopApplyAppIcon();
 #endif
 
 bool nsEnv::Init() {
@@ -38,6 +39,9 @@ void nsEnv::GetClientSize(int &width, int &height) const {
 
 GLFWwindow* nsEnv::CreateGameWindow() {
     _wnd = glfwCreateWindow(800, 600, "GROm Engine", nullptr, nullptr);
+#ifdef __APPLE__
+    if (_wnd) DesktopApplyAppIcon();
+#endif
     return _wnd;
 }
 

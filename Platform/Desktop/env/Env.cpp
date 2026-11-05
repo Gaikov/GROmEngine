@@ -8,18 +8,33 @@
 static std::vector<int> mouseButtons;
 nsEnv *nsEnv::_shared = nullptr;
 
+static void GetPointerScale(GLFWwindow *window, double &scaleX, double &scaleY) {
+#ifdef __EMSCRIPTEN__
+    float contentScaleX;
+    float contentScaleY;
+    glfwGetWindowContentScale(window, &contentScaleX, &contentScaleY);
+    scaleX = contentScaleX;
+    scaleY = contentScaleY;
+#else
+    int windowWidth, windowHeight;
+    int framebufferWidth, framebufferHeight;
+    glfwGetWindowSize(window, &windowWidth, &windowHeight);
+    glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+    scaleX = windowWidth > 0 && framebufferWidth > 0 ? double(framebufferWidth) / windowWidth : 1.0;
+    scaleY = windowHeight > 0 && framebufferHeight > 0 ? double(framebufferHeight) / windowHeight : 1.0;
+#endif
+}
+
 void nsEnv::WindowToClientCoordinates(double &x, double &y) const {
-    float scaleX;
-    float scaleY;
-    glfwGetWindowContentScale(_wnd, &scaleX, &scaleY);
+    double scaleX, scaleY;
+    GetPointerScale(_wnd, scaleX, scaleY);
     x *= scaleX;
     y *= scaleY;
 }
 
 void nsEnv::ClientToWindowCoordinates(double &x, double &y) const {
-    float scaleX;
-    float scaleY;
-    glfwGetWindowContentScale(_wnd, &scaleX, &scaleY);
+    double scaleX, scaleY;
+    GetPointerScale(_wnd, scaleX, scaleY);
     x /= scaleX;
     y /= scaleY;
 }

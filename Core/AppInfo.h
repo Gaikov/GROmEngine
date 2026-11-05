@@ -21,6 +21,7 @@ public:
 	virtual void            ConfigurePackage(nsPackage &) {}
 	virtual bool            Init() { return true; }
 	virtual void            Release() {}
+    virtual const char *GetAppIconPath() const { return nullptr; }
 
 	virtual const char*		GetAppName() = 0;
 	

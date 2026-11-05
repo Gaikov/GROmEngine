@@ -1,7 +1,25 @@
 #import <AppKit/AppKit.h>
 
+#include "Core/AppInfo.h"
 #include "env/Env.h"
 #include "nsLib/log.h"
+
+void DesktopApplyAppIcon() {
+    const auto *path = App_GetInfo()->GetAppIconPath();
+    if (!path) return;
+
+    @autoreleasepool {
+        auto *image = [[NSImage alloc] initWithContentsOfFile:[NSString stringWithUTF8String:path]];
+        if (image) {
+            [NSApp setApplicationIconImage:image];
+        } else {
+            Log::Warning("Can't load app icon: %s", path);
+        }
+#if !__has_feature(objc_arc)
+        [image release];
+#endif
+    }
+}
 
 void nsEnv::MessagePopup(const char *title, const char *message) {
     @autoreleasepool {

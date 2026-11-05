@@ -80,6 +80,7 @@ private:
 
     GLFWwindow  *_wnd = nullptr;
     GLFWmonitor *_display = nullptr;
+    bool _firstDisplayMode = true;
     ISoftInput::sp_t _softInput;
     nsVar   *_useSoftInput = nullptr;
     nsFilePath _internalRoot = "";
