@@ -11,6 +11,7 @@
 #define	GVF_SAVABLE		1u	//gets saved into config always
 #define GVF_READONLY	2u	//readonly and does not get saved into config except gc_savevars is set
 #define GVF_INTERNAL	4u	//never gets saved into config file and readonly
+#define GVF_SESSION     8u  //console writable, excluded from config load/save
 //empty flags means that a var will not be saved except gc_savevars is set (debugging vars for example)
 
 //-----------------------------------------------------

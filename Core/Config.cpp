@@ -176,7 +176,7 @@ void nsConfig::SaveConfig(const char *fileName, bool forceFile) {
 
     for (nsVar *var = _varList; var; var = var->m_next) {
         if ((var->m_flags & GVF_SAVABLE || gc_savevars->Bool())
-            && !(var->m_flags & GVF_INTERNAL))
+            && !(var->m_flags & (GVF_INTERNAL | GVF_SESSION)))
             out->Printf("%s \"%s\"\n", var->GetName(), var->String());
     }
 }
@@ -283,7 +283,7 @@ nsVar* nsConfig::RegVar( const char* varName, const char* defValue, uint flags )
 	var->m_next = _varList;
 	_varList = var;
 	
-	if ( (flags & GVF_INTERNAL) ) return var;
+	if ( flags & (GVF_INTERNAL | GVF_SESSION) ) return var;
 
 	const char *str = GetConfigValue(varName, GetDefaultConfig());
 	if ( str )

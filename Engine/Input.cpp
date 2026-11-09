@@ -164,6 +164,7 @@ void nsInput::Process()
 {
     auto platform = App_GetPlatform();
     m_bAnyKey = false;
+    _varPressCount = 0;
 
     int mouseX, mouseY;
     platform->GetCursorPos(mouseX, mouseY);
@@ -255,6 +256,7 @@ void nsInput::Process()
 //---------------------------------------------------------
 void nsInput::ReleaseAllKeys()
 {
+    _varPressCount = 0;
 	for ( int i = 0; i < KEYBOARD_MAX_KEYS; i++ )
 	{
 		if ( m_kbPrev[i] && !m_awaitRelease[i] )
@@ -272,6 +274,15 @@ void nsInput::ReleaseAllKeys()
 			m_joyPrev[i] = false;
 		}
 	}
+}
+
+//--- nsInput::GetVarPressDirection: ---
+int nsInput::GetVarPressDirection(const nsVar *var) const {
+    for (auto i = _varPressCount; i > 0; --i) {
+        const auto &press = _varPresses[i - 1];
+        if (press.var == var) return press.direction;
+    }
+    return 0;
 }
 
 //---------------------------------------------------------
@@ -633,6 +644,7 @@ void nsInput::KeyDown(KeyBinding_t *key)
 {
 	if ( key->type == IC_VAR )
 	{
+		_varPresses[_varPressCount++] = {key->var, key->inc ? 1 : -1};
 		if ( key->inc )
             key->var->Inc();
 		else

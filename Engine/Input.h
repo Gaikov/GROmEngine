@@ -1,5 +1,4 @@
-#ifndef _INPUT_H_
-#define _INPUT_H_
+#pragma once
 
 #include "nsLib/StrTools.h"
 #include "Core/Config.h"
@@ -55,6 +54,7 @@ public:
 	void			Process();
 
 	void			ReleaseAllKeys();
+    int GetVarPressDirection(const nsVar *var) const;
 
 	void			Unbind( const char *var_cmd );
 	int				GetBind( const char *var_cmd, nsString **keys );
@@ -77,6 +77,12 @@ private:
 	KeyBinding_t	m_inKeys[KEYBOARD_MAX_KEYS]{};
 	bool			m_kbPrev[KEYBOARD_MAX_KEYS]{};
 	bool			m_awaitRelease[KEYBOARD_MAX_KEYS]{};
+    struct nsVarPress {
+        const nsVar *var;
+        int direction;
+    };
+    nsVarPress _varPresses[KEYBOARD_MAX_KEYS + 8];
+    int _varPressCount = 0;
 
 	bool			_cursorVisible = true;	//cursor state (hidden/visible)
     bool            _cursorInClient = false;
@@ -108,7 +114,7 @@ private:
 	KeyBinding_t*		GetKey( const char *name );
 	static void			KeyPressed( KeyBinding_t *key );
 	static void			KeyUp( KeyBinding_t *key );
-	static void			KeyDown( KeyBinding_t *key );
+	void			KeyDown( KeyBinding_t *key );
 
 	static void			GetJoyState( bool keys[8] );
 
@@ -116,5 +122,3 @@ private:
 };
 
 extern	nsInput		g_inp;
-
-#endif
