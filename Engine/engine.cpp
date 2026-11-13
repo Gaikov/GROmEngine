@@ -217,6 +217,8 @@ void nsEngine::MainLoop()
 		}
 	}
 
+    App_GetPlatform()->UpdateGamepads();
+
 	nsRenderStats::BeginFrame(r_render_stats && r_render_stats->Bool());
 	{
 		const float adjustedMs = (float)frametime + g_timeCarryMs;

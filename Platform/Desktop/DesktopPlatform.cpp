@@ -56,6 +56,7 @@ bool DesktopPlatform::Init() {
 
     _display = glfwGetPrimaryMonitor();
     _firstDisplayMode = true;
+    _gamepads.Init();
 
     return true;
 }
@@ -69,6 +70,7 @@ void DesktopPlatform::UpdateSoftInput() {
 }
 
 void DesktopPlatform::Release() {
+    _gamepads.Release();
     Log::Info("##### Release Desktop #####");
 
     if (_wnd) {

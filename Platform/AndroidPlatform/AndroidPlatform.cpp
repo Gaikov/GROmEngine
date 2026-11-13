@@ -62,6 +62,7 @@ bool AndroidPlatform::Init() {
 }
 
 void AndroidPlatform::Release() {
+    _gamepads.Release();
     r_frame_pacing = nullptr;
     _activity = nullptr;
     _softInput = nullptr;

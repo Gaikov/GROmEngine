@@ -16,7 +16,8 @@ set(TESTS
         serialization/SerializeUtilsTest.cpp
         undo/UndoTest.cpp
         memory/FastMem.cpp
-        memory/MemoryTest.cpp)
+        memory/MemoryTest.cpp
+        input/GamepadRegistryTest.cpp)
 
 add_executable(Core_unit ${TESTS})
 

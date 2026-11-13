@@ -95,6 +95,9 @@ public:
     bool IsKeyPressed(int) override { return false; }
     const char *GetKeyName(int) override { return ""; }
     ISoftInput *GetSoftInput() override { return nullptr; }
+    void UpdateGamepads() override {}
+    int GetGamepadCount() const override { return 0; }
+    const IGamepad* GetGamepad(int) override { return nullptr; }
     unsigned int GetTime() override { return 0; }
     void MessagePopup(const char *, const char *) override {}
     void Minimize() override {}

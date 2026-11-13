@@ -10,6 +10,7 @@
 #include "GLNativeContext.h"
 #include "AndroidCommon.h"
 #include "JavaObject.h"
+#include "AndroidGamepads.h"
 #include <string>
 #include <vector>
 
@@ -40,6 +41,12 @@ public:
     void ShowCursor(bool show) override;
 
     bool IsKeyPressed(int key) override;
+    void UpdateGamepads() override { _gamepads.Update(); }
+    int GetGamepadCount() const override { return _gamepads.GetCount(); }
+    const IGamepad* GetGamepad(int index) override { return _gamepads.GetGamepad(index); }
+    bool HandleGamepadKey(const GameActivityKeyEvent& event) { return _gamepads.HandleKey(event); }
+    bool HandleGamepadMotion(const GameActivityMotionEvent& event) { return _gamepads.HandleMotion(event); }
+    void ClearGamepadInput() { _gamepads.ClearInput(); }
 
     const char *GetKeyName(int key) override;
 
@@ -97,6 +104,7 @@ private:
     AAssetManager *_assetManager;
     GLNativeContext *_glContext;
     AndroidKeyboard _keyboard;
+    nsAndroidGamepads _gamepads;
     ImagesDecoder _imagesDecoder;
     std::string _internalDataPath;
     int _screenWidth;

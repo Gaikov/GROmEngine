@@ -8,6 +8,7 @@ set(sources
         AndroidLogPolicy.cpp
         JavaObject.cpp
         AndroidKeyboard.cpp
+        AndroidGamepads.cpp
         GLNativeContext.cpp
 )
 
@@ -19,4 +20,5 @@ add_library(AndroidPlatform
 )
 
 find_package(games-frame-pacing REQUIRED CONFIG)
-target_link_libraries(AndroidPlatform PUBLIC games-frame-pacing::swappy_static)
+find_package(game-activity REQUIRED CONFIG)
+target_link_libraries(AndroidPlatform PUBLIC games-frame-pacing::swappy_static game-activity::game-activity_static)

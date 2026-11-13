@@ -8,6 +8,7 @@
 #include "Core/DataWriter.h"
 #include "nsLib/FilePath.h"
 #include "input/ISoftInput.h"
+#include "input/IGamepad.h"
 
 class Platform {
 public:
@@ -37,6 +38,9 @@ public:
     virtual bool IsKeyPressed(int key) = 0;
     virtual const char* GetKeyName(int key) = 0;
     virtual ISoftInput* GetSoftInput() = 0;
+    virtual void UpdateGamepads() = 0;
+    virtual int GetGamepadCount() const = 0;
+    virtual const IGamepad* GetGamepad(int index) = 0;
 
     //Time
     virtual unsigned int GetTime() = 0;

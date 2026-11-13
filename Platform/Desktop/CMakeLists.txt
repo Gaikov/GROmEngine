@@ -4,17 +4,20 @@ project(Platform)
 if (WEB_ASM)
     set(env-sources
             env/web/WebEnv.cpp
+            env/web/WebGamepads.cpp
     )
 elseif (CMAKE_SYSTEM_NAME STREQUAL Windows)
     find_package(glfw3 REQUIRED)
     set(env-sources
             env/desktop/DesktopEnv.cpp
             env/desktop/DesktopEnvWin.cpp
+            input/DesktopGamepads.cpp
     )
 else ()
     find_package(glfw3 REQUIRED)
     set(env-sources
             env/desktop/DesktopEnv.cpp
+            input/DesktopGamepads.cpp
     )
     if (APPLE)
         list(APPEND env-sources
