@@ -21,6 +21,17 @@ set(TESTS
 
 add_executable(Core_unit ${TESTS})
 
+if (APPLE AND NOT WEB_ASM)
+    find_package(glfw3 REQUIRED)
+    set(APPLE_GAMEPAD_SOURCES
+            input/AppleGamepadTest.mm
+            ../Platform/Desktop/input/apple/AppleGamepad.mm
+            ../Platform/Desktop/input/apple/AppleGamepads.mm)
+    set_source_files_properties(${APPLE_GAMEPAD_SOURCES} PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+    target_sources(Core_unit PRIVATE ${APPLE_GAMEPAD_SOURCES})
+    target_link_libraries(Core_unit glfw ${APPKIT_FRAMEWORK} ${GAMECONTROLLER_FRAMEWORK} ${IOKIT_FRAMEWORK})
+endif ()
+
 target_link_libraries(Core_unit
         Core
         nsLib

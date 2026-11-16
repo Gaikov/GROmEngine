@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-// Platform-owned, read-only snapshot. Reacquire after UpdateGamepads(): a
+// Platform-owned, read-only snapshot. Reacquire after IGamepads::Update(): a
 // disconnected device is destroyed there, while surviving devices stay put.
 class IGamepad {
 public:

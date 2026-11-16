@@ -317,9 +317,9 @@ nsInput::nsGamepadState* nsInput::FindGamepad(uint64_t connectionId) {
 }
 
 const IGamepad* nsInput::FindPlatformGamepad(uint64_t connectionId) {
-    const auto platform = App_GetPlatform();
-    for (auto i = 0; i < platform->GetGamepadCount(); ++i) {
-        const auto pad = platform->GetGamepad(i);
+    const auto gamepads = App_GetPlatform()->GetGamepadsProvider();
+    for (auto i = 0; gamepads && i < gamepads->GetCount(); ++i) {
+        const auto pad = gamepads->GetGamepad(i);
         if (pad && pad->GetConnectionId() == connectionId) return pad;
     }
     return nullptr;
@@ -334,10 +334,10 @@ void nsInput::ReleaseGamepad(nsGamepadState& state) {
 
 void nsInput::SyncGamepads() {
     for (auto& state : _gamepads) state.seen = false;
-    const auto platform = App_GetPlatform();
+    const auto gamepads = App_GetPlatform()->GetGamepadsProvider();
     auto pressCapacity = size_t(KEYBOARD_MAX_KEYS);
-    for (auto i = 0; i < platform->GetGamepadCount(); ++i) {
-        const auto pad = platform->GetGamepad(i);
+    for (auto i = 0; gamepads && i < gamepads->GetCount(); ++i) {
+        const auto pad = gamepads->GetGamepad(i);
         if (!pad) continue;
         const auto count = static_cast<size_t>(std::max(0, pad->GetButtonCount()));
         pressCapacity += count;
@@ -401,10 +401,10 @@ void nsInput::ProcessGamepads() {
         _varPresses.clear();
         return;
     }
-    const auto platform = App_GetPlatform();
+    const auto gamepads = App_GetPlatform()->GetGamepadsProvider();
     const auto generation = _gamepadResetGeneration;
-    for (auto i = 0; i < platform->GetGamepadCount(); ++i) {
-        const auto pad = platform->GetGamepad(i);
+    for (auto i = 0; gamepads && i < gamepads->GetCount(); ++i) {
+        const auto pad = gamepads->GetGamepad(i);
         if (!pad) continue;
         const auto state = FindGamepad(pad->GetConnectionId());
         if (!state) continue;
@@ -624,9 +624,9 @@ bool nsInput::IsAnyKeyPressed()
 		if ( IsKeyPressed( i ) )
 			return true;
 	}
-    const auto platform = App_GetPlatform();
-    for (auto i = 0; i < platform->GetGamepadCount(); ++i) {
-        const auto pad = platform->GetGamepad(i);
+    const auto gamepads = App_GetPlatform()->GetGamepadsProvider();
+    for (auto i = 0; gamepads && i < gamepads->GetCount(); ++i) {
+        const auto pad = gamepads->GetGamepad(i);
         if (pad) {
             for (auto button = 0; button < pad->GetButtonCount(); ++button) if (pad->IsButtonPressed(button)) return true;
         }

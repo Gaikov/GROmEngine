@@ -50,6 +50,25 @@ private:
     uint64_t _id;
 };
 
+class nsFakeGamepads final : public IGamepads {
+public:
+    explicit nsFakeGamepads(int& inputQueries) : _inputQueries(inputQueries) {}
+    void Init() override {}
+    void Release() override { devices.clear(); }
+    void Update() override { ++updates; }
+    int GetCount() const override { ++_inputQueries; return static_cast<int>(devices.size()); }
+    const IGamepad* GetGamepad(int index) override {
+        ++_inputQueries;
+        return index >= 0 && index < static_cast<int>(devices.size()) ? devices[index].get() : nullptr;
+    }
+
+    std::vector<std::unique_ptr<nsFakeGamepad>> devices;
+    int updates = 0;
+
+private:
+    int& _inputQueries;
+};
+
 class nsInputTestPlatform final : public Platform {
 public:
     bool Init() override { return true; }
@@ -67,9 +86,7 @@ public:
     }
     const char* GetKeyName(int key) override { return key == NS_KEY_SPACE ? "space" : nullptr; }
     ISoftInput* GetSoftInput() override { return nullptr; }
-    void UpdateGamepads() override { ++updates; }
-    int GetGamepadCount() const override { ++inputQueries; return static_cast<int>(gamepads.size()); }
-    const IGamepad* GetGamepad(int index) override { ++inputQueries; return gamepads[index].get(); }
+    IGamepads* GetGamepadsProvider() override { return providerAvailable ? &gamepads : nullptr; }
     unsigned int GetTime() override { return 0; }
     void MessagePopup(const char*, const char*) override {}
     void Minimize() override {}
@@ -89,11 +106,11 @@ public:
     void SwapBuffers() override {}
 
     std::array<bool, KEYBOARD_MAX_KEYS> keys{};
-    std::vector<std::unique_ptr<nsFakeGamepad>> gamepads;
+    int inputQueries = 0;
+    nsFakeGamepads gamepads{inputQueries};
+    bool providerAvailable = true;
     std::string defaultConfig;
     std::string currentConfig;
-    int updates = 0;
-    mutable int inputQueries = 0;
 private:
     nsArgs _args;
 };
@@ -121,8 +138,9 @@ protected:
         g_platform.defaultConfig = defaults;
         g_platform.currentConfig = current;
         g_platform.keys.fill(false);
-        g_platform.gamepads.clear();
-        g_platform.updates = 0;
+        g_platform.providerAvailable = true;
+        g_platform.gamepads.devices.clear();
+        g_platform.gamepads.updates = 0;
         g_platform.inputQueries = 0;
         nsConfig::Init();
         nsConsole::Init();
@@ -143,13 +161,13 @@ protected:
         nsConsole::Release();
         nsConfig::Release();
         g_pack.Release();
-        g_platform.gamepads.clear();
+        g_platform.gamepads.devices.clear();
     }
     void TearDown() override { Shutdown(); }
     nsFakeGamepad& AddPad(uint64_t id, int buttons = 8) {
-        g_platform.gamepads.push_back(std::make_unique<nsFakeGamepad>(id, buttons));
+        g_platform.gamepads.devices.push_back(std::make_unique<nsFakeGamepad>(id, buttons));
         g_inp.Process();
-        return *g_platform.gamepads.back();
+        return *g_platform.gamepads.devices.back();
     }
     std::string Save() {
         nsStringWriter writer;
@@ -195,7 +213,7 @@ TEST_F(InputTest, VariablesAndPressDirectionAreIndependentAcrossPadsAndKeyboard)
     first.buttons[0] = false;
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 2);
-    g_platform.gamepads.erase(g_platform.gamepads.begin() + 1);
+    g_platform.gamepads.devices.erase(g_platform.gamepads.devices.begin() + 1);
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 1);
     first.buttons[1] = false;
@@ -203,7 +221,7 @@ TEST_F(InputTest, VariablesAndPressDirectionAreIndependentAcrossPadsAndKeyboard)
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 0);
     EXPECT_FLOAT_EQ(y->Value(), 0);
-    EXPECT_EQ(g_platform.updates, 0);
+    EXPECT_EQ(g_platform.gamepads.updates, 0);
 }
 
 TEST_F(InputTest, CommandsRepeatOncePerProcessPerDeviceAndKeepArguments) {
@@ -225,29 +243,74 @@ TEST_F(InputTest, CommandsRepeatOncePerProcessPerDeviceAndKeepArguments) {
     first.buttons[1] = false;
     g_inp.Process();
     EXPECT_EQ(calls, 11);
-    g_platform.gamepads.erase(g_platform.gamepads.begin() + 1);
+    g_platform.gamepads.devices.erase(g_platform.gamepads.devices.begin() + 1);
     g_inp.Process();
     EXPECT_EQ(calls, 11);
+}
+
+TEST_F(InputTest, MissingProviderIsAnEmptyDeviceListAndKeyboardStillWorks) {
+    g_platform.providerAvailable = false;
+    g_cfg->ExecLine("padcmd 0 tick");
+    g_cfg->ExecLine("keycmd space +axisx");
+    g_inp.Process();
+    EXPECT_FALSE(g_inp.IsAnyKeyPressed());
+    EXPECT_EQ(calls, 0);
+    g_platform.keys[NS_KEY_SPACE] = true;
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 1);
+    EXPECT_TRUE(g_inp.IsAnyKeyPressed());
+    g_inp.ReleaseAllKeys();
+    EXPECT_FLOAT_EQ(x->Value(), 0);
+}
+
+TEST_F(InputTest, LosingProviderReleasesOnlyGamepadContributionsAndRearmsOnReturn) {
+    auto& pad = AddPad(1);
+    g_cfg->ExecLine("padcmd 0 +axisx");
+    g_cfg->ExecLine("padcmd 1 tick");
+    g_cfg->ExecLine("keycmd space +axisx");
+    pad.buttons[0] = pad.buttons[1] = true;
+    g_platform.keys[NS_KEY_SPACE] = true;
+    g_inp.Process();
+    ASSERT_FLOAT_EQ(x->Value(), 2);
+    ASSERT_EQ(calls, 1);
+
+    g_platform.providerAvailable = false;
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 1);
+    EXPECT_EQ(calls, 1);
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 1);
+
+    g_platform.providerAvailable = true;
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 1);
+    EXPECT_EQ(calls, 1);
+    pad.buttons[0] = pad.buttons[1] = false;
+    g_inp.Process();
+    pad.buttons[0] = pad.buttons[1] = true;
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 2);
+    EXPECT_EQ(calls, 2);
 }
 
 TEST_F(InputTest, ConnectAndReconnectHeldButtonsWaitForRelease) {
     g_cfg->ExecLine("padcmd 0 +axisx");
     auto pad = std::make_unique<nsFakeGamepad>(1, 8);
     pad->buttons[0] = true;
-    g_platform.gamepads.push_back(std::move(pad));
+    g_platform.gamepads.devices.push_back(std::move(pad));
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 0);
     EXPECT_FALSE(g_inp.WaitAnyKey());
     EXPECT_TRUE(nsInput::IsAnyKeyPressed());
-    g_platform.gamepads[0]->buttons[0] = false;
+    g_platform.gamepads.devices[0]->buttons[0] = false;
     g_inp.Process();
-    g_platform.gamepads[0]->buttons[0] = true;
+    g_platform.gamepads.devices[0]->buttons[0] = true;
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 1);
-    g_platform.gamepads.clear();
+    g_platform.gamepads.devices.clear();
     auto next = std::make_unique<nsFakeGamepad>(2, 8);
     next->buttons[0] = true;
-    g_platform.gamepads.push_back(std::move(next));
+    g_platform.gamepads.devices.push_back(std::move(next));
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 0);
 }
@@ -269,7 +332,7 @@ TEST_F(InputTest, RebindingAndNoneBalanceOldContributionsAndWaitForRelease) {
     EXPECT_FLOAT_EQ(y->Value(), 1);
     g_cfg->ExecLine("padcmd 0 none");
     EXPECT_FLOAT_EQ(y->Value(), 0);
-    g_platform.gamepads.clear();
+    g_platform.gamepads.devices.clear();
     g_inp.Process();
     EXPECT_FLOAT_EQ(y->Value(), 0);
 }
@@ -320,7 +383,7 @@ TEST_F(InputTest, ResetFocusAndConsoleCancelAndDoNotReapplyHeldButtons) {
     pad.buttons[0] = true;
     g_inp.Process();
     nsConsole::Shared()->Activate(true);
-    g_platform.gamepads.clear();
+    g_platform.gamepads.devices.clear();
     g_inp.Process();
     EXPECT_FLOAT_EQ(x->Value(), 0);
 }
@@ -379,7 +442,7 @@ TEST_F(InputTest, GameplayResetCancelsHeldBindingsBeforeClearingSharedVariables)
         EXPECT_FLOAT_EQ(jump->Value(), 0);
         EXPECT_EQ(g_inp.GetVarPressDirection(jump), 0);
     }
-    g_platform.gamepads.erase(g_platform.gamepads.begin() + 1); // Detach while held.
+    g_platform.gamepads.devices.erase(g_platform.gamepads.devices.begin() + 1); // Detach while held.
     std::fill(first.buttons.begin(), first.buttons.end(), false);
     g_platform.keys[NS_KEY_SPACE] = false;
     g_inp.Process();
@@ -472,7 +535,7 @@ TEST_F(InputTest, ReleaseIsBalancedAndTheConfigWriterDoesNotReadFreedBindings) {
     g_platform.keys[NS_KEY_SPACE] = true;
     g_inp.Process();
     ASSERT_FLOAT_EQ(x->Value(), 2);
-    g_platform.gamepads.clear(); // Native devices may already be unavailable at shutdown.
+    g_platform.gamepads.devices.clear(); // Native devices may already be unavailable at shutdown.
     const auto queries = g_platform.inputQueries;
     g_inp.Release();
     EXPECT_EQ(g_platform.inputQueries, queries);

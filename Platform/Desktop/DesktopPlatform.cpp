@@ -13,6 +13,14 @@
 #include "Core/time/Time.h"
 #include "env/Env.h"
 
+#ifdef WEB_ASM
+#include "env/web/WebGamepads.h"
+#elif defined(__APPLE__)
+#include "input/apple/AppleGamepads.h"
+#else
+#include "input/GlfwGamepads.h"
+#endif
+
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
@@ -56,7 +64,14 @@ bool DesktopPlatform::Init() {
 
     _display = glfwGetPrimaryMonitor();
     _firstDisplayMode = true;
-    _gamepads.Init();
+#ifdef WEB_ASM
+    _gamepads = std::make_unique<nsWebGamepads>();
+#elif defined(__APPLE__)
+    _gamepads = std::make_unique<nsAppleGamepads>();
+#else
+    _gamepads = std::make_unique<nsGlfwGamepads>();
+#endif
+    _gamepads->Init();
 
     return true;
 }
@@ -70,7 +85,10 @@ void DesktopPlatform::UpdateSoftInput() {
 }
 
 void DesktopPlatform::Release() {
-    _gamepads.Release();
+    if (_gamepads) {
+        _gamepads->Release();
+        _gamepads.reset();
+    }
     Log::Info("##### Release Desktop #####");
 
     if (_wnd) {

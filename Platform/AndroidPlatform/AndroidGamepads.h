@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/input/IGamepad.h"
+#include "Engine/input/IGamepads.h"
 #include "Platform/input/GamepadRegistry.h"
 
 struct GameActivityKeyEvent;
@@ -10,17 +10,18 @@ struct nsAndroidGamepadDescription;
 struct nsAndroidGamepadInput;
 struct nsAndroidGamepadChange;
 
-class nsAndroidGamepads {
+class nsAndroidGamepads final : public IGamepads {
 public:
     nsAndroidGamepads();
-    ~nsAndroidGamepads();
-    void Update();
-    void Release();
+    ~nsAndroidGamepads() override;
+    void Init() override {}
+    void Update() override;
+    void Release() override;
     void ClearInput();
     bool HandleKey(const GameActivityKeyEvent& event);
     bool HandleMotion(const GameActivityMotionEvent& event);
-    int GetCount() const { return _devices.GetCount(); }
-    const IGamepad* GetGamepad(int index);
+    int GetCount() const override { return _devices.GetCount(); }
+    const IGamepad* GetGamepad(int index) override;
 
 private:
     void CollectDeviceChanges();

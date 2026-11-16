@@ -57,18 +57,6 @@ static int RunDesktopApp(int argc, char *argv[]) {
 
         glfwPollEvents();
 
-#ifndef WEB_ASM
-        glfwSetJoystickCallback([](int id, int status) {
-            if (status == GLFW_DISCONNECTED) g_desktop.OnGamepadDisconnected(id);
-            else if (status == GLFW_CONNECTED) {
-                int axes = 0, buttons = 0;
-                glfwGetJoystickAxes(id, &axes);
-                glfwGetJoystickButtons(id, &buttons);
-                g_desktop.OnGamepadConnected(id, glfwGetJoystickName(id), axes, buttons);
-            }
-        });
-#endif
-
         glfwSetWindowFocusCallback(wnd, [](GLFWwindow *window, int focused) {
             nsEnv::Shared()->OnWindowFocusChanged( focused != 0 );
         });

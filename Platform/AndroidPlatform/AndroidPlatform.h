@@ -41,9 +41,7 @@ public:
     void ShowCursor(bool show) override;
 
     bool IsKeyPressed(int key) override;
-    void UpdateGamepads() override { _gamepads.Update(); }
-    int GetGamepadCount() const override { return _gamepads.GetCount(); }
-    const IGamepad* GetGamepad(int index) override { return _gamepads.GetGamepad(index); }
+    IGamepads* GetGamepadsProvider() override { return &_gamepads; }
     bool HandleGamepadKey(const GameActivityKeyEvent& event) { return _gamepads.HandleKey(event); }
     bool HandleGamepadMotion(const GameActivityMotionEvent& event) { return _gamepads.HandleMotion(event); }
     void ClearGamepadInput() { _gamepads.ClearInput(); }

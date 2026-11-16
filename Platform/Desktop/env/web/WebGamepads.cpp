@@ -1,4 +1,4 @@
-#include "input/DesktopGamepads.h"
+#include "WebGamepads.h"
 
 #include <cmath>
 #include <emscripten/html5.h>
@@ -44,32 +44,37 @@ private:
     std::vector<uint8_t> _buttons;
 };
 
-nsDesktopGamepads::nsDesktopGamepads() = default;
-nsDesktopGamepads::~nsDesktopGamepads() = default;
+nsWebGamepads::nsWebGamepads() = default;
+nsWebGamepads::~nsWebGamepads() { Release(); }
 
-void nsDesktopGamepads::Init() {
+void nsWebGamepads::Init() {
+    if (_initialized) return;
+    _initialized = true;
     emscripten_set_gamepadconnected_callback(this, false,
         [](int, const EmscriptenGamepadEvent* event, void* data) -> EM_BOOL {
-            static_cast<nsDesktopGamepads*>(data)->QueueConnect(event->index, event->id,
+            static_cast<nsWebGamepads*>(data)->_devices.QueueConnect(event->index, event->id,
                 std::clamp(event->numAxes, 0, static_cast<int>(std::size(event->axis))),
                 std::clamp(event->numButtons, 0, static_cast<int>(std::size(event->digitalButton))));
             return false;
         });
     emscripten_set_gamepaddisconnected_callback(this, false,
         [](int, const EmscriptenGamepadEvent* event, void* data) -> EM_BOOL {
-            static_cast<nsDesktopGamepads*>(data)->QueueDisconnect(event->index);
+            static_cast<nsWebGamepads*>(data)->_devices.QueueDisconnect(event->index);
             return false;
         });
 }
 
-void nsDesktopGamepads::Release() {
-    emscripten_set_gamepadconnected_callback(nullptr, false, nullptr);
-    emscripten_set_gamepaddisconnected_callback(nullptr, false, nullptr);
+void nsWebGamepads::Release() {
+    if (_initialized) {
+        emscripten_set_gamepadconnected_callback(nullptr, false, nullptr);
+        emscripten_set_gamepaddisconnected_callback(nullptr, false, nullptr);
+        _initialized = false;
+    }
     _devices.Clear();
     _sampleAvailable = false;
 }
 
-const IGamepad* nsDesktopGamepads::GetGamepad(int index) {
+const IGamepad* nsWebGamepads::GetGamepad(int index) {
     const auto device = _devices.GetDevice(index);
     if (!device) return nullptr;
     if (!device->gamepad) {
@@ -79,7 +84,8 @@ const IGamepad* nsDesktopGamepads::GetGamepad(int index) {
     return device->gamepad.get();
 }
 
-void nsDesktopGamepads::Update() {
+void nsWebGamepads::Update() {
+    if (!_initialized) return;
     _devices.ApplyChanges();
     const auto count = emscripten_sample_gamepad_data() == EMSCRIPTEN_RESULT_SUCCESS
         ? emscripten_get_num_gamepads() : -1;

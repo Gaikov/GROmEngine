@@ -57,6 +57,7 @@ AndroidPlatform::AndroidPlatform() :
 }
 
 bool AndroidPlatform::Init() {
+    _gamepads.Init();
     r_frame_pacing = g_cfg->RegVar("r_frame_pacing", "1", 0);
     return true;
 }

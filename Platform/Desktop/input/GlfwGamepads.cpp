@@ -1,7 +1,11 @@
-#include "DesktopGamepads.h"
+#include "GlfwGamepads.h"
 
 #include <cmath>
 #include <GLFW/glfw3.h>
+
+namespace {
+nsGlfwGamepads* g_gamepads = nullptr;
+}
 
 class nsDesktopGamepad final : public IGamepad {
 public:
@@ -48,15 +52,35 @@ private:
     std::vector<uint8_t> _buttons;
 };
 
-nsDesktopGamepads::nsDesktopGamepads() = default;
-nsDesktopGamepads::~nsDesktopGamepads() = default;
-void nsDesktopGamepads::Init() {}
+nsGlfwGamepads::nsGlfwGamepads() = default;
+nsGlfwGamepads::~nsGlfwGamepads() { Release(); }
 
-void nsDesktopGamepads::Release() {
+void nsGlfwGamepads::Init() {
+    if (_initialized) return;
+    _initialized = true;
+    g_gamepads = this;
+    glfwSetJoystickCallback([](int id, int status) {
+        if (!g_gamepads) return;
+        if (status == GLFW_DISCONNECTED) g_gamepads->_devices.QueueDisconnect(id);
+        else if (status == GLFW_CONNECTED) {
+            int axes = 0, buttons = 0;
+            glfwGetJoystickAxes(id, &axes);
+            glfwGetJoystickButtons(id, &buttons);
+            g_gamepads->_devices.QueueConnect(id, glfwGetJoystickName(id), axes, buttons);
+        }
+    });
+}
+
+void nsGlfwGamepads::Release() {
+    if (g_gamepads == this) {
+        glfwSetJoystickCallback(nullptr);
+        g_gamepads = nullptr;
+    }
+    _initialized = false;
     _devices.Clear();
 }
 
-const IGamepad* nsDesktopGamepads::GetGamepad(int index) {
+const IGamepad* nsGlfwGamepads::GetGamepad(int index) {
     const auto device = _devices.GetDevice(index);
     if (!device) return nullptr;
     if (!device->gamepad) {
@@ -66,7 +90,8 @@ const IGamepad* nsDesktopGamepads::GetGamepad(int index) {
     return device->gamepad.get();
 }
 
-void nsDesktopGamepads::Update() {
+void nsGlfwGamepads::Update() {
+    if (!_initialized) return;
     _devices.ApplyChanges();
     for (auto id = GLFW_JOYSTICK_1; id <= GLFW_JOYSTICK_LAST; ++id) {
         if (!glfwJoystickPresent(id)) {

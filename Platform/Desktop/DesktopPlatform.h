@@ -11,7 +11,7 @@
 #include "Core/DataWriter.h"
 #include "nsLib/FilePath.h"
 #include "Core/Var.h"
-#include "input/DesktopGamepads.h"
+#include <memory>
 
 class DesktopPlatform final : public Platform {
 public:
@@ -23,13 +23,7 @@ public:
     const char *GetKeyName(int key) override;
 
     bool IsKeyPressed(int key) override;
-    void UpdateGamepads() override { _gamepads.Update(); }
-    int GetGamepadCount() const override { return _gamepads.GetCount(); }
-    const IGamepad* GetGamepad(int index) override { return _gamepads.GetGamepad(index); }
-    void OnGamepadDisconnected(int nativeId) { _gamepads.QueueDisconnect(nativeId); }
-    void OnGamepadConnected(int id, const char* name, int axes, int buttons) {
-        _gamepads.QueueConnect(id, name, axes, buttons);
-    }
+    IGamepads* GetGamepadsProvider() override { return _gamepads.get(); }
 
     void SetCursorPos(int x, int y) override;
 
@@ -85,7 +79,7 @@ public:
 
 private:
     DesktopKeyNames _keyNames;
-    nsDesktopGamepads _gamepads;
+    std::unique_ptr<IGamepads> _gamepads;
 
     GLFWwindow  *_wnd = nullptr;
     GLFWmonitor *_display = nullptr;

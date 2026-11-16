@@ -217,7 +217,7 @@ void nsEngine::MainLoop()
 		}
 	}
 
-    App_GetPlatform()->UpdateGamepads();
+    if (auto gamepads = App_GetPlatform()->GetGamepadsProvider()) gamepads->Update();
 
 	nsRenderStats::BeginFrame(r_render_stats && r_render_stats->Bool());
 	{
