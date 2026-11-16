@@ -99,6 +99,7 @@ if (NOT ANDROID AND NOT WEB_ASM) #TODO: disable tests for non Desktop
     add_subdirectory(nsLib_unit)
     add_dependencies(nsLib_unit nsLib)
     add_subdirectory(Core_unit)
+    add_subdirectory(Input_unit)
     add_dependencies(Core_unit Core)
     add_subdirectory(Http_unit)
     add_dependencies(Http_unit Http)

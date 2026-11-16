@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <vector>
 #include "nsLib/StrTools.h"
 #include "Core/Config.h"
 #include "KeyCodes.h"
+
+class IGamepad;
 
 typedef enum
 {
@@ -18,6 +22,7 @@ typedef struct
 {
 	char		keyname[MAX_KEY_NAME];
 	ic_type_t	type;
+    bool configured; // Explicit padcmd entry, including none.
 
 	union
 	{
@@ -81,42 +86,69 @@ private:
         const nsVar *var;
         int direction;
     };
-    nsVarPress _varPresses[KEYBOARD_MAX_KEYS + 8];
-    int _varPressCount = 0;
+    std::vector<nsVarPress> _varPresses;
 
 	bool			_cursorVisible = true;	//cursor state (hidden/visible)
     bool            _cursorInClient = false;
 
-	KeyBinding_t	m_joyKeys[8]{};
-	bool			m_joyPrev[8]{};
-	bool			m_joyUse;
+    struct nsButtonState {
+        bool previous = false;
+        bool awaitRelease = false;
+    };
+    struct nsGamepadState {
+        uint64_t connectionId;
+        bool seen = false;
+        std::vector<nsButtonState> buttons;
+    };
+    struct nsCommandArgs {
+        int argc;
+        char** argv;
+    };
+    std::vector<KeyBinding_t> _gamepadBindings;
+    std::vector<nsGamepadState> _gamepads;
+    std::vector<nsCommandArgs> _retiredArgs;
+    int _dispatchDepth = 0;
+    uint64_t _gamepadResetGeneration = 0;
+    bool _appActive = true;
 
 	bool			m_uiActive;
 	bool			m_bAnyKey;
 
 private:
+    static void PadCmd(int argc, const char* argv[]);
+    static void PrintBinding(const KeyBinding_t* binding);
 	static void		keycmd_f( int argc, const char *argv[] );
 	static void		in_showkeys_f( int argc, const char *argv[] );
 	static void		keydesc_f( int argc, const char *argv[] );
 
 	virtual void	OnSaveConfig( IDataWriter *out );
 	void			LoadBindings();
-	static void		LoadKeys( char *str );
+	static void		LoadKeys(const char* text);
 
-	void			BindKeyCmd( KeyBinding_t *key, const cmdDesc_t *cmd, int argc, const char *argv[], bool play );
+	bool			BindKeyCmd( KeyBinding_t *key, const cmdDesc_t *cmd, int argc, const char *argv[], bool play );
 	void			BindKeyVar( KeyBinding_t *key, nsVar *var, bool inc );
-	static void		UnbindKey( KeyBinding_t *key );
+	void			UnbindKey( KeyBinding_t *key );
 
 	void			ShowKeys();
 
     void            UpdateCursorState();
 
 	KeyBinding_t*		GetKey( const char *name );
-	static void			KeyPressed( KeyBinding_t *key );
+	void				KeyPressed( KeyBinding_t *key );
 	static void			KeyUp( KeyBinding_t *key );
 	void			KeyDown( KeyBinding_t *key );
 
-	static void			GetJoyState( bool keys[8] );
+    static void FreeArgs(nsCommandArgs args);
+    void ExecuteCommand(const KeyBinding_t* key);
+    void FinishCommand();
+    void SyncGamepads();
+    nsGamepadState* FindGamepad(uint64_t connectionId);
+    static const IGamepad* FindPlatformGamepad(uint64_t connectionId);
+    void ReleaseGamepad(nsGamepadState& state);
+    void CancelGamepads();
+    void CancelGamepadBinding(int index);
+    void ProcessGamepads();
+    bool GamepadsBlocked() const;
 
 	static bool			IsSystemKeyPressed();
 };
