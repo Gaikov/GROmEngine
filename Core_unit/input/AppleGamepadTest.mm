@@ -2,6 +2,20 @@
 #include "Core/Memory.h"
 #include <gtest/gtest.h>
 #include <limits>
+#include "Platform/Desktop/input/GlfwGamepadLayout.h"
+
+// A native profile is usable even without the extended/micro convenience facade.
+API_AVAILABLE(macos(11.0))
+@interface nsProfileOnlyController : NSObject
+@property(nonatomic, strong) GCPhysicalInputProfile* suppliedProfile;
+@property(nonatomic, strong) dispatch_queue_t handlerQueue;
+@end
+@implementation nsProfileOnlyController
+- (GCPhysicalInputProfile*)physicalInputProfile { return self.suppliedProfile; }
+- (GCExtendedGamepad*)extendedGamepad { return nil; }
+- (GCMicroGamepad*)microGamepad { return nil; }
+- (NSString*)vendorName { return @"Controller"; }
+@end
 
 // Exercise publication without starting IOKit, GLFW or an application UI.
 class nsAppleGamepadsTestAccess {
@@ -107,9 +121,9 @@ TEST_F(AppleGamepadTest, AxesAndDigitalTriggersUpdateOnlyWhenPublished) {
         EXPECT_FALSE(pad.IsButtonPressed(6));
         pad.Update(true);
         EXPECT_FLOAT_EQ(pad.GetAxisValue(0), -0.75f);
-        EXPECT_FLOAT_EQ(pad.GetAxisValue(1), 0.5f);
+        EXPECT_FLOAT_EQ(pad.GetAxisValue(1), -0.5f);
         EXPECT_FLOAT_EQ(pad.GetAxisValue(2), 0.25f);
-        EXPECT_FLOAT_EQ(pad.GetAxisValue(3), -0.5f);
+        EXPECT_FLOAT_EQ(pad.GetAxisValue(3), 0.5f);
         EXPECT_TRUE(pad.IsButtonPressed(6));
         EXPECT_FALSE(pad.IsButtonPressed(7));
         pad.Update(false);
@@ -149,12 +163,15 @@ TEST_F(AppleGamepadTest, MissingOptionalSlotsStayNeutralWithoutShiftingOtherButt
 }
 
 TEST_F(AppleGamepadTest, GlfwSamplesAreFiniteBoundedAndMissingDataIsNeutral) {
-    nsAppleGamepad pad(1, 0, 4, 2, false); // Construction does not poll GLFW when inactive.
-    const float axes[] = {2, -2, std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity()};
-    const unsigned char buttons[] = {1, 0};
-    const unsigned char released[] = {0, 0};
-    pad.Update(axes, released);
-    pad.Update(axes, buttons);
+    nsAppleGamepad pad(1, 0, false); // Inactive construction does not poll GLFW.
+    GLFWgamepadstate state{};
+    state.axes[0] = 2;
+    state.axes[1] = -2;
+    state.axes[2] = std::numeric_limits<float>::quiet_NaN();
+    state.axes[3] = std::numeric_limits<float>::infinity();
+    pad.Update(state);
+    state.buttons[GLFW_GAMEPAD_BUTTON_A] = GLFW_PRESS;
+    pad.Update(state);
     EXPECT_FLOAT_EQ(pad.GetAxisValue(0), 1);
     EXPECT_FLOAT_EQ(pad.GetAxisValue(1), -1);
     EXPECT_FLOAT_EQ(pad.GetAxisValue(2), 0);
@@ -165,21 +182,40 @@ TEST_F(AppleGamepadTest, GlfwSamplesAreFiniteBoundedAndMissingDataIsNeutral) {
     EXPECT_FLOAT_EQ(pad.GetAxisValue(0), 0);
 }
 
-TEST_F(AppleGamepadTest, GenericProfileExposesAllUniqueNativeInputs) {
+TEST_F(AppleGamepadTest, MicroProfileUsesXboxSlotsForItsSupportedControls) {
     if (@available(macOS 11.0, *)) {
         auto controller = [GCController controllerWithMicroGamepad];
         auto controls = nsAppleGamepadControls::Discover(controller);
-        EXPECT_EQ(controls.extended, nil);
-        EXPECT_EQ(controls.axes.size(), controller.physicalInputProfile.allAxes.count);
-        EXPECT_EQ(controls.buttons.size(), controller.physicalInputProfile.allButtons.count);
+        EXPECT_EQ(controls.axes.size(), nsGamepadLayout::AxisCount);
+        EXPECT_GE(controls.buttons.size(), nsGamepadLayout::ButtonCount);
         EXPECT_TRUE(controls.Matches(controller));
         nsAppleGamepad pad(1, controller, controls, true);
         [controller.microGamepad.buttonA setValue:1];
         pad.Update(true);
         auto pressed = 0;
         for (auto i = 0; i < pad.GetButtonCount(); ++i) pressed += pad.IsButtonPressed(i);
-        EXPECT_GT(pressed, 0);
+        EXPECT_EQ(pressed, 1);
+        EXPECT_TRUE(pad.IsButtonPressed(nsGamepadLayout::A));
+        EXPECT_FALSE(pad.IsButtonPressed(nsGamepadLayout::B));
     } else GTEST_SKIP();
+}
+
+TEST(GlfwGamepadLayoutTest, NativeButtonsAndTriggersUseTheWebOrder) {
+    GLFWgamepadstate state{};
+    state.buttons[GLFW_GAMEPAD_BUTTON_START] = GLFW_PRESS;
+    state.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB] = GLFW_PRESS;
+    state.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] = GLFW_PRESS;
+    state.buttons[GLFW_GAMEPAD_BUTTON_GUIDE] = GLFW_PRESS;
+    state.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] = 1;
+    state.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER] = -1;
+    EXPECT_TRUE(GlfwGamepadButton(state, nsGamepadLayout::Menu));
+    EXPECT_TRUE(GlfwGamepadButton(state, nsGamepadLayout::LeftStick));
+    EXPECT_TRUE(GlfwGamepadButton(state, nsGamepadLayout::Left));
+    EXPECT_TRUE(GlfwGamepadButton(state, nsGamepadLayout::Home));
+    EXPECT_TRUE(GlfwGamepadButton(state, nsGamepadLayout::LeftTrigger));
+    EXPECT_FALSE(GlfwGamepadButton(state, nsGamepadLayout::RightTrigger));
+    EXPECT_FALSE(GlfwGamepadButton(state, nsGamepadLayout::A));
+    EXPECT_FALSE(GlfwGamepadButton(state, nsGamepadLayout::Right));
 }
 
 TEST_F(AppleGamepadTest, DiscoveryIsLazyAndIdenticalControllersHaveIndependentConnections) {
@@ -232,6 +268,54 @@ TEST_F(AppleGamepadTest, PhysicalAndSyntheticDuplicatesAreFilteredBeforeDiagnost
         EXPECT_EQ(devices.Find(1), nullptr);
         EXPECT_NE(devices.Find(2), nullptr);
         EXPECT_EQ(log.messages.size(), 2);
+    } else GTEST_SKIP();
+}
+
+TEST_F(AppleGamepadTest, SemanticProfileWithoutTypedFacadePublishesTheHidOwnedController) {
+    if (@available(macOS 11.0, *)) {
+        auto snapshot = [GCController controllerWithExtendedGamepad];
+        auto controller = [nsProfileOnlyController new];
+        controller.suppliedProfile = snapshot.physicalInputProfile;
+        nsGamepadRegistry<nsAppleGamepad> devices;
+        nsAppleGamepadDiscovery discovery(devices);
+        nsAppleGamepadsTestAccess::Prepare(discovery);
+        nsAppleGamepadsTestAccess::Hid(discovery, 1, "Controller", true, false);
+        nsAppleGamepadsTestAccess::Glfw(discovery, 0, "Controller", true);
+        nsAppleGamepadsTestAccess::Queue(discovery, (GCController*)controller, true);
+        nsAppleGamepadsTestAccess::Publish(discovery);
+        ASSERT_EQ(devices.GetCount(), 1);
+        EXPECT_EQ(devices.Find(0), nullptr);
+        auto pad = discovery.GetGamepad(0);
+        [snapshot.extendedGamepad.buttonA setValue:1];
+        [snapshot.extendedGamepad.buttonB setValue:1];
+        [snapshot.extendedGamepad.buttonY setValue:1];
+        [snapshot.extendedGamepad.dpad setValueForXAxis:-1 yAxis:1];
+        nsAppleGamepadsTestAccess::Update(discovery);
+        EXPECT_TRUE(pad->IsButtonPressed(nsGamepadLayout::A));
+        EXPECT_TRUE(pad->IsButtonPressed(nsGamepadLayout::B));
+        EXPECT_TRUE(pad->IsButtonPressed(nsGamepadLayout::Y));
+        EXPECT_TRUE(pad->IsButtonPressed(nsGamepadLayout::Up));
+        EXPECT_TRUE(pad->IsButtonPressed(nsGamepadLayout::Left));
+        EXPECT_EQ(log.messages.size(), 1);
+    } else GTEST_SKIP();
+}
+
+TEST_F(AppleGamepadTest, ControllerWaitsForATemporarilyUnavailableProfile) {
+    if (@available(macOS 11.0, *)) {
+        auto controller = [nsProfileOnlyController new];
+        nsGamepadRegistry<nsAppleGamepad> devices;
+        nsAppleGamepadDiscovery discovery(devices);
+        nsAppleGamepadsTestAccess::Prepare(discovery);
+        nsAppleGamepadsTestAccess::Queue(discovery, (GCController*)controller, true);
+        nsAppleGamepadsTestAccess::Publish(discovery);
+        EXPECT_EQ(devices.GetCount(), 0);
+        EXPECT_TRUE(log.messages.empty());
+        auto snapshot = [GCController controllerWithExtendedGamepad];
+        controller.suppliedProfile = snapshot.physicalInputProfile;
+        nsAppleGamepadsTestAccess::Update(discovery);
+        ASSERT_EQ(devices.GetCount(), 1);
+        EXPECT_NE(discovery.GetGamepad(0), nullptr);
+        EXPECT_EQ(log.messages.size(), 1);
     } else GTEST_SKIP();
 }
 

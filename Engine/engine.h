@@ -3,8 +3,7 @@
 // file engine.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_engine_H_
-#define	_engine_H_
+#pragma once
 
 #include "UserInput.h"
 
@@ -25,5 +24,3 @@ struct nsEngine
     static void OnPointerUp(int pointerId, int clientX, int clientY);
     static void OnPointerCancel(int pointerId);
 };
-
-#endif //_engine_H_

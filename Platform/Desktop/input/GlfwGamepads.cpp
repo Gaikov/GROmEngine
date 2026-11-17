@@ -1,7 +1,7 @@
 #include "GlfwGamepads.h"
 
-#include <cmath>
-#include <GLFW/glfw3.h>
+#include "GlfwGamepadLayout.h"
+#include <array>
 
 namespace {
 nsGlfwGamepads* g_gamepads = nullptr;
@@ -9,8 +9,8 @@ nsGlfwGamepads* g_gamepads = nullptr;
 
 class nsDesktopGamepad final : public IGamepad {
 public:
-    nsDesktopGamepad(int nativeId, uint64_t connectionId, int axes, int buttons) :
-        _nativeId(nativeId), _connectionId(connectionId), _axes(axes), _buttons(buttons) {
+    nsDesktopGamepad(int nativeId, uint64_t connectionId) :
+        _nativeId(nativeId), _connectionId(connectionId) {
         Update();
     }
 
@@ -25,19 +25,14 @@ public:
     }
 
     void Update() {
-        int axes = 0, buttons = 0;
-        const auto axisValues = glfwGetJoystickAxes(_nativeId, &axes);
-        const auto buttonValues = glfwGetJoystickButtons(_nativeId, &buttons);
-        if (axes != GetAxisCount() || buttons != GetButtonCount()
-            || (axes && !axisValues) || (buttons && !buttonValues)) ClearInput();
-        else Update(axisValues, buttonValues);
+        GLFWgamepadstate state{};
+        if (glfwGetGamepadState(_nativeId, &state)) Update(state);
+        else ClearInput();
     }
 
-    void Update(const float* axes, const unsigned char* buttons) {
-        for (auto i = 0; i < GetAxisCount(); ++i) {
-            _axes[i] = std::isfinite(axes[i]) ? std::clamp(axes[i], -1.0f, 1.0f) : 0;
-        }
-        for (auto i = 0; i < GetButtonCount(); ++i) _buttons[i] = buttons[i] == GLFW_PRESS;
+    void Update(const GLFWgamepadstate& state) {
+        for (auto i = 0; i < GetAxisCount(); ++i) _axes[i] = GlfwGamepadAxis(state, i);
+        for (auto i = 0; i < GetButtonCount(); ++i) _buttons[i] = GlfwGamepadButton(state, i);
     }
 
     void ClearInput() {
@@ -48,8 +43,8 @@ public:
 private:
     int _nativeId;
     uint64_t _connectionId;
-    std::vector<float> _axes;
-    std::vector<uint8_t> _buttons;
+    std::array<float, nsGamepadLayout::AxisCount> _axes{};
+    std::array<uint8_t, nsGamepadLayout::ButtonCount> _buttons{};
 };
 
 nsGlfwGamepads::nsGlfwGamepads() = default;
@@ -63,10 +58,8 @@ void nsGlfwGamepads::Init() {
         if (!g_gamepads) return;
         if (status == GLFW_DISCONNECTED) g_gamepads->_devices.QueueDisconnect(id);
         else if (status == GLFW_CONNECTED) {
-            int axes = 0, buttons = 0;
-            glfwGetJoystickAxes(id, &axes);
-            glfwGetJoystickButtons(id, &buttons);
-            g_gamepads->_devices.QueueConnect(id, glfwGetJoystickName(id), axes, buttons);
+            if (glfwJoystickIsGamepad(id)) g_gamepads->_devices.QueueConnect(id,
+                glfwGetJoystickName(id), nsGamepadLayout::AxisCount, nsGamepadLayout::ButtonCount);
         }
     });
 }
@@ -85,7 +78,7 @@ const IGamepad* nsGlfwGamepads::GetGamepad(int index) {
     if (!device) return nullptr;
     if (!device->gamepad) {
         device->gamepad = std::make_unique<nsDesktopGamepad>(
-            device->nativeId, device->connectionId, device->axisCount, device->buttonCount);
+            device->nativeId, device->connectionId);
     }
     return device->gamepad.get();
 }
@@ -98,17 +91,17 @@ void nsGlfwGamepads::Update() {
             _devices.Disconnect(id);
             continue;
         }
-        int axes = 0, buttons = 0;
-        const auto axisValues = glfwGetJoystickAxes(id, &axes);
-        const auto buttonValues = glfwGetJoystickButtons(id, &buttons);
-        const auto existing = _devices.Find(id);
-        if ((axes && !axisValues) || (buttons && !buttonValues)
-            || (existing && !axisValues && !buttonValues
-                && (existing->axisCount || existing->buttonCount))) {
-            if (existing && existing->gamepad) existing->gamepad->ClearInput();
+        if (!glfwJoystickIsGamepad(id)) {
+            _devices.Disconnect(id); // Raw devices require a platform mapping/decorator first.
             continue;
         }
-        auto& device = _devices.Connect(id, glfwGetJoystickName(id), axes, buttons);
-        if (device.gamepad) device.gamepad->Update(axisValues, buttonValues);
+        GLFWgamepadstate state{};
+        if (!glfwGetGamepadState(id, &state)) {
+            if (auto device = _devices.Find(id); device && device->gamepad) device->gamepad->ClearInput();
+            continue;
+        }
+        auto& device = _devices.Connect(id, glfwGetJoystickName(id),
+            nsGamepadLayout::AxisCount, nsGamepadLayout::ButtonCount);
+        if (device.gamepad) device.gamepad->Update(state);
     }
 }

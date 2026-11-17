@@ -13,6 +13,7 @@ public:
     typedef std::vector<IUserInput*> tInputsList;
 
 public:
+    nsMultiUserInput() { _interactiveItems.reserve(4); }
     virtual ~nsMultiUserInput() = default;
     IPointerTransform   *_pointerTransform = nullptr;
 

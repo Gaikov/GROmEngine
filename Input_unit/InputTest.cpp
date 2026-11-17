@@ -1,4 +1,5 @@
 #include "Engine/Input.h"
+#include "Engine/input/GamepadMouse.h"
 #include "Engine/Platform.h"
 #include "Engine/GameApp.h"
 #include "Engine/console/Console.h"
@@ -71,14 +72,15 @@ private:
 
 class nsInputTestPlatform final : public Platform {
 public:
+    bool mobile = false;
     bool Init() override { return true; }
     void Release() override {}
     const nsArgs& GetArgs() override { return _args; }
-    bool IsMobile() override { return false; }
+    bool IsMobile() override { return mobile; }
     bool ShowInterstitialAd() override { return false; }
     const char* GetDomainName() override { return "test"; }
-    void GetCursorPos(int& x, int& y) override { x = y = 0; }
-    void SetCursorPos(int, int) override {}
+    void GetCursorPos(int& x, int& y) override { x = cursorX; y = cursorY; }
+    void SetCursorPos(int x, int y) override { cursorX = x; cursorY = y; ++cursorWrites; }
     void ShowCursor(bool) override {}
     bool IsKeyPressed(int key) override {
         ++inputQueries;
@@ -91,7 +93,7 @@ public:
     void MessagePopup(const char*, const char*) override {}
     void Minimize() override {}
     void SetAppTitle(const char*) override {}
-    void GetClientSize(int& width, int& height) override { width = height = 100; }
+    void GetClientSize(int& width, int& height) override { width = clientWidth; height = clientHeight; }
     void* GetWindowHandler() override { return nullptr; }
     void OpenUrl(const char*) override {}
     void GetDisplayModes(tDisplayModesList&) override {}
@@ -109,6 +111,9 @@ public:
     int inputQueries = 0;
     nsFakeGamepads gamepads{inputQueries};
     bool providerAvailable = true;
+    int cursorX = 0, cursorY = 0, cursorWrites = 0;
+    int clientWidth = 100;
+    int clientHeight = 100;
     std::string defaultConfig;
     std::string currentConfig;
 private:
@@ -138,12 +143,16 @@ protected:
         g_platform.defaultConfig = defaults;
         g_platform.currentConfig = current;
         g_platform.keys.fill(false);
+        g_platform.mobile = false;
+        g_platform.cursorX = g_platform.cursorY = g_platform.cursorWrites = 0;
         g_platform.providerAvailable = true;
+        g_platform.clientWidth = g_platform.clientHeight = 100;
         g_platform.gamepads.devices.clear();
         g_platform.gamepads.updates = 0;
         g_platform.inputQueries = 0;
         nsConfig::Init();
         nsConsole::Init();
+        ASSERT_TRUE(nsGamepadMouse::Init());
         x = g_cfg->RegVar("axisx", "0", GVF_INTERNAL);
         y = g_cfg->RegVar("axisy", "0", GVF_INTERNAL);
         g_cfg->RegCmd("tick", [this](int, const char*[]) { ++calls; });
@@ -158,6 +167,7 @@ protected:
     }
     void Shutdown() {
         g_inp.Release();
+        nsGamepadMouse::Release();
         nsConsole::Release();
         nsConfig::Release();
         g_pack.Release();
@@ -182,7 +192,40 @@ protected:
 }
 
 Platform* App_GetPlatform() { return &g_platform; }
-IGameApp* App_GetGame() { return nullptr; }
+void InputTestClientSize(int width, int height) {
+    g_platform.clientWidth = width;
+    g_platform.clientHeight = height;
+}
+void InputTestMousePlatform(bool mobile) {
+    g_platform.mobile = mobile;
+    g_platform.keys.fill(false);
+    g_platform.defaultConfig.clear();
+    g_platform.currentConfig.clear();
+    g_platform.clientWidth = g_platform.clientHeight = 100;
+    g_platform.cursorX = g_platform.cursorY = g_platform.cursorWrites = 0;
+}
+void InputTestCursor(int x, int y) { g_platform.cursorX = x; g_platform.cursorY = y; }
+int InputTestCursorWrites() { return g_platform.cursorWrites; }
+
+namespace {
+class nsInputTestGame final : public IGameApp {
+public:
+    bool InitDialog() override { return true; }
+    bool Init() override { return true; }
+    void Release() override {}
+    void DrawWorld() override {}
+    void Loop(float) override {}
+    void OnActivate(bool) override {}
+    void OnPause(bool) override {}
+    void OnExitRequested() override {}
+    int GetWindowIcon() override { return 0; }
+    IUserInput* GetUserInput() override { return nullptr; }
+    void GetGUIDimension(int& width, int& height) override { width = height = 100; }
+    const char* GetVersionInfo() override { return "test"; }
+};
+}
+void IGameApp::OnExitRequested() {}
+IGameApp* App_GetGame() { static nsInputTestGame game; return &game; }
 IAppInfo* App_GetInfo() { static nsInputAppInfo info; return &info; }
 
 TEST(InputLifecycleTest, ReleaseBeforeInitDoesNotPollThePlatform) {
@@ -261,6 +304,30 @@ TEST_F(InputTest, MissingProviderIsAnEmptyDeviceListAndKeyboardStillWorks) {
     EXPECT_TRUE(g_inp.IsAnyKeyPressed());
     g_inp.ReleaseAllKeys();
     EXPECT_FLOAT_EQ(x->Value(), 0);
+}
+
+TEST_F(InputTest, GamepadMouseModeSuspendsBindingsAndRearmsOnReturn) {
+    auto& pad = AddPad(1);
+    g_cfg->ExecLine("padcmd 0 +axisx");
+    g_cfg->ExecLine("padcmd 1 tick");
+    pad.buttons[0] = true;
+    g_inp.Process();
+    ASSERT_FLOAT_EQ(x->Value(), 1);
+    nsGamepadMouse::Shared()->enabled.AddLock("menu");
+    pad.buttons[1] = true;
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 0);
+    EXPECT_EQ(calls, 0);
+    nsGamepadMouse::Shared()->enabled.RemoveLock("menu");
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 0);
+    EXPECT_EQ(calls, 0);
+    pad.buttons[0] = pad.buttons[1] = false;
+    g_inp.Process();
+    pad.buttons[0] = pad.buttons[1] = true;
+    g_inp.Process();
+    EXPECT_FLOAT_EQ(x->Value(), 1);
+    EXPECT_EQ(calls, 1);
 }
 
 TEST_F(InputTest, LosingProviderReleasesOnlyGamepadContributionsAndRearmsOnReturn) {
@@ -586,4 +653,17 @@ TEST_F(InputTest, ConfigRoundTripKeepsNoneArgumentsAndBindingLineBoundaries) {
     ASSERT_EQ(args.size(), 3);
     EXPECT_EQ(args[1], "padcmd 0 tick");
     EXPECT_EQ(args[2], "two words");
+}
+
+TEST_F(InputTest, AnyKeyIgnoresCapturedGamepadsButKeepsPhysicalKeyboard) {
+    auto& pad = AddPad(1);
+    pad.buttons[0] = true;
+    EXPECT_TRUE(g_inp.IsAnyKeyPressed());
+    nsGamepadMouse::Shared()->enabled.AddLock("menu");
+    EXPECT_FALSE(g_inp.IsAnyKeyPressed());
+    g_platform.keys[NS_KEY_SPACE] = true;
+    EXPECT_TRUE(g_inp.IsAnyKeyPressed());
+    g_platform.keys[NS_KEY_SPACE] = false;
+    nsGamepadMouse::Shared()->enabled.RemoveLock("menu");
+    EXPECT_TRUE(g_inp.IsAnyKeyPressed());
 }

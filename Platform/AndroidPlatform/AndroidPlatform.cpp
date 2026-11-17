@@ -75,7 +75,7 @@ const nsArgs &AndroidPlatform::GetArgs() {
 }
 
 void AndroidPlatform::GetCursorPos(int &x, int &y) {
-
+    x = y = 0;
 }
 
 void AndroidPlatform::SetCursorPos(int x, int y) {

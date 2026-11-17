@@ -1,6 +1,7 @@
 #include "WebGamepads.h"
 
 #include <cmath>
+#include <cstring>
 #include <emscripten/html5.h>
 
 class nsWebGamepad final : public IGamepad {
@@ -22,15 +23,17 @@ public:
     }
 
     void Update(const EmscriptenGamepadEvent& sample) {
-        if (!sample.connected || sample.numAxes != GetAxisCount() || sample.numButtons != GetButtonCount()) {
+        if (!sample.connected
+            || std::clamp(sample.numAxes, nsGamepadLayout::AxisCount, static_cast<int>(std::size(sample.axis))) != GetAxisCount()
+            || std::clamp(sample.numButtons, nsGamepadLayout::ButtonCount, static_cast<int>(std::size(sample.digitalButton))) != GetButtonCount()) {
             ClearInput();
             return;
         }
         for (auto i = 0; i < GetAxisCount(); ++i) {
-            const auto value = sample.axis[i];
+            const auto value = i < sample.numAxes ? sample.axis[i] : 0;
             _axes[i] = std::isfinite(value) ? static_cast<float>(std::clamp(value, -1.0, 1.0)) : 0;
         }
-        for (auto i = 0; i < GetButtonCount(); ++i) _buttons[i] = sample.digitalButton[i];
+        for (auto i = 0; i < GetButtonCount(); ++i) _buttons[i] = i < sample.numButtons && sample.digitalButton[i];
     }
 
     void ClearInput() {
@@ -52,9 +55,10 @@ void nsWebGamepads::Init() {
     _initialized = true;
     emscripten_set_gamepadconnected_callback(this, false,
         [](int, const EmscriptenGamepadEvent* event, void* data) -> EM_BOOL {
+            if (std::strcmp(event->mapping, "standard") != 0) return false;
             static_cast<nsWebGamepads*>(data)->_devices.QueueConnect(event->index, event->id,
-                std::clamp(event->numAxes, 0, static_cast<int>(std::size(event->axis))),
-                std::clamp(event->numButtons, 0, static_cast<int>(std::size(event->digitalButton))));
+                std::clamp(event->numAxes, nsGamepadLayout::AxisCount, static_cast<int>(std::size(event->axis))),
+                std::clamp(event->numButtons, nsGamepadLayout::ButtonCount, static_cast<int>(std::size(event->digitalButton))));
             return false;
         });
     emscripten_set_gamepaddisconnected_callback(this, false,
@@ -109,9 +113,11 @@ void nsWebGamepads::Update() {
         } else if (result != EMSCRIPTEN_RESULT_SUCCESS) {
             const auto device = _devices.Find(id);
             if (device && device->gamepad) device->gamepad->ClearInput();
+        } else if (std::strcmp(sample.mapping, "standard") != 0) {
+            _devices.Disconnect(id); // No raw layout leaks into the engine.
         } else {
-            const auto axes = std::clamp(sample.numAxes, 0, static_cast<int>(std::size(sample.axis)));
-            const auto buttons = std::clamp(sample.numButtons, 0, static_cast<int>(std::size(sample.digitalButton)));
+            const auto axes = std::clamp(sample.numAxes, nsGamepadLayout::AxisCount, static_cast<int>(std::size(sample.axis)));
+            const auto buttons = std::clamp(sample.numButtons, nsGamepadLayout::ButtonCount, static_cast<int>(std::size(sample.digitalButton)));
             auto& device = _devices.Connect(id, sample.id, axes, buttons);
             if (device.gamepad) device.gamepad->Update(sample);
         }

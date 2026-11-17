@@ -17,6 +17,7 @@ public:
     IRenState* GetUIState() { return _rsGUI; }
     nsOrthogonalNativeView& GetUIOrtho() { return _nativeOrtho; }
     IUserInput* GetActiveInput();
+    void CancelPointer(int pointerId);
     nsVisualContext2d& GetContext2D() { return _context2d; }
 
 protected:

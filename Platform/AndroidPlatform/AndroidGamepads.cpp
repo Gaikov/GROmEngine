@@ -1,4 +1,5 @@
 #include "AndroidGamepads.h"
+#include "AndroidGamepadLayout.h"
 
 #include <array>
 #include <cmath>
@@ -23,10 +24,20 @@ struct nsAndroidGamepadChange {
     std::vector<int> buttons;
 };
 
+struct nsAndroidKeyControl {
+    int button = -1;
+    uint8_t dpadKey = 0;
+};
+
 struct nsAndroidGamepadDescription {
     int id;
     std::vector<nsAndroidAxisRange> axes;
     std::vector<int> buttons;
+    std::vector<nsAndroidAxisRange> mappedAxes;
+    std::vector<int> mappedButtons;
+    std::array<nsAndroidKeyControl, AKEYCODE_DPAD_DOWN_RIGHT + 1> keyControls{};
+    // LT, RT, hat X and hat Y; prepared once, never searched during motion.
+    std::array<nsAndroidAxisRange, 4> buttonAxes{};
 };
 
 namespace {
@@ -39,6 +50,54 @@ float NormalizeAxis(float value, const nsAndroidAxisRange& range) {
     const auto normalized = 2.0 * (static_cast<double>(value) - range.min)
         / (static_cast<double>(range.max) - range.min) - 1.0;
     return static_cast<float>(std::clamp(normalized, -1.0, 1.0));
+}
+
+const nsAndroidAxisRange* FindAxis(const nsAndroidGamepadDescription& description, int code) {
+    for (const auto& axis : description.axes) if (axis.code == code) return &axis;
+    return nullptr;
+}
+
+void PrepareLayout(nsAndroidGamepadDescription& description) {
+    constexpr int axes[] = {AMOTION_EVENT_AXIS_X, AMOTION_EVENT_AXIS_Y,
+        AMOTION_EVENT_AXIS_Z, AMOTION_EVENT_AXIS_RZ};
+    for (auto code : axes) {
+        auto range = FindAxis(description, code);
+        description.mappedAxes.push_back(range ? *range : nsAndroidAxisRange{-1, -1, 1});
+    }
+    for (const auto& range : description.axes) {
+        if (std::find(std::begin(axes), std::end(axes), range.code) != std::end(axes)
+            || range.code == AMOTION_EVENT_AXIS_HAT_X || range.code == AMOTION_EVENT_AXIS_HAT_Y) continue;
+        if ((range.code == AMOTION_EVENT_AXIS_BRAKE && FindAxis(description, AMOTION_EVENT_AXIS_LTRIGGER))
+            || (range.code == AMOTION_EVENT_AXIS_GAS && FindAxis(description, AMOTION_EVENT_AXIS_RTRIGGER))) continue;
+        description.mappedAxes.push_back(range);
+    }
+    description.mappedButtons = {AKEYCODE_BUTTON_A, AKEYCODE_BUTTON_B, AKEYCODE_BUTTON_X, AKEYCODE_BUTTON_Y,
+        AKEYCODE_BUTTON_L1, AKEYCODE_BUTTON_R1, AKEYCODE_BUTTON_L2, AKEYCODE_BUTTON_R2,
+        AKEYCODE_BUTTON_SELECT, AKEYCODE_BUTTON_START, AKEYCODE_BUTTON_THUMBL, AKEYCODE_BUTTON_THUMBR,
+        AKEYCODE_DPAD_UP, AKEYCODE_DPAD_DOWN, AKEYCODE_DPAD_LEFT, AKEYCODE_DPAD_RIGHT, AKEYCODE_BUTTON_MODE};
+    constexpr int dpadKeys[] = {AKEYCODE_DPAD_UP, AKEYCODE_DPAD_DOWN, AKEYCODE_DPAD_LEFT, AKEYCODE_DPAD_RIGHT,
+        AKEYCODE_DPAD_UP_LEFT, AKEYCODE_DPAD_DOWN_LEFT, AKEYCODE_DPAD_UP_RIGHT, AKEYCODE_DPAD_DOWN_RIGHT};
+    for (auto i = 0; i < 8; ++i) description.keyControls[dpadKeys[i]].dpadKey = 1 << i;
+    for (auto code : description.buttons) {
+        if (code < 0 || code >= static_cast<int>(description.keyControls.size())) continue;
+        if (description.keyControls[code].dpadKey) continue;
+        if (std::find(description.mappedButtons.begin(), description.mappedButtons.end(), code)
+            != description.mappedButtons.end()) continue;
+        if (description.mappedButtons.size() == 17) description.mappedButtons.push_back(-1); // Share reserved.
+        description.mappedButtons.push_back(code);
+    }
+    for (auto i = 0; i < static_cast<int>(description.mappedButtons.size()); ++i) {
+        const auto code = description.mappedButtons[i];
+        if (code >= 0) description.keyControls[code].button = i;
+    }
+    constexpr int primary[] = {AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_RTRIGGER,
+        AMOTION_EVENT_AXIS_HAT_X, AMOTION_EVENT_AXIS_HAT_Y};
+    constexpr int fallback[] = {AMOTION_EVENT_AXIS_BRAKE, AMOTION_EVENT_AXIS_GAS, -1, -1};
+    for (auto i = 0; i < 4; ++i) {
+        auto range = FindAxis(description, primary[i]);
+        if (!range) range = FindAxis(description, fallback[i]);
+        description.buttonAxes[i] = range ? *range : nsAndroidAxisRange{-1, -1, 1};
+    }
 }
 
 bool IsControllerKey(int code) {
@@ -90,8 +149,10 @@ class nsAndroidGamepad final : public IGamepad {
 public:
     nsAndroidGamepad(uint64_t connectionId, const nsAndroidGamepadDescription& description) :
         _connectionId(connectionId), _description(description),
-        _axes(description.axes.size()), _buttons(description.buttons.size()) {
-        for (auto i = 0; i < GetAxisCount(); ++i) _axes[i] = NormalizeAxis(0, description.axes[i]);
+        _axes(description.mappedAxes.size()), _buttons(description.mappedButtons.size()) {
+        for (auto i = nsGamepadLayout::AxisCount; i < GetAxisCount(); ++i) {
+            _axes[i] = NormalizeAxis(0, description.mappedAxes[i]);
+        }
     }
 
     uint64_t GetConnectionId() const override { return _connectionId; }
@@ -105,46 +166,72 @@ public:
     }
 
     void Update(const GameActivityKeyEvent& event) {
-        const auto& codes = _description.buttons;
-        const auto it = std::lower_bound(codes.begin(), codes.end(), event.keyCode);
-        if (it != codes.end() && *it == event.keyCode
-            && (event.action == AKEY_EVENT_ACTION_DOWN || event.action == AKEY_EVENT_ACTION_UP)) {
-            _buttons[it - codes.begin()] = event.action == AKEY_EVENT_ACTION_DOWN;
+        if (event.action == AKEY_EVENT_ACTION_DOWN || event.action == AKEY_EVENT_ACTION_UP) {
+            UpdateKey(event.keyCode, event.action == AKEY_EVENT_ACTION_DOWN);
         }
     }
 
     void Update(const GameActivityMotionEvent& event) {
         if ((event.action & AMOTION_EVENT_ACTION_MASK) == AMOTION_EVENT_ACTION_CANCEL) ClearInput();
         else if (event.pointerCount > 0) {
-            for (auto i = 0; i < GetAxisCount(); ++i) {
-                const auto& range = _description.axes[i];
-                _axes[i] = NormalizeAxis(GameActivityPointerAxes_getAxisValue(&event.pointers[0], range.code), range);
+            std::array<float, GAME_ACTIVITY_POINTER_INFO_AXIS_COUNT> values{};
+            for (const auto& axis : _description.axes) {
+                values[axis.code] = GameActivityPointerAxes_getAxisValue(&event.pointers[0], axis.code);
             }
+            UpdateAxes(values);
         }
     }
 
     void Update(const nsAndroidGamepadInput& input) {
         if (input.clearInput) ClearInput();
-        if (input.hasAxes) {
-            for (auto i = 0; i < GetAxisCount(); ++i) {
-                const auto& range = _description.axes[i];
-                _axes[i] = NormalizeAxis(input.axes[range.code], range);
-            }
-        }
-        for (auto i = 0; i < GetButtonCount(); ++i) {
-            const auto code = _description.buttons[i];
-            if (code >= 0 && code < static_cast<int>(input.buttons.size()) && input.touchedButtons[code]) {
-                _buttons[i] = input.buttons[code];
-            }
+        if (input.hasAxes) UpdateAxes(input.axes);
+        for (auto code = size_t(0); code < input.buttons.size(); ++code) {
+            if (input.touchedButtons[code]) UpdateKey(static_cast<int>(code), input.buttons[code]);
         }
     }
 
     void ClearInput() {
+        _dpadKeys = 0;
         std::fill(_axes.begin(), _axes.end(), 0);
         std::fill(_buttons.begin(), _buttons.end(), 0);
     }
 
 private:
+    void UpdateKey(int code, bool down) {
+        if (code < 0 || code >= static_cast<int>(_description.keyControls.size())) return;
+        const auto& control = _description.keyControls[code];
+        if (control.dpadKey) {
+            if (down) _dpadKeys |= control.dpadKey;
+            else _dpadKeys &= ~control.dpadKey;
+            const auto directions = nsAndroidGamepadLayout::DpadDirections(_dpadKeys);
+            for (auto i = 0; i < 4; ++i) SetButtonSource(nsGamepadLayout::Up + i, 1, directions & (1 << i));
+        } else if (control.button >= 0) SetButtonSource(control.button, 1, down);
+    }
+
+    void SetButtonSource(int index, uint8_t source, bool down) {
+        if (down) _buttons[index] |= source;
+        else _buttons[index] &= ~source;
+    }
+
+    void UpdateAxes(const std::array<float, GAME_ACTIVITY_POINTER_INFO_AXIS_COUNT>& values) {
+        for (auto i = 0; i < GetAxisCount(); ++i) {
+            const auto& range = _description.mappedAxes[i];
+            _axes[i] = range.code >= 0 ? NormalizeAxis(values[range.code], range) : 0;
+        }
+        const auto read = [&](int index) {
+            const auto& range = _description.buttonAxes[index];
+            return range.code >= 0 ? NormalizeAxis(values[range.code], range) : 0.0f;
+        };
+        SetButtonSource(nsGamepadLayout::LeftTrigger, 2, read(0) > 0);
+        SetButtonSource(nsGamepadLayout::RightTrigger, 2, read(1) > 0);
+        const auto x = read(2), y = read(3);
+        SetButtonSource(nsGamepadLayout::Up, 2, y < -0.5f);
+        SetButtonSource(nsGamepadLayout::Down, 2, y > 0.5f);
+        SetButtonSource(nsGamepadLayout::Left, 2, x < -0.5f);
+        SetButtonSource(nsGamepadLayout::Right, 2, x > 0.5f);
+    }
+
+    uint8_t _dpadKeys = 0;
     uint64_t _connectionId;
     const nsAndroidGamepadDescription& _description;
     std::vector<float> _axes;
@@ -271,9 +358,8 @@ void nsAndroidGamepads::Update() {
     for (auto& change : _changes) {
         const auto id = change.id;
         const auto description = FindDescription(id);
-        const auto axes = static_cast<int>(change.axes.size());
-        const auto buttons = static_cast<int>(change.buttons.size());
-        if (!change.removed && description && _devices.Matches(id, change.name.c_str(), axes, buttons)
+        if (!change.removed && description && _devices.Matches(id, change.name.c_str(),
+            static_cast<int>(description->mappedAxes.size()), static_cast<int>(description->mappedButtons.size()))
             && description->axes == change.axes && description->buttons == change.buttons) continue;
 
         _devices.Disconnect(id); // Destroy the gamepad before its immutable description.
@@ -281,6 +367,9 @@ void nsAndroidGamepads::Update() {
         if (!change.removed) {
             auto next = std::make_unique<nsAndroidGamepadDescription>(nsAndroidGamepadDescription{
                 id, std::move(change.axes), std::move(change.buttons)});
+            PrepareLayout(*next);
+            const auto axes = static_cast<int>(next->mappedAxes.size());
+            const auto buttons = static_cast<int>(next->mappedButtons.size());
             _descriptions.push_back(std::move(next));
             _devices.Connect(id, change.name.c_str(), axes, buttons);
         }

@@ -17,7 +17,8 @@ set(TESTS
         undo/UndoTest.cpp
         memory/FastMem.cpp
         memory/MemoryTest.cpp
-        input/GamepadRegistryTest.cpp)
+        input/GamepadRegistryTest.cpp
+        input/AndroidGamepadLayoutTest.cpp)
 
 add_executable(Core_unit ${TESTS})
 

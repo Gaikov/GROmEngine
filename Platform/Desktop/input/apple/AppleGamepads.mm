@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <cstdio>
 #include <limits>
+#include "../GlfwGamepadLayout.h"
 
 static_assert(GLFW_JOYSTICK_LAST + 1 == 16);
 
@@ -42,10 +43,8 @@ void nsAppleGamepads::Init() {
         if (!g_gamepads) return;
         if (status == GLFW_DISCONNECTED) g_gamepads->_discovery->QueueGlfwDisconnect(id);
         else if (status == GLFW_CONNECTED) {
-            int axes = 0, buttons = 0;
-            glfwGetJoystickAxes(id, &axes);
-            glfwGetJoystickButtons(id, &buttons);
-            g_gamepads->_discovery->QueueGlfwConnect(id, glfwGetJoystickName(id), axes, buttons);
+            if (glfwJoystickIsGamepad(id)) g_gamepads->_discovery->QueueGlfwConnect(id,
+                glfwGetJoystickName(id), nsGamepadLayout::AxisCount, nsGamepadLayout::ButtonCount);
         }
     });
 }
@@ -217,12 +216,13 @@ void nsAppleGamepadDiscovery::ConnectController(GCController* controller,
     nsAppleGamepadControls&& controls, const char* name) {
     for (const auto& source : _controllers) if (source.controller == controller) return;
     if (_nextNativeId == std::numeric_limits<int>::min()) return;
-    if (!controls.profile) return;
     controller.handlerQueue = dispatch_get_main_queue();
     auto nativeId = _nextNativeId--;
     _controllers.push_back({nativeId, controller, std::move(controls)});
     const auto& source = _controllers.back();
-    _devices.Connect(nativeId, name,
+    // Keep the native identity even if the framework has not supplied its
+    // profile yet. UpdateControllers publishes it once capabilities are ready.
+    if (source.controls.profile) _devices.Connect(nativeId, name,
         static_cast<int>(source.controls.axes.size()), static_cast<int>(source.controls.buttons.size()));
 }
 
@@ -316,8 +316,11 @@ void nsAppleGamepadDiscovery::UpdateControllers(bool active) {
             _devices.Disconnect(source.nativeId);
             source.nativeId = _nextNativeId--;
             source.controls = std::move(controls);
-            device = &_devices.Connect(source.nativeId, source.controller.vendorName.UTF8String,
-                static_cast<int>(source.controls.axes.size()), static_cast<int>(source.controls.buttons.size()));
+            device = nullptr;
+            if (source.controls.profile) {
+                device = &_devices.Connect(source.nativeId, source.controller.vendorName.UTF8String,
+                    static_cast<int>(source.controls.axes.size()), static_cast<int>(source.controls.buttons.size()));
+            }
         }
         if (device && device->gamepad) device->gamepad->Update(active);
     }
@@ -339,12 +342,16 @@ void nsAppleGamepadDiscovery::UpdateGlfw(bool active) {
             _devices.Disconnect(id);
             continue;
         }
-        int axes = 0, buttons = 0;
-        auto axisValues = glfwGetJoystickAxes(id, &axes);
-        auto buttonValues = glfwGetJoystickButtons(id, &buttons);
+        if (!glfwJoystickIsGamepad(id)) {
+            slot.present = false;
+            _devices.Disconnect(id);
+            continue;
+        }
+        constexpr auto axes = nsGamepadLayout::AxisCount;
+        constexpr auto buttons = nsGamepadLayout::ButtonCount;
+        GLFWgamepadstate state{};
         auto device = _devices.Find(id);
-        if ((axes && !axisValues) || (buttons && !buttonValues)
-            || (device && !axisValues && !buttonValues && (device->axisCount || device->buttonCount))) {
+        if (!glfwGetGamepadState(id, &state)) {
             if (device && device->gamepad) {
                 if (active) device->gamepad->ClearInput();
                 else device->gamepad->Update(false);
@@ -364,7 +371,7 @@ void nsAppleGamepadDiscovery::UpdateGlfw(bool active) {
         if (device && device->gamepad) {
             if (!active) device->gamepad->Update(false);
             else if (!_nativeEnabled || _routing.GetRoute(slot.guid.data(), slot.name.c_str())
-                == nsAppleGamepadRouting::Route::Glfw) device->gamepad->Update(axisValues, buttonValues);
+                == nsAppleGamepadRouting::Route::Glfw) device->gamepad->Update(state);
             else device->gamepad->ClearInput();
         }
     }
@@ -390,8 +397,7 @@ const IGamepad* nsAppleGamepadDiscovery::GetGamepad(int index) {
                     break;
                 }
             }
-        } else device->gamepad = std::make_unique<nsAppleGamepad>(device->connectionId, device->nativeId,
-            device->axisCount, device->buttonCount, _active);
+        } else device->gamepad = std::make_unique<nsAppleGamepad>(device->connectionId, device->nativeId, _active);
     }
     return device->gamepad.get();
 }

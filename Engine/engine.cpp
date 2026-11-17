@@ -20,6 +20,7 @@
 #include "Anim.h"
 #include "Platform.h"
 #include "input/SoftKeyboard.h"
+#include "input/GamepadMouse.h"
 #include "display/VisualSceneRender2d.h"
 #include "EngineContext.h"
 #include "debug/DebugDrawManager.h"
@@ -114,6 +115,7 @@ bool nsEngine::Init()
 	ddm->AddPolicy(new nsFastMemDebugDraw());
 	ddm->AddPolicy(new nsVisualsPoolDebugDraw());
 
+    if (!nsGamepadMouse::Init()) return false;
 	if ( !app->Init() ) return false;
 
 	prevTime = App_GetPlatform()->GetTime();
@@ -151,6 +153,7 @@ void nsEngine::Release(bool failed)
 
 	g_inp.Release();
 	App_GetGame()->Release();
+    nsGamepadMouse::Release();
 	nsShareService::Release();
 	nsHttpClient::Release();
 
@@ -218,6 +221,7 @@ void nsEngine::MainLoop()
 	}
 
     if (auto gamepads = App_GetPlatform()->GetGamepadsProvider()) gamepads->Update();
+    nsGamepadMouse::Shared()->Update();
 
 	nsRenderStats::BeginFrame(r_render_stats && r_render_stats->Bool());
 	{
@@ -338,6 +342,7 @@ IUserInput *nsEngine::GetActiveInput() {
 }
 
 void nsEngine::OnPointerMove(int pointerId, int clientX, int clientY) {
+    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Move, pointerId, clientX, clientY);
     auto ui = GetActiveInput();
     if (ui) {
         ui->OnPointerMove((float)clientX, (float)clientY, pointerId);
@@ -345,6 +350,7 @@ void nsEngine::OnPointerMove(int pointerId, int clientX, int clientY) {
 }
 
 void nsEngine::OnPointerDown(int pointerId, int clientX, int clientY) {
+    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Down, pointerId, clientX, clientY);
     auto ui = GetActiveInput();
     if (ui) {
         ui->OnPointerDown((float)clientX, (float)clientY, pointerId);
@@ -352,6 +358,7 @@ void nsEngine::OnPointerDown(int pointerId, int clientX, int clientY) {
 }
 
 void nsEngine::OnPointerUp(int pointerId, int clientX, int clientY) {
+    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Up, pointerId, clientX, clientY);
     auto ui = GetActiveInput();
     if (ui) {
         ui->OnPointerUp((float)clientX, (float)clientY, pointerId);
@@ -359,10 +366,8 @@ void nsEngine::OnPointerUp(int pointerId, int clientX, int clientY) {
 }
 
 void nsEngine::OnPointerCancel(int pointerId) {
-    auto ui = GetActiveInput();
-    if (ui) {
-        ui->OnPointerCancel(pointerId);
-    }
+    nsGamepadMouse::Shared()->OnPointerCancel(pointerId);
+    nsEngineContext::Shared()->CancelPointer(pointerId);
 }
 
 
@@ -379,6 +384,7 @@ void nsEngine::OnActivateApp(bool active) {
 
     prevTime = App_GetPlatform()->GetTime();
     g_timeCarryMs = 0.0f;
+    nsGamepadMouse::Shared()->OnActivateApp(active);
     g_inp.OnActivateApp(active);
     nsSoundDevice::Shared()->Device()->OnActivate(active);
     App_GetGame()->OnActivate(active);

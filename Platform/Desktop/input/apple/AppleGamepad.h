@@ -4,11 +4,12 @@
 #include "Engine/input/IGamepad.h"
 #include <vector>
 
+struct GLFWgamepadstate;
+
 // Connection capabilities and retained native controls, never a second input state.
 struct nsAppleGamepadControls {
     // Keep the handle usable by the GLFW fallback on pre-macOS 11 deployments.
     NSObject* profile = nil;
-    GCExtendedGamepad* extended = nil;
     NSDictionary<NSString*, GCControllerAxisInput*>* nativeAxes = nil;
     NSDictionary<NSString*, GCControllerButtonInput*>* nativeButtons = nil;
     std::vector<GCControllerAxisInput*> axes;
@@ -22,7 +23,7 @@ class nsAppleGamepad final : public IGamepad {
 public:
     nsAppleGamepad(uint64_t connectionId, GCController* controller,
         const nsAppleGamepadControls& controls, bool active);
-    nsAppleGamepad(uint64_t connectionId, int nativeId, int axes, int buttons, bool active);
+    nsAppleGamepad(uint64_t connectionId, int nativeId, bool active);
 
     uint64_t GetConnectionId() const override { return _connectionId; }
     int GetAxisCount() const override { return static_cast<int>(_axes.size()); }
@@ -31,7 +32,7 @@ public:
     bool IsButtonPressed(int index) const override;
 
     void Update(bool active);
-    void Update(const float* axes, const unsigned char* buttons);
+    void Update(const GLFWgamepadstate& state);
     void ClearInput();
 
 private:

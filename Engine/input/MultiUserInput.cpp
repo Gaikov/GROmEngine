@@ -69,7 +69,7 @@ nsVec2 nsMultiUserInput::ScreenToTarget(float x, float y) const {
 }
 
 void nsMultiUserInput::ClearInputs() {
-    tInputsList().swap(_interactiveItems);
+    _interactiveItems.clear();
 }
 
 void nsMultiUserInput::AddInput(IUserInput *input) {

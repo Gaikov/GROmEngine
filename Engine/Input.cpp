@@ -1,4 +1,5 @@
 #include "Input.h"
+#include "input/GamepadMouse.h"
 #include <algorithm>
 #include <charconv>
 #include <cstring>
@@ -246,8 +247,8 @@ void nsInput::Process()
     _varPresses.clear();
     SyncGamepads(); // Detach cleanup also runs while the console blocks input.
 
-    int mouseX, mouseY;
-    platform->GetCursorPos(mouseX, mouseY);
+    float mouseX = 0, mouseY = 0;
+    GetCursorPos(mouseX, mouseY);
 
     int winWidth, winHeight;
     platform->GetClientSize(winWidth, winHeight);
@@ -396,7 +397,7 @@ void nsInput::CancelGamepadBinding(int index) {
 
 //--- nsInput::ProcessGamepads: ---
 void nsInput::ProcessGamepads() {
-    if (GamepadsBlocked()) {
+    if (GamepadsBlocked() || nsGamepadMouse::Shared()->enabled.IsLocked()) {
         CancelGamepads();
         _varPresses.clear();
         return;
@@ -441,6 +442,7 @@ void nsInput::ProcessGamepads() {
 //---------------------------------------------------------
 void nsInput::ReleaseAllKeys()
 {
+    nsGamepadMouse::Shared()->Cancel();
     _varPresses.clear();
     m_bAnyKey = false;
 	for ( int i = 0; i < KEYBOARD_MAX_KEYS; i++ )
@@ -557,7 +559,11 @@ void nsInput::SetCursorPos( float x, float y )
 	clientX = int( x * winWidth / float(w) );
 	clientY = int( ( float(h) - y ) * winHeight / float(h) );
 
-    platform->SetCursorPos(clientX, clientY);
+    if (nsGamepadMouse::Shared()->enabled.IsLocked()) {
+        nsGamepadMouse::Shared()->SetCursorPos(static_cast<float>(clientX), static_cast<float>(clientY));
+    } else {
+        platform->SetCursorPos(clientX, clientY);
+    }
 }
 
 //---------------------------------------------------------
@@ -565,7 +571,8 @@ void nsInput::SetCursorPos( float x, float y )
 //---------------------------------------------------------
 void nsInput::GetCursorPos( float &x, float &y )
 {
-	int mouseX, mouseY;
+    if (nsGamepadMouse::Shared()->GetCursorPos(x, y)) return;
+	int mouseX = 0, mouseY = 0;
     App_GetPlatform()->GetCursorPos(mouseX, mouseY);
     x = (float)mouseX;
     y = (float)mouseY;
@@ -576,7 +583,7 @@ void nsInput::GetCursorPos( float &x, float &y )
 //---------------------------------------------------------
 bool nsInput::CanDrawCursor()
 {
-	return !_cursorVisible;
+	return !_cursorVisible && (!App_GetPlatform()->IsMobile() || nsGamepadMouse::Shared()->enabled.IsLocked());
 }
 
 //---------------------------------------------------------
@@ -624,6 +631,7 @@ bool nsInput::IsAnyKeyPressed()
 		if ( IsKeyPressed( i ) )
 			return true;
 	}
+    if (nsGamepadMouse::Shared()->enabled.IsLocked()) return false;
     const auto gamepads = App_GetPlatform()->GetGamepadsProvider();
     for (auto i = 0; gamepads && i < gamepads->GetCount(); ++i) {
         const auto pad = gamepads->GetGamepad(i);
