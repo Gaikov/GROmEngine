@@ -59,6 +59,8 @@ bool nsMetalRenderState::Parse(script_state_t *ss) {
 
     _zEnable  = ps_get_f(ss, "z_enable", 1) != 0;
     _zWrite   = ps_get_f(ss, "z_write", 1) != 0;
+    _depthBias = ps_get_f(ss, "depth_bias", 0);
+    _slopeScaleDepthBias = ps_get_f(ss, "slope_scale_depth_bias", 0);
 
     _alphaTest = ps_get_f(ss, "alpha_test", 0) != 0;
     _alphaRef  = ps_get_f(ss, "alpha_ref", 0);
@@ -212,6 +214,7 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
     }
 
     if (!prev) {
+        [encoder setDepthBias:_depthBias slopeScale:_slopeScaleDepthBias clamp:0];
         [encoder setRenderPipelineState:pipelineState];
         if (_depthStencilState) [encoder setDepthStencilState:_depthStencilState];
         [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
@@ -225,6 +228,9 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
 
     if (pipelineState != prev->GetPipelineState()) {
         [encoder setRenderPipelineState:pipelineState];
+    }
+    if (_depthBias != prev->_depthBias || _slopeScaleDepthBias != prev->_slopeScaleDepthBias) {
+        [encoder setDepthBias:_depthBias slopeScale:_slopeScaleDepthBias clamp:0];
     }
     if (_depthStencilState != prev->_depthStencilState) {
         [encoder setDepthStencilState:_depthStencilState];

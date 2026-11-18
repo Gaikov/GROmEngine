@@ -137,7 +137,7 @@ IDataReader *AndroidPlatform::FileRead(const char *fileName) {
 }
 
 bool AndroidPlatform::FolderListing(const nsFilePath &folder, nsFilePath::tList &result) {
-    const char *path = folder.GetPath() == "./" || folder.GetPath() == "." ? "" : folder.GetPath();
+    const auto path = folder.GetPath() == "./" || folder.GetPath() == "." ? "" : folder.AsChar();
     auto dir = AAssetManager_openDir(_assetManager, path);
     if (!dir) {
         Log::Warning("can't open dir %s", (const char *) path);
@@ -148,7 +148,7 @@ bool AndroidPlatform::FolderListing(const nsFilePath &folder, nsFilePath::tList 
 
     const char *fileName;
     while ((fileName = AAssetDir_getNextFileName(dir))) {
-        result.push_back(nsFilePath(fileName));
+        result.push_back(folder.ResolvePath(fileName));
     }
 
     AAssetDir_close(dir);

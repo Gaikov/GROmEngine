@@ -30,12 +30,7 @@ private:
     struct nsDevice {
         uint64_t id;
         bool seen = false;
-        bool buttons[2]{};
-        bool awaitRelease[2]{};
-        bool pressed[2]{};
-        bool stickActive = false;
-        float x = 0;
-        float y = 0;
+        bool clickHeld = false; // Distinguish a disconnected hold from a normal release.
     };
 
     void UpdateFrame(IGamepads* provider, float seconds);
@@ -49,7 +44,8 @@ private:
     bool GetCursorPos(float& x, float& y);
     void SetCursorPos(float x, float y);
     void SendEscape();
-    nsDevice* Find(uint64_t id);
+    static float GetAxisState(IGamepads* provider, int index);
+    static bool IsButtonPressed(IGamepads* provider, int index);
     void SeedPosition(int width, int height);
 
     nsVar* _sensitivity = nullptr;
@@ -59,7 +55,8 @@ private:
     // Used only for the synchronous Escape pair, never during ordinary events.
     std::vector<IUserInput*> _escapeRoute;
     std::vector<IUserInput*> _escapeNextRoute;
-    uint64_t _owner = 0;
+    bool _buttons[2]{};
+    bool _awaitRelease[2]{true, true};
     uint64_t _generation = 0;
     uint64_t _lastUpdate = 0;
     float _x = 0;

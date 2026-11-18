@@ -13,7 +13,7 @@ GLShader *GLShadersManager::AllocateResource(const char *id, int param) {
 	}
 
 	auto shader = new GLShader(programs);
-	shader->m_fileName = id;
+	shader->fileName = id;
 	shader->Reload();
 	return shader;
 }

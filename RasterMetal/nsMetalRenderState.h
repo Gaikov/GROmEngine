@@ -51,6 +51,8 @@ private:
 
     bool    _zEnable        = true;
     bool    _zWrite         = true;
+    float   _depthBias      = 0;
+    float   _slopeScaleDepthBias = 0;
     bool    _alphaTest      = false;
     float   _alphaRef       = 0;
     bool    _alphaBlend     = false;

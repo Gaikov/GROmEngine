@@ -1,7 +1,7 @@
 // Copyright (c) 2003-2007, Roman Gaikov. All rights reserved.
 //--------------------------------------------------------------------------------------------------
 // file RenState.cpp
-// author Roman Gaikov 
+// author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
 #include "GLShader.h"
 #include "Core/ParseFile.h"
@@ -10,191 +10,199 @@
 
 struct renValueMap_t
 {
-	const char	*name;
-	GLenum		value;
+    const char    *name;
+    GLenum        value;
 };
 
 #define RENMAP_COUNT( array ) sizeof(array) / sizeof(renValueMap_t)
 
 //---------------------------------------------------------
-// SetRenValue: 
+// SetRenValue:
 //---------------------------------------------------------
 static bool SetRenValue( const renValueMap_t *map, const int count, const char *name, GLenum &value )
 {
-	if ( !StrCheck( name ) ) return false;
+    if ( !StrCheck( name ) ) return false;
 
-	for ( int i = 0; i < count; ++i )
-		if ( StrEqual( map[i].name, name ) )
-		{
-			value = map[i].value;
-			return true;
-		}
-	return false;	
+    for ( int i = 0; i < count; ++i )
+        if ( StrEqual( map[i].name, name ) )
+        {
+            value = map[i].value;
+            return true;
+        }
+    return false;
 }
 
 //---------------------------------------------------------
-// gs_blendMap: 
+// gs_blendMap:
 //---------------------------------------------------------
-static const renValueMap_t	gs_blendMap[] =
+static const renValueMap_t    gs_blendMap[] =
 {
-	{ "zero", GL_ZERO },
-	{ "one", GL_ONE },
-	{ "src_color", GL_SRC_COLOR },
-	{ "inv_src_color", GL_ONE_MINUS_SRC_COLOR },
-	{ "src_alpha", GL_SRC_ALPHA },
-	{ "inv_src_alpha", GL_ONE_MINUS_SRC_ALPHA },
-	{ "dst_alpha", GL_DST_ALPHA },
-	{ "inv_dst_alpha", GL_ONE_MINUS_DST_ALPHA },
-	{ "dst_color", GL_DST_COLOR },
-	{ "inv_dst_color", GL_ONE_MINUS_DST_COLOR },
-	{ "src_alpha_sat", GL_SRC_ALPHA_SATURATE }
+    { "zero", GL_ZERO },
+    { "one", GL_ONE },
+    { "src_color", GL_SRC_COLOR },
+    { "inv_src_color", GL_ONE_MINUS_SRC_COLOR },
+    { "src_alpha", GL_SRC_ALPHA },
+    { "inv_src_alpha", GL_ONE_MINUS_SRC_ALPHA },
+    { "dst_alpha", GL_DST_ALPHA },
+    { "inv_dst_alpha", GL_ONE_MINUS_DST_ALPHA },
+    { "dst_color", GL_DST_COLOR },
+    { "inv_dst_color", GL_ONE_MINUS_DST_COLOR },
+    { "src_alpha_sat", GL_SRC_ALPHA_SATURATE }
 };
 
 static const int gs_blendCount = RENMAP_COUNT( gs_blendMap );
 
 //---------------------------------------------------------
-// nsRenState::nsRenState: 
+// nsRenState::nsRenState:
 //---------------------------------------------------------
 GLShader::GLShader(nsGLProgramsCache &programs) : _programs(programs)
 {
-	m_zEnable = true;
-	m_zWrite = GL_TRUE;
-	
-	m_alphaTest = false;
-	m_alphaRef = 0;
-	
-	m_alphaBlend = false;
-	m_srcBlend = GL_ONE;
-	m_dstBlend = GL_ONE;
+    _zEnable = true;
+    _zWrite = GL_TRUE;
 
-	m_cullMode = true;
-	
-	m_texCoordU = GL_REPEAT;
-	m_texCoordV = GL_REPEAT;
+    _alphaTest = false;
+    _alphaRef = 0;
+
+    _alphaBlend = false;
+    _srcBlend = GL_ONE;
+    _dstBlend = GL_ONE;
+
+    _cullMode = true;
+
+    _texCoordU = GL_REPEAT;
+    _texCoordV = GL_REPEAT;
 }
 
 //---------------------------------------------------------
-// nsRenState::Reload: 
+// nsRenState::Reload:
 //---------------------------------------------------------
 bool GLShader::Reload()
 {
-	Log::Info("...loading shader: %s", m_fileName.AsChar());
-	nsParseFile	pf;
-	script_state_t	*ss = pf.BeginFile( m_fileName );
-	if ( !ss )
-	{
-		Log::Warning("can't load shader '%s'", m_fileName.AsChar() );
-		return false;
-	}
+    Log::Info("...loading shader: %s", fileName.AsChar());
+    nsParseFile    pf;
+    script_state_t    *ss = pf.BeginFile( fileName );
+    if ( !ss )
+    {
+        Log::Warning("can't load shader '%s'", fileName.AsChar() );
+        return false;
+    }
 
-	return Parse( ss );
+    return Parse( ss );
 }
 
 //---------------------------------------------------------
-// nsRenState::ForceApply: 
+// nsRenState::ForceApply:
 //---------------------------------------------------------
 void GLShader::ForceApply()
 {
-	_programs.Bind(_program, false);
+    _programs.Bind(_program, false);
 
-	GLUtils::SetState(GL_DEPTH_TEST, m_zEnable);
-	glDepthMask(m_zWrite);
+    GLUtils::SetState(GL_DEPTH_TEST, _zEnable);
+    glDepthMask(_zWrite);
+    GLUtils::SetState(GL_POLYGON_OFFSET_FILL, _depthBias != 0 || _slopeScaleDepthBias != 0);
+    glPolygonOffset(_slopeScaleDepthBias, _depthBias);
 
-	GLUtils::SetState(GL_BLEND, m_alphaBlend);
-    glBlendFunc(m_srcBlend, m_dstBlend);
+    GLUtils::SetState(GL_BLEND, _alphaBlend);
+    glBlendFuncSeparate(_srcBlend, _dstBlend, _srcAlphaBlend, _dstAlphaBlend);
 
-	GLUtils::SetState(GL_CULL_FACE, m_cullMode);
+    GLUtils::SetState(GL_CULL_FACE, _cullMode);
 
-	GL_CHECK_HOT_R("GLShader::ForceApply",)
+    GL_CHECK_HOT_R("GLShader::ForceApply",)
 }
 
 //---------------------------------------------------------
-// nsRenState::Apply: 
+// nsRenState::Apply:
 //---------------------------------------------------------
 void GLShader::Apply( GLShader *prev )
 {
-	if ( !prev )
-	{
-		ForceApply();
-		return;
-	}
+    if ( !prev )
+    {
+        ForceApply();
+        return;
+    }
 
-	_programs.Bind(_program, false);
+    _programs.Bind(_program, false);
 
-	if ( m_zEnable != prev->m_zEnable )
-		GLUtils::SetState(GL_DEPTH_TEST, m_zEnable);
-	if ( m_zWrite != prev->m_zWrite )
-		glDepthMask(m_zWrite);
-	
-	if ( m_alphaBlend != prev->m_alphaBlend )
-		GLUtils::SetState(GL_BLEND, m_alphaBlend);
-	if ( m_srcBlend != prev->m_srcBlend
-		|| m_dstBlend != prev->m_dstBlend
-		|| m_srcAlphaBlend != prev->m_srcAlphaBlend
-		|| m_dstAlphaBlend != prev->m_dstAlphaBlend) {
+    if ( _zEnable != prev->_zEnable )
+        GLUtils::SetState(GL_DEPTH_TEST, _zEnable);
+    if ( _zWrite != prev->_zWrite )
+        glDepthMask(_zWrite);
+    if (_depthBias != prev->_depthBias || _slopeScaleDepthBias != prev->_slopeScaleDepthBias) {
+        GLUtils::SetState(GL_POLYGON_OFFSET_FILL, _depthBias != 0 || _slopeScaleDepthBias != 0);
+        glPolygonOffset(_slopeScaleDepthBias, _depthBias);
+    }
 
-		glBlendFuncSeparate(m_srcBlend, m_dstBlend,
-			m_srcAlphaBlend, m_dstAlphaBlend);
+    if ( _alphaBlend != prev->_alphaBlend )
+        GLUtils::SetState(GL_BLEND, _alphaBlend);
+    if ( _srcBlend != prev->_srcBlend
+        || _dstBlend != prev->_dstBlend
+        || _srcAlphaBlend != prev->_srcAlphaBlend
+        || _dstAlphaBlend != prev->_dstAlphaBlend) {
 
-	}
+        glBlendFuncSeparate(_srcBlend, _dstBlend,
+            _srcAlphaBlend, _dstAlphaBlend);
 
-	if ( m_cullMode != prev->m_cullMode )
-		GLUtils::SetState(GL_CULL_FACE, m_cullMode);
+    }
 
-	GL_CHECK_HOT_R("GLShader::Apply",)
+    if ( _cullMode != prev->_cullMode )
+        GLUtils::SetState(GL_CULL_FACE, _cullMode);
+
+    GL_CHECK_HOT_R("GLShader::Apply",)
 }
 
 //---------------------------------------------------------
-// nsRenState::ReParse: 
+// nsRenState::ReParse:
 //---------------------------------------------------------
 bool GLShader::Parse( script_state_t *ss )
 {
-	const std::string vs = ps_get_str( ss, "vs", nsGLProgramsCache::DEFAULT_VERTEX_SHADER);
-	const std::string fs = ps_get_str( ss, "fs", nsGLProgramsCache::DEFAULT_FRAGMENT_SHADER);
-	_program = _programs.GetProgram(
-		nsGLProgramsCache::ResolveShaderPath(vs, true).c_str(),
-		nsGLProgramsCache::ResolveShaderPath(fs, false).c_str());
-	if (!_program) {
-		return false;
-	}
+    const std::string vs = ps_get_str( ss, "vs", nsGLProgramsCache::DEFAULT_VERTEX_SHADER);
+    const std::string fs = ps_get_str( ss, "fs", nsGLProgramsCache::DEFAULT_FRAGMENT_SHADER);
+    _program = _programs.GetProgram(
+        nsGLProgramsCache::ResolveShaderPath(vs, true).c_str(),
+        nsGLProgramsCache::ResolveShaderPath(fs, false).c_str());
+    if (!_program) {
+        return false;
+    }
 
-	std::string str;
+    std::string str;
 
-	m_zEnable = ps_get_f( ss, "z_enable", 1 ) != 0;
-	m_zWrite = ps_get_f( ss, "z_write", 1 ) ? GL_TRUE : GL_FALSE;
+    _zEnable = ps_get_f( ss, "z_enable", 1 ) != 0;
+    _zWrite = ps_get_f( ss, "z_write", 1 ) ? GL_TRUE : GL_FALSE;
+    _depthBias = ps_get_f(ss, "depth_bias", 0);
+    _slopeScaleDepthBias = ps_get_f(ss, "slope_scale_depth_bias", 0);
 
-	m_alphaTest = ps_get_f( ss, "alpha_test", 0 ) != 0;
-	m_alphaRef = ps_get_f( ss, "alpha_ref", 0 );
-	if ( m_alphaRef > 255 ) m_alphaRef = 255;
-	m_alphaRef /= 255;
+    _alphaTest = ps_get_f( ss, "alpha_test", 0 ) != 0;
+    _alphaRef = ps_get_f( ss, "alpha_ref", 0 );
+    if ( _alphaRef > 255 ) _alphaRef = 255;
+    _alphaRef /= 255;
 
-	str = ps_get_str( ss, "blend_src", "none" );
-	bool res = SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_srcBlend );
-	
-	str = ps_get_str( ss, "blend_dst", "none" );
-	res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_dstBlend );
+    str = ps_get_str( ss, "blend_src", "none" );
+    bool res = SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), _srcBlend );
 
-	str = ps_get_str( ss, "blend_src_alpha", "none" );
-	res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_srcAlphaBlend );
+    str = ps_get_str( ss, "blend_dst", "none" );
+    res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), _dstBlend );
 
-	str = ps_get_str( ss, "blend_dst_alpha", "none" );
-	res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), m_dstAlphaBlend );
+    str = ps_get_str( ss, "blend_src_alpha", "none" );
+    res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), _srcAlphaBlend );
 
-	m_alphaBlend = res;
+    str = ps_get_str( ss, "blend_dst_alpha", "none" );
+    res |= SetRenValue( gs_blendMap, gs_blendCount, str.c_str(), _dstAlphaBlend );
 
-	m_cullMode = ps_get_f( ss, "cull_mode", 1 ) != 0;
+    _alphaBlend = res;
 
-	m_texCoordU = StrEqual( ps_get_str( ss, "tex_coord_u", "wrap" ), "clamp" ) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-	m_texCoordV = StrEqual( ps_get_str( ss, "tex_coord_v", "wrap" ), "clamp" ) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-	m_nearestFilter = StrEqual(ps_get_str(ss, "tex_filter", "linear"), "nearest");
+    _cullMode = ps_get_f( ss, "cull_mode", 1 ) != 0;
 
-	return true;
+    _texCoordU = StrEqual( ps_get_str( ss, "tex_coord_u", "wrap" ), "clamp" ) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+    _texCoordV = StrEqual( ps_get_str( ss, "tex_coord_v", "wrap" ), "clamp" ) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+    _nearestFilter = StrEqual(ps_get_str(ss, "tex_filter", "linear"), "nearest");
+
+    return true;
 }
 
 unsigned int GLShader::GetSamplerIndex() const {
-    return (m_texCoordU == GL_CLAMP_TO_EDGE ? 1u : 0u) |
-           (m_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u) |
-           (m_nearestFilter ? 4u : 0u);
+    return (_texCoordU == GL_CLAMP_TO_EDGE ? 1u : 0u) |
+           (_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u) |
+           (_nearestFilter ? 4u : 0u);
 }
 
 IShaderUniform *GLShader::GetUniform(const char *name) {

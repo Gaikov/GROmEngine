@@ -3,8 +3,7 @@
 // file RenState.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef	_RenState_H_
-#define	_RenState_H_
+#pragma once
 
 #include "GLCommon.h"
 #include "GLProgramsCache.h"
@@ -13,49 +12,47 @@
 class GLShader : public IRenState
 {
 public:
-	nsString	m_fileName;
+    nsString    fileName;
+    GLShader(nsGLProgramsCache &programs);
+    const char* GetPath() const { return fileName; }
+    bool        Reload();
 
-public:
-	GLShader(nsGLProgramsCache &programs);
-	const char* GetPath() const { return m_fileName; }
-	bool		Reload();
+    void        ForceApply();
+    void        Apply( GLShader *prev );
+    unsigned int GetSamplerIndex() const;
 
-	void		ForceApply();
-	void		Apply( GLShader *prev );
-	unsigned int GetSamplerIndex() const;
-
-    bool        IsAlphaTest() override { return m_alphaTest != 0; }
-    float		GetAlphaCutoff() const { return m_alphaRef; }
+    bool        IsAlphaTest() override { return _alphaTest != 0; }
+    float        GetAlphaCutoff() const { return _alphaRef; }
 
     IShaderUniform *GetUniform(const char *name) override;
 
 private:
-	bool		m_zEnable;
-	GLboolean	m_zWrite;
+    bool        _zEnable;
+    GLboolean    _zWrite;
+    float _depthBias = 0;
+    float _slopeScaleDepthBias = 0;
 
-	bool		m_alphaTest;
-	GLclampf	m_alphaRef;
+    bool        _alphaTest;
+    GLclampf    _alphaRef;
 
-	bool		m_alphaBlend;
-	GLenum		m_srcBlend;
-	GLenum		m_dstBlend;
+    bool        _alphaBlend;
+    GLenum        _srcBlend;
+    GLenum        _dstBlend;
 
-	GLenum		m_srcAlphaBlend = GL_ONE;
-	GLenum		m_dstAlphaBlend = GL_ONE;
+    GLenum        _srcAlphaBlend = GL_ONE;
+    GLenum        _dstAlphaBlend = GL_ONE;
 
-	bool		m_cullMode;
+    bool        _cullMode;
 
-	GLint		m_texCoordU;
-	GLint		m_texCoordV;
-	bool		m_nearestFilter = false;
+    GLint        _texCoordU;
+    GLint        _texCoordV;
+    bool        _nearestFilter = false;
 
-	nsGLProgram	*_program = nullptr;
-	nsGLProgramsCache &_programs;
+    nsGLProgram    *_program = nullptr;
+    nsGLProgramsCache &_programs;
 
 private:
-	bool		Parse( script_state_t *ss );
+    bool        Parse( script_state_t *ss );
 
-	bool	    IsAlphaBlend() override { return m_alphaBlend != 0; }
+    bool        IsAlphaBlend() override { return _alphaBlend != 0; }
 };
-
-#endif //_RenState_H_

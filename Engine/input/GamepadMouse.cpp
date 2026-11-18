@@ -31,29 +31,36 @@ float Axis(float value) {
 
 bool nsGamepadMouse::OnInit() {
     _sensitivity = g_cfg->RegVar("pad_ui_sensitivity", "2", GVF_SAVABLE);
-    _deadzone = g_cfg->RegVar("pad_ui_deadzone", "0.05", GVF_SAVABLE);
-    _exponent = g_cfg->RegVar("pad_ui_exponent", "0.5", GVF_SAVABLE);
+    _deadzone = g_cfg->RegVar("pad_ui_deadzone", "0.02", GVF_SAVABLE);
+    _exponent = g_cfg->RegVar("pad_ui_exponent", "2", GVF_SAVABLE);
     _escapeRoute.reserve(16);
     _escapeNextRoute.reserve(16);
     return true;
 }
 
-nsGamepadMouse::nsDevice* nsGamepadMouse::Find(uint64_t id) {
-    for (auto& device : _devices) if (device.id == id) return &device;
-    return nullptr;
+float nsGamepadMouse::GetAxisState(IGamepads* provider, int index) {
+    auto sum = 0.0f;
+    for (auto i = 0; provider && i < provider->GetCount(); ++i) {
+        if (const auto pad = provider->GetGamepad(i)) {
+            sum += Axis(pad->GetAxisValue(index));
+        }
+    }
+    return std::clamp(sum, -1.0f, 1.0f);
+}
+
+bool nsGamepadMouse::IsButtonPressed(IGamepads* provider, int index) {
+    for (auto i = 0; provider && i < provider->GetCount(); ++i) {
+        const auto pad = provider->GetGamepad(i);
+        if (pad && pad->IsButtonPressed(index)) return true;
+    }
+    return false;
 }
 
 bool nsGamepadMouse::Cancel(bool notify) {
     const auto generation = ++_generation;
     const auto held = _mouseDown;
     _mouseDown = false;
-    _owner = 0;
-    for (auto& device : _devices) {
-        for (auto i = 0; i < 2; ++i) {
-            device.awaitRelease[i] = true; // Wait for a neutral sample, even if the last sample was up.
-            device.pressed[i] = false;
-        }
-    }
+    _awaitRelease[0] = _awaitRelease[1] = true;
     if (notify && held) nsEngineContext::Shared()->CancelPointer(NS_POINTER_PRIMARY);
     return _generation == generation;
 }
@@ -181,46 +188,44 @@ void nsGamepadMouse::UpdateFrame(IGamepads* provider, float seconds) {
     const auto oldX = hadPosition ? previousX : static_cast<int>(_x);
     const auto oldY = hadPosition ? previousY : static_cast<int>(_y);
     seconds = std::isfinite(seconds) ? std::clamp(seconds, 0.0f, 0.1f) : 0;
-    const auto deadzone = Parameter(_deadzone, 0.05f, 0, 0.95f);
+    const auto deadzone = Parameter(_deadzone, 0.02f, 0, 0.95f);
     for (auto& device : _devices) device.seen = false;
-    uint64_t candidate = 0;
     for (auto index = 0; provider && index < provider->GetCount(); ++index) {
         const auto pad = provider->GetGamepad(index);
         if (!pad) continue;
-        auto device = Find(pad->GetConnectionId());
-        if (!device) {
+        auto device = std::find_if(_devices.begin(), _devices.end(), [pad](const auto& item) {
+            return item.id == pad->GetConnectionId();
+        });
+        if (device == _devices.end()) {
             _devices.push_back({pad->GetConnectionId()});
-            device = &_devices.back();
-            for (auto button = 0; button < 2; ++button) device->awaitRelease[button] = pad->IsButtonPressed(button);
+            device = _devices.end() - 1;
+            for (auto button = 0; button < 2; ++button) {
+                if (!_buttons[button] && pad->IsButtonPressed(button)) _awaitRelease[button] = true;
+            }
         }
         device->seen = true;
-        auto fresh = false;
-        for (auto button = 0; button < 2; ++button) {
-            const auto down = pad->IsButtonPressed(button);
-            if (!down) device->awaitRelease[button] = false;
-            device->pressed[button] = down && !device->buttons[button] && !device->awaitRelease[button];
-            device->buttons[button] = down;
-            fresh |= device->pressed[button];
-        }
-        device->x = Axis(pad->GetAxisValue(nsGamepadLayout::LeftX));
-        device->y = Axis(pad->GetAxisValue(nsGamepadLayout::LeftY));
-        const auto moving = std::hypot(device->x, device->y) > deadzone;
-        fresh |= moving && !device->stickActive;
-        device->stickActive = moving;
-        if (fresh && !candidate) candidate = device->id;
+        device->clickHeld = pad->IsButtonPressed(nsGamepadLayout::A);
     }
-    if (auto owner = Find(_owner); _owner && (!owner || !owner->seen)) {
-        Cancel();
-        candidate = 0;
-    }
+    const auto disconnectedClick = std::any_of(_devices.begin(), _devices.end(), [](const auto& device) {
+        return !device.seen && device.clickHeld;
+    });
     std::erase_if(_devices, [](const auto& device) { return !device.seen; });
-    if (!_mouseDown && candidate) _owner = candidate;
-    const auto owner = Find(_owner);
-    if (!owner) return;
+    bool pressed[2]{};
+    for (auto button = 0; button < 2; ++button) {
+        const auto down = IsButtonPressed(provider, button);
+        if (!down) _awaitRelease[button] = false;
+        pressed[button] = down && !_buttons[button] && !_awaitRelease[button];
+        _buttons[button] = down;
+    }
+    if (_mouseDown && disconnectedClick && !_buttons[0]) {
+        Cancel();
+        return;
+    }
+    const auto x = GetAxisState(provider, nsGamepadLayout::LeftX);
+    const auto y = GetAxisState(provider, nsGamepadLayout::LeftY);
     // Copy only scalar input before dispatch: callbacks can reset the emulator.
-    const auto x = owner->x, y = owner->y;
-    const auto click = owner->buttons[0];
-    const auto pressClick = owner->pressed[0], pressBack = owner->pressed[1];
+    const auto click = _buttons[0];
+    const auto pressClick = pressed[0], pressBack = pressed[1];
     const auto generation = _generation;
     if (pressBack) {
         if (_mouseDown) {
@@ -233,7 +238,7 @@ void nsGamepadMouse::UpdateFrame(IGamepads* provider, float seconds) {
     if (radius > deadzone) {
         const auto amount = (std::min(radius, 1.0f) - deadzone) / (1.0f - deadzone);
         const auto speed = Parameter(_sensitivity, 2, 0, 10) * height
-            * std::pow(amount, Parameter(_exponent, 0.5f, 0.1f, 8));
+            * std::pow(amount, Parameter(_exponent, 2, 0.1f, 8));
         _x = std::clamp(_x + x / radius * speed * seconds, 0.0f, static_cast<float>(width - 1));
         _y = std::clamp(_y + y / radius * speed * seconds, 0.0f, static_cast<float>(height - 1));
     }

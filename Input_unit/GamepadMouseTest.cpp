@@ -154,8 +154,8 @@ protected:
         ASSERT_TRUE(nsEngineContext::Init());
         ASSERT_TRUE(nsGamepadMouse::Init());
         EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_sensitivity")->Value(), 2);
-        EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_deadzone")->Value(), 0.05f);
-        EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_exponent")->Value(), 0.5f);
+        EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_deadzone")->Value(), 0.02f);
+        EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_exponent")->Value(), 2);
         // Reference-curve tests keep explicit parameters independent of defaults.
         g_cfg->ExecLine("pad_ui_sensitivity 1");
         g_cfg->ExecLine("pad_ui_deadzone 0.2");
@@ -258,16 +258,16 @@ TEST_F(GamepadMouseTest, RadialDeadzoneAndPowerCurveKeepFractionalPosition) {
     Position(55, 50);
     EXPECT_EQ(pads.updates, 0);
 }
-TEST_F(GamepadMouseTest, DefaultSettingsUseFivePercentDeadzoneAndSquareRootResponse) {
+TEST_F(GamepadMouseTest, DefaultSettingsUseTwoPercentDeadzoneAndQuadraticResponse) {
     g_cfg->ExecLine("pad_ui_sensitivity 2");
-    g_cfg->ExecLine("pad_ui_deadzone 0.05");
-    g_cfg->ExecLine("pad_ui_exponent 0.5");
-    Pad().axes[0] = 0.05f;
+    g_cfg->ExecLine("pad_ui_deadzone 0.02");
+    g_cfg->ExecLine("pad_ui_exponent 2");
+    Pad().axes[0] = 0.02f;
     Frame();
     EXPECT_EQ(Count('m'), 0);
-    Pad().axes[0] = 0.2875f; // Rescaled magnitude 0.25 -> square-root response 0.5.
+    Pad().axes[0] = 0.51f; // Rescaled magnitude 0.5 -> quadratic response 0.25.
     Frame();
-    Position(60, 50);
+    Position(55, 50);
 }
 TEST_F(GamepadMouseTest, DiagonalIsNotFasterAndPositiveYMovesDown) {
     Pad().axes[0] = Pad().axes[1] = 1;
@@ -434,7 +434,52 @@ TEST_F(GamepadMouseTest, ResetDuringDragCancelSuppressesEscapeIntoTheReplacement
     EXPECT_EQ(second.ups, 1);
     EXPECT_EQ(nativeKeyEvents, 0);
 }
-TEST_F(GamepadMouseTest, AnotherPadCannotStealAHeldDrag) {
+TEST_F(GamepadMouseTest, AxesSumAllConnectedPadsAndClampToUnitRange) {
+    g_cfg->ExecLine("pad_ui_deadzone 0");
+    g_cfg->ExecLine("pad_ui_exponent 1");
+    auto& other = pads.Add(2);
+    Frame(0);
+    Pad().axes[0] = 1;
+    Frame();
+    Position(60, 50); // A neutral pad does not reduce the velocity.
+    other.axes[0] = 1;
+    Frame();
+    Position(70, 50); // The sum of two full inputs is clamped to one.
+    other.axes[0] = -1;
+    Frame();
+    Position(70, 50); // Opposite inputs cancel each other.
+    Pad().axes[0] = -1;
+    Frame();
+    Position(60, 50); // Negative sums are clamped to minus one.
+}
+TEST_F(GamepadMouseTest, PartialAxisValuesAddWithoutAveraging) {
+    g_cfg->ExecLine("pad_ui_deadzone 0");
+    g_cfg->ExecLine("pad_ui_exponent 1");
+    auto& other = pads.Add(2);
+    Frame(0);
+    Pad().axes[0] = 0.4f;
+    other.axes[0] = 0.3f;
+    Frame();
+    Position(57, 50);
+    Pad().axes[0] = other.axes[0] = 0;
+    Pad().axes[1] = other.axes[1] = -0.3f;
+    Frame();
+    Position(57, 44);
+}
+TEST_F(GamepadMouseTest, AxisSumIsClampedAfterAllDevicesContribute) {
+    g_cfg->ExecLine("pad_ui_deadzone 0");
+    g_cfg->ExecLine("pad_ui_exponent 1");
+    auto& secondPad = pads.Add(2);
+    auto& thirdPad = pads.Add(3);
+    Frame(0);
+    Pad().axes[0] = secondPad.axes[0] = 1;
+    thirdPad.axes[0] = -1;
+    Frame();
+    Position(60, 50); // 1 + 1 - 1 = 1; clamping intermediate sums would produce zero.
+}
+TEST_F(GamepadMouseTest, AllPadsContributeToMovementAndOneLogicalMouseButton) {
+    g_cfg->ExecLine("pad_ui_deadzone 0");
+    g_cfg->ExecLine("pad_ui_exponent 1");
     auto& other = pads.Add(2);
     Frame(0);
     Pad().buttons[0] = true;
@@ -442,15 +487,99 @@ TEST_F(GamepadMouseTest, AnotherPadCannotStealAHeldDrag) {
     other.axes[0] = 1;
     other.buttons[0] = true;
     Frame();
-    Position(50, 50);
+    Position(60, 50);
     EXPECT_EQ(Count('d'), 1);
     Pad().buttons[0] = false;
     Frame();
-    EXPECT_EQ(Count('u'), 1);
+    Position(70, 50);
+    EXPECT_EQ(Count('u'), 0);
     other.axes[0] = 0;
     other.buttons[0] = false;
     Frame();
-    other.axes[0] = 1;
+    EXPECT_EQ(Count('u'), 1);
+    EXPECT_EQ(first.clicks, 1);
+    EXPECT_EQ(first.cancels, 0);
+}
+TEST_F(GamepadMouseTest, EscapeRearmsOnlyAfterAllPadsReleaseB) {
+    auto& other = pads.Add(2);
+    Frame(0);
+    Pad().buttons[1] = true;
+    Frame();
+    other.buttons[1] = true;
+    Frame();
+    Pad().buttons[1] = false;
+    Frame();
+    EXPECT_EQ(Count('k'), 1);
+    EXPECT_EQ(Count('K'), 1);
+    other.buttons[1] = false;
+    Frame();
+    Pad().buttons[1] = true;
+    Frame();
+    EXPECT_EQ(Count('k'), 2);
+    EXPECT_EQ(Count('K'), 2);
+}
+TEST_F(GamepadMouseTest, JoiningHeldPadDoesNotReleaseExistingDragOrTriggerEscape) {
+    Pad().buttons[0] = true;
+    Frame();
+    auto& other = pads.Add(2);
+    other.buttons[0] = other.buttons[1] = true;
+    Frame();
+    EXPECT_EQ(Count('d'), 1);
+    EXPECT_EQ(Count('u'), 0);
+    EXPECT_EQ(Count('k'), 0);
+    EXPECT_EQ(first.cancels, 0);
+    Pad().buttons[0] = false;
+    Frame();
+    EXPECT_EQ(Count('u'), 0);
+    other.buttons[0] = other.buttons[1] = false;
+    Frame();
+    EXPECT_EQ(Count('u'), 1);
+    other.buttons[1] = true;
+    Frame();
+    EXPECT_EQ(Count('k'), 1);
+    EXPECT_EQ(Count('K'), 1);
+}
+TEST_F(GamepadMouseTest, DisconnectingOneHeldPadKeepsDragWhileAnotherPadStillHoldsA) {
+    auto& other = pads.Add(2);
+    Frame(0);
+    Pad().buttons[0] = other.buttons[0] = true;
+    Frame();
+    pads.devices.erase(pads.devices.begin());
+    Frame();
+    EXPECT_EQ(first.cancels, 0);
+    EXPECT_EQ(Count('u'), 0);
+    other.buttons[0] = false;
+    Frame();
+    EXPECT_EQ(first.clicks, 1);
+    EXPECT_EQ(Count('u'), 1);
+}
+TEST_F(GamepadMouseTest, DisconnectingNeutralPadDoesNotCancelDrag) {
+    pads.Add(2);
+    Frame(0);
+    Pad().buttons[0] = true;
+    Frame();
+    pads.devices.pop_back();
+    Frame();
+    EXPECT_EQ(first.cancels, 0);
+    EXPECT_EQ(Count('u'), 0);
+    Pad().buttons[0] = false;
+    Frame();
+    EXPECT_EQ(first.clicks, 1);
+}
+TEST_F(GamepadMouseTest, DisconnectingLastHeldPadCancelsInsteadOfClicking) {
+    pads.Add(2);
+    Frame(0);
+    Pad().buttons[0] = true;
+    Frame();
+    pads.devices.erase(pads.devices.begin());
+    Frame();
+    EXPECT_EQ(first.cancels, 1);
+    EXPECT_EQ(first.clicks, 0);
+    EXPECT_EQ(Count('u'), 0);
+}
+TEST_F(GamepadMouseTest, NullDevicesDoNotContributeToAxisSum) {
+    pads.devices.push_back(nullptr);
+    Pad().axes[0] = 1;
     Frame();
     Position(60, 50);
 }
@@ -667,6 +796,21 @@ TEST_F(GamepadMouseTest, MoveCallbackRefreshesTheRouteBeforeButtonDown) {
     EXPECT_EQ(Count('d'), 1);
     EXPECT_EQ(routeQueries, 2);
     EXPECT_EQ(nativePointerEvents, 0);
+}
+TEST_F(GamepadMouseTest, ResetKeepsDeflectedStickMovingAcrossMenuRoutes) {
+    Pad().axes[0] = 1;
+    Frame();
+    Position(60, 50);
+    g_inp.ReleaseAllKeys(); // Menu activation resets buttons but must not stop the stick.
+    nested.ClearInputs();
+    nested.AddInput(&second);
+    Frame();
+    Position(70, 50);
+    Frame();
+    Position(80, 50);
+    EXPECT_EQ(Count('m'), 3);
+    EXPECT_EQ(Count('d'), 0);
+    EXPECT_EQ(Count('k'), 0);
 }
 TEST_F(GamepadMouseTest, MobileCursorUsesEnabledAndStartsAtCenter) {
     Mouse().enabled.RemoveLock("menu");
