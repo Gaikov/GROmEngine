@@ -79,9 +79,9 @@ public:
 
     void OnActivateApp(bool active);
 private:
-	KeyBinding_t	m_inKeys[KEYBOARD_MAX_KEYS]{};
-	bool			m_kbPrev[KEYBOARD_MAX_KEYS]{};
-	bool			m_awaitRelease[KEYBOARD_MAX_KEYS]{};
+	KeyBinding_t	_keys[KEYBOARD_MAX_KEYS]{};
+	bool			_previousKeys[KEYBOARD_MAX_KEYS]{};
+	bool			_awaitRelease[KEYBOARD_MAX_KEYS]{};
     struct nsVarPress {
         const nsVar *var;
         int direction;
@@ -111,8 +111,8 @@ private:
     uint64_t _gamepadResetGeneration = 0;
     bool _appActive = true;
 
-	bool			m_uiActive;
-	bool			m_bAnyKey;
+	bool			_uiActive;
+	bool			_anyKey;
 
 private:
     static void PadCmd(int argc, const char* argv[]);

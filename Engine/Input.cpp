@@ -180,10 +180,10 @@ void nsInput::keydesc_f( int argc, const char *argv[] )
 //---------------------------------------------------------
 nsInput::nsInput()
 {
-	//memset( m_kbPrev, 0, sizeof(m_kbPrev) );//*/
+	//memset( _previousKeys, 0, sizeof(_previousKeys) );//*/
 
-	m_bAnyKey = false;
-	m_uiActive = false;
+	_anyKey = false;
+	_uiActive = false;
 
 	nsConfig::AddWriter( this );
 }
@@ -197,20 +197,18 @@ void nsInput::Init()
 	g_cfg->RegCmd( "keycmd", keycmd_f );
 	g_cfg->RegCmd( "in_showkeys", in_showkeys_f );
     g_cfg->RegCmd("padcmd", PadCmd);
-    // Retained for legacy configs/UI; raw padcmd bindings ignore it.
-    g_cfg->RegVar("in_joy_use", "0", GVF_SAVABLE);
     _appActive = true;
-    m_uiActive = m_bAnyKey = false;
-    std::fill_n(m_kbPrev, KEYBOARD_MAX_KEYS, false);
-    std::fill_n(m_awaitRelease, KEYBOARD_MAX_KEYS, false);
+    _uiActive = _anyKey = false;
+    std::fill_n(_previousKeys, KEYBOARD_MAX_KEYS, false);
+    std::fill_n(_awaitRelease, KEYBOARD_MAX_KEYS, false);
     _varPresses.clear();
     _varPresses.reserve(KEYBOARD_MAX_KEYS);
 
-	memset( m_inKeys, 0, sizeof(m_inKeys) );
+	memset( _keys, 0, sizeof(_keys) );
     for (int key = 0; key < KEYBOARD_MAX_KEYS; key++) {
         auto name = App_GetPlatform()->GetKeyName(key);
         if (name) {
-            strcpy(m_inKeys[key].keyname, name);
+            strcpy(_keys[key].keyname, name);
         }
     }
 
@@ -225,13 +223,13 @@ void nsInput::Release() {
     // Balance recorded contributions without polling or rearming controls.
     ++_gamepadResetGeneration;
     _varPresses.clear();
-    m_bAnyKey = false;
+    _anyKey = false;
     for (auto i = 0; i < KEYBOARD_MAX_KEYS; ++i) {
-        if (m_kbPrev[i] && !m_awaitRelease[i]) KeyUp(&m_inKeys[i]);
-        m_kbPrev[i] = m_awaitRelease[i] = false;
+        if (_previousKeys[i] && !_awaitRelease[i]) KeyUp(&_keys[i]);
+        _previousKeys[i] = _awaitRelease[i] = false;
     }
     for (auto& state : _gamepads) ReleaseGamepad(state);
-    for (auto& key : m_inKeys) UnbindKey(&key);
+    for (auto& key : _keys) UnbindKey(&key);
     for (auto& key : _gamepadBindings) UnbindKey(&key);
     _gamepadBindings.clear();
     _gamepads.clear();
@@ -243,7 +241,7 @@ void nsInput::Release() {
 void nsInput::Process()
 {
     auto platform = App_GetPlatform();
-    m_bAnyKey = false;
+    _anyKey = false;
     _varPresses.clear();
     SyncGamepads(); // Detach cleanup also runs while the console blocks input.
 
@@ -264,7 +262,7 @@ void nsInput::Process()
 
     if (GamepadsBlocked()) CancelGamepads();
     if (nsConsole::Shared()->IsActive()) {
-        m_uiActive = true;
+        _uiActive = true;
         return;
     }
 
@@ -278,37 +276,37 @@ void nsInput::Process()
 	{
 		state = IsKeyPressed( i );
 
-		if ( m_uiActive && state )
+		if ( _uiActive && state )
 		{
 			any_key = true;
 			break;
 		}
 		else if ( state )
 		{
-			if ( !m_kbPrev[i] )
+			if ( !_previousKeys[i] )
 			{
-				KeyDown( &m_inKeys[i] );
+				KeyDown( &_keys[i] );
                 if (_gamepadResetGeneration != generation) return;
 
-				if ( !IsMouseKey( i ) )		m_bAnyKey = true;
-				else if ( _cursorInClient )	m_bAnyKey = true;
+				if ( !IsMouseKey( i ) )		_anyKey = true;
+				else if ( _cursorInClient )	_anyKey = true;
 			}
 
-			KeyPressed( &m_inKeys[i] );
+			KeyPressed( &_keys[i] );
             if (_gamepadResetGeneration != generation) return;
 		}
-		else if ( m_kbPrev[i] )
+		else if ( _previousKeys[i] )
 		{
-			if ( !m_awaitRelease[i] )
-				KeyUp( &m_inKeys[i] );
-			m_awaitRelease[i] = false;
+			if ( !_awaitRelease[i] )
+				KeyUp( &_keys[i] );
+			_awaitRelease[i] = false;
 		}
 
-		m_kbPrev[i] = state;
+		_previousKeys[i] = state;
 	}
 
 
-	if ( !any_key )	m_uiActive = false;
+	if ( !any_key )	_uiActive = false;
     ProcessGamepads();
 }
 
@@ -421,7 +419,7 @@ void nsInput::ProcessGamepads() {
             }
             if (button.awaitRelease) continue;
             const auto pressed = !wasDown;
-            if (pressed) m_bAnyKey = true;
+            if (pressed) _anyKey = true;
             if (index >= _gamepadBindings.size()) continue;
             if (pressed) KeyDown(&_gamepadBindings[index]);
             else KeyPressed(&_gamepadBindings[index]);
@@ -430,7 +428,7 @@ void nsInput::ProcessGamepads() {
             if (GamepadsBlocked()) {
                 CancelGamepads();
                 _varPresses.clear();
-                m_bAnyKey = false;
+                _anyKey = false;
                 return;
             }
         }
@@ -444,13 +442,13 @@ void nsInput::ReleaseAllKeys()
 {
     nsGamepadMouse::Shared()->Cancel();
     _varPresses.clear();
-    m_bAnyKey = false;
+    _anyKey = false;
 	for ( int i = 0; i < KEYBOARD_MAX_KEYS; i++ )
 	{
-		if ( m_kbPrev[i] && !m_awaitRelease[i] )
-			KeyUp( &m_inKeys[i] );
-		m_kbPrev[i] = IsKeyPressed( i );
-		m_awaitRelease[i] = m_kbPrev[i];
+		if ( _previousKeys[i] && !_awaitRelease[i] )
+			KeyUp( &_keys[i] );
+		_previousKeys[i] = IsKeyPressed( i );
+		_awaitRelease[i] = _previousKeys[i];
 	}
 
     CancelGamepads();
@@ -470,7 +468,7 @@ int nsInput::GetVarPressDirection(const nsVar *var) const {
 //---------------------------------------------------------
 void nsInput::Unbind( const char *var_cmd )
 {
-	KeyBinding_t	*k = m_inKeys;
+	KeyBinding_t	*k = _keys;
 	bool	inc = false;
 	if ( var_cmd[0] == '+' )
 	{
@@ -508,7 +506,7 @@ int nsInput::GetBind( const char *var_cmd, nsString **keys )
 		var_cmd ++;
 	}
 
-	KeyBinding_t	*k = m_inKeys;
+	KeyBinding_t	*k = _keys;
 	for ( int i = 0; i < KEYBOARD_MAX_KEYS; i++, k++ )
 	{
 		if ( k->type == IC_CMD )
@@ -591,7 +589,7 @@ bool nsInput::CanDrawCursor()
 //---------------------------------------------------------
 const char* nsInput::GetKeyDesc( int code )
 {
-	return m_inKeys[code].keyname;
+	return _keys[code].keyname;
 }
 
 //---------------------------------------------------------
@@ -601,7 +599,7 @@ bool nsInput::HasKey(const char *desc)
 {
 	if ( desc && strlen( desc ) )
 	{
-		for (auto & key : m_inKeys)
+		for (auto & key : _keys)
 		{
 			if ( strlen(key.keyname)
 				&& StrEqual( key.keyname, desc ) )
@@ -618,7 +616,7 @@ bool nsInput::HasKey(const char *desc)
 //---------------------------------------------------------
 bool nsInput::WaitAnyKey()
 {
-	return m_bAnyKey;
+	return _anyKey;
 }
 
 //---------------------------------------------------------
@@ -648,9 +646,9 @@ bool nsInput::IsAnyKeyPressed()
 void nsInput::OnSaveConfig( IDataWriter *out )
 {
 	//save keys bindings
-	for (auto & m_inKey : m_inKeys)
+	for (auto & binding : _keys)
 	{
-		KeyBinding_t	*key = &m_inKey;
+		KeyBinding_t	*key = &binding;
 		if ( key->type == IC_VAR )
 			out->Printf( "keycmd %s %s%s\n", key->keyname, key->inc ? "+": "", key->var->GetName() );
 		else if ( key->type == IC_CMD )
@@ -806,10 +804,10 @@ void nsInput::ShowKeys()
 {
 	Log::Info("------------------------- key names ------------------------" );
 	int	count = 0;
-	for (auto & m_inKey : m_inKeys)
-		if ( strlen(m_inKey.keyname) )
+	for (auto & binding : _keys)
+		if ( strlen(binding.keyname) )
 		{
-			Log::Info("%s", m_inKey.keyname );
+			Log::Info("%s", binding.keyname );
 /*
 			if ( count > 4 )
 			{
@@ -829,10 +827,10 @@ KeyBinding_t* nsInput::GetKey( const char *name )
 {
 	if ( !name ) return nullptr;
 
-	for (auto & m_inKey : m_inKeys)
+	for (auto & binding : _keys)
 	{
-		if ( StrEqual( m_inKey.keyname, name ) )
-			return &m_inKey;
+		if ( StrEqual( binding.keyname, name ) )
+			return &binding;
 	}
 
 
@@ -895,7 +893,7 @@ void nsInput::OnActivateApp(bool active) {
     _appActive = active;
     if (!active) {
         _cursorInClient = false;
-        m_bAnyKey = false;
+        _anyKey = false;
         _varPresses.clear();
         CancelGamepads();
     }
