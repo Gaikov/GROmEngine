@@ -2,6 +2,7 @@
 // Created by Roman on 10/07/2019.
 //
 
+#include "nsLib/math/ScissorRect.h"
 #include "GLRenderDevice.h"
 #include "GLTexture.h"
 #include "GLVertexBuffer.h"
@@ -95,6 +96,7 @@ bool GLRenderDevice::PrepareOpenGL() {
 	GL_CHECK_R("glFrontFace", false)
 	ApplyProjectionMatrix();
 
+    ResetScissorRect();
 	glDepthFunc(GL_LEQUAL);
 
 	return true;
@@ -109,6 +111,8 @@ void GLRenderDevice::CleanupOpenGL() {
 }
 
 void GLRenderDevice::Release() {
+    _scissorEnabled = false;
+    _scissorRect = {};
 	Log::Info("*****************************************");
 	Log::Info("+         releasing GL renderer         +");
 	Log::Info("*****************************************");
@@ -226,6 +230,39 @@ void GLRenderDevice::StateApply(IRenState *state)
 	ApplySampler();
 }
 
+void GLRenderDevice::SetScissorRect(const nsRect &rect) {
+    int width, height;
+    if (const auto target = GetRenderTarget()) target->GetSize(width, height);
+    else App_GetPlatform()->GetClientSize(width, height);
+    _scissorRect = nsScissorRect::Normalize(rect, width, height);
+    _scissorEnabled = true;
+    ApplyScissor();
+}
+
+void GLRenderDevice::ResetScissorRect() {
+    _scissorEnabled = false;
+    _scissorRect = {};
+    ApplyScissor();
+}
+
+nsRect GLRenderDevice::ToGLScissorRect(const nsRect &rect, int targetHeight, bool renderTexture) {
+    // Render textures already flip projection Y to the engine texture convention.
+    return {rect.x, renderTexture ? rect.y : float(targetHeight) - rect.y - rect.height, rect.width, rect.height};
+}
+
+void GLRenderDevice::ApplyScissor() {
+    if (!_scissorEnabled) {
+        glDisable(GL_SCISSOR_TEST);
+        return;
+    }
+    int width, height;
+    if (const auto target = GetRenderTarget()) target->GetSize(width, height);
+    else App_GetPlatform()->GetClientSize(width, height);
+    const auto rect = ToGLScissorRect(_scissorRect, height, _renderTextureBound);
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(int(rect.x), int(rect.y), int(rect.width), int(rect.height));
+}
+
 void GLRenderDevice::ClearScene(uint flags, const nsColor &color) {
     GLbitfield glBits = 0;
     if (flags & CLR_CBUFF) {
@@ -239,7 +276,9 @@ void GLRenderDevice::ClearScene(uint flags, const nsColor &color) {
     if (CLR_STENCIL & flags) {
         glBits |= GL_STENCIL_BUFFER_BIT;
     }
+    if (_scissorEnabled) glDisable(GL_SCISSOR_TEST);
     glClear(glBits);
+    if (_scissorEnabled) ApplyScissor();
     GL_CHECK_HOT_R("glClear",)
 }
 
@@ -255,6 +294,7 @@ bool GLRenderDevice::BeginScene()
 		}
 	}
 
+    ResetScissorRect();
 	int w, h;
 	App_GetPlatform()->GetClientSize(w, h);
 	glViewport(0, 0, w, h);
@@ -408,6 +448,7 @@ void GLRenderDevice::VerticesRelease(IVertexBuffer *vb)
 
 void GLRenderDevice::VerticesDraw(IVertexBuffer *vb)
 {
+    if (_scissorEnabled && (_scissorRect.width <= 0 || _scissorRect.height <= 0)) return;
     _textures.ApplyBindings();
     _shaders.programs.SetTextureBound(_textures.HasBoundTexture());
     ApplySampler();
@@ -522,6 +563,7 @@ GLRenderDevice::DrawPlaneSprite(const nsVec3 &p1, const nsVec3 &p2, float width,
 
 void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 {
+    if (_scissorEnabled && (_scissorRect.width <= 0 || _scissorRect.height <= 0)) return;
     _textures.ApplyBindings();
     _shaders.programs.SetTextureBound(_textures.HasBoundTexture());
     ApplySampler();
@@ -536,6 +578,7 @@ void GLRenderDevice::DrawQuad(vbVertex_t v[4])
 }
 
 void GLRenderDevice::InvalidateResources() {
+    ResetScissorRect();
     _queryRestart = true;
 	_renderTextureBound = false;
 	_textures.UnloadFromGPU();
@@ -597,6 +640,7 @@ void GLRenderDevice::RenderTextureBind(IRenderTexture *rt) {
 	const auto target = dynamic_cast<nsGLRenderTexture *>(rt);
 	_renderTextures.Bind(target);
 	_renderTextureBound = target != nullptr;
+    ResetScissorRect();
 
 	// The clip-space Y flip reverses triangle winding. Keep the engine's
 	// front-face convention unchanged for render states with culling enabled.

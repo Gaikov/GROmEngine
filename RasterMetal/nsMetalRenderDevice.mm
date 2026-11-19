@@ -2,6 +2,7 @@
 // Created by OpenCode
 //
 
+#include "nsLib/math/ScissorRect.h"
 #include "nsMetalRenderDevice.h"
 #include "nsMetalRenderState.h"
 #include "nsMetalStencilState.h"
@@ -107,6 +108,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
 
 void nsMetalRenderDevice::Release() {
     EndEncoder();
+    ResetScissorRect();
     _commandBuffer = nil;
     _currentDrawable = nil;
     _depthStencilTexture = nil;
@@ -142,6 +144,7 @@ void nsMetalRenderDevice::Release() {
 }
 
 void nsMetalRenderDevice::InvalidateResources() {
+    ResetScissorRect();
 	_queryRestart = true;
 }
 
@@ -223,6 +226,7 @@ bool nsMetalRenderDevice::BeginEncoder() {
         0.0, 1.0
     };
     [_encoder setViewport:viewport];
+    ApplyScissor();
     [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
     return true;
@@ -252,6 +256,7 @@ void nsMetalRenderDevice::ApplyVSync() {
 }
 
 bool nsMetalRenderDevice::BeginScene() {
+    ResetScissorRect();
 	_currentRenderTexture = nullptr;
 	_frameIndex++;
 	if (_queryRestart) {
@@ -349,6 +354,38 @@ void nsMetalRenderDevice::EndScene() {
     SubmitFrame();
 }
 
+void nsMetalRenderDevice::SetScissorRect(const nsRect &rect) {
+    int width = 0, height = 0;
+    if (_currentRenderTexture) _currentRenderTexture->GetSize(width, height);
+    else if (_currentDrawable) {
+        width = int(_currentDrawable.texture.width);
+        height = int(_currentDrawable.texture.height);
+    }
+    _scissorRect = nsScissorRect::Normalize(rect, width, height);
+    _scissorEnabled = true;
+    ApplyScissor();
+}
+
+void nsMetalRenderDevice::ResetScissorRect() {
+    _scissorEnabled = false;
+    _scissorRect = {};
+    ApplyScissor();
+}
+
+void nsMetalRenderDevice::ApplyScissor() {
+    if (!_encoder) return;
+    if (_scissorEnabled) {
+        // Empty scissor is implemented by suppressing submissions, not by
+        // sending an invalid empty rectangle to Metal.
+        if (_scissorRect.width <= 0 || _scissorRect.height <= 0) return;
+        [_encoder setScissorRect:MTLScissorRect{NSUInteger(_scissorRect.x), NSUInteger(_scissorRect.y),
+            NSUInteger(_scissorRect.width), NSUInteger(_scissorRect.height)}];
+        return;
+    }
+    const auto color = _currentRenderTexture ? _currentRenderTexture->GetColorTexture() : _currentDrawable.texture;
+    if (color && color.width && color.height) [_encoder setScissorRect:MTLScissorRect{0, 0, color.width, color.height}];
+}
+
 void nsMetalRenderDevice::ClearScene(uint flags, const nsColor &clearColor) {
     if (flags & CLR_CBUFF) {
         _pendingClearColor = MTLClearColorMake(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
@@ -379,6 +416,7 @@ void nsMetalRenderDevice::ClearScene(uint flags, const nsColor &clearColor) {
 	}
     MTLViewport viewport = {0.0, 0.0, (double)color.width, (double)color.height, 0.0, 1.0};
     [_encoder setViewport:viewport];
+    ApplyScissor();
     [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     if (_currentState) {
         _currentState->Apply(_encoder, *_programs, nullptr);
@@ -527,6 +565,7 @@ void nsMetalRenderDevice::VerticesRelease(IVertexBuffer *vb) {
 }
 
 void nsMetalRenderDevice::VerticesDraw(IVertexBuffer *vb) {
+    if (_scissorEnabled && (_scissorRect.width <= 0 || _scissorRect.height <= 0)) return;
     if (!_encoder) return;
     auto state = _currentState ? _currentState : _defaultState;
     if (!state) return;
@@ -732,6 +771,7 @@ IRenderTexture* nsMetalRenderDevice::RenderTextureCreate(int width, int height, 
 
 void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
     EndEncoder();
+    ResetScissorRect();
 	_currentRenderTexture = dynamic_cast<nsMetalRenderTexture*>(rt);
 	if (!_commandBuffer) {
 	    nsMemoryLoopAllocScope metalAllocScope;
@@ -756,6 +796,7 @@ void nsMetalRenderDevice::RenderTextureBind(IRenderTexture *rt) {
 	}
     MTLViewport viewport = {0.0, 0.0, (double)color.width, (double)color.height, 0.0, 1.0};
     [_encoder setViewport:viewport];
+    ApplyScissor();
     [_encoder setFrontFacingWinding:MTLWindingCounterClockwise];
     if (_currentState) {
         _currentState->Apply(_encoder, *_programs, nullptr);
@@ -837,6 +878,7 @@ MTLRenderPassDescriptor *nsMetalRenderDevice::CreatePassDescriptor(id<MTLTexture
 }
 
 void nsMetalRenderDevice::DrawQuad(vbVertex_t v[4]) {
+    if (_scissorEnabled && (_scissorRect.width <= 0 || _scissorRect.height <= 0)) return;
     auto drawVerts = _quadBuff->GetWriteVertices();
     for (int i = 0; i < 4; ++i) {
         drawVerts[i] = v[i];

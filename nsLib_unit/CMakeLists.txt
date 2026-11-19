@@ -17,6 +17,7 @@ set(TESTS
         structs/FastListTest.cpp
         math/Matrix2Text.cpp
         math/Matrix4Test.cpp
+        math/Vec3Test.cpp
 )
 
 include_directories(./)

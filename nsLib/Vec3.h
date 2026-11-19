@@ -1,5 +1,6 @@
-#ifndef _VECTOR3_H_
-#define _VECTOR3_H_
+#pragma once
+
+#include <cmath>
 
 #include "headers.h"
 #include "Vec2.h"
@@ -43,6 +44,10 @@ struct nsVec3
 	{
 		return (float)sqrt( Dot( *this ) );
 	}
+
+    bool IsFinite() const {
+        return std::isfinite(x) && std::isfinite(y) && std::isfinite(z);
+    }
 	
 	inline void Norm()
 	{
@@ -185,6 +190,3 @@ inline bool operator != ( const nsVec3 &a, const nsVec3 &b )
 {
 	return a.x != b.x || a.y != b.y || a.z != b.z;
 }
-
-
-#endif

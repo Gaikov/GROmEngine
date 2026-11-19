@@ -35,6 +35,8 @@ public:
 	const char* StateGetPath(IRenState *state) override;
 	void StateRelease(IRenState *state) override;
 	void StateApply(IRenState *state) override;
+    void SetScissorRect(const nsRect &rect) override;
+    void ResetScissorRect() override;
     void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) override;
 	bool BeginScene() override;
 	nsBitmapData::tSP CaptureScreen() override;
@@ -73,6 +75,8 @@ private:
 	nsMatrix         _projMatrix;
 	nsMatrix         _viewMatrix;
 	bool             _renderTextureBound = false;
+    bool _scissorEnabled = false;
+    nsRect _scissorRect;
 	bool             _sceneActive = false;
 	bool             _queryRestart = false;
 
@@ -84,6 +88,8 @@ private:
 
 private:
 	void ApplyProjectionMatrix();
+    static nsRect ToGLScissorRect(const nsRect &rect, int targetHeight, bool renderTexture);
+    void ApplyScissor();
 	void DrawQuad(vbVertex_t v[4]);
 	bool PrepareOpenGL();
 	void CleanupOpenGL();

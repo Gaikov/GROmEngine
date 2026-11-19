@@ -49,6 +49,8 @@ public:
     void StateRelease(IRenState *state) override;
     void StateApply(IRenState *state) override;
 
+    void SetScissorRect(const nsRect &rect) override;
+    void ResetScissorRect() override;
     void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) override;
     bool BeginScene() override;
     nsBitmapData::tSP CaptureScreen() override;
@@ -109,12 +111,15 @@ private:
 	nsMatrix _projMatrix;
 	nsMatrix _viewMatrix;
 	nsColor  _currentColor = nsColor::white;
+    bool _scissorEnabled = false;
+    nsRect _scissorRect;
 	uint _pendingClearFlags = CLR_ALL;
     MTLClearColor _pendingClearColor = MTLClearColorMake(0, 0, 0, 0);
 	uint _frameIndex = 0;
 	bool _queryRestart = false;
 
 	bool BeginEncoder();
+    void ApplyScissor();
 	void EndEncoder();
 	void SubmitFrame();
 	bool ApplyDisplayMode();

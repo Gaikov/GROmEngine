@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "nsLib/math/Rect.h"
 #include "Core/BitmapData.h"
 #include "nsLib/color.h"
 #include "nsLib/matrix4.h"
@@ -217,6 +218,11 @@ struct IRenDevice
     virtual IStencilState*  StencilLoad(const char *fileName) = 0;
     virtual void            StencilRelease( IStencilState *state) = 0;
     virtual void            StencilApply( IStencilState *state) = 0;
+
+    // Dynamic raster restriction, in logical top-left pixels of the active target.
+    // Empty rect suppresses draws; clears remain full-target.
+    virtual void SetScissorRect(const nsRect &rect) = 0;
+    virtual void ResetScissorRect() = 0;
 
 	//scene functions
     virtual void ClearScene(uint flags, const nsColor &color = {0, 0, 0, 0}) = 0;

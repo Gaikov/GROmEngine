@@ -19,6 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
 
 add_library(RasterMetal STATIC ${sources})
 target_link_libraries(RasterMetal
+    nsLib
     ${METAL_LIB}
     ${QUARTZCORE_LIB}
     ${METALKIT_LIB}
