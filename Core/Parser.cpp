@@ -6,6 +6,35 @@
 
 #define		STR_DELIMIT		" \t\r\n"
 
+namespace {
+    class nsScriptBlockScanner final {
+    public:
+        static char *FindSymbol(char *text, const char symbol) {
+            if (!text) return nullptr;
+            auto quoted = false;
+            for (auto cursor = text; *cursor; ++cursor) {
+                if (*cursor == '"') quoted = !quoted;
+                else if (!quoted && *cursor == symbol) return cursor;
+            }
+            return nullptr;
+        }
+
+        static char *FindClosingBrace(char *opening) {
+            if (!opening || *opening != '{') return nullptr;
+            auto depth = 1;
+            auto quoted = false;
+            for (auto cursor = opening + 1; *cursor; ++cursor) {
+                if (*cursor == '"') quoted = !quoted;
+                else if (!quoted) {
+                    if (*cursor == '{') ++depth;
+                    else if (*cursor == '}' && --depth == 0) return cursor;
+                }
+            }
+            return nullptr;
+        }
+    };
+}
+
 //---------------------------------------------------------
 // block_state_t:
 //---------------------------------------------------------
@@ -64,67 +93,29 @@ void strconv( char *str )
 //---------------------------------------------------------
 // ps_delete_comments:
 //---------------------------------------------------------
-typedef struct
-{
-	const char *open;
-	const char *close;
-}
-comment_t;
-
-char* ps_find_comment( char *block, const char *delim )
-{
-	bool	quote = false;
-
-	while ( *block )
-	{
-		if ( !quote )
-		{
-			if ( strncmp( delim, block, strlen( delim ) ) == 0 )
-				return block;
-		}
-
-		if ( *block == '"' )
-			quote = !quote;
-
-		block ++;
-	}
-
-	return nullptr;
-}
-
-bool ps_del_comment( char *block, comment_t &c )
-{
-	char	*start = ps_find_comment( block, c.open );
-	if ( !start ) return false;
-	
-	char	*end = ps_find_comment( start + strlen( c.open ), c.close );
-	if ( !end ) return false;
-	end += strlen( c.close );
-
-	size_t	len = strlen( end ) + 1;
-
-	memmove( start, end, len );
-	return true;
-}
-
-void ps_delete_comments( char *block )
-{
-	comment_t	c[] = 
-	{
-		{ "//", "\n" },
-		{ "/*", "*/" },
-		{ ";", "\n" },
-	};
-	int	count = sizeof(c) / sizeof(comment_t);
-
-	for ( int i = 0; i < count; i++ )
-	{
-		while ( true )
-		{
-			if ( !ps_del_comment( block, c[i] ) )
-				break;
-		}
-	}
+void ps_delete_comments(char *block) {
+    auto output = block;
+    auto quoted = false;
+    while (*block) {
+        if (!quoted && block[0] == '/' && block[1] == '*') {
+            // Comment contents are literal: glyph labels may contain quotes or braces.
+            const auto end = strstr(block + 2, "*/");
+            if (end) {
+                block = end + 2;
+                continue;
+            }
+            // Preserve an unterminated block comment, as the legacy parser did.
+            memmove(output, block, strlen(block) + 1);
+            return;
+        }
+        if (!quoted && (*block == ';' || (block[0] == '/' && block[1] == '/'))) {
+            while (*block && *block != '\n') ++block;
+            continue;
+        }
+        if (*block == '"') quoted = !quoted;
+        *output++ = *block++;
+    }
+    *output = 0;
 }
 
 //---------------------------------------------------------
@@ -185,7 +176,7 @@ bool	ps_is_block( char *text, char pfx )
 	int	len = 0;
 	if ( !text ) return false;
 	
-	char	*token = strchr( text, pfx  );	if ( !token ) return false;
+	char	*token = nsScriptBlockScanner::FindSymbol(text, pfx);	if ( !token ) return false;
 	if ( !StrToken( token, STR_DELIMIT, len ) ) return false;
 
 	token = StrToken( nullptr, STR_DELIMIT, len );
@@ -196,22 +187,10 @@ bool	ps_is_block( char *text, char pfx )
 //---------------------------------------------------------
 // ps_skip_block:
 //---------------------------------------------------------
-char* ps_skip_block( char *text )
-{
-	int	q = 1;
-	char	*token = strchr( text, '{' );
-	if ( !token ) return nullptr;
-
-
-	token ++;
-	while ( *token && q )
-	{
-		if ( *token == '{' ) q ++;
-		else if ( *token == '}' ) q --;
-		token ++;
-	}
-
-	return token;
+char* ps_skip_block( char *text ) {
+    const auto opening = nsScriptBlockScanner::FindSymbol(text, '{');
+    const auto closing = nsScriptBlockScanner::FindClosingBrace(opening);
+    return closing ? closing + 1 : nullptr;
 }
 
 //---------------------------------------------------------
@@ -220,7 +199,7 @@ char* ps_skip_block( char *text )
 char* ps_find_block( char *from, const char *name, char pfx ) //if name == NULL search any block
 {
 	char	*token = from;
-	while ( token && (token = strchr( token, pfx )) )
+	while ( token && (token = nsScriptBlockScanner::FindSymbol(token, pfx)) )
 	{
 		if ( !name || !strlen( name ) )
 		{
@@ -242,30 +221,14 @@ char* ps_find_block( char *from, const char *name, char pfx ) //if name == NULL 
 //---------------------------------------------------------
 // ps_block_len:
 //---------------------------------------------------------
-char* ps_block_len( char *from, /*out*/ int &len )	//return block starting and length
-{
-	len = 0;
-	char	*token = strchr( from, '{' );
-	int	q = 1;
-
-	token ++;
-	char	*begin = token;
-	while ( *token && q )
-	{
-		if ( *token == '{' ) q ++;
-		else if ( *token == '}' ) q --;
-		token ++;
-	}
-
-	if ( strlen( begin ) )
-	{
-		len = token - begin - 1;
-		if ( !len ) return nullptr;
-		return begin;
-	}
-	
-	len = 0;
-	return nullptr;
+char* ps_block_len( char *from, /*out*/ int &len ) {
+    len = 0;
+    const auto opening = nsScriptBlockScanner::FindSymbol(from, '{');
+    const auto closing = nsScriptBlockScanner::FindClosingBrace(opening);
+    if (!closing) return nullptr;
+    const auto begin = opening + 1;
+    len = static_cast<int>(closing - begin);
+    return len ? begin : nullptr;
 }
 
 //---------------------------------------------------------
@@ -276,7 +239,7 @@ bool ps_var_name( char *from, char pfx, /*out*/char name[PS_MAX_NAME_LEN] )
 	name[0] = 0;
 	if ( !from ) return false;
 		
-	char *token = strchr( from, pfx );
+	char *token = nsScriptBlockScanner::FindSymbol(from, pfx);
 	if ( !token ) return false;
 	token ++;
 
@@ -420,7 +383,7 @@ const char*     ps_block_name( script_state_t *ss) {
 //---------------------------------------------------------
 char* ps_var_search( char *from, const char *name, char pfx )
 {
-	while ( (from = strchr( from, pfx )) )
+	while ( (from = nsScriptBlockScanner::FindSymbol(from, pfx)) )
 	{
 		if ( ps_is_block( from, pfx ) )
 		{

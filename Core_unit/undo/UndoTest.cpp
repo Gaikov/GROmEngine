@@ -21,6 +21,7 @@
 #include "Core/undo/array/UndoArrayRemoveAt.h"
 #include "Core/undo/array/UndoArraySet.h"
 #include "Core/serialization/var/IntVar.h"
+#include "Core/serialization/var/Float2Var.h"
 #include "nsLib/log.h"
 
 namespace {
@@ -71,6 +72,24 @@ TEST_F(UndoFixture, SupportsRawAndUniqueOwnershipAndNames) {
     EXPECT_EQ(undo->GetUndoName(), "Unique edit");
     undo->Clear();
     EXPECT_EQ(destroyed, 2);
+}
+
+TEST_F(UndoFixture, Vec2PropertyChangesCompareComponentsAndSkipNoOps) {
+    nsFloat2Var property = nsVec2(2, .5f);
+    auto unchanged = std::make_unique<nsUndoBatch>();
+    EXPECT_FALSE(nsUndoUtils::AddPropertyChange(*unchanged, property, nsVec2(2, .5f)));
+    EXPECT_TRUE(unchanged->IsEmpty());
+    auto changed = std::make_unique<nsUndoBatch>();
+    EXPECT_TRUE(nsUndoUtils::AddPropertyChange(*changed, property, nsVec2(3, .5f)));
+    ASSERT_TRUE(nsUndoService::Shared()->Push(std::move(changed), "Change vector"));
+    EXPECT_FLOAT_EQ(3, property.GetValue().x);
+    EXPECT_FLOAT_EQ(.5f, property.GetValue().y);
+    nsUndoService::Shared()->Undo();
+    EXPECT_FLOAT_EQ(2, property.GetValue().x);
+    nsUndoService::Shared()->Redo();
+    EXPECT_FLOAT_EQ(3, property.GetValue().x);
+    nsUndoBatch secondAxis;
+    EXPECT_TRUE(nsUndoUtils::AddPropertyChange(secondAxis, property, nsVec2(3, 1)));
 }
 
 TEST_F(UndoFixture, ClearsRedoBranchAfterDivergentPush) {

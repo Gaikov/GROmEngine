@@ -61,13 +61,21 @@ bool nsPackage::GetLogicalPath(const char *fileName, nsString &result) const {
             if (canonical.IsWithin(root, CASE_INSENSITIVE_PATHS)) {
                 result = root.GetRelativePath(canonical);
             } else {
-                const nsFilePath lexical(std::filesystem::path(fileName).lexically_normal().generic_string().c_str());
-                const nsFilePath lexicalRoot(std::filesystem::path(internal.ToAbsolute().AsChar())
-                    .lexically_normal().generic_string().c_str());
-                // Validate escaped Internal aliases through the platform; unconfigured desktop storage stays native.
-                if ((lexical.IsWithin(lexicalRoot, CASE_INSENSITIVE_PATHS)
-                    || lexical.IsWithin(root, CASE_INSENSITIVE_PATHS))
-                    && App_GetPlatform()->GetInternalPath(root.GetRelativePath(canonical)).IsEmpty()) return false;
+                // A parent may identify Internal through another filesystem alias
+                // (for example /var vs /private/var), before a child symlink escapes it.
+                auto ancestor = std::filesystem::path(nsFilePath(fileName).AsChar()).lexically_normal();
+                while (!ancestor.empty()) {
+                    nsFilePath canonicalAncestor("");
+                    if (nsFilePath(ancestor.generic_string().c_str()).GetCanonical(canonicalAncestor)
+                        && canonicalAncestor.IsWithin(root, CASE_INSENSITIVE_PATHS)) {
+                        // Preserve unrestricted native access when desktop Internal is unconfigured.
+                        if (App_GetPlatform()->GetInternalPath(root.GetRelativePath(canonical)).IsEmpty()) return false;
+                        break;
+                    }
+                    const auto parent = ancestor.parent_path();
+                    if (parent == ancestor) break;
+                    ancestor = parent;
+                }
             }
         }
     } else if (IsLogicalPath(fileName)) {

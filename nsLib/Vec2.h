@@ -1,5 +1,4 @@
-#ifndef _VEC2_H_
-#define _VEC2_H_
+#pragma once
 
 #include "headers.h"
 #include "MathTools.h"
@@ -40,6 +39,7 @@ public:
 	inline nsVec2		GetRight() const;
 	inline void			FromLerp( const nsVec2 &v1, const nsVec2 &v2, float t );
 	inline float		DistTo( const nsVec2 &v ) const;
+    inline bool Equal(const nsVec2 &v, float eps = 0.0001f) const;
 	inline const char*	ToStr() const;
 	inline nsVec2&		Invert();
     inline void         Random(float length);
@@ -227,6 +227,13 @@ float nsVec2::DistTo( const nsVec2 &v ) const
 }
 
 //---------------------------------------------------------
+// nsVec2::Equal:
+//---------------------------------------------------------
+bool nsVec2::Equal(const nsVec2 &v, const float eps) const {
+    return nsMath::Equal(x, v.x, eps) && nsMath::Equal(y, v.y, eps);
+}
+
+//---------------------------------------------------------
 // nsVec2::ToStr:
 //---------------------------------------------------------
 const char*	nsVec2::ToStr() const
@@ -320,8 +327,10 @@ inline nsVec2 operator / ( const nsVec2 &v, float t )
 	return nsVec2( v.x / t, v.y / t );
 }
 
-inline bool operator != (const nsVec2 &a, const nsVec2 &b) {
-	return a.x != b.x || a.y != b.y;
+inline bool operator == (const nsVec2 &a, const nsVec2 &b) {
+    return a.x == b.x && a.y == b.y;
 }
 
-#endif
+inline bool operator != (const nsVec2 &a, const nsVec2 &b) {
+    return !(a == b);
+}

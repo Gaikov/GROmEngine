@@ -18,6 +18,7 @@ set(TESTS
         math/Matrix2Text.cpp
         math/Matrix4Test.cpp
         math/Vec3Test.cpp
+        math/Vec2Test.cpp
 )
 
 include_directories(./)

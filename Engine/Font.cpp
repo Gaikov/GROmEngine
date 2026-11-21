@@ -162,8 +162,14 @@ bool nsFont::LoadBitmapFont(const nsFilePath &filePath) {
             nsString    path;
             sscanf( page, "page id=%i file=\"%255[^\"]\"", &id, path.AsChar());
             if (!path.IsEmpty()) {
-                auto texPath = filePath.GetParent().ResolvePath(path);
-                _pages.push_back(_device->TextureLoad(texPath));
+                const auto texPath = filePath.GetParent().ResolvePath(path);
+                const auto texture = _device->TextureLoad(texPath);
+                if (!texture) {
+                    Log::Warning("Can't load font page: %s (font: %s)", texPath.AsChar(), filePath.AsChar());
+                    g_pack.ReleaseFile(file);
+                    return false;
+                }
+                _pages.push_back(texture);
             }
             page ++;
         }
