@@ -341,33 +341,33 @@ IUserInput *nsEngine::GetActiveInput() {
     return nsEngineContext::Shared()->GetActiveInput();
 }
 
-void nsEngine::OnPointerMove(int pointerId, int clientX, int clientY) {
-    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Move, pointerId, clientX, clientY);
+void nsEngine::OnPointerMove(const nsPointerData &pointer) {
+    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Move, pointer);
     auto ui = GetActiveInput();
     if (ui) {
-        ui->OnPointerMove((float)clientX, (float)clientY, pointerId);
+        ui->OnPointerMove(pointer);
     }
 }
 
-void nsEngine::OnPointerDown(int pointerId, int clientX, int clientY) {
-    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Down, pointerId, clientX, clientY);
+void nsEngine::OnPointerDown(const nsPointerData &pointer) {
+    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Down, pointer);
     auto ui = GetActiveInput();
     if (ui) {
-        ui->OnPointerDown((float)clientX, (float)clientY, pointerId);
+        ui->OnPointerDown(pointer);
     }
 }
 
-void nsEngine::OnPointerUp(int pointerId, int clientX, int clientY) {
-    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Up, pointerId, clientX, clientY);
+void nsEngine::OnPointerUp(const nsPointerData &pointer) {
+    nsGamepadMouse::Shared()->OnPointerEvent(nsGamepadMouse::nsPointerEvent::Up, pointer);
     auto ui = GetActiveInput();
     if (ui) {
-        ui->OnPointerUp((float)clientX, (float)clientY, pointerId);
+        ui->OnPointerUp(pointer);
     }
 }
 
-void nsEngine::OnPointerCancel(int pointerId) {
-    nsGamepadMouse::Shared()->OnPointerCancel(pointerId);
-    nsEngineContext::Shared()->CancelPointer(pointerId);
+void nsEngine::OnPointerCancel(const nsPointerData &pointer) {
+    nsGamepadMouse::Shared()->OnPointerCancel(pointer);
+    nsEngineContext::Shared()->CancelPointer(pointer);
 }
 
 

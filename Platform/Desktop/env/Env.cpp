@@ -62,12 +62,13 @@ void nsEnv::PrepareDesktopInput() {
 
     glfwSetCursorPosCallback(_wnd, [](GLFWwindow *window, double xpos, double ypos) -> void {
         nsEnv::Shared()->WindowToClientCoordinates(xpos, ypos);
+        const nsVec2 pos{float(int(xpos)), float(int(ypos))};
         if (!mouseButtons.empty()) {
             for (auto button: mouseButtons) {
-                nsEngine::OnPointerMove(button, (int) xpos, (int) ypos);
+                nsEngine::OnPointerMove({POINTER_MOUSE, pos, button});
             }
         } else {
-            nsEngine::OnPointerMove(-1, (int) xpos, (int) ypos);
+            nsEngine::OnPointerMove({POINTER_MOUSE, pos, -1});
         }
     });
 
@@ -75,15 +76,16 @@ void nsEnv::PrepareDesktopInput() {
         double x, y;
         glfwGetCursorPos(window, &x, &y);
         nsEnv::Shared()->WindowToClientCoordinates(x, y);
+        const nsPointerData pointer{POINTER_MOUSE, {float(int(x)), float(int(y))}, button};
         if (action == GLFW_PRESS) {
             mouseButtons.push_back(button);
-            nsEngine::OnPointerDown(button, (int) x, (int) y);
+            nsEngine::OnPointerDown(pointer);
         } else if (action == GLFW_RELEASE) {
             auto it = std::remove(mouseButtons.begin(), mouseButtons.end(), button);
             if (it != mouseButtons.end()) {
                 mouseButtons.erase(it);
             }
-            nsEngine::OnPointerUp(button, (int) x, (int) y);
+            nsEngine::OnPointerUp(pointer);
         }
     });
 }
@@ -93,9 +95,13 @@ void nsEnv::PrepareDesktopInput() {
 // notifying the application so missed releases cannot survive focus loss.
 //---------------------------------------------------------
 void nsEnv::OnWindowFocusChanged( const bool focused ) {
-    if ( !focused ) {
+    if (!focused && !mouseButtons.empty()) {
+        double x = 0, y = 0;
+        glfwGetCursorPos(_wnd, &x, &y);
+        WindowToClientCoordinates(x, y);
+        const nsVec2 pos{float(int(x)), float(int(y))};
         for ( const auto button : mouseButtons ) {
-            nsEngine::OnPointerCancel( button );
+            nsEngine::OnPointerCancel({POINTER_MOUSE, pos, button});
         }
         mouseButtons.clear();
     }

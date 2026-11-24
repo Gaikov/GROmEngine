@@ -17,12 +17,12 @@ public:
     void Loop(float deltaTime) override;
     void Draw() override;
 
-    bool OnPointerMove(float x, float y, int pointerId) override;
+    bool OnPointerMove(const nsPointerData &pointer) override;
     void OnKeyDown(int key, bool rept, int mods) override;
 
     nsTextLabel* CreateLabel(const char *text, nsVisualContainer2d *container) const;
-    bool OnPointerDown(float x, float y, int pointerId) override;
-    bool OnPointerUp(float x, float y, int pointerId) override;
+    bool OnPointerDown(const nsPointerData &pointer) override;
+    bool OnPointerUp(const nsPointerData &pointer) override;
 
 private:
     nsGroupLayout       _root;

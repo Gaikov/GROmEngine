@@ -64,11 +64,11 @@ void nsEngineContext::OnKeyUp(int key, int mods) {
     GetActiveInput()->OnKeyUp(key, mods);
 }
 
-void nsEngineContext::CancelPointer(int pointerId) {
+void nsEngineContext::CancelPointer(const nsPointerData &pointer) {
     // Cancellation must also reach captures hidden by the console/input route.
-    static_cast<IUserInput*>(_root)->OnPointerCancel(pointerId);
-    static_cast<IUserInput*>(nsConsole::Shared())->OnPointerCancel(pointerId);
-    if (auto gameInput = App_GetGame()->GetUserInput()) gameInput->OnPointerCancel(pointerId);
+    static_cast<IUserInput*>(_root)->OnPointerCancel(pointer);
+    static_cast<IUserInput*>(nsConsole::Shared())->OnPointerCancel(pointer);
+    if (auto gameInput = App_GetGame()->GetUserInput()) gameInput->OnPointerCancel(pointer);
 }
 
 void nsEngineContext::OnKeyDown(int key, bool rept, int mods) {

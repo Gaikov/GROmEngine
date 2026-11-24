@@ -124,19 +124,23 @@ void nsParticlesTest::Draw() {
     nsVisualSceneRender2d::DrawScene(&_root);
 }
 
-bool nsParticlesTest::OnPointerDown(float x, float y, int pointerId) {
+bool nsParticlesTest::OnPointerDown(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
     _mousePos = WindowToScreen({x, y});
     _mouseDown = true;
-    return BaseFunctionalTest::OnPointerDown(x, y, pointerId);
+    return BaseFunctionalTest::OnPointerDown(pointer);
 }
 
-bool nsParticlesTest::OnPointerUp(float x, float y, int pointerId) {
+bool nsParticlesTest::OnPointerUp(const nsPointerData &pointer) {
     _mouseDown = false;
-    return BaseFunctionalTest::OnPointerUp(x, y, pointerId);
+    return BaseFunctionalTest::OnPointerUp(pointer);
 }
 
-bool nsParticlesTest::OnPointerMove(float x, float y, int pointerId) {
-    BaseFunctionalTest::OnPointerMove(x, y, pointerId);
+bool nsParticlesTest::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    BaseFunctionalTest::OnPointerMove(pointer);
     _mousePos = WindowToScreen({x, y});
     return true;
 }

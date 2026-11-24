@@ -78,25 +78,30 @@ void nsImGUIBackend::OnActivate( const bool active ) {
     io.AddFocusEvent( active );
 }
 
-bool nsImGUIBackend::OnPointerUp(float x, float y, int pointerId) {
+bool nsImGUIBackend::OnPointerUp(const nsPointerData &pointer) {
+    const auto pointerId = pointer.pointerId;
     ImGuiIO &io = ImGui::GetIO();
     io.AddMouseButtonEvent(pointerId, false);
     return io.WantCaptureMouse;
 }
 
-bool nsImGUIBackend::OnPointerDown(float x, float y, int pointerId) {
+bool nsImGUIBackend::OnPointerDown(const nsPointerData &pointer) {
+    const auto pointerId = pointer.pointerId;
     ImGuiIO &io = ImGui::GetIO();
     io.AddMouseButtonEvent(pointerId, true);
     return io.WantCaptureMouse;
 }
 
-bool nsImGUIBackend::OnPointerMove(float x, float y, int pointerId) {
+bool nsImGUIBackend::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
     ImGuiIO &io = ImGui::GetIO();
     io.AddMousePosEvent(x, y);
     return io.WantCaptureMouse;
 }
 
-void nsImGUIBackend::OnPointerCancel(int pointerId) {
+void nsImGUIBackend::OnPointerCancel(const nsPointerData &pointer) {
+    const auto pointerId = pointer.pointerId;
     ImGui::GetIO().AddMouseButtonEvent( pointerId, false );
 }
 

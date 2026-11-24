@@ -7,6 +7,7 @@
 
 class IGamepads;
 struct IUserInput;
+struct nsPointerData;
 class nsInput;
 class nsVar;
 struct nsEngine;
@@ -38,8 +39,8 @@ private:
     bool IsBlocked() const;
     // False if a cancel callback reset input again.
     bool Cancel(bool notify = true);
-    void OnPointerEvent(nsPointerEvent event, int id, int x, int y);
-    void OnPointerCancel(int id);
+    void OnPointerEvent(nsPointerEvent event, const nsPointerData &pointer);
+    void OnPointerCancel(const nsPointerData &pointer);
     void OnActivateApp(bool active);
     bool GetCursorPos(float& x, float& y);
     void SetCursorPos(float x, float y);

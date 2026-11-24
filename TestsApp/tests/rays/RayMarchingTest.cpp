@@ -43,8 +43,10 @@ bool nsRayMarchingTest::Init() {
     return true;
 }
 
-bool nsRayMarchingTest::OnPointerMove(float x, float y, int pointerId) {
-    BaseFunctionalTest::OnPointerMove(x, y, pointerId);
+bool nsRayMarchingTest::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    BaseFunctionalTest::OnPointerMove(pointer);
 
     int winWidth, winHeight;
     App_GetPlatform()->GetClientSize(winWidth, winHeight);

@@ -137,19 +137,20 @@ EM_BOOL touch_callback(int eventType, const EmscriptenTouchEvent *touchEvent, vo
 
 		const float x = float(touch->targetX * r);
 		const float y = float(touch->targetY * r);
+		const nsPointerData pointer{POINTER_TOUCH, {float(int(x)), float(int(y))}, touch->identifier};
 
 		switch (eventType) {
 			case EMSCRIPTEN_EVENT_TOUCHSTART:
-				nsEngine::OnPointerDown(touch->identifier, x, y);
+				nsEngine::OnPointerDown(pointer);
 				break;
 			case EMSCRIPTEN_EVENT_TOUCHMOVE:
-				nsEngine::OnPointerMove(touch->identifier, x, y);
+				nsEngine::OnPointerMove(pointer);
 				break;
 			case EMSCRIPTEN_EVENT_TOUCHEND:
-				nsEngine::OnPointerUp(touch->identifier, x, y);
+				nsEngine::OnPointerUp(pointer);
 				break;
 			case EMSCRIPTEN_EVENT_TOUCHCANCEL:
-				nsEngine::OnPointerCancel(touch->identifier);
+				nsEngine::OnPointerCancel(pointer);
 				break;
 			default:
 				break;

@@ -22,34 +22,31 @@ void nsMultiUserInput::OnChar(char ch) {
     }
 }
 
-bool nsMultiUserInput::OnPointerUp(float x, float y, int pointerId) {
-    auto pos = ScreenToTarget(x, y);
-    for (auto ui : GetInteractiveItems()) {
-        if (ui->OnPointerUp(pos.x, pos.y, pointerId)) {
-            return true;
-        }
-    }
-    return false;
+bool nsMultiUserInput::OnPointerUp(const nsPointerData &pointer) {
+    return DispatchPointer(pointer, &IPointersInput::OnPointerUp);
 }
 
-bool nsMultiUserInput::OnPointerDown(float x, float y, int pointerId) {
-    auto pos = ScreenToTarget(x, y);
-    for (auto ui : GetInteractiveItems()) {
-        if (ui->OnPointerDown(pos.x, pos.y, pointerId)) {
-            return true;
-        }
-    }
-    return false;
+bool nsMultiUserInput::OnPointerDown(const nsPointerData &pointer) {
+    return DispatchPointer(pointer, &IPointersInput::OnPointerDown);
 }
 
-bool nsMultiUserInput::OnPointerMove(float x, float y, int pointerId) {
-    auto pos = ScreenToTarget(x, y);
-    for (auto ui : GetInteractiveItems()) {
-        if (ui->OnPointerMove(pos.x, pos.y, pointerId)) {
-            return true;
+bool nsMultiUserInput::OnPointerMove(const nsPointerData &pointer) {
+    return DispatchPointer(pointer, &IPointersInput::OnPointerMove);
+}
+
+bool nsMultiUserInput::DispatchPointer(const nsPointerData &pointer,
+                                     bool (IPointersInput::*handler)(const nsPointerData &)) {
+    const auto dispatch = [this, handler](const nsPointerData &target) {
+        for (auto ui : GetInteractiveItems()) {
+            if ((ui->*handler)(target)) return true;
         }
-    }
-    return false;
+        return false;
+    };
+    if (!_pointerTransform) return dispatch(pointer);
+
+    auto target = pointer;
+    target.pos = _pointerTransform->ScreenToTarget(pointer.pos.x, pointer.pos.y);
+    return dispatch(target);
 }
 
 bool nsMultiUserInput::OnMouseWheel(float delta) {
@@ -61,13 +58,6 @@ bool nsMultiUserInput::OnMouseWheel(float delta) {
     return false;
 }
 
-nsVec2 nsMultiUserInput::ScreenToTarget(float x, float y) const {
-    if (_pointerTransform) {
-        return _pointerTransform->ScreenToTarget(x, y);
-    }
-    return {x, y};
-}
-
 void nsMultiUserInput::ClearInputs() {
     _interactiveItems.clear();
 }
@@ -76,8 +66,8 @@ void nsMultiUserInput::AddInput(IUserInput *input) {
     _interactiveItems.push_back(input);
 }
 
-void nsMultiUserInput::OnPointerCancel(int pointerId) {
+void nsMultiUserInput::OnPointerCancel(const nsPointerData &pointer) {
     for (auto ui : GetInteractiveItems()) {
-        ui->OnPointerCancel(pointerId);
+        ui->OnPointerCancel(pointer);
     }
 }

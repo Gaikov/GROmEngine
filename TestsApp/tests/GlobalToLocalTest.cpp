@@ -40,8 +40,10 @@ void nsGlobalToLocalTest::Release() {
 
 }
 
-bool nsGlobalToLocalTest::OnPointerMove(float x, float y, int pointerId) {
-    BaseFunctionalTest::OnPointerMove(x, y, pointerId);
+bool nsGlobalToLocalTest::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    BaseFunctionalTest::OnPointerMove(pointer);
 
     int w, h;
     App_GetPlatform()->GetClientSize(w, h);

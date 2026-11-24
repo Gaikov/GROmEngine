@@ -8,29 +8,32 @@ BaseFunctionalTest::BaseFunctionalTest() :
         _device(nsRenDevice::Shared()->Device()) {
 }
 
-bool BaseFunctionalTest::OnPointerUp(float x, float y, int pointerId) {
+bool BaseFunctionalTest::OnPointerUp(const nsPointerData &pointer) {
     auto input = GetInput();
     if (input) {
-        nsVec2 pos = WindowToScreen({x, y});
-        return input->OnPointerUp(pos.x, pos.y, pointerId);
+        auto target = pointer;
+        target.pos = WindowToScreen(pointer.pos);
+        return input->OnPointerUp(target);
     }
     return false;
 }
 
-bool BaseFunctionalTest::OnPointerDown(float x, float y, int pointerId) {
+bool BaseFunctionalTest::OnPointerDown(const nsPointerData &pointer) {
     auto input = GetInput();
     if (input) {
-        nsVec2 pos = WindowToScreen({x, y});
-        return input->OnPointerDown(pos.x, pos.y, pointerId);
+        auto target = pointer;
+        target.pos = WindowToScreen(pointer.pos);
+        return input->OnPointerDown(target);
     }
     return false;
 }
 
-bool BaseFunctionalTest::OnPointerMove(float x, float y, int pointerId) {
+bool BaseFunctionalTest::OnPointerMove(const nsPointerData &pointer) {
     auto input = GetInput();
     if (input) {
-        auto pos = WindowToScreen({x, y});
-        return input->OnPointerMove(pos.x, pos.y, pointerId);
+        auto target = pointer;
+        target.pos = WindowToScreen(pointer.pos);
+        return input->OnPointerMove(target);
     }
     return false;
 }
@@ -74,6 +77,6 @@ nsVec2 BaseFunctionalTest::WindowToScreen(const nsVec2 &winPos) {
     return {winPos.x, float(h) - winPos.y};
 }
 
-void BaseFunctionalTest::OnPointerCancel(int pointerId) {
+void BaseFunctionalTest::OnPointerCancel(const nsPointerData &) {
 
 }

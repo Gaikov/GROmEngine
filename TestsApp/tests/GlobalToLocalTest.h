@@ -30,7 +30,7 @@ protected:
     void Draw() override;
     void Release() override;
 public:
-    bool OnPointerMove(float x, float y, int pointerId) override;
+    bool OnPointerMove(const nsPointerData &pointer) override;
 private:
     nsVisualContainer2d _container;
     nsGlobalToLocalRect _rect;

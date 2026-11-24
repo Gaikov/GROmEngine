@@ -19,19 +19,19 @@ public:
         yMax.SetNumber(0);
     }
 
-    bool OnPointerUp(float x, float y, int pointerId) override {
+    bool OnPointerUp(const nsPointerData &) override {
         return true;
     }
 
-    bool OnPointerDown(float x, float y, int pointerId) override {
+    bool OnPointerDown(const nsPointerData &) override {
         return true;
     }
 
-    bool OnPointerMove(float x, float y, int pointerId) override {
+    bool OnPointerMove(const nsPointerData &) override {
         return true;
     }
 
-    void OnPointerCancel(int pointerId) override {
+    void OnPointerCancel(const nsPointerData &) override {
     }
 
     void OnKeyUp(int key, int mods) override {}

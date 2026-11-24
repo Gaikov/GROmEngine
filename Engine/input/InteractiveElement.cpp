@@ -20,7 +20,8 @@ void nsInteractiveElement::OnChar(char ch) {
 
 }
 
-bool nsInteractiveElement::OnPointerUp(float x, float y, int pointerId) {
+bool nsInteractiveElement::OnPointerUp(const nsPointerData &pointer) {
+    const auto pointerId = pointer.pointerId;
     if (!IsEnabled()) {
         return false;
     }
@@ -36,7 +37,10 @@ bool nsInteractiveElement::OnPointerUp(float x, float y, int pointerId) {
     return false;
 }
 
-bool nsInteractiveElement::OnPointerDown(float x, float y, int pointerId) {
+bool nsInteractiveElement::OnPointerDown(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    const auto pointerId = pointer.pointerId;
     if (!IsEnabled()) {
         return false;
     }
@@ -59,7 +63,10 @@ bool nsInteractiveElement::OnPointerDown(float x, float y, int pointerId) {
     return false;
 }
 
-bool nsInteractiveElement::OnPointerMove(float x, float y, int pointerId) {
+bool nsInteractiveElement::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    const auto pointerId = pointer.pointerId;
     if (!IsEnabled()) {
         return false;
     }
@@ -75,7 +82,7 @@ bool nsInteractiveElement::OnPointerMove(float x, float y, int pointerId) {
         }
         return true;
     } else {
-        OnPointerCancel(pointerId);
+        OnPointerCancel(pointer);
     }
     return false;
 }
@@ -117,7 +124,8 @@ bool nsInteractiveElement::IsEnabled() const {
     return _enabled;
 }
 
-void nsInteractiveElement::OnPointerCancel(int pointerId) {
+void nsInteractiveElement::OnPointerCancel(const nsPointerData &pointer) {
+    const auto pointerId = pointer.pointerId;
     if (_pointerOverId == pointerId) {
         if (_pointerOver) {
             for (auto p: _policies) {

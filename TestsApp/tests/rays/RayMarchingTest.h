@@ -17,7 +17,7 @@ public:
     void Loop(float deltaTime) override;
     void Draw() override;
     void Release() override;
-    bool OnPointerMove(float x, float y, int pointerId) override;
+    bool OnPointerMove(const nsPointerData &pointer) override;
 
 private:
     nsVec2 _mousePos;

@@ -19,8 +19,8 @@ struct nsEngine
     static void OnKeyUp(int keyCode, int mods);
     static void OnCharDown(char ch);
 
-    static void OnPointerMove(int pointerId, int clientX, int clientY);
-    static void OnPointerDown(int pointerId, int clientX, int clientY);
-    static void OnPointerUp(int pointerId, int clientX, int clientY);
-    static void OnPointerCancel(int pointerId);
+    static void OnPointerMove(const nsPointerData &pointer);
+    static void OnPointerDown(const nsPointerData &pointer);
+    static void OnPointerUp(const nsPointerData &pointer);
+    static void OnPointerCancel(const nsPointerData &pointer);
 };

@@ -17,10 +17,10 @@ public:
     void EndFrame();
     void OnActivate( bool active );
 
-    bool OnPointerUp(float x, float y, int pointerId) override;
-    bool OnPointerDown(float x, float y, int pointerId) override;
-    bool OnPointerMove(float x, float y, int pointerId) override;
-    void OnPointerCancel(int pointerId) override;
+    bool OnPointerUp(const nsPointerData &pointer) override;
+    bool OnPointerDown(const nsPointerData &pointer) override;
+    bool OnPointerMove(const nsPointerData &pointer) override;
+    void OnPointerCancel(const nsPointerData &pointer) override;
     void OnKeyUp(int key, int mods) override;
     void OnKeyDown(int key, bool repeat, int mods) override;
     void OnChar(char ch) override;

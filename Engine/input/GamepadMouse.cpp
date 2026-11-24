@@ -61,7 +61,10 @@ bool nsGamepadMouse::Cancel(bool notify) {
     const auto held = _mouseDown;
     _mouseDown = false;
     _awaitRelease[0] = _awaitRelease[1] = true;
-    if (notify && held) nsEngineContext::Shared()->CancelPointer(NS_POINTER_PRIMARY);
+    if (notify && held) {
+        const nsVec2 pos = _hasPosition ? nsVec2(float(int(_x)), float(int(_y))) : nsVec2{};
+        nsEngineContext::Shared()->CancelPointer({POINTER_CONTROLLER, pos, NS_POINTER_PRIMARY});
+    }
     return _generation == generation;
 }
 
@@ -80,22 +83,22 @@ bool nsGamepadMouse::IsBlocked() const {
         || (platform->IsKeyPressed(NS_KEY_LEFT_ALT) && platform->IsKeyPressed(NS_KEY_TAB));
 }
 
-void nsGamepadMouse::OnPointerEvent(nsPointerEvent event, int id, int x, int y) {
+void nsGamepadMouse::OnPointerEvent(nsPointerEvent event, const nsPointerData &pointer) {
     SyncMode();
-    if (id == NS_POINTER_PRIMARY) {
+    if (pointer.pointerId == NS_POINTER_PRIMARY) {
         if (event == nsPointerEvent::Down) _physicalDown = true;
         else if (event == nsPointerEvent::Up) _physicalDown = false;
     }
     if (enabled.IsLocked()) {
         Cancel();
-        _x = static_cast<float>(x);
-        _y = static_cast<float>(y);
+        _x = pointer.pos.x;
+        _y = pointer.pos.y;
         _hasPosition = true;
     }
 }
 
-void nsGamepadMouse::OnPointerCancel(int id) {
-    if (id != NS_POINTER_PRIMARY) return;
+void nsGamepadMouse::OnPointerCancel(const nsPointerData &pointer) {
+    if (pointer.pointerId != NS_POINTER_PRIMARY) return;
     _physicalDown = false;
     Cancel(false);
 }
@@ -243,18 +246,19 @@ void nsGamepadMouse::UpdateFrame(IGamepads* provider, float seconds) {
         _y = std::clamp(_y + y / radius * speed * seconds, 0.0f, static_cast<float>(height - 1));
     }
     const auto clientX = static_cast<int>(_x), clientY = static_cast<int>(_y);
+    const nsPointerData pointer{POINTER_CONTROLLER, {float(clientX), float(clientY)}, NS_POINTER_PRIMARY};
     if (oldX != clientX || oldY != clientY) {
         auto ui = nsEngineContext::Shared()->GetActiveInput();
-        ui->OnPointerMove(static_cast<float>(clientX), static_cast<float>(clientY), NS_POINTER_PRIMARY);
+        ui->OnPointerMove(pointer);
         if (_generation != generation || !enabled.IsLocked() || IsBlocked()) return;
     }
     if (pressClick) {
         _mouseDown = true;
         auto ui = nsEngineContext::Shared()->GetActiveInput();
-        ui->OnPointerDown(static_cast<float>(clientX), static_cast<float>(clientY), NS_POINTER_PRIMARY);
+        ui->OnPointerDown(pointer);
     } else if (_mouseDown && !click) {
         _mouseDown = false;
         auto ui = nsEngineContext::Shared()->GetActiveInput();
-        ui->OnPointerUp(static_cast<float>(clientX), static_cast<float>(clientY), NS_POINTER_PRIMARY);
+        ui->OnPointerUp(pointer);
     }
 }

@@ -40,13 +40,13 @@ protected:
 
     void OnChar(char ch) override;
 
-    bool OnPointerUp(float x, float y, int pointerId) override;
+    bool OnPointerUp(const nsPointerData &pointer) override;
 
-    bool OnPointerDown(float x, float y, int pointerId) override;
+    bool OnPointerDown(const nsPointerData &pointer) override;
 
-    bool OnPointerMove(float x, float y, int pointerId) override;
+    bool OnPointerMove(const nsPointerData &pointer) override;
 
-    void OnPointerCancel(int pointerId) override;
+    void OnPointerCancel(const nsPointerData &pointer) override;
 
     bool OnMouseWheel(float delta) override;
 

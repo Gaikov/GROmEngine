@@ -19,7 +19,7 @@ public:
     void Loop(float deltaTime) override;
     void Draw() override;
 
-    bool OnPointerMove(float x, float y, int pointerId) override;
+    bool OnPointerMove(const nsPointerData &pointer) override;
     void OnKeyDown(int key, bool rept, int mods) override;
     bool OnMouseWheel(float delta) override;
 

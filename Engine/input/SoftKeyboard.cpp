@@ -21,12 +21,15 @@ public:
     }
 
 protected:
-    bool OnPointerUp(float x, float y, int pointerId) override {
+    bool OnPointerUp(const nsPointerData &pointer) override {
+        const auto x = pointer.pos.x;
+        const auto y = pointer.pos.y;
+        const auto pointerId = pointer.pointerId;
         if (_activePointers.erase(pointerId) == 0) {
             return true;
         }
 
-        nsVGroupLayout::OnPointerUp(x, y, pointerId);
+        nsVGroupLayout::OnPointerUp(pointer);
 
         auto pos = origin.ToLocal({x, y});
         nsRect bounds = {0, 0, GetContentWidth(), GetContentHeight()};
@@ -36,17 +39,19 @@ protected:
         }
         return true;
     }
-    bool OnPointerDown(float x, float y, int pointerId) override {
+    bool OnPointerDown(const nsPointerData &pointer) override {
+        const auto pointerId = pointer.pointerId;
         _activePointers.insert(pointerId);
-        nsVGroupLayout::OnPointerDown(x, y, pointerId);
+        nsVGroupLayout::OnPointerDown(pointer);
         return true;
     }
-    void OnPointerCancel(int pointerId) override {
+    void OnPointerCancel(const nsPointerData &pointer) override {
+        const auto pointerId = pointer.pointerId;
         _activePointers.erase(pointerId);
-        nsVGroupLayout::OnPointerCancel(pointerId);
+        nsVGroupLayout::OnPointerCancel(pointer);
     }
-    bool OnPointerMove(float x, float y, int pointerId) override {
-        nsVGroupLayout::OnPointerMove(x, y, pointerId);
+    bool OnPointerMove(const nsPointerData &pointer) override {
+        nsVGroupLayout::OnPointerMove(pointer);
         return true;
     }
 

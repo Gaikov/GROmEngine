@@ -138,7 +138,9 @@ float nsScrollBar::ComputeScrollPos(float localPos) {
     return maxScroll * (1 - factor);
 }
 
-bool nsScrollBar::OnPointerDown(float x, float y, int pointerId) {
+bool nsScrollBar::OnPointerDown(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
     if (!_down && nsVisualContainer2d::HitTest(x, y)) {
         _down = true;
         nsVec2 localPos = origin.ToLocal({x, y});
@@ -152,27 +154,31 @@ bool nsScrollBar::OnPointerDown(float x, float y, int pointerId) {
         }
         scrollPosition = ComputeScrollPos(localPos.y + _offset);
     }
-    return nsVisualContainer2d::OnPointerDown(x, y, pointerId) || _down;
+    return nsVisualContainer2d::OnPointerDown(pointer) || _down;
 }
 
-bool nsScrollBar::OnPointerMove(float x, float y, int pointerId) {
+bool nsScrollBar::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    const auto pointerId = pointer.pointerId;
     if (_down && _pointerId == pointerId) {
         nsVec2 localPos = origin.ToLocal({x, y});
         scrollPosition = ComputeScrollPos(localPos.y + _offset);
     }
 
-    return nsVisualContainer2d::OnPointerMove(x, y, pointerId) || _down;
+    return nsVisualContainer2d::OnPointerMove(pointer) || _down;
 }
 
-bool nsScrollBar::OnPointerUp(float x, float y, int pointerId) {
-    OnPointerCancel(pointerId);
-    return nsVisualContainer2d::OnPointerUp(x, y, pointerId);
+bool nsScrollBar::OnPointerUp(const nsPointerData &pointer) {
+    OnPointerCancel(pointer);
+    return nsVisualContainer2d::OnPointerUp(pointer);
 }
 
-void nsScrollBar::OnPointerCancel(int pointerId) {
+void nsScrollBar::OnPointerCancel(const nsPointerData &pointer) {
+    const auto pointerId = pointer.pointerId;
     if (_pointerId == pointerId) {
         _down = false;
     }
-    nsVisualContainer2d::OnPointerCancel(pointerId);
+    nsVisualContainer2d::OnPointerCancel(pointer);
 }
 

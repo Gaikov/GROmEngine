@@ -410,7 +410,7 @@ void nsConsole::clear_f(int argc, const char **argv) {
     Shared()->Clear();
 }
 
-void nsConsole::OnPointerCancel(int pointerId) {
+void nsConsole::OnPointerCancel(const nsPointerData &) {
 
 }
 

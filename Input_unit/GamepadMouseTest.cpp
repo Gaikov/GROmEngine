@@ -22,13 +22,19 @@ public:
     static void Frame(IGamepads* provider, float seconds = 0.1f) {
         nsGamepadMouse::Shared()->UpdateFrame(provider, seconds);
     }
-    static void Pointer(char event, int id, int x, int y) {
+    static void Pointer(char event, const nsPointerData &pointer) {
         const auto type = event == 'd' ? nsGamepadMouse::nsPointerEvent::Down
             : event == 'u' ? nsGamepadMouse::nsPointerEvent::Up : nsGamepadMouse::nsPointerEvent::Move;
-        nsGamepadMouse::Shared()->OnPointerEvent(type, id, x, y);
+        nsGamepadMouse::Shared()->OnPointerEvent(type, pointer);
+    }
+    static void Pointer(char event, int id, int x, int y) {
+        Pointer(event, {POINTER_MOUSE, {float(x), float(y)}, id});
+    }
+    static void Cancel(const nsPointerData &pointer) {
+        nsGamepadMouse::Shared()->OnPointerCancel(pointer);
     }
     static void Cancel(int id) {
-        nsGamepadMouse::Shared()->OnPointerCancel(id);
+        Cancel({POINTER_MOUSE, {}, id});
     }
     static void Focus(bool active) { nsGamepadMouse::Shared()->OnActivateApp(active); }
 };
@@ -95,19 +101,22 @@ public:
     }
     void OnKeyUp(int key, int mods) override { Record('K', key, 0, mods); ++ups; }
     void OnChar(char) override {}
-    bool OnPointerDown(float x, float y, int id) override {
-        Record('d', id, static_cast<int>(x), static_cast<int>(y));
-        captured = id;
-        if (cancelOnDown) nsEngine::OnPointerCancel(id);
+    bool OnPointerDown(const nsPointerData &pointer) override {
+        lastPointer = pointer;
+        Record('d', pointer.pointerId, int(pointer.pos.x), int(pointer.pos.y));
+        captured = pointer.pointerId;
+        if (cancelOnDown) nsEngine::OnPointerCancel(pointer);
         return true;
     }
-    bool OnPointerUp(float x, float y, int id) override {
-        Record('u', id, static_cast<int>(x), static_cast<int>(y));
-        if (captured == id) { ++clicks; captured = -1; }
+    bool OnPointerUp(const nsPointerData &pointer) override {
+        lastPointer = pointer;
+        Record('u', pointer.pointerId, int(pointer.pos.x), int(pointer.pos.y));
+        if (captured == pointer.pointerId) { ++clicks; captured = -1; }
         return true;
     }
-    bool OnPointerMove(float x, float y, int id) override {
-        Record('m', id, static_cast<int>(x), static_cast<int>(y));
+    bool OnPointerMove(const nsPointerData &pointer) override {
+        lastPointer = pointer;
+        Record('m', pointer.pointerId, int(pointer.pos.x), int(pointer.pos.y));
         if (moveReplacement) {
             route->ClearInputs();
             route->AddInput(moveReplacement);
@@ -115,14 +124,16 @@ public:
         if (resetOnMove) g_inp.ReleaseAllKeys();
         return true;
     }
-    void OnPointerCancel(int id) override {
-        if (captured != id) return;
+    void OnPointerCancel(const nsPointerData &pointer) override {
+        if (captured != pointer.pointerId) return;
+        lastPointer = pointer;
         captured = -1;
         ++cancels;
         if (cancelReplacement) activeInput = cancelReplacement;
         if (resetOnCancel) g_inp.ReleaseAllKeys();
     }
     bool OnMouseWheel(float) override { return true; }
+    nsPointerData lastPointer{};
     int downs = 0, ups = 0, clicks = 0, cancels = 0, captured = -1;
     nsMultiUserInput* route = nullptr;
     IUserInput* replacement = nullptr;
@@ -206,9 +217,9 @@ protected:
 bool nsEngineContext::OnInit() { return true; }
 void nsEngineContext::OnRelease() {}
 IUserInput* nsEngineContext::GetActiveInput() { ++routeQueries; return activeInput; }
-void nsEngineContext::CancelPointer(int id) {
-    Record('c', id);
-    if (gameInput) gameInput->OnPointerCancel(id);
+void nsEngineContext::CancelPointer(const nsPointerData &pointer) {
+    Record('c', pointer.pointerId);
+    if (gameInput) gameInput->OnPointerCancel(pointer);
 }
 void nsEngineContext::OnKeyDown(int key, bool repeat, int mods) { GetActiveInput()->OnKeyDown(key, repeat, mods); }
 void nsEngineContext::OnKeyUp(int key, int mods) { GetActiveInput()->OnKeyUp(key, mods); }
@@ -218,25 +229,25 @@ nsVisualContext2d::~nsVisualContext2d() = default;
 // Native entrypoints observe physical events before the ordinary UI delivery.
 // Emulation must reach the receiver directly, without calling these entrypoints.
 IUserInput* nsEngine::GetActiveInput() { return nsEngineContext::Shared()->GetActiveInput(); }
-void nsEngine::OnPointerMove(int id, int x, int y) {
+void nsEngine::OnPointerMove(const nsPointerData &pointer) {
     ++nativePointerEvents;
-    nsGamepadMouseTestAccess::Pointer('m', id, x, y);
-    if (activeInput) activeInput->OnPointerMove(x, y, id);
+    nsGamepadMouseTestAccess::Pointer('m', pointer);
+    if (activeInput) activeInput->OnPointerMove(pointer);
 }
-void nsEngine::OnPointerDown(int id, int x, int y) {
+void nsEngine::OnPointerDown(const nsPointerData &pointer) {
     ++nativePointerEvents;
-    nsGamepadMouseTestAccess::Pointer('d', id, x, y);
-    if (activeInput) activeInput->OnPointerDown(x, y, id);
+    nsGamepadMouseTestAccess::Pointer('d', pointer);
+    if (activeInput) activeInput->OnPointerDown(pointer);
 }
-void nsEngine::OnPointerUp(int id, int x, int y) {
+void nsEngine::OnPointerUp(const nsPointerData &pointer) {
     ++nativePointerEvents;
-    nsGamepadMouseTestAccess::Pointer('u', id, x, y);
-    if (activeInput) activeInput->OnPointerUp(x, y, id);
+    nsGamepadMouseTestAccess::Pointer('u', pointer);
+    if (activeInput) activeInput->OnPointerUp(pointer);
 }
-void nsEngine::OnPointerCancel(int id) {
+void nsEngine::OnPointerCancel(const nsPointerData &pointer) {
     ++nativePointerEvents;
-    nsGamepadMouseTestAccess::Cancel(id);
-    nsEngineContext::Shared()->CancelPointer(id);
+    nsGamepadMouseTestAccess::Cancel(pointer);
+    nsEngineContext::Shared()->CancelPointer(pointer);
 }
 void nsEngine::OnKeyDown(int key, bool repeat, int mods) {
     ++nativeKeyEvents;
@@ -602,7 +613,7 @@ TEST_F(GamepadMouseTest, DisconnectAndReconnectHeldButtonRearm) {
 TEST_F(GamepadMouseTest, PhysicalTakeoverCancelsDragBeforeDeliveryAndSynchronizesPosition) {
     Pad().buttons[0] = true;
     Frame();
-    nsEngine::OnPointerMove(NS_POINTER_PRIMARY, 20, 30);
+    nsEngine::OnPointerMove({POINTER_MOUSE, {20, 30}, NS_POINTER_PRIMARY});
     ASSERT_GE(eventCount, 3);
     EXPECT_EQ(events[eventCount - 2].type, 'c');
     EXPECT_EQ(events[eventCount - 1].type, 'm');
@@ -615,7 +626,7 @@ TEST_F(GamepadMouseTest, PhysicalCancelWaitsForButtonsPressedAfterTheLastSample)
     Pad().buttons[0] = true;
     Frame();
     Pad().buttons[1] = true; // Pressed after the emulator's last sample.
-    nsEngine::OnPointerMove(NS_POINTER_PRIMARY, 20, 30);
+    nsEngine::OnPointerMove({POINTER_MOUSE, {20, 30}, NS_POINTER_PRIMARY});
     Frame();
     EXPECT_EQ(first.cancels, 1);
     EXPECT_EQ(Count('d'), 1);
@@ -637,7 +648,7 @@ TEST_F(GamepadMouseTest, PhysicalCancelWaitsForButtonsPressedAfterTheLastSample)
 }
 TEST_F(GamepadMouseTest, PhysicalCancelBlocksANewClickUntilANeutralSample) {
     Pad().buttons[0] = true; // The previous sample still says released.
-    nsEngine::OnPointerMove(NS_POINTER_PRIMARY, 20, 30);
+    nsEngine::OnPointerMove({POINTER_MOUSE, {20, 30}, NS_POINTER_PRIMARY});
     Frame();
     EXPECT_EQ(Count('d'), 0);
     Pad().buttons[0] = false;
@@ -647,14 +658,14 @@ TEST_F(GamepadMouseTest, PhysicalCancelBlocksANewClickUntilANeutralSample) {
     EXPECT_EQ(Count('d'), 1);
 }
 TEST_F(GamepadMouseTest, PhysicalDragBlocksPadAndNativeUpIsNeverFiltered) {
-    nsEngine::OnPointerDown(NS_POINTER_PRIMARY, 40, 50);
+    nsEngine::OnPointerDown({POINTER_MOUSE, {40, 50}, NS_POINTER_PRIMARY});
     Pad().buttons[0] = true;
     Pad().axes[0] = 1;
     Frame();
     EXPECT_EQ(Count('d'), 1);
     EXPECT_EQ(first.cancels, 0);
-    nsEngine::OnPointerUp(NS_POINTER_PRIMARY, 40, 50);
-    nsEngine::OnPointerUp(NS_POINTER_PRIMARY, 40, 50); // Unmatched native event is still delivered.
+    nsEngine::OnPointerUp({POINTER_MOUSE, {40, 50}, NS_POINTER_PRIMARY});
+    nsEngine::OnPointerUp({POINTER_MOUSE, {40, 50}, NS_POINTER_PRIMARY}); // Unmatched native event is still delivered.
     EXPECT_EQ(Count('u'), 2);
     Frame();
     EXPECT_EQ(Count('d'), 1);
@@ -667,7 +678,7 @@ TEST_F(GamepadMouseTest, PhysicalDragBlocksPadAndNativeUpIsNeverFiltered) {
 TEST_F(GamepadMouseTest, PhysicalDownDuringEmulatedDragRemainsBlockedUntilNativeUp) {
     Pad().buttons[0] = true;
     Frame();
-    nsEngine::OnPointerDown(NS_POINTER_PRIMARY, 20, 30);
+    nsEngine::OnPointerDown({POINTER_MOUSE, {20, 30}, NS_POINTER_PRIMARY});
     EXPECT_EQ(first.cancels, 1);
     EXPECT_EQ(Count('d'), 2); // One emulated press and one physical press.
     Pad().buttons[0] = false;
@@ -678,7 +689,7 @@ TEST_F(GamepadMouseTest, PhysicalDownDuringEmulatedDragRemainsBlockedUntilNative
     Position(20, 30);
     EXPECT_EQ(Count('d'), 2);
     EXPECT_EQ(Count('u'), 0);
-    nsEngine::OnPointerUp(NS_POINTER_PRIMARY, 20, 30);
+    nsEngine::OnPointerUp({POINTER_MOUSE, {20, 30}, NS_POINTER_PRIMARY});
     Frame();
     EXPECT_EQ(Count('d'), 2); // Held pad button still requires release.
     Pad().buttons[0] = false;
@@ -758,14 +769,45 @@ TEST_F(GamepadMouseTest, ConsoleCancellationReleasesCaptureOutsideTheActiveRoute
     Pad().buttons[0] = true;
     Frame();
     ASSERT_EQ(first.captured, NS_POINTER_PRIMARY);
+    EXPECT_EQ(first.lastPointer.type, POINTER_CONTROLLER);
+    const auto click = first.lastPointer;
     activeInput = &second;
     nsConsole::Shared()->Activate(true);
     Frame();
     EXPECT_EQ(first.captured, -1);
     EXPECT_EQ(first.cancels, 1);
+    EXPECT_EQ(first.lastPointer.type, POINTER_CONTROLLER);
+    EXPECT_EQ(first.lastPointer.pointerId, click.pointerId);
+    EXPECT_FLOAT_EQ(first.lastPointer.pos.x, click.pos.x);
+    EXPECT_FLOAT_EQ(first.lastPointer.pos.y, click.pos.y);
     EXPECT_EQ(second.cancels, 0);
     EXPECT_EQ(nativePointerEvents, 0);
 }
+TEST_F(GamepadMouseTest, CoordinateTransformPreservesPointerTypeAndIdAndDoesNotTransformCancel) {
+    class nsOffsetTransform final : public IPointerTransform {
+    public:
+        nsVec2 ScreenToTarget(float x, float y) override { return {x + 2.5f, y - 1.5f}; }
+    } transform;
+    nested._pointerTransform = &transform;
+    const nsPointerData pointer{POINTER_TOUCH, {11, 19}, 7};
+    nsEngine::OnPointerDown(pointer);
+    ASSERT_EQ(first.captured, 7);
+    EXPECT_EQ(first.lastPointer.type, POINTER_TOUCH);
+    EXPECT_EQ(first.lastPointer.pointerId, 7);
+    EXPECT_FLOAT_EQ(first.lastPointer.pos.x, 13.5f);
+    EXPECT_FLOAT_EQ(first.lastPointer.pos.y, 17.5f);
+    EXPECT_FLOAT_EQ(pointer.pos.x, 11);
+    EXPECT_FLOAT_EQ(pointer.pos.y, 19);
+
+    nsEngine::OnPointerCancel(pointer);
+    EXPECT_EQ(first.captured, -1);
+    EXPECT_EQ(first.lastPointer.type, POINTER_TOUCH);
+    EXPECT_EQ(first.lastPointer.pointerId, 7);
+    EXPECT_FLOAT_EQ(first.lastPointer.pos.x, 11);
+    EXPECT_FLOAT_EQ(first.lastPointer.pos.y, 19);
+    nested._pointerTransform = nullptr;
+}
+
 TEST_F(GamepadMouseTest, CallbackCancellationStopsTheOldBatch) {
     resetOnMove = true;
     Pad().axes[0] = 1;
@@ -821,7 +863,7 @@ TEST_F(GamepadMouseTest, MobileCursorUsesEnabledAndStartsAtCenter) {
     Mouse().enabled.AddLock("menu");
     EXPECT_TRUE(g_inp.CanDrawCursor());
     Position(50, 50);
-    nsEngine::OnPointerMove(NS_POINTER_SECONDARY, 20, 30);
+    nsEngine::OnPointerMove({POINTER_MOUSE, {20, 30}, NS_POINTER_SECONDARY});
     Position(20, 30);
     EXPECT_TRUE(g_inp.CanDrawCursor());
 }

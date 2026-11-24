@@ -140,17 +140,17 @@ bool nsVisualContainer2d::HitTest(float x, float y) {
         } \
     }
 
-bool nsVisualContainer2d::OnPointerUp(float x, float y, int pointerId) {
-    ITER_INPUT_CHILDREN(if (input->OnPointerUp(x, y, pointerId)) return true)
+bool nsVisualContainer2d::OnPointerUp(const nsPointerData &pointer) {
+    ITER_INPUT_CHILDREN(if (input->OnPointerUp(pointer)) return true)
     return false;
 }
 
-bool nsVisualContainer2d::OnPointerDown(float x, float y, int pointerId) {
-    ITER_INPUT_CHILDREN(if (input->OnPointerDown(x, y, pointerId)) return true);
+bool nsVisualContainer2d::OnPointerDown(const nsPointerData &pointer) {
+    ITER_INPUT_CHILDREN(if (input->OnPointerDown(pointer)) return true);
     return false;
 }
 
-bool nsVisualContainer2d::OnPointerMove(float x, float y, int pointerId) {
+bool nsVisualContainer2d::OnPointerMove(const nsPointerData &pointer) {
     if (!interactiveChildren) {
         return false;
     }
@@ -158,9 +158,9 @@ bool nsVisualContainer2d::OnPointerMove(float x, float y, int pointerId) {
     for (auto it = _children.rbegin(); it != _children.rend(); ++it) {
         auto input = dynamic_cast<IUserInput *>(*it);
         if (input && (*it)->visible) {
-            if (input->OnPointerMove(x, y, pointerId)) {
+            if (input->OnPointerMove(pointer)) {
                 if (_childOver && _childOver != input) {
-                    _childOver->OnPointerCancel(pointerId);
+                    _childOver->OnPointerCancel(pointer);
                 }
                 _childOver = input;
                 return true;
@@ -199,8 +199,8 @@ void nsVisualContainer2d::OnRemovedFromStage() {
     }
 }
 
-void nsVisualContainer2d::OnPointerCancel(int pointerId) {
-    ITER_INPUT_CHILDREN(input->OnPointerCancel(pointerId))
+void nsVisualContainer2d::OnPointerCancel(const nsPointerData &pointer) {
+    ITER_INPUT_CHILDREN(input->OnPointerCancel(pointer))
 }
 
 void nsVisualContainer2d::DrawNode(const nsVisualContext2d &context) {

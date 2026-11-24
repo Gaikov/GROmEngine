@@ -73,10 +73,10 @@ public:
 protected:
     void	OnChar( char ch ) override ;
 
-	bool OnPointerUp(float x, float y, int pointerId) override { return true; }
-	bool OnPointerDown(float x, float y, int pointerId) override { return true; }
-	bool OnPointerMove(float x, float y, int pointerId) override { return true; }
-    void OnPointerCancel(int pointerId) override;
+	bool OnPointerUp(const nsPointerData &pointer) override { return true; }
+	bool OnPointerDown(const nsPointerData &pointer) override { return true; }
+	bool OnPointerMove(const nsPointerData &pointer) override { return true; }
+    void OnPointerCancel(const nsPointerData &pointer) override;
 
 private:
 	void    LogPrint(LogLevel level, const char *str) override;

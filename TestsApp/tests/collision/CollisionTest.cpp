@@ -83,8 +83,10 @@ nsVisualRect *nsCollisionTest::CreateRect(float width, float height) {
     return rect;
 }
 
-bool nsCollisionTest::OnPointerMove(float x, float y, int pointerId) {
-    BaseFunctionalTest::OnPointerMove(x, y, pointerId);
+bool nsCollisionTest::OnPointerMove(const nsPointerData &pointer) {
+    const auto x = pointer.pos.x;
+    const auto y = pointer.pos.y;
+    BaseFunctionalTest::OnPointerMove(pointer);
 
     auto size = nsAppUtils::GetClientSize();
 

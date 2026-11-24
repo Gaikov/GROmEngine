@@ -3,8 +3,7 @@
 // file UserInput.h
 // author Roman Gaikov
 //--------------------------------------------------------------------------------------------------
-#ifndef    _UserInput_H_
-#define    _UserInput_H_
+#pragma once
 
 #include "nsLib/Vec2.h"
 
@@ -12,14 +11,27 @@ struct IPointerTransform {
     virtual nsVec2 ScreenToTarget(float x, float y) = 0;
 };
 
+enum nsPointerType {
+    POINTER_MOUSE,
+    POINTER_TOUCH,
+    POINTER_CONTROLLER,
+    POINTER_UNKNOWN
+};
+
+struct nsPointerData {
+    nsPointerType type = POINTER_UNKNOWN;
+    nsVec2 pos;
+    int pointerId = -1;
+};
+
 struct IPointersInput {
-    virtual bool OnPointerUp(float x, float y, int pointerId) = 0;
+    virtual bool OnPointerUp(const nsPointerData &pointer) = 0;
 
-    virtual bool OnPointerDown(float x, float y, int pointerId) = 0;
+    virtual bool OnPointerDown(const nsPointerData &pointer) = 0;
 
-    virtual bool OnPointerMove(float x, float y, int pointerId) = 0;
+    virtual bool OnPointerMove(const nsPointerData &pointer) = 0;
 
-    virtual void OnPointerCancel(int pointerId) = 0;
+    virtual void OnPointerCancel(const nsPointerData &pointer) = 0;
 };
 
 struct IKeyboardInput {
@@ -33,5 +45,3 @@ struct IKeyboardInput {
 struct IUserInput : public IPointersInput, public IKeyboardInput {
     virtual bool OnMouseWheel(float delta) = 0;
 };
-
-#endif //_UserInput_H_

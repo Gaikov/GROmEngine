@@ -13,5 +13,5 @@ void nsConsole::Toggle() { Activate(!m_bActive); }
 bool nsConsole::OnMouseWheel(float) { return true; }
 void nsConsole::OnKeyDown(int, bool, int) {}
 void nsConsole::OnChar(char) {}
-void nsConsole::OnPointerCancel(int) {}
+void nsConsole::OnPointerCancel(const nsPointerData &) {}
 void nsConsole::LogPrint(LogLevel, const char*) {}
