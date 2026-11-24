@@ -31,7 +31,7 @@ float Axis(float value) {
 
 bool nsGamepadMouse::OnInit() {
     _sensitivity = g_cfg->RegVar("pad_ui_sensitivity", "2", GVF_SAVABLE);
-    _deadzone = g_cfg->RegVar("pad_ui_deadzone", "0.02", GVF_SAVABLE);
+    _deadzone = g_cfg->RegVar("pad_ui_deadzone", "0.05", GVF_SAVABLE);
     _exponent = g_cfg->RegVar("pad_ui_exponent", "2", GVF_SAVABLE);
     _escapeRoute.reserve(16);
     _escapeNextRoute.reserve(16);
@@ -185,13 +185,11 @@ void nsGamepadMouse::UpdateFrame(IGamepads* provider, float seconds) {
     int width = 0, height = 0;
     App_GetPlatform()->GetClientSize(width, height);
     if (width <= 0 || height <= 0) { Cancel(); return; }
-    const auto hadPosition = _hasPosition;
-    const auto previousX = static_cast<int>(_x), previousY = static_cast<int>(_y);
     SeedPosition(width, height);
-    const auto oldX = hadPosition ? previousX : static_cast<int>(_x);
-    const auto oldY = hadPosition ? previousY : static_cast<int>(_y);
+    // Synchronizing or clamping the position is not gamepad movement.
+    const auto oldX = static_cast<int>(_x), oldY = static_cast<int>(_y);
     seconds = std::isfinite(seconds) ? std::clamp(seconds, 0.0f, 0.1f) : 0;
-    const auto deadzone = Parameter(_deadzone, 0.02f, 0, 0.95f);
+    const auto deadzone = Parameter(_deadzone, 0.05f, 0, 0.95f);
     for (auto& device : _devices) device.seen = false;
     for (auto index = 0; provider && index < provider->GetCount(); ++index) {
         const auto pad = provider->GetGamepad(index);

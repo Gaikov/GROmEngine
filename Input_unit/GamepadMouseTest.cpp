@@ -165,7 +165,7 @@ protected:
         ASSERT_TRUE(nsEngineContext::Init());
         ASSERT_TRUE(nsGamepadMouse::Init());
         EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_sensitivity")->Value(), 2);
-        EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_deadzone")->Value(), 0.02f);
+        EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_deadzone")->Value(), 0.05f);
         EXPECT_FLOAT_EQ(g_cfg->FindVar("pad_ui_exponent")->Value(), 2);
         // Reference-curve tests keep explicit parameters independent of defaults.
         g_cfg->ExecLine("pad_ui_sensitivity 1");
@@ -269,14 +269,17 @@ TEST_F(GamepadMouseTest, RadialDeadzoneAndPowerCurveKeepFractionalPosition) {
     Position(55, 50);
     EXPECT_EQ(pads.updates, 0);
 }
-TEST_F(GamepadMouseTest, DefaultSettingsUseTwoPercentDeadzoneAndQuadraticResponse) {
+TEST_F(GamepadMouseTest, DefaultSettingsUseFivePercentDeadzoneAndQuadraticResponse) {
     g_cfg->ExecLine("pad_ui_sensitivity 2");
-    g_cfg->ExecLine("pad_ui_deadzone 0.02");
+    g_cfg->ExecLine("pad_ui_deadzone 0.05");
     g_cfg->ExecLine("pad_ui_exponent 2");
-    Pad().axes[0] = 0.02f;
+    Pad().axes[0] = 0.04f;
     Frame();
-    EXPECT_EQ(Count('m'), 0);
-    Pad().axes[0] = 0.51f; // Rescaled magnitude 0.5 -> quadratic response 0.25.
+    Position(50, 50);
+    g_cfg->FindVar("pad_ui_deadzone")->SetValue(std::numeric_limits<float>::quiet_NaN());
+    Frame();
+    Position(50, 50);
+    Pad().axes[0] = 0.525f; // Rescaled magnitude 0.5 -> quadratic response 0.25.
     Frame();
     Position(55, 50);
 }
@@ -360,6 +363,15 @@ TEST_F(GamepadMouseTest, ResizeClampsAndZeroSizeCancelsWithoutClick) {
     Frame();
     EXPECT_EQ(first.cancels, 1);
     EXPECT_EQ(first.clicks, 0);
+}
+
+TEST_F(GamepadMouseTest, ClampingTouchReleaseDoesNotGenerateControllerMotion) {
+    nsEngine::OnPointerDown({POINTER_TOUCH, {99, 50}, NS_POINTER_PRIMARY});
+    nsEngine::OnPointerUp({POINTER_TOUCH, {100, 50}, NS_POINTER_PRIMARY});
+    nsGamepadMouseTestAccess::Frame(nullptr);
+
+    EXPECT_EQ(Count('m'), 0);
+    Position(99, 50);
 }
 TEST_F(GamepadMouseTest, NonFiniteParametersAndSamplesCannotPoisonPosition) {
     g_cfg->FindVar("pad_ui_sensitivity")->SetValue(std::numeric_limits<float>::infinity());
