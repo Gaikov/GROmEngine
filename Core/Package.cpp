@@ -321,12 +321,15 @@ nsFile *nsPackage::LoadPackFile(const char *fileName) {
     }
 
     IDataReader::sp_t reader = App_GetPlatform()->FileRead(_packs[packIndex].packName);
-    if (!reader || !reader->IsValid()) return nullptr;
+    if (!reader || !reader->IsValid()) {
+        Log::Error("Can't open pack '%s' to read '%s'", _packs[packIndex].packName.AsChar(), fileName);
+        return nullptr;
+    }
 
     auto file = new nsFile(desc->size);
     if (!reader->Seek(static_cast<long>(desc->offset), SEEK_SET) ||
         (desc->size && !reader->Read(file->GetData(), desc->size))) {
-        Log::Warning("Can't read packed file '%s'", fileName);
+        Log::Error("Can't read packed file '%s'", fileName);
         delete file;
         return nullptr;
     }
