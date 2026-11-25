@@ -8,7 +8,7 @@
 #include "GLCommon.h"
 #include "GLTexturesCache.h"
 #include "shaders/GLShadersManager.h"
-#include "GLDisplayModes.h"
+#include "RasterCommon/DisplayModeConfig.h"
 #include "renderTexture/GLRenderTexturesCache.h"
 #include "stencil/GLStencilManager.h"
 
@@ -22,7 +22,6 @@ public:
 	GLRenderDevice();
 	bool Init(void *wnd) override;
 	void Release() override;
-	void GetDisplayInfo(DisplayInfo &info) override;
 	const rasterConfig_t *GetCurrentConfig() override;
 	void SetColor(const float *c) override;
 	ITexture *TextureLoad(const char *filename, texfmt_t fmt = TF_RGBA, int flags = TLF_NONE) override;
@@ -66,7 +65,7 @@ public:
 
 private:
 
-	GLDisplayModes   _modes;
+	nsDisplayModeConfig _modes;
 	GLTexturesCache  _textures;
 	nsGLRenderTexturesCache _renderTextures;
 	GLVertexBuffer   *_quadBuff;

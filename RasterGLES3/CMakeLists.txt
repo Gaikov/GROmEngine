@@ -20,4 +20,4 @@ include_directories(
 )
 
 add_library(RasterGL STATIC ${sources})
-target_link_libraries(RasterGL nsLib ${OPENGL_LIBRARIES})
+target_link_libraries(RasterGL PRIVATE RasterCommon nsLib ${OPENGL_LIBRARIES})

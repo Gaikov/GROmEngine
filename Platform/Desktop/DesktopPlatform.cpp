@@ -11,6 +11,7 @@
 #include "Engine/input/soft/SoftInputKeyboard.h"
 #include "Core/Config.h"
 #include "Core/time/Time.h"
+#include "RasterCommon/DisplayModeConfig.h"
 #include "env/Env.h"
 
 #ifdef WEB_ASM
@@ -24,6 +25,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
+#include <span>
 
 bool DesktopPlatform::Init() {
     Log::Info("##### Init Desktop #####");
@@ -49,6 +51,10 @@ bool DesktopPlatform::Init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
+    glfwWindowHint(GLFW_RED_BITS, WindowChannelBits);
+    glfwWindowHint(GLFW_GREEN_BITS, WindowChannelBits);
+    glfwWindowHint(GLFW_BLUE_BITS, WindowChannelBits);
+
 #ifdef WEB_ASM
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 #endif
@@ -63,6 +69,7 @@ bool DesktopPlatform::Init() {
 #endif
 
     _display = glfwGetPrimaryMonitor();
+    _desktopFrequency = 0;
     _firstDisplayMode = true;
 #ifdef WEB_ASM
     _gamepads = std::make_unique<nsWebGamepads>();
@@ -153,30 +160,46 @@ void *DesktopPlatform::GetWindowHandler() {
     return _wnd;
 }
 
+Platform::DisplayMode DesktopPlatform::ReadDisplayMode(GLFWmonitor *monitor) {
+    if (monitor) {
+        if (const auto *mode = glfwGetVideoMode(monitor)) {
+            return {mode->width, mode->height, mode->refreshRate, mode->redBits + mode->greenBits + mode->blueBits};
+        }
+    }
+    return {};
+}
+
+int DesktopPlatform::GetDisplayColorDistance(const GLFWvidmode &mode) {
+    return std::abs(mode.redBits - WindowChannelBits)
+        + std::abs(mode.greenBits - WindowChannelBits)
+        + std::abs(mode.blueBits - WindowChannelBits);
+}
+
 void DesktopPlatform::GetDisplayModes(Platform::tDisplayModesList &result) {
+    if (!_display) {
+        return;
+    }
     int count;
     auto modes = glfwGetVideoModes(_display, &count);
     if (count < 1) {
         Log::Error("Display modes are not available!");
+        return;
     }
 
     Log::Info("num display modes: %i", count);
 
-    for (int i = 0; i < count; ++i) {
-        auto m = &modes[i];
-        auto bits = m->redBits + m->greenBits + m->blueBits;
+    // GLFW compares the window's RGB hints before either size or refresh rate.
+    const auto nativeModes = std::span(modes, size_t(count));
+    const auto closestColor = GetDisplayColorDistance(
+        *std::ranges::min_element(nativeModes, {}, GetDisplayColorDistance));
+    for (const auto &mode : nativeModes) {
+        const auto bits = mode.redBits + mode.greenBits + mode.blueBits;
 
-        DisplayMode mode = {
-                m->width,
-                m->height,
-                m->refreshRate,
-                bits
-        };
-
-        result.push_back(mode);
+        result.push_back({mode.width, mode.height, mode.refreshRate, bits,
+                          GetDisplayColorDistance(mode) == closestColor});
 
         Log::Info("Mode bpp:%i, %i x %i, format: %i%i%i, refresh: %i",
-                  bits, m->width, m->height, m->redBits, m->greenBits, m->blueBits, m->refreshRate);
+                  bits, mode.width, mode.height, mode.redBits, mode.greenBits, mode.blueBits, mode.refreshRate);
     }
 }
 
@@ -213,48 +236,114 @@ static bool FitStartupWindow(GLFWwindow *window, GLFWmonitor *display, int &widt
 
 bool DesktopPlatform::ApplyDisplayMode(int width, int height, bool fullScreen, int bits, int frequency) {
 #if !defined(WEB_ASM)
+    if (!_wnd || width <= 0 || height <= 0 || (fullScreen && !_display)) {
+        return false;
+    }
+
+    const auto previous = GetDisplayState();
+    const auto desktopFrequency = fullScreen && !previous.monitor ? ReadDisplayMode(_display).frequency : _desktopFrequency;
+    if (fullScreen && bits <= 0) {
+        tDisplayModesList modes;
+        GetDisplayModes(modes);
+        const auto *mode = nsDisplayModeConfig::SelectFullscreenMode(modes, width, height,
+                                                                     frequency > 0 ? frequency : desktopFrequency);
+        if (!mode) {
+            return false;
+        }
+        bits = mode->bits;
+        frequency = mode->frequency;
+    }
+    const auto applied = fullScreen
+        ? ApplyFullscreenMode(width, height, bits, frequency)
+        : ApplyWindowMode(width, height);
+    if (!applied) {
+        RestoreDisplayState(previous);
+        return false;
+    }
+    _firstDisplayMode = false;
+    _desktopFrequency = fullScreen ? desktopFrequency : 0;
+#endif
+    return true;
+}
+
+#ifndef WEB_ASM
+DesktopPlatform::DisplayState DesktopPlatform::GetDisplayState() const {
+    DisplayState state;
+    state.monitor = glfwGetWindowMonitor(_wnd);
+    if (state.monitor) {
+        state.mode = ReadDisplayMode(state.monitor);
+    } else {
+        glfwGetWindowSize(_wnd, &state.mode.width, &state.mode.height);
+        glfwGetWindowPos(_wnd, &state.x, &state.y);
+    }
+    return state;
+}
+
+void DesktopPlatform::RestoreDisplayState(const DisplayState &previous) {
+    // GLFW can retain the requested mode even when the native switch fails.
+    const auto &mode = previous.mode;
+    if (mode.width > 0 && mode.height > 0) {
+        glfwGetError(nullptr);
+        glfwSetWindowMonitor(_wnd, previous.monitor, previous.x, previous.y, mode.width, mode.height,
+                             mode.frequency > 0 ? mode.frequency : GLFW_DONT_CARE);
+        if (glfwGetError(nullptr) == GLFW_NO_ERROR && (!previous.monitor || GetDisplayState() == previous)) {
+            return;
+        }
+    }
+    Log::Error("Could not restore the previous display mode: %ix%i, %i Hz", mode.width, mode.height, mode.frequency);
+}
+
+bool DesktopPlatform::ApplyWindowMode(int width, int height) {
     int startupX = 0;
     int startupY = 0;
-    const auto fitted = _firstDisplayMode && !fullScreen
-        && FitStartupWindow(_wnd, _display, width, height, startupX, startupY);
+    const auto fitted = _firstDisplayMode && FitStartupWindow(_wnd, _display, width, height, startupX, startupY);
     glfwGetError(nullptr);
 
     Log::Info("Applying display mode: %ix%i...", width, height);
 
-    if (fullScreen) {
-        glfwSetWindowMonitor(_wnd, _display, 0, 0, width, height, frequency);
-    } else {
-        glfwSetWindowMonitor(_wnd, nullptr, 0, 0, width, height,0);
-
-        if (_display) {
-            if (fitted) {
-                glfwSetWindowPos(_wnd, startupX, startupY);
-            } else if (const auto *mode = glfwGetVideoMode(_display)) {
-                int posX = (mode->width - width) / 2;
-                int posY = (mode->height - height) / 2;
-                glfwSetWindowPos(_wnd, posX, posY);
-            } else {
-                glfwSetWindowPos(_wnd, 50, 50);
-            }
-
-            float sx, sy;
-            glfwGetMonitorContentScale(_display, &sx, &sy);
-            Log::Info("Monitor content scale: %fx%f", sx, sy);
-        }
-    }
-
-    if (glfwGetError(nullptr) != GLFW_NO_ERROR) {
-        Sys_Message("Can't apply display mode: %ix%i", width, height);
+    glfwSetWindowMonitor(_wnd, nullptr, 0, 0, width, height, GLFW_DONT_CARE);
+    if (const auto error = glfwGetError(nullptr); error != GLFW_NO_ERROR) {
+        Log::Warning("Window size %ix%i was not applied (GLFW error: %i)", width, height, error);
         return false;
     }
-    _firstDisplayMode = false;
 
+    if (_display) {
+        if (fitted) {
+            glfwSetWindowPos(_wnd, startupX, startupY);
+        } else if (const auto *mode = glfwGetVideoMode(_display)) {
+            const auto posX = (mode->width - width) / 2;
+            const auto posY = (mode->height - height) / 2;
+            glfwSetWindowPos(_wnd, posX, posY);
+        } else {
+            glfwSetWindowPos(_wnd, 50, 50);
+        }
 
-    //glfwSwapInterval(r_vsync->Bool() ? 1 : 0);
-    Log::Info("DONE");
-#endif
+        float sx, sy;
+        glfwGetMonitorContentScale(_display, &sx, &sy);
+        Log::Info("Monitor content scale: %fx%f", sx, sy);
+    }
+
     return true;
 }
+
+bool DesktopPlatform::ApplyFullscreenMode(int width, int height, int bits, int frequency) {
+    glfwGetError(nullptr);
+    glfwSetWindowMonitor(_wnd, _display, 0, 0, width, height,
+                         frequency > 0 ? frequency : GLFW_DONT_CARE);
+    const auto error = glfwGetError(nullptr);
+    auto *actualMonitor = glfwGetWindowMonitor(_wnd);
+    const auto actual = ReadDisplayMode(actualMonitor);
+    if (error == GLFW_NO_ERROR && actualMonitor == _display && actual.width == width && actual.height == height
+        && (frequency <= 0 || actual.frequency == frequency) && (bits <= 0 || actual.bits == bits)) {
+        Log::Info("Full screen mode: %ix%i, %i Hz, %i bpp", actual.width, actual.height, actual.frequency, actual.bits);
+        return true;
+    }
+
+    Log::Warning("Full screen mode %ix%i, %i Hz, %i bpp was not applied (actual: %ix%i, %i Hz, %i bpp)",
+                 width, height, frequency, bits, actual.width, actual.height, actual.frequency, actual.bits);
+    return false;
+}
+#endif
 
 IDataReader *DesktopPlatform::FileRead(const char *fileName) {
     return new nsFileReader(fileName, "rb");

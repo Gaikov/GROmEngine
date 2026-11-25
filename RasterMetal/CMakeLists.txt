@@ -18,7 +18,8 @@ include_directories(
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
 
 add_library(RasterMetal STATIC ${sources})
-target_link_libraries(RasterMetal
+target_link_libraries(RasterMetal PRIVATE
+    RasterCommon
     nsLib
     ${METAL_LIB}
     ${QUARTZCORE_LIB}

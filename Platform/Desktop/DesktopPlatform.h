@@ -43,7 +43,7 @@ public:
 
     void SetAppTitle(const char *text) override;
 
-    void GetClientSize(int &width, int &eight) override;
+    void GetClientSize(int &width, int &height) override;
 
     void GetDisplayModes(tDisplayModesList &modes) override;
 
@@ -78,15 +78,36 @@ public:
     const char * GetDomainName() override;
 
 private:
+    static constexpr int WindowChannelBits = 8;
+
+    struct DisplayState {
+        GLFWmonitor *monitor = nullptr;
+        DisplayMode mode{};
+        int x = 0, y = 0;
+
+        bool operator==(const DisplayState &other) const {
+            return monitor == other.monitor && mode.width == other.mode.width && mode.height == other.mode.height
+                && mode.frequency == other.mode.frequency && mode.bits == other.mode.bits
+                && x == other.x && y == other.y;
+        }
+    };
+
     DesktopKeyNames _keyNames;
     std::unique_ptr<IGamepads> _gamepads;
 
     GLFWwindow  *_wnd = nullptr;
     GLFWmonitor *_display = nullptr;
+    int _desktopFrequency = 0;
     bool _firstDisplayMode = true;
     ISoftInput::sp_t _softInput;
     nsVar   *_useSoftInput = nullptr;
     nsFilePath _internalRoot = "";
 
     void UpdateSoftInput();
+    DisplayState GetDisplayState() const;
+    void RestoreDisplayState(const DisplayState &previous);
+    bool ApplyWindowMode(int width, int height);
+    bool ApplyFullscreenMode(int width, int height, int bits, int frequency);
+    static DisplayMode ReadDisplayMode(GLFWmonitor *monitor);
+    static int GetDisplayColorDistance(const GLFWvidmode &mode);
 };

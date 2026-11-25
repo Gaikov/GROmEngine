@@ -8,9 +8,11 @@
 #include "nsMetalStencilState.h"
 #include "Core/Config.h"
 #include "Core/Memory.h"
+#include "Core/sys.h"
 #include "nsLib/log.h"
 #include "nsLib/FilePath.h"
 #include "Engine/Platform.h"
+#include "RasterCommon/DisplayVars.h"
 #import <AppKit/AppKit.h>
 #import <QuartzCore/CAMetalLayer.h>
 #define GLFW_INCLUDE_NONE
@@ -46,17 +48,15 @@ bool nsMetalRenderDevice::Init(void *wnd) {
 
 	Log::Info("Metal device: %s", [[_device name] UTF8String]);
 
-	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) { _queryRestart = true; });
+    g_cfg->RegCmd("r_restart", [this](int, const char *[]) { _queryRestart = true; });
 	r_vsync->AddHandler(nsVar::NSVAR_CHANGED, [this](const nsBaseEvent*) {
 	    ApplyVSync();
 	});
 
-	if (!_displayModes.Init()) {
-	    return false;
-	}
-	if (!ApplyDisplayMode()) {
-	    return false;
-	}
+    ApplyDisplayMode();
+    if (Sys_IsExit()) {
+        return false;
+    }
 
 	_commandQueue = [_device newCommandQueue];
 	_passDescriptor = [[MTLRenderPassDescriptor alloc] init];
@@ -149,7 +149,10 @@ void nsMetalRenderDevice::InvalidateResources() {
 }
 
 void nsMetalRenderDevice::RestartResources() {
-	ApplyDisplayMode();
+    ApplyDisplayMode();
+    if (Sys_IsExit()) {
+        return;
+    }
 	_currentState = nullptr;
 	if (_defaultState) {
 	    _defaultState->Invalidate();
@@ -168,12 +171,6 @@ void nsMetalRenderDevice::RestartResources() {
 	for (auto state : _allocatedStencilStates) {
 	    state->Invalidate();
 	}
-}
-void nsMetalRenderDevice::GetDisplayInfo(DisplayInfo &info) {
-    auto &modes = _displayModes.GetModes();
-    for (auto &mode : modes) {
-        info.modes.push_back({mode.width, mode.height});
-    }
 }
 const rasterConfig_t* nsMetalRenderDevice::GetCurrentConfig() {
     return &_displayModes.GetConfig();
@@ -236,14 +233,15 @@ void nsMetalRenderDevice::EndEncoder() {
     if (_encoder) { [_encoder endEncoding]; _encoder = nil; }
 }
 
-bool nsMetalRenderDevice::ApplyDisplayMode() {
+void nsMetalRenderDevice::ApplyDisplayMode() {
     EndEncoder();
     _currentDrawable = nil;
     _commandBuffer = nil;
     _depthStencilTexture = nil;
-    const bool result = _displayModes.ApplyCurrentMode();
-    ApplyVSync();
-    return result;
+    _displayModes.ApplyConfiguredMode(*App_GetPlatform());
+    if (!Sys_IsExit()) {
+        ApplyVSync();
+    }
 }
 
 void nsMetalRenderDevice::ApplyVSync() {
@@ -263,7 +261,7 @@ bool nsMetalRenderDevice::BeginScene() {
 	    _queryRestart = false;
 	    RestartResources();
 	}
-	return BeginEncoder();
+    return !Sys_IsExit() && BeginEncoder();
 }
 
 //---------------------------------------------------------

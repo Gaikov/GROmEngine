@@ -10,8 +10,7 @@
 #include "nsLib/color.h"
 #include "nsLib/matrix4.h"
 #include "nsLib/comm_types.h"
-
-class	nsVar;
+#include "RasterCommon/DisplayVars.h"
 
 /*=========================================
 raster configuration desc
@@ -25,14 +24,10 @@ struct rasterConfig_t
 /*-------------------------------------------------------------------------------------
 render config variables
 -------------------------------------------------------------------------------------*/
-extern	nsVar	*r_fullscreen;
 extern	nsVar	*r_pixel_bits;
 extern	nsVar	*r_tex_bits;
-extern	nsVar	*r_vsync;
 extern	nsVar	*r_tex_filter;
 extern	nsVar	*r_brightness;
-extern	nsVar	*r_width;
-extern	nsVar	*r_height;
 extern	nsVar	*r_refresh;
 extern  nsVar   *r_render_stats;
 extern	nsVar	*r_fov;//*/
@@ -174,21 +169,9 @@ struct IRenderTexture : public ITexture {
 //---------------------------------------------------------
 struct IRenDevice
 {
-	struct DisplayMode {
-		int w = 0, h = 0;
-	};
-	typedef std::vector<DisplayMode>    tDisplayModes;
-
-	struct DisplayInfo {
-		tDisplayModes       modes;
-		std::vector<int>    bits;
-		//std::vector<int>    frequency;
-	};
-
 	//init render
 	virtual bool					Init( void *wnd ) = 0;	//�������������, ���������� ����������� ����� ������� �������������
 	virtual	void					Release() = 0; //������������, ���������� ����������� ����� �������������
-	virtual void                    GetDisplayInfo(DisplayInfo &modes ) = 0;
 	virtual const rasterConfig_t*	GetCurrentConfig() = 0;
     virtual void                    InvalidateResources() = 0;
 

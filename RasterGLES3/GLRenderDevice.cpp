@@ -9,6 +9,7 @@
 #include "GLUtils.h"
 #include "Core/Config.h"
 #include "Core/RenderStats.h"
+#include "Core/sys.h"
 
 static GLRenderDevice *g_shared = nullptr;
 
@@ -46,13 +47,8 @@ bool GLRenderDevice::Init(void *wnd)
 	glGetIntegerv(GL_STENCIL_BITS, &stencilBits);
 	Log::Info("stencil bits: %i", stencilBits);
 
-	g_cfg->RegCmd("r_restart", [this](int argc, const char* argv[]) {_queryRestart = true;});
+    g_cfg->RegCmd("r_restart", [this](int, const char *[]) { _queryRestart = true; });
     g_cfg->RegCmd("r_texkeys", [this](int argc, const char* argv[]) {_textures.DumpKeys();});
-
-	if (!_modes.Init())
-	{
-		return false;
-	}
 
 	Log::Info("GL Vendor: %s", glGetString(GL_VENDOR));
 	Log::Info("GL Renderer: %s", glGetString(GL_RENDERER));
@@ -84,9 +80,14 @@ bool GLRenderDevice::Init(void *wnd)
 }
 
 bool GLRenderDevice::PrepareOpenGL() {
-	if (!_modes.ApplyCurrentMode()) {
-		return false;
-	}
+    _modes.ApplyConfiguredMode(*App_GetPlatform());
+    if (Sys_IsExit()) {
+        return false;
+    }
+    auto width = 0, height = 0;
+    App_GetPlatform()->GetClientSize(width, height);
+    glViewport(0, 0, width, height);
+    GL_CHECK_R("glViewport", false)
 
 	_shaders.programs.Bind(nullptr, true);
 	InitSamplers();
@@ -136,18 +137,6 @@ void GLRenderDevice::Release() {
 
 	delete g_shared;
 	g_shared = nullptr;
-}
-
-void GLRenderDevice::GetDisplayInfo(DisplayInfo &info)
-{
-	auto &modes = _modes.GetModes();
-    for (auto &mode : modes) {
-        DisplayMode m = {
-                mode.width,
-                mode.height
-        };
-        info.modes.push_back(m);
-    }
 }
 
 const rasterConfig_t *GLRenderDevice::GetCurrentConfig()
@@ -282,17 +271,17 @@ void GLRenderDevice::ClearScene(uint flags, const nsColor &color) {
     GL_CHECK_HOT_R("glClear",)
 }
 
-bool GLRenderDevice::BeginScene()
-{
-	if (_queryRestart)
-	{
-		_queryRestart = false;
-		CleanupOpenGL();
-		if (!PrepareOpenGL())
-		{
-			return false;
-		}
-	}
+bool GLRenderDevice::BeginScene() {
+    if (Sys_IsExit()) {
+        return false;
+    }
+    if (_queryRestart) {
+        _queryRestart = false;
+        CleanupOpenGL();
+        if (!PrepareOpenGL()) {
+            return false;
+        }
+    }
 
     ResetScissorRect();
 	int w, h;

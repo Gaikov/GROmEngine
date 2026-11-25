@@ -16,6 +16,7 @@ public:
         int width, height;
         int frequency;
         int bits;
+        bool fullscreenAvailable = true;
     };
 
     typedef void (*ProcAddr)();
@@ -54,7 +55,7 @@ public:
 
     //Display modes
     virtual void GetDisplayModes(tDisplayModesList &modes) = 0;
-    virtual bool ApplyDisplayMode(int width, int height, bool fullScreen, int bits, int frequency) = 0;
+    virtual bool ApplyDisplayMode(int width, int height, bool fullScreen, int bits = 0, int frequency = 0) = 0;
 
     //File system
     virtual IDataReader* FileRead(const char *fileName) = 0;

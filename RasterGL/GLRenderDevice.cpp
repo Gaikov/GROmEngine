@@ -112,18 +112,6 @@ void GLRenderDevice::Release() {
 	g_shared = nullptr;
 }
 
-void GLRenderDevice::GetDisplayInfo(DisplayInfo &info)
-{
-	auto &modes = _modes.GetModes();
-    for (auto &mode : modes) {
-        DisplayMode m = {
-                mode.width,
-                mode.height
-        };
-        info.modes.push_back(m);
-    }
-}
-
 const rasterConfig_t *GLRenderDevice::GetCurrentConfig()
 {
 	return &_modes.GetConfig();

@@ -54,6 +54,7 @@ add_library(Desktop
 
 target_link_libraries(Desktop
         glfw
+        RasterCommon
 )
 
 if (WEB_ASM)

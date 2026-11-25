@@ -10,7 +10,7 @@
 #include "nsMetalRenderState.h"
 #include "nsMetalStencilState.h"
 #include "nsMetalRenderTexture.h"
-#include "nsMetalDisplayModes.h"
+#include "RasterCommon/DisplayModeConfig.h"
 #include "nsLib/color.h"
 
 #import <Metal/Metal.h>
@@ -32,7 +32,6 @@ public:
     void Release() override;
     void InvalidateResources() override;
 
-    void GetDisplayInfo(DisplayInfo &info) override;
     const rasterConfig_t* GetCurrentConfig() override;
 
     void SetColor(const float c[4]) override;
@@ -106,7 +105,7 @@ private:
 	nsMetalStencilState        *_currentStencil  = nullptr;
 	nsMetalRenderTexture       *_currentRenderTexture = nullptr;
 	nsMetalRenderTexture       *_sampledRenderTextures[2] = {};
-	nsMetalDisplayModes        _displayModes;
+	nsDisplayModeConfig       _displayModes;
 
 	nsMatrix _projMatrix;
 	nsMatrix _viewMatrix;
@@ -122,7 +121,7 @@ private:
     void ApplyScissor();
 	void EndEncoder();
 	void SubmitFrame();
-	bool ApplyDisplayMode();
+	void ApplyDisplayMode();
 	void ApplyVSync();
 	void RestartResources();
 	void EnsureDepthStencilTexture(int width, int height);
