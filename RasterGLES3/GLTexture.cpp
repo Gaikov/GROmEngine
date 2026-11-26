@@ -8,6 +8,7 @@
 #include "Engine/Platform.h"
 #include "ImageDecoder/BitmapLoader.h"
 #include "Core/Package.h"
+#include "Core/Var.h"
 
 GLTexture::GLTexture() :
 		_glTexture(0)
@@ -61,6 +62,10 @@ uint64_t GLTexture::GetId() {
     return _glTexture;
 }
 
+GLint GLTexture::GetUploadFormat() {
+    return r_tex_bits->Value() == 16 ? GL_RGBA4 : GL_RGBA8;
+}
+
 bool GLTexture::UploadToGPU() {
     if (!EnsureBitmapData()) {
         return false;
@@ -79,7 +84,7 @@ bool GLTexture::UploadToGPU() {
     glBindTexture(GL_TEXTURE_2D, _glTexture);
     GL_CHECK("glBindTexture")
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+    glTexImage2D(GL_TEXTURE_2D, 0, GetUploadFormat(),
                  _bmData->GetWidth(), _bmData->GetHeight(), 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, _bmData->GetData());
     GL_CHECK("glTexImage2D")

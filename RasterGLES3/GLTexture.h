@@ -15,6 +15,7 @@ public:
 	static GLTexture *Load(const char *filePath, int flags);
 	static void Free(GLTexture *t);
 	static GLTexture *Create(const char *id, nsBitmapData::tSP &data);
+    static GLint GetUploadFormat();
 	bool Bind() override;
 	int GetWidth();
 	int GetHeight();

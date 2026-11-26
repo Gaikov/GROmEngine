@@ -5,6 +5,7 @@
 #include "Core/ParserUtils.h"
 #include "Core/Parser.h"
 #include <limits>
+#include <memory>
 
 TEST(ParserUtils, Float) {
 
@@ -85,6 +86,24 @@ TEST(ParserUtils, QuotedClosingBraceDoesNotTerminateUnclosedBlock) {
     ASSERT_NE(nullptr, parser);
     EXPECT_FALSE(ps_block_begin(parser, "item"));
     ps_end(parser);
+}
+
+TEST(ParserUtils, EmptyBlocksOpenAndDoNotEndIteration) {
+    char source[] = "$items { $value 99 $item {} $item { $value 42 } $item {} $item { $value 7 } }";
+    const auto parser = std::unique_ptr<script_state_t, decltype(&ps_end)>(ps_begin(source), ps_end);
+    ASSERT_NE(nullptr, parser);
+    ASSERT_TRUE(ps_block_begin(parser.get(), "items"));
+    ASSERT_TRUE(ps_block_begin(parser.get(), "item"));
+    EXPECT_FALSE(ps_var_begin(parser.get(), "value"));
+    ASSERT_TRUE(ps_block_next(parser.get()));
+    EXPECT_FLOAT_EQ(42, ps_get_f(parser.get(), "value", 0));
+    ASSERT_TRUE(ps_block_next(parser.get()));
+    EXPECT_FALSE(ps_var_begin(parser.get(), "value"));
+    ASSERT_TRUE(ps_block_next(parser.get()));
+    EXPECT_FLOAT_EQ(7, ps_get_f(parser.get(), "value", 0));
+    EXPECT_FALSE(ps_block_next(parser.get()));
+    ps_block_end(parser.get());
+    EXPECT_FLOAT_EQ(99, ps_get_f(parser.get(), "value", 0));
 }
 
 TEST(ParserUtils, CommentsWithLiteralGlyphsDoNotHideFollowingBlocks) {

@@ -70,6 +70,7 @@ private:
 
 	nsDisplayModeConfig _modes;
 	GLTexturesCache  _textures;
+    GLint            _textureFormat = GL_RGBA8;
 	nsGLRenderTexturesCache _renderTextures;
 	GLVertexBuffer   *_quadBuff;
 	GLShadersManager _shaders;

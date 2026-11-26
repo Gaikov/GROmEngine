@@ -72,7 +72,10 @@ protected:
         Log::Init();
         Log::Shared()->AddPolicy(&log);
     }
-    void TearDown() override { Log::Shared()->RemovePolicy(&log); }
+    void TearDown() override {
+        Log::Shared()->RemovePolicy(&log);
+        Log::Release();
+    }
     nsAppleInputLog log;
 };
 }
@@ -85,18 +88,30 @@ TEST_F(AppleGamepadTest, StandardButtonsUseTheExistingXboxConfigIndices) {
         nsAppleGamepad pad(7, controller, controls, true);
         EXPECT_EQ(pad.GetConnectionId(), 7);
         EXPECT_EQ(pad.GetAxisCount(), 4); // D-pad axes and thumbstick pseudo-buttons are excluded.
-        EXPECT_GE(pad.GetButtonCount(), 17);
-        EXPECT_LE(pad.GetButtonCount(), 18);
+        EXPECT_GE(pad.GetButtonCount(), nsGamepadLayout::ButtonCount);
         GCControllerButtonInput* buttons[] = {profile.buttonA, profile.buttonB, profile.buttonX, profile.buttonY,
             profile.leftShoulder, profile.rightShoulder, profile.leftTrigger, profile.rightTrigger,
             profile.buttonOptions, profile.buttonMenu, profile.leftThumbstickButton, profile.rightThumbstickButton,
-            profile.dpad.up, profile.dpad.down, profile.dpad.left, profile.dpad.right, profile.buttonHome};
-        for (auto index = 0; index < 17; ++index) {
+            nil, nil, nil, nil, profile.buttonHome};
+        for (auto index = 0; index < nsGamepadLayout::ButtonCount; ++index) {
+            if (index >= nsGamepadLayout::Up && index <= nsGamepadLayout::Right) continue;
             SCOPED_TRACE(index);
             [buttons[index] setValue:1];
             pad.Update(true);
             EXPECT_EQ(pad.IsButtonPressed(index), buttons[index] != nil);
             [buttons[index] setValue:0];
+            pad.Update(true);
+            EXPECT_FALSE(pad.IsButtonPressed(index));
+        }
+        const auto dpad = profile.dpad;
+        const float directions[][2]{{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
+        for (auto index = nsGamepadLayout::Up; index <= nsGamepadLayout::Right; ++index) {
+            SCOPED_TRACE(index);
+            const auto &direction = directions[index - nsGamepadLayout::Up];
+            [dpad setValueForXAxis:direction[0] yAxis:direction[1]];
+            pad.Update(true);
+            EXPECT_TRUE(pad.IsButtonPressed(index));
+            [dpad setValueForXAxis:0 yAxis:0];
             pad.Update(true);
             EXPECT_FALSE(pad.IsButtonPressed(index));
         }
@@ -149,7 +164,7 @@ TEST_F(AppleGamepadTest, MissingOptionalSlotsStayNeutralWithoutShiftingOtherButt
         controls.buttons[17] = shareController.extendedGamepad.buttonA;
         nsAppleGamepad pad(1, controller, controls, true);
         [controller.extendedGamepad.buttonY setValue:1];
-        [controller.extendedGamepad.dpad.right setValue:1];
+        [controller.extendedGamepad.dpad setValueForXAxis:1 yAxis:0];
         [shareController.extendedGamepad.buttonA setValue:1];
         pad.Update(true);
         EXPECT_EQ(pad.GetButtonCount(), 18);

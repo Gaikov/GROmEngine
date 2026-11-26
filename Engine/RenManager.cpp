@@ -37,7 +37,7 @@ bool nsRenDevice::RegVars()
 
 	r_fullscreen = g_cfg->RegVar( "r_fullscreen", "0", GVF_SAVABLE );
 	r_pixel_bits = g_cfg->RegVar( "r_pixel_bits", "16", GVF_SAVABLE );
-	r_tex_bits = g_cfg->RegVar( "r_tex_bits", "16", GVF_SAVABLE );
+	r_tex_bits = g_cfg->RegVar( "r_tex_bits", "32", GVF_SAVABLE );
 	r_vsync = g_cfg->RegVar( "r_vsync", "1", GVF_SAVABLE );
 	r_tex_filter = g_cfg->RegVar( "r_tex_filter", "1", GVF_SAVABLE );
 	r_brightness = g_cfg->RegVar( "r_brightness", "0.5", GVF_SAVABLE );

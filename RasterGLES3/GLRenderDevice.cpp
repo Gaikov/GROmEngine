@@ -53,6 +53,8 @@ bool GLRenderDevice::Init(void *wnd)
 	Log::Info("GL Vendor: %s", glGetString(GL_VENDOR));
 	Log::Info("GL Renderer: %s", glGetString(GL_RENDERER));
 	Log::Info("GL Version: %s", glGetString(GL_VERSION));
+    _textureFormat = GLTexture::GetUploadFormat();
+    Log::Info("GLES3 texture formats: GL_RGBA8, GL_RGBA4 (startup quality %d bits)", _textureFormat == GL_RGBA4 ? 16 : 32);
 
 	_quadBuff = dynamic_cast<GLVertexBuffer *>(VerticesCreate(4, 6, true, false));
 
@@ -283,6 +285,10 @@ bool GLRenderDevice::BeginScene() {
         }
     }
 
+    if (const auto format = GLTexture::GetUploadFormat(); format != _textureFormat) {
+        _textureFormat = format;
+        _textures.UnloadFromGPU();
+    }
     UpdateTextureFilter();
     ResetScissorRect();
 	int w, h;

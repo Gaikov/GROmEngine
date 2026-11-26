@@ -47,6 +47,7 @@ bool nsMetalRenderDevice::Init(void *wnd) {
     }
 
 	Log::Info("Metal device: %s", [[_device name] UTF8String]);
+    Log::Info("Metal texture formats: RGBA8Unorm (startup quality 32 bits)");
 
     g_cfg->RegCmd("r_restart", [this](int, const char *[]) { _queryRestart = true; });
 	r_vsync->AddHandler(nsVar::NSVAR_CHANGED, [this](const nsBaseEvent*) {

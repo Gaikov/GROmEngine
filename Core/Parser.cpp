@@ -228,7 +228,7 @@ char* ps_block_len( char *from, /*out*/ int &len ) {
     if (!closing) return nullptr;
     const auto begin = opening + 1;
     len = static_cast<int>(closing - begin);
-    return len ? begin : nullptr;
+    return begin;
 }
 
 //---------------------------------------------------------
