@@ -47,7 +47,8 @@ private:
 
     std::array<id<MTLRenderPipelineState>, COLOR_WRITE_MASK_VARIANTS> _pipelineStates{};
     id<MTLDepthStencilState>   _depthStencilState = nil;
-    id<MTLSamplerState>        _samplerState = nil;
+    id<MTLSamplerState> _nearestMipSampler = nil;
+    id<MTLSamplerState> _linearMipSampler = nil;
 
     bool    _zEnable        = true;
     bool    _zWrite         = true;
@@ -70,5 +71,6 @@ private:
     bool EnsureResources();
     bool CreatePipelineState(MTLColorWriteMask mask);
     bool CreateCommonStates();
+    id<MTLSamplerState> GetSampler(bool trilinear) const;
     id<MTLRenderPipelineState> GetPipelineState() const;
 };

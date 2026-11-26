@@ -200,9 +200,9 @@ bool GLShader::Parse( script_state_t *ss )
 }
 
 unsigned int GLShader::GetSamplerIndex() const {
-    return (_texCoordU == GL_CLAMP_TO_EDGE ? 1u : 0u) |
-           (_texCoordV == GL_CLAMP_TO_EDGE ? 2u : 0u) |
-           (_nearestFilter ? 4u : 0u);
+    return (_texCoordU == GL_CLAMP_TO_EDGE ? SamplerClampU : 0u) |
+           (_texCoordV == GL_CLAMP_TO_EDGE ? SamplerClampV : 0u) |
+           (_nearestFilter ? SamplerNearest : 0u);
 }
 
 IShaderUniform *GLShader::GetUniform(const char *name) {

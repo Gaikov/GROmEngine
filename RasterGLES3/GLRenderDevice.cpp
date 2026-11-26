@@ -283,6 +283,7 @@ bool GLRenderDevice::BeginScene() {
         }
     }
 
+    UpdateTextureFilter();
     ResetScissorRect();
 	int w, h;
 	App_GetPlatform()->GetClientSize(w, h);
@@ -580,30 +581,46 @@ void GLRenderDevice::InvalidateResources() {
 }
 
 void GLRenderDevice::InitSamplers() {
-	if (_samplers[0]) return;
+    if (_samplers[0]) return;
 
-	glGenSamplers(16, _samplers);
-	for (unsigned int index = 0; index < 16; ++index) {
-		const unsigned int state = index / 2;
-		const bool nearest = (state & 4u) != 0;
-		const GLint wrapU = (state & 1u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-		const GLint wrapV = (state & 2u) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-		const GLint minFilter = nearest
-			? ((index & 1u) ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST)
-			: ((index & 1u) ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-		glSamplerParameteri(_samplers[index], GL_TEXTURE_MIN_FILTER, minFilter);
-		glSamplerParameteri(_samplers[index], GL_TEXTURE_MAG_FILTER, nearest ? GL_NEAREST : GL_LINEAR);
-		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_S, wrapU);
-		glSamplerParameteri(_samplers[index], GL_TEXTURE_WRAP_T, wrapV);
-	}
+    _trilinearFilter = r_tex_filter->Bool();
+    const auto mipFilter = _trilinearFilter ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST;
+    glGenSamplers(SamplerCount, _samplers);
+    for (auto state = 0u; state < GLShader::SamplerStateCount; ++state) {
+        const auto nearest = (state & GLShader::SamplerNearest) != 0;
+        const auto wrapU = (state & GLShader::SamplerClampU) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+        const auto wrapV = (state & GLShader::SamplerClampV) ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+        const auto filter = nearest ? GL_NEAREST : GL_LINEAR;
+        const auto minMipFilter = nearest ? GL_NEAREST_MIPMAP_NEAREST : mipFilter;
+        for (const auto mipmapped : {false, true}) {
+            const auto sampler = _samplers[GetSamplerArrayIndex(state, mipmapped)];
+            glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, mipmapped ? minMipFilter : filter);
+            glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, filter);
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, wrapU);
+            glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, wrapV);
+        }
+    }
     for (auto &sampler : _boundSamplers) sampler = 0;
+}
+
+void GLRenderDevice::UpdateTextureFilter() {
+    const auto trilinear = r_tex_filter->Bool();
+    if (_trilinearFilter == trilinear) return;
+
+    _trilinearFilter = trilinear;
+    const auto mipFilter = trilinear ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST;
+    for (auto state = 0u; state < GLShader::SamplerStateCount; ++state) {
+        if (state & GLShader::SamplerNearest) continue;
+        const auto sampler = _samplers[GetSamplerArrayIndex(state, true)];
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, mipFilter);
+    }
 }
 
 void GLRenderDevice::ReleaseSamplers() {
 	if (_samplers[0]) {
 		glBindSampler(0, 0);
         glBindSampler(1, 0);
-		glDeleteSamplers(16, _samplers);
+		glDeleteSamplers(SamplerCount, _samplers);
 		for (auto &sampler : _samplers) sampler = 0;
 	}
     for (auto &sampler : _boundSamplers) sampler = 0;
@@ -612,7 +629,7 @@ void GLRenderDevice::ReleaseSamplers() {
 void GLRenderDevice::ApplySampler() {
     for (auto slot = 0u; slot < 2; ++slot) {
         const GLuint sampler = _textures.HasBoundTexture(slot)
-            ? _samplers[_shaders.GetSamplerIndex() * 2 + (_textures.HasBoundMipmappedTexture(slot) ? 1 : 0)]
+            ? _samplers[GetSamplerArrayIndex(_shaders.GetSamplerIndex(), _textures.HasBoundMipmappedTexture(slot))]
             : 0;
         if (_boundSamplers[slot] == sampler) continue;
         glBindSampler(slot, sampler);

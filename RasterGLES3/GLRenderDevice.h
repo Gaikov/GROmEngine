@@ -65,6 +65,9 @@ public:
 
 private:
 
+    static constexpr auto SamplersPerState = 2u;
+    static constexpr auto SamplerCount = GLShader::SamplerStateCount * SamplersPerState;
+
 	nsDisplayModeConfig _modes;
 	GLTexturesCache  _textures;
 	nsGLRenderTexturesCache _renderTextures;
@@ -81,8 +84,9 @@ private:
 
 	nsColor          _currentColor;
 	std::vector<GLVertexBuffer*> _allocatedVBS;
-	GLuint           _samplers[16] = {};
+	GLuint           _samplers[SamplerCount] = {};
 	GLuint           _boundSamplers[2] = {};
+    bool _trilinearFilter = true;
 	std::uint64_t    _frameSerial = 0;
 
 private:
@@ -93,6 +97,10 @@ private:
 	bool PrepareOpenGL();
 	void CleanupOpenGL();
 	void InitSamplers();
+    void UpdateTextureFilter();
 	void ReleaseSamplers();
 	void ApplySampler();
+    static unsigned GetSamplerArrayIndex(unsigned state, bool mipmapped) {
+        return state * SamplersPerState + unsigned(mipmapped);
+    }
 };

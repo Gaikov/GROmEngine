@@ -12,6 +12,11 @@
 class GLShader : public IRenState
 {
 public:
+    static constexpr auto SamplerClampU = 1u << 0;
+    static constexpr auto SamplerClampV = 1u << 1;
+    static constexpr auto SamplerNearest = 1u << 2;
+    static constexpr auto SamplerStateCount = (SamplerClampU | SamplerClampV | SamplerNearest) + 1u;
+
     nsString    fileName;
     GLShader(nsGLProgramsCache &programs);
     const char* GetPath() const { return fileName; }

@@ -4,6 +4,7 @@
 
 #include "nsMetalRenderState.h"
 #include "Core/ParseFile.h"
+#include "Core/Var.h"
 #include "nsLib/log.h"
 #include <cstddef>
 #include <cstring>
@@ -157,18 +158,22 @@ bool nsMetalRenderState::CreateCommonStates() {
         if (!_depthStencilState) return false;
     }
 
-    if (!_samplerState) {
-        MTLSamplerDescriptor *samplerDesc = [MTLSamplerDescriptor new];
-		const auto minMagFilter = _nearestFilter
-			? MTLSamplerMinMagFilterNearest
-			: MTLSamplerMinMagFilterLinear;
-		samplerDesc.minFilter = minMagFilter;
-		samplerDesc.magFilter = minMagFilter;
-		samplerDesc.mipFilter = _nearestFilter ? MTLSamplerMipFilterNearest : MTLSamplerMipFilterLinear;
+    if (!_nearestMipSampler) {
+        auto samplerDesc = [MTLSamplerDescriptor new];
+        const auto minMagFilter = _nearestFilter ? MTLSamplerMinMagFilterNearest : MTLSamplerMinMagFilterLinear;
+        samplerDesc.minFilter = minMagFilter;
+        samplerDesc.magFilter = minMagFilter;
+        samplerDesc.mipFilter = MTLSamplerMipFilterNearest;
         samplerDesc.sAddressMode = _texCoordU;
         samplerDesc.tAddressMode = _texCoordV;
-        _samplerState = [_device newSamplerStateWithDescriptor:samplerDesc];
-        if (!_samplerState) return false;
+        const auto nearestMipSampler = [_device newSamplerStateWithDescriptor:samplerDesc];
+        if (!nearestMipSampler) return false;
+        if (!_nearestFilter) {
+            samplerDesc.mipFilter = MTLSamplerMipFilterLinear;
+            _linearMipSampler = [_device newSamplerStateWithDescriptor:samplerDesc];
+            if (!_linearMipSampler) return false;
+        }
+        _nearestMipSampler = nearestMipSampler;
     }
 
     return true;
@@ -176,6 +181,10 @@ bool nsMetalRenderState::CreateCommonStates() {
 
 bool nsMetalRenderState::EnsureResources() {
     return CreatePipelineState(_colorWriteMask) && CreateCommonStates();
+}
+
+id<MTLSamplerState> nsMetalRenderState::GetSampler(bool trilinear) const {
+    return trilinear && !_nearestFilter ? _linearMipSampler : _nearestMipSampler;
 }
 
 id<MTLRenderPipelineState> nsMetalRenderState::GetPipelineState() const {
@@ -190,7 +199,8 @@ IShaderUniform *nsMetalRenderState::GetUniform(const char *name) {
 void nsMetalRenderState::Invalidate() {
     _pipelineStates.fill(nil);
     _depthStencilState = nil;
-    _samplerState = nil;
+    _nearestMipSampler = nil;
+    _linearMipSampler = nil;
 }
 
 void nsMetalRenderState::SetColorWriteMask(MTLColorWriteMask mask) {
@@ -208,8 +218,11 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
     if (!pipelineState) {
         return;
     }
+    const auto trilinear = r_tex_filter->Bool();
+    const auto sampler = GetSampler(trilinear);
+    const auto previousSampler = prev ? prev->GetSampler(trilinear) : nil;
     if (!prev || !prev->GetPipelineState() ||
-        !prev->_depthStencilState || !prev->_samplerState) {
+        !prev->_depthStencilState || !previousSampler) {
         prev = nullptr;
     }
 
@@ -218,10 +231,8 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
         [encoder setRenderPipelineState:pipelineState];
         if (_depthStencilState) [encoder setDepthStencilState:_depthStencilState];
         [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
-        if (_samplerState) {
-            [encoder setFragmentSamplerState:_samplerState atIndex:0];
-            [encoder setFragmentSamplerState:_samplerState atIndex:1];
-        }
+        [encoder setFragmentSamplerState:sampler atIndex:0];
+        [encoder setFragmentSamplerState:sampler atIndex:1];
         programs.Bind(_program, true);
         return;
     }
@@ -238,9 +249,9 @@ void nsMetalRenderState::Apply(id<MTLRenderCommandEncoder> encoder,
     if (_cullMode != prev->_cullMode) {
         [encoder setCullMode:_cullMode ? MTLCullModeBack : MTLCullModeNone];
     }
-    if (_samplerState != prev->_samplerState) {
-        [encoder setFragmentSamplerState:_samplerState atIndex:0];
-        [encoder setFragmentSamplerState:_samplerState atIndex:1];
+    if (sampler != previousSampler) {
+        [encoder setFragmentSamplerState:sampler atIndex:0];
+        [encoder setFragmentSamplerState:sampler atIndex:1];
     }
     if (_program != prev->_program) {
         programs.Bind(_program, true);
